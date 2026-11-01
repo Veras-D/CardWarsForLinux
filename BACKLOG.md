@@ -1,202 +1,318 @@
-# Card Wars (Godot 4 PC Remake) - Project Backlog
+# Card Wars (Godot 4 PC Remake) - Master Backlog & Architecture Specification
 
-A roadmap and task breakdown for completing the open-source Godot 4 remake of *Adventure Time: Card Wars*, preserving all original game mechanics, blueprint databases, and visual flair while adding modern PC features (Controller Support, Local Multiplayer, and Cross-Platform Standalones).
-
----
-
-## 📊 Current Implementation Status (Completed)
-
-- [x] **Project Scaffolding**: Godot 4.7+ project configuration, autoloads (`Database.gd`, `GameManager.gd`), and viewport stretch setup.
-- [x] **Blueprint & Data Engine**:
-  - Dynamically parses and caches **416 original cards** (341 Creatures, 48 Spells, 27 Buildings) from `db_Creatures.json`, `db_Spells.json`, `db_Buildings.json`.
-  - Maps and imports **288 authentic card illustrations** (`assets/textures/cardart/`).
-  - Parsed **1,127 localized English titles, card descriptions, and ability texts** (`data/strings_en.json`).
-- [x] **Core 4-Lane Tactical Combat**:
-  - 4 Opponent Lanes vs. 4 Player Lanes with landscape affinities (Corn, Plains, Cotton, Sand, Swamp).
-  - Magic Points (MP) progression (starts at 2 MP, increases by 1 each turn up to 10 MP).
-  - Card drawing, summoning to empty lanes, and lane clashing (ATK vs. DEF).
-  - Direct Hero HP damage when an opposing lane is empty.
-  - **Floop Mechanic**: Tapping/flooping creatures, spending floop MP, visual rotation/exhaustion, and core ability scripts (*The Pig*, *Angel Eye*, *Blueberry Djini*, *DamageAll*, etc.).
-  - Opponent AI turn execution.
-- [x] **Menus & Compendium**:
-  - Main Menu with direct battle launch (Finn vs. Jake).
-  - Card Compendium modal to browse all original cards and stats.
-- [x] **Headless CLI / Runner Tooling**:
-  - Headless test verification passing without errors or warnings.
-  - Convenience launcher script `scripts/run-godot.sh`.
+An exhaustive technical backlog and architectural blueprint for the open-source Godot 4 remake of *Adventure Time: Card Wars*, detailing all 1,380+ C# scripts, 240+ managers, 340+ quests, 38 animated character rigs, and the complete gameplay engine.
 
 ---
 
-## 🎯 Epics & Task Breakdown
+## 🧭 Executive Summary & Status
 
-### Epic 1: Full Card System & Advanced Battle Rules
-
-- [ ] **Task 1.1: Spell Cards System**
-  - [ ] Implement spell card play directly from hand.
-  - [ ] Target selection mode (target creature, target lane, target hero, or board-wide).
-  - [ ] Support spell effects: direct damage, stat buffs/debuffs, lane disruption, card drawing, and MP modification.
-  - [ ] Implement discard pile resolution for expended spells.
-- [ ] **Task 1.2: Building Cards System**
-  - [ ] Add dedicated Building Slots behind creatures in each lane slot.
-  - [ ] Passive lane modifiers (e.g. `FruitCakeBuilding`: creature in this lane gains DEF; `RedDome`: creature gains ATK).
-  - [ ] Building durability / destruction effects (buildings targeted by spells or abilities).
-- [ ] **Task 1.3: Landscape Affinity Rules**
-  - [ ] Enforce landscape placement restrictions (Corn creatures only on Corn, Plains on Plains, etc.).
-  - [ ] Allow Universal cards (`Faction == "Universal"`) on any landscape.
-  - [ ] Visual indicator (green border / red border) when dragging or selecting a lane based on affinity.
-- [ ] **Task 1.4: Extended Floop Ability Engine**
-  - [ ] Implement remaining ability scripts from `db_FloopActions.json` and Unity assemblies:
-    - `ReturnDiscardCard` (retrieve card from discard pile to hand).
-    - `LowerATKTarget` / `BonusDEFTarget` (targeted stat manipulation).
-    - `HealTarget` / `HealAll` (creature and hero recovery).
-    - `SacrificeForMP` (destroy friendly creature to gain bonus Magic Points).
-    - `MoveBuildingSelf` / `MoveBuildingOpponent` (lane swapping mechanics).
-    - `ATKBonusFactionCreatures` (synergy buffs across a faction).
-    - `ResetSelf` (unfloop self for multi-use turns).
-- [ ] **Task 1.5: Hero Leaders & Active Leader Powers**
-  - [ ] Load Leader data (`db_Leaders.json`) for Finn, Jake, Princess Bubblegum, Marceline, BMO, Ice King, Lemongrab, Flame Princess, LSP, etc.
-  - [ ] Leader Cooldown Turn Counter (e.g., 3 turns until ready).
-  - [ ] Leader Power button on UI with visual charge meter.
-  - [ ] Execute leader effects (e.g., Finn: +2 MP; Jake: +3 ATK to all Corn creatures; PB: heal all creatures).
-- [ ] **Task 1.6: The Battle Wheel (Roulette Minigame)**
-  - [ ] Create the iconic circular spinning battle wheel UI component (`BattleWheel.tscn`).
-  - [ ] Read character wheel hit/crit ranges from `db_Leaders.json` (`Ring_P1_HitAreaRange`, `Ring_P1_CritAreaRange`).
-  - [ ] Player timing input (Stop button / Spacebar / Controller button):
-    - **Critical Hit**: 2x damage multiplier.
-    - **Hit**: Standard damage.
-    - **Miss / Block**: 0 damage dealt or incoming damage blocked.
-  - [ ] Add option in settings to enable/disable or automate the wheel (instant combat toggle).
+- **Engine Target**: Godot 4.7+ (GL Compatibility / Forward+, GDScript).
+- **Core Architecture**: Data-driven ECS/Node architecture loading original JSON blueprints and textures directly from disk.
+- **Current Milestone (Milestone 0: Prototype Foundation - Complete)**:
+  - [x] Blueprints Engine (`Database.gd`): 416 cards, 288 textures, 1,127 localizations loaded dynamically.
+  - [x] 4-Lane Combat Proof-of-Concept: Player vs. Opponent lanes, MP ramp, basic Floop triggers, lane attacks, and direct Hero damage.
+  - [x] Main Menu & Card Compendium Browser.
+  - [x] Verified zero-error headless compilation and test runs.
 
 ---
 
-### Epic 2: Controls, Gamepad & Local Multiplayer
+## 📑 Epics & Comprehensive Task Breakdown
 
-- [ ] **Task 2.1: Controller / Gamepad Support**
-  - [ ] Implement complete Godot `InputMap` actions for controllers (XInput / Xbox, DualShock/DualSense, Nintendo Switch Pro, Steam Deck).
-  - [ ] UI focus navigation (`focus_neighbor_*`) across hand cards, lane slots, Floop buttons, and Attack button.
-  - [ ] Controller shortcuts:
-    - `D-Pad / Left Stick`: Navigate cards and lanes.
-    - `A / Cross`: Select card / summon to lane / confirm.
-    - `X / Square`: Floop selected creature.
-    - `Y / Triangle`: Inspect card details (zoom view).
+```
+├── Epic 1: Pre-Battle Setup & Flow (RPS, Landscapes, Matchups)
+├── Epic 2: Core Battlefield & Combat Resolver Engine
+├── Epic 3: Complete Card Ability & Floop Script Library (317+ Scripts)
+├── Epic 4: 38 Animated Character Face Rigs & Audio System
+├── Epic 5: Controller Support & Local Multiplayer
+├── Epic 6: Deck Building, Fusion & Inventory
+├── Epic 7: Campaign, Quests & Game Modes (346 Quests, Fionna & Cake, Dungeons, El Fisto)
+├── Epic 8: Economy, Chests & Progression
+└── Epic 9: UI, Localization, Settings & Multiplatform CI/CD
+```
+
+---
+
+### Epic 1: Pre-Battle Setup & Match Flow
+
+*Reference Unity Scripts: `RPSMatrix.cs`, `RPSManager.cs`, `LandscapePreviewController.cs`, `ManualLandscapeScript.cs`, `CWBattleIntroController.cs`*
+
+- [ ] **Task 1.1: Rock-Paper-Scissors (RPS) Turn Decider**
+  - [ ] Implement the opening minigame before turn 1 (`RPSMatrix.cs`).
+  - [ ] Player picks Rock, Paper, or Scissors; Opponent AI chooses.
+  - [ ] Winner chooses whether to play **First** or **Second** (with tie re-rolls).
+  - [ ] Setting option: "Auto-roll RPS" or "Skip RPS" for fast battles.
+- [ ] **Task 1.2: Landscape Placement Phase**
+  - [ ] Before placing cards, players set or confirm 4 landscapes across their 4 lanes (`LandscapePreviewController.cs`).
+  - [ ] Landscape types: **Plains**, **Corn**, **Cotton**, **Sand**, **Swamp**, and **Candy** (Fionna & Cake).
+  - [ ] Animated 3D/2D landscape drop sequence into the 4 lane slots.
+- [ ] **Task 1.3: Matchup Intro Sequence**
+  - [ ] Display Hero matchup overlay: Player Hero portrait vs. Opponent Hero portrait (`CWBattleIntroController.cs`).
+  - [ ] Display starting HP, Leader names, and play intro character VO line (e.g. Finn vs. Jake banter).
+
+---
+
+### Epic 2: Core Battlefield & Combat Resolver Engine
+
+*Reference Unity Scripts: `BattlePhaseManager.cs`, `BattleResolver.cs`, `AttackResolver.cs`, `BattleWheelController.cs`, `BuildingScript.cs`, `SpellResolver.cs`, `DiscardPileController.cs`*
+
+- [ ] **Task 2.1: Phase State Machine (`BattlePhaseManager.gd`)**
+  - [ ] Strict phase transitions:
+    1. `START_TURN`: Draw 1 card, increment Max MP (+1 up to 10), reset unflooped states, tick building/leader cooldowns.
+    2. `ACTION_PHASE`: Free play of Creatures, Spells, Buildings, and activating Floop abilities.
+    3. `BATTLE_WHEEL_PHASE`: Triggered during combat for timing attacks and blocks.
+    4. `COMBAT_RESOLUTION`: Lane-by-lane clash (Lane 0 $\rightarrow$ Lane 3).
+    5. `END_TURN`: Discard resolution, tick passive effects, pass turn to next player.
+- [ ] **Task 2.2: Spell Cards System**
+  - [ ] Implement spell card play from hand:
+    - **Untargeted Spells**: Board-wide effects (e.g. *Grain Storm*, *Hot Dog Rain*).
+    - **Targeted Spells**: Draggable target reticle onto friendly/enemy creature or lane (e.g. *Scroll of Bad Breath*, *Teleport*).
+  - [ ] Send resolved spells to Graveyard / Discard Pile (`DiscardPileController.cs`).
+- [ ] **Task 2.3: Building Cards System**
+  - [ ] Dedicated rear building slot behind creature slots in each of the 4 lanes.
+  - [ ] Continuous lane auras (e.g., `FruitCakeBuilding`: creature in lane gains +DEF; `RedDome`: creature gains +ATK).
+  - [ ] Building targeting and destruction mechanics (`DestroyBuildingLane.cs`, `MoveBuildingSelf.cs`).
+- [ ] **Task 2.4: Landscape Affinity Enforcer**
+  - [ ] Creature summon validation: Corn creature requires Corn lane, Plains requires Plains, etc.
+  - [ ] Universal creatures (`Faction == "Universal"`) playable on any landscape.
+  - [ ] Visual lane highlight: green glow if compatible, red X if mismatched.
+- [ ] **Task 2.5: The Battle Wheel (Roulette Minigame)**
+  - [ ] Spinning wheel UI modal (`BattleWheel.tscn`):
+    - Reads `Ring_P1_HitAreaRange`, `Ring_P1_CritAreaRange`, and rotation speed from `db_Leaders.json`.
+    - **Critical Hit**: 2x damage multiplier + screen shake.
+    - **Hit**: 100% normal damage.
+    - **Miss / Block**: 0 damage dealt or incoming attack completely shielded.
+  - [ ] Configurable in Settings: Manual Wheel, Auto-Hit, or Instant Skip.
+- [ ] **Task 2.6: Leader Powers & Cooldown Trackers**
+  - [ ] Active Leader power button on battlefield HUD.
+  - [ ] Turn cooldown counter (e.g., 3 turns cooldown).
+  - [ ] Leader effects: Finn (+2 MP), Jake (+3 ATK to Corn creatures), PB (Heal all creatures), Marceline (+2 ATK to all), BMO (Extra action points), Ice King (Freeze lane).
+- [ ] **Task 2.7: Advanced Combat Resolution**
+  - [ ] Overkill direct damage calculations.
+  - [ ] Defense armor vs. direct piercing damage.
+  - [ ] Lane counter-attacks when specified by creature abilities.
+
+---
+
+### Epic 3: Complete Ability & Floop Engine (317+ Combat Scripts)
+
+*Reference Unity Scripts: `Assets/Scripts/Assembly-CSharp/` (317 scripts matching `ATKBonus*`, `DEFBonus*`, `ActionOnFloop*`, `Heal*`, `Damage*`, `Block*`)*
+
+- [ ] **Task 3.1: Ability Trigger Event Dispatcher**
+  - [ ] Implement event listeners for all 6 core card trigger events:
+    1. `ON_FLOOP`: Activated manually by player spending Floop MP.
+    2. `ON_DEATH`: Triggers when creature DEF drops to 0 (`DamageHeroOnDeath.cs`, `HealHeroOnDeath.cs`).
+    3. `ON_TURN_START`: Passive beginning-of-turn effects (`StartTurnHealCreature.cs`).
+    4. `ON_TURN_END`: End-of-turn status checks (`EndTurnDEFBonus.cs`).
+    5. `ON_SUMMON`: Triggers upon entering the lane (`SpawnCreatureBonus.cs`).
+    6. `STATIC_AURA`: Continuous passive modifiers based on neighbors (`AdjacentATKBonus.cs`, `AdjacentDEFBonus.cs`).
+- [ ] **Task 3.2: Stat Manipulation Script Library**
+  - [ ] `ATKBonusAll`, `DEFBonusAll`, `ATKDEFBonusBuilding`.
+  - [ ] `LowerATKTarget`, `BonusDEFTarget`, `LowerATKBonusATK`.
+  - [ ] `SwapATKDEF`: Swaps creature Attack and Defense values.
+  - [ ] `ATKPenaltyFaction`: Decreases opponent stats based on faction.
+- [ ] **Task 3.3: Board Control & Manipulation Scripts**
+  - [ ] `ReturnOppnentToHand`: Bounces opponent creature back to hand.
+  - [ ] `Teleport` / `MoveCreatureLane`: Shift friendly creature to an adjacent empty lane.
+  - [ ] `SacrificeForMP`: Destroys friendly creature to gain bonus Magic Points.
+  - [ ] `DestroyBuildings` / `DestroyOpponentBuilding`.
+- [ ] **Task 3.4: Card Draw & Graveyard Recovery Scripts**
+  - [ ] `DrawCards`: Draw specified number of cards from draw pile.
+  - [ ] `ReturnDiscardCard`: Retrieve chosen creature/spell from discard pile.
+  - [ ] `DamageOpponentDiscardPile`: Damage opponent scaling with discard pile count.
+- [ ] **Task 3.5: Creature Blocking & Counter Scripts**
+  - [ ] `BlockCardCreature`, `BlockCardSpell`, `BlockCardBuilding`.
+  - [ ] `BlockTargetFloop`: Freezes/silences target creature's ability for a turn.
+
+---
+
+### Epic 4: 38 Animated Character Face Rigs & Audio System
+
+*Reference Unity Assets: `Assets/StreamingAssets/CharacterFaceAnim/` (38 characters), `VOManager.cs`, `Assets/AudioClip/` (500+ .wav files)*
+
+- [ ] **Task 4.1: Character Facial Animation Rig (`CharacterFaceRig.gd`)**
+  - [ ] Load and play original UV keyframe JSON files (`Assets/StreamingAssets/CharacterFaceAnim/`):
+    - `_Idle`, `_CardIdle`, `_PlayCard`, `_Fidget`, `_Happy`, `_Defeated`, `_DweebDrink`, `_LastCard`, `_IntroP1`, `_IntroP2`.
+  - [ ] Support all 38 characters:
+    *Finn, Jake, Princess Bubblegum, Marceline, BMO, Ice King, Flame Princess, Earl of Lemongrab, Gunter, Magic Man, Peppermint Butler, Cinnamon Bun, Ash, Cake, Fionna, Marshall Lee, Prince Gumball, Ice Queen, Lord Monochromicorn, etc.*
+  - [ ] Dynamic emotional triggers: Character smiles when placing high-tier card, grimaces when taking damage, and drinks from Dweeb Cup on loss.
+- [ ] **Task 4.2: Audio & Voice Line Manager (`AudioManager.gd`)**
+  - [ ] Autoload audio manager with 4 dedicated audio buses: Master, Music, SFX, Voice.
+  - [ ] Hook up character VO lines from `Assets/AudioClip/`:
+    - Finn: *"Floop the pig!"*, *"Algebraic!"*, *"Mathematical!"*, perfect block audio.
+    - Jake: *"Oh man!"*, *"I floop the pig!"*, defeat cries.
+    - Opponent reaction lines on defeat and critical hits.
+  - [ ] Battle SFX:
+    - Card draw whoosh, card play thud, Floop energy hum, attack hit, shield block, critical strike.
+- [ ] **Task 4.3: Background Music (BGM)**
+  - [ ] Main Menu BGM track loop.
+  - [ ] Battle BGM track loop with dynamic pitch/intensity shift when Hero HP $\le 8$.
+  - [ ] Victory fanfare ("Cool Guy Cup") & Defeat theme ("Dweeb Cup").
+
+---
+
+### Epic 5: Input, Gamepad & Local Multiplayer
+
+- [ ] **Task 5.1: Controller & Steam Deck Support**
+  - [ ] Native controller input mapping for Xbox, DualShock/DualSense, Switch Pro, and Steam Deck.
+  - [ ] Focus-driven UI navigation across Hand, Lanes, Floop buttons, and Turn button.
+  - [ ] Button bindings:
+    - `D-Pad / Sticks`: Navigate hand cards and lane slots.
+    - `Button South (A / Cross)`: Select / Summon / Confirm.
+    - `Button West (X / Square)`: Trigger Floop on selected creature.
+    - `Button North (Y / Triangle)`: Zoom inspect card artwork and full description.
     - `R1 / RB`: Trigger Attack / End Turn.
-    - `L1 / LB`: Trigger Leader Power.
+    - `L1 / LB`: Activate Leader Power.
     - `Start / Menu`: Pause menu.
-  - [ ] Dynamic UI prompt icons (switching between Xbox/PlayStation/Keyboard glyphs based on last input device).
-- [ ] **Task 2.2: Local Multiplayer (2 Players on Same Machine)**
-  - [ ] Add "Local 2-Player Match" to Main Menu.
-  - [ ] **Mode A: Dual Controller / Shared Screen**:
-    - Player 1 uses Controller 1 (controls bottom lanes).
-    - Player 2 uses Controller 2 (controls top lanes).
-  - [ ] **Mode B: Pass & Play (Hotseat)**:
-    - "Hide Hand" transition screen between turns so players cannot see each other's hidden cards.
-  - [ ] Custom deck and landscape selection for both Player 1 and Player 2 before starting.
-- [ ] **Task 2.3: Keyboard & Mouse Shortcuts**
-  - [ ] Number keys `1`–`8` to quickly select cards in hand.
-  - [ ] Number keys `Q`, `W`, `E`, `R` (or `1`-`4`) to target Lanes 1–4.
-  - [ ] `Spacebar` / `Enter` for Attack / End Turn.
-  - [ ] `Tab` to inspect hovered card in high resolution.
-  - [ ] `Esc` for Pause / Options menu.
+  - [ ] Dynamic glyph switching (auto-detects active controller type and displays Xbox/PlayStation/Keyboard icons).
+- [ ] **Task 5.2: Local 2-Player Multiplayer**
+  - [ ] **Mode 1: Shared Screen (Dual Controllers)**:
+    - Player 1 uses Gamepad 1 (controls bottom lanes).
+    - Player 2 uses Gamepad 2 (controls top lanes).
+    - True simultaneous action phase or structured alternating turns.
+  - [ ] **Mode 2: Pass & Play (Hotseat / Single Device)**:
+    - Blind screen transition between turns: *"Pass device to Player 2"* overlay to conceal private hand cards.
+  - [ ] Pre-match screen: Both players independently choose Hero Leader, 4 Landscapes, and custom Deck.
+- [ ] **Task 5.3: Keyboard Shortcuts**
+  - [ ] Keys `1`–`8`: Quick-select card from hand.
+  - [ ] Keys `Q`, `W`, `E`, `R`: Select Lane 1, 2, 3, 4.
+  - [ ] `Spacebar`: Attack / End Turn.
+  - [ ] `Tab`: High-res card zoom inspection.
 
 ---
 
-### Epic 3: Audio, Animations & Visual Polish ("Game Juice")
+### Epic 6: Deck Building, Fusion & Inventory
 
-- [ ] **Task 3.1: SFX & Voice Line Integration**
-  - [ ] Audio Manager autoload (`AudioManager.gd`) with bus volume controls (Master, Music, SFX, Voice).
-  - [ ] Character Voice Lines from `Assets/AudioClip/`:
-    - Finn shouts ("Floop the pig!", "Algebraic!").
-    - Jake reactions ("Oh man!", "Mathematical!").
-    - BMO, Marceline, Princess Bubblegum, Lemongrab voice lines.
-  - [ ] Tactical SFX:
-    - Card draw whoosh, card placement thump.
-    - Floop activation chime / spark sound.
-    - Attack strike, critical hit clash, creature destruction explosion.
-    - Hero damage grunt and defeat scream.
-- [ ] **Task 3.2: Card Battle Animations**
-  - [ ] Card draw animation (flying from draw pile into player hand).
-  - [ ] Summon animation (card expands and slides into lane slot).
-  - [ ] Attack clash animation (creature card jolts forward toward enemy lane).
-  - [ ] Floating combat text (`-5 DEF`, `+2 ATK`, `CRIT!`, `BLOCKED!`).
-  - [ ] Screen shake on heavy attacks or hero damage.
-- [ ] **Task 3.3: Battlefield & UI Visual Upgrades**
-  - [ ] Replace dark placeholder panels with authentic 2D Land of Ooo grass/sky environment backgrounds (`AdventureTimeEnvironment*.unity` visual assets).
-  - [ ] High-resolution card zoom preview on hover/inspect.
-  - [ ] Animated turn transition banners ("PLAYER TURN", "OPPONENT TURN", "BATTLE PHASE").
-- [ ] **Task 3.4: Background Music (BGM)**
-  - [ ] Main Menu BGM track.
-  - [ ] Battle BGM tracks (standard battle, intense battle when Hero HP < 10).
-  - [ ] Victory fanfare ("Cool Guy Cup") and Defeat music ("Dweeb Cup").
+*Reference Unity Blueprints: `db_Decks.json`, `db_Fusion.json`, `db_CardBox.json`, `CWDeckBuildDeckController.cs`*
 
----
-
-### Epic 4: Deck Builder & Customization
-
-- [ ] **Task 4.1: Deck Builder Interface (`DeckBuilder.tscn`)**
-  - [ ] Filter cards by Faction (Plains, Corn, Cotton, Sand, Swamp, Universal).
+- [ ] **Task 6.1: Full Deck Builder (`DeckBuilder.tscn`)**
+  - [ ] Filter cards by Faction (Corn, Plains, Cotton, Sand, Swamp, Universal).
   - [ ] Filter cards by Type (Creature, Spell, Building) and Cost (1 to 5+ MP).
-  - [ ] Card search bar by name.
-  - [ ] Deck legal validation (minimum 10 cards, maximum 25 cards, duplicate limits).
-- [ ] **Task 4.2: Landscape Customizer**
-  - [ ] Allow choosing 4 landscape tiles for your deck (e.g. 2 Corn, 2 Plains, or 4 Cotton).
-- [ ] **Task 4.3: Leader Selection Screen**
-  - [ ] Choose active Hero Leader portrait and power for the deck.
-- [ ] **Task 4.4: Save & Load System**
-  - [ ] Save custom decks as JSON files in `user://decks/`.
-  - [ ] Support multiple named deck slots (e.g. "Finn's Rush", "Jake's Corn Army", "Marceline Vamp").
+  - [ ] Search bar for instant text matching.
+  - [ ] Deck rules validator:
+    - Deck size: 10 to 25 cards.
+    - Maximum 3 copies of identical cards.
+    - Requires 1 Leader.
+- [ ] **Task 6.2: Landscape Customizer**
+  - [ ] Choose 4 landscape tiles for your deck (e.g. 4 Corn, or 2 Plains + 2 Cotton).
+- [ ] **Task 6.3: Save & Load System**
+  - [ ] Save multiple named deck profiles to `user://decks/*.json`.
+  - [ ] Export/import deck codes (Base64 string sharing with friends).
+- [ ] **Task 6.4: Card Fusion & Crafting (`db_Fusion.json`)**
+  - [ ] 204 authentic fusion recipes:
+    - Combine duplicate cards + gold coins to rank up card Quality: **Standard $\rightarrow$ Gold $\rightarrow$ Obsidian**.
+    - Boost base ATK/DEF stats for fused cards.
+  - [ ] Animated fusion cauldron/anvil VFX.
+- [ ] **Task 6.5: Card Box & Inventory Management (`db_CardBox.json`)**
+  - [ ] Card inventory screen with sorting (by ATK, DEF, Cost, Rarity, Faction).
+  - [ ] Disenchant / sell duplicate cards for gold coins.
 
 ---
 
-### Epic 5: Campaign & Progression
+### Epic 7: Campaign, Quests & Game Modes (346 Quests, Fionna & Cake, Dungeons, El Fisto)
 
-- [ ] **Task 5.1: Quest Map System (`QuestMap.tscn`)**
-  - [ ] World map nodes connecting through the Land of Ooo based on `db_Quest.json` (Quests 1 to 120+).
-  - [ ] Visual road unlocking upon victory.
-  - [ ] Dialogue cutscenes before matches using character portraits.
-- [ ] **Task 5.2: Star Objectives & Quest Conditions**
-  - [ ] Parse `db_QuestConditions.json`:
-    - Win with > 15 Hero HP.
-    - Win without flooping any creatures.
-    - Win in under 5 turns.
-  - [ ] 3-star rating system per quest node.
-- [ ] **Task 5.3: Card Chest / Gacha Rewards**
-  - [ ] In-game Coin and Gem currency rewards from battles (no real money / microtransactions).
-  - [ ] Chest opening screen (`db_GachaWeights.json`):
-    - Regular Chest (Coins) & Algebraic Chest (Gems).
-    - Card reveal animation with rarity glows (Common, Rare, Very Rare, Algebraic).
-- [ ] **Task 5.4: Card Fusion & Crafting**
-  - [ ] Card fusion screen based on `db_Fusion.json`:
-    - Combine duplicate cards and recipe items to upgrade creature stats (Standard -> Gold -> Obsidian).
+*Reference Unity Blueprints: `db_Quest.json`, `db_QuestConditions.json`, `db_SideQuests.json`, `db_FCMap.json`, `db_Dungeon.json`, `db_ElFisto.json`*
 
----
-
-### Epic 6: Multiplatform Packaging & CI/CD
-
-- [ ] **Task 6.1: Godot 4 Linux Standalone & AppImage**
-  - [ ] Automated headless export preset in Godot for Linux x86_64 (`CardWars.x86_64`).
-  - [ ] Package into single-file portable `CardWars-x86_64.AppImage` using `appimagetool`.
-- [ ] **Task 6.2: Godot 4 Windows Standalone**
-  - [ ] Automated headless export preset for Windows 64-bit (`CardWars.exe`).
-  - [ ] Zipped release package (`CardWars-Windows.zip`).
-- [ ] **Task 6.3: Godot 4 macOS Standalone**
-  - [ ] Automated export for macOS (`CardWars.app`).
-  - [ ] Zipped release package (`CardWars-macOS.zip`).
-- [ ] **Task 6.4: Steam Deck & Linux Desktop Integration**
-  - [ ] `.desktop` application entry and icon installation script.
-  - [ ] Steam Deck controller preset and 1280x800 resolution support.
-- [ ] **Task 6.5: Zero-License GitHub Actions Workflow**
-  - [ ] Set up GitHub Actions using official Godot 4 export action (requires **zero licenses, zero serial numbers, and zero third-party accounts**).
-  - [ ] Automatic release generation on tag push (`v*`).
+- [ ] **Task 7.1: Main Campaign Quest Map (`QuestMap.tscn`)**
+  - [ ] World map nodes connecting across the Land of Ooo (346 quests in `db_Quest.json`).
+  - [ ] Road unlocking visual animation upon beating each quest.
+  - [ ] Pre-battle dialogue cutscenes with character dialogue boxes.
+- [ ] **Task 7.2: Star Objectives & Quest Conditions (`db_QuestConditions.json`)**
+  - [ ] 3-star ranking per quest:
+    - Star 1: Win the match.
+    - Star 2: Special condition (e.g. *"Win without flooping"*, *"Win in under 5 turns"*).
+    - Star 3: Health condition (e.g. *"Win with 15+ Hero HP remaining"*).
+- [ ] **Task 7.3: Branching Side Quests (`db_SideQuests.json`)**
+  - [ ] 12 hidden side quests discovered by completing secret map challenges.
+- [ ] **Task 7.4: Fionna & Cake Expansion Campaign (`db_FCMap.json`)**
+  - [ ] Second campaign world map featuring Fionna, Cake, Marshall Lee, and Prince Gumball.
+  - [ ] Introduces the **Candy** faction and new landscape tiles.
+- [ ] **Task 7.5: Daily Thematic Dungeons (`db_Dungeon.json`)**
+  - [ ] 7 rotating daily event dungeons:
+    - Monday: Plains Dungeon
+    - Tuesday: Corn Dungeon
+    - Wednesday: Swamp Dungeon
+    - Thursday: Cotton Dungeon
+    - Friday: Sand Dungeon
+    - Saturday: 2x XP Dungeon
+    - Sunday: 2x Coins Dungeon
+- [ ] **Task 7.6: El Fisto Boss Arena (`db_ElFisto.json`)**
+  - [ ] 8-round survival gauntlet against escalating boss decks.
+  - [ ] Unique boss streak rewards (Gems, rare Gold cards).
+- [ ] **Task 7.7: Interactive Scripted Tutorial (`db_Tutorials.json`)**
+  - [ ] Step-by-step tutorial taught by Jake:
+    - Step 1: Placing landscapes & drawing cards.
+    - Step 2: Magic Point costs & summoning creatures.
+    - Step 3: Flooping the Pig & ability triggers.
+    - Step 4: Lane combat, defending, and direct hero attacks.
 
 ---
 
-## 🛠 Suggested Development Order
+### Epic 8: Economy, Chests & Progression
+
+*Reference Unity Blueprints: `db_GachaWeights.json`, `db_GachaSchedule.json`, `db_DailyGift.json`, `db_CalendarGift.json`, `db_RankUp.json`*
+
+- [ ] **Task 8.1: In-Game Economy (100% Free / No Real Microtransactions)**
+  - [ ] In-game currency system: **Gold Coins** (earned in battles) and **Gems** (earned from 3-star quests & boss milestones).
+  - [ ] Stamina/Hearts system toggle: Option to play with original Heart stamina or Infinite Free Play mode.
+- [ ] **Task 8.2: Chest Opening / Gacha System (`db_GachaWeights.json`)**
+  - [ ] **Cool Chest**: Purchased with Gold Coins (Common to Rare cards).
+  - [ ] **Algebraic Chest**: Purchased with Gems (Rare, Very Rare, and Algebraic cards).
+  - [ ] Animated 3D/2D chest opening sequence with gold glow and card reveal cards.
+- [ ] **Task 8.3: Daily Login Calendar (`db_CalendarGift.json`)**
+  - [ ] 30-day login calendar awarding free coins, gems, and exclusive cards.
+- [ ] **Task 8.4: Hero Leveling & Rank Ups (`db_RankUp.json`)**
+  - [ ] Earn XP from battles to level up Hero Leaders.
+  - [ ] Level-up rewards: Increases max Hero HP and unlocks new leader power tiers.
+
+---
+
+### Epic 9: UI, Localization, Settings & Multiplatform CI/CD
+
+- [ ] **Task 9.1: Multilingual Localization Engine**
+  - [ ] Language selector in Options:
+    - **English** (`EN_*.bytes`)
+    - **German** (`DE_*.bytes`)
+    - **Spanish** (`ES_*.bytes`)
+    - **French** (`FR_*.bytes`)
+    - **Italian** (`IT_*.bytes`)
+    - **Portuguese** (`PT_*.bytes`)
+    - **Latin American Spanish** (`LatAm_*.bytes`)
+  - [ ] Runtime language switching updating all card names, descriptions, and UI menus.
+- [ ] **Task 9.2: Settings & Video / Audio Options**
+  - [ ] Resolution selector (1080p, 1440p, 4K, 1280x800 for Steam Deck).
+  - [ ] Fullscreen / Windowed / Borderless toggle, VSync toggle.
+  - [ ] Audio volume sliders (Master, Music, SFX, Voice).
+  - [ ] Fast Combat Animation speed toggle (1x, 1.5x, 2x).
+- [ ] **Task 9.3: Multiplatform Packaging & Automated CI/CD (Zero Licenses Needed)**
+  - [ ] Automated GitHub Actions workflow using Godot 4 export tooling:
+    - **Linux Standalone**: Native `.x86_64` binary + single-file portable `.AppImage`.
+    - **Windows Standalone**: Native 64-bit `.exe` zipped package.
+    - **macOS Standalone**: Signed/notarized `.app` bundle.
+  - [ ] Automatic release generation on tag push (`v*`) with all assets attached.
+
+---
+
+## 📅 Phased Implementation Roadmap
 
 ```mermaid
-flowchart TD
-    A["Epic 1: Spells, Buildings & Landscape Rules"] --> B["Epic 2: Gamepad & Local Multiplayer"]
-    B --> C["Epic 3: Audio & Visual Juice (SFX & Animations)"]
-    C --> D["Epic 4: Deck Builder & Customization"]
-    D --> E["Epic 5: Quest Map & Campaign"]
-    E --> F["Epic 6: Automated Multiplatform Releases"]
+gantt
+    title Card Wars Godot 4 Phased Roadmap
+    dateFormat  YYYY-MM-DD
+    section Phase 1: Combat Depth
+    Spells & Buildings           :p1_1, 2026-11-03, 7d
+    Landscape Affinity Rules     :p1_2, after p1_1, 3d
+    Battle Wheel Minigame        :p1_3, after p1_2, 5d
+    Leader Active Powers         :p1_4, after p1_3, 4d
+    section Phase 2: Controls & Audio
+    Controller Support           :p2_1, after p1_4, 5d
+    Local 2-Player Multiplayer   :p2_2, after p2_1, 6d
+    SFX & 38 Character Face Rigs :p2_3, after p2_2, 8d
+    section Phase 3: Progression & Modes
+    Deck Builder & Customizer    :p3_1, after p2_3, 6d
+    Card Fusion & Quality Tiers  :p3_2, after p3_1, 5d
+    Campaign Quest Map (346 Qs)  :p3_3, after p3_2, 10d
+    Dungeons & El Fisto Arena    :p3_4, after p3_3, 7d
+    section Phase 4: Polish & Ship
+    Localization & Settings      :p4_1, after p3_4, 4d
+    Multiplatform AppImage & CI  :p4_2, after p4_1, 4d
 ```
