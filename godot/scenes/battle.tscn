@@ -1,0 +1,303 @@
+[gd_scene format=3 uid="uid://dmj6kvn8bqp4a"]
+
+[ext_resource type="Script" path="res://src/battle/BattleController.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c34e8kfy7m2w8" path="res://scenes/components/LaneSlot.tscn" id="2_lane"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.0823529, 0.101961, 0.14902, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header"]
+bg_color = Color(0.12, 0.15, 0.22, 0.95)
+border_width_bottom = 2
+border_color = Color(0.85, 0.69, 0.27, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp"]
+bg_color = Color(0.8, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_footer"]
+bg_color = Color(0.12, 0.15, 0.22, 0.95)
+border_width_top = 2
+border_color = Color(0.85, 0.69, 0.27, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dialog"]
+bg_color = Color(0.08, 0.1, 0.15, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 0.69, 0.27, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_size = 10
+
+[node name="Battle" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="Header" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 48.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_header")
+
+[node name="OpponentInfo" type="HBoxContainer" parent="Header"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_right = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="NameLabel" type="Label" parent="Header/OpponentInfo"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Jake"
+
+[node name="HpBar" type="ProgressBar" parent="Header/OpponentInfo"]
+custom_minimum_size = Vector2(300, 20)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp")
+value = 100.0
+show_percentage = false
+
+[node name="HpLabel" type="Label" parent="Header/OpponentInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Jake: 25 / 25 HP"
+
+[node name="Field" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -290.0
+offset_right = 310.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="OpponentLanes" type="HBoxContainer" parent="Field"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Lane0" parent="Field/OpponentLanes" instance=ExtResource("2_lane")]
+layout_mode = 2
+
+[node name="Lane1" parent="Field/OpponentLanes" instance=ExtResource("2_lane")]
+layout_mode = 2
+
+[node name="Lane2" parent="Field/OpponentLanes" instance=ExtResource("2_lane")]
+layout_mode = 2
+
+[node name="Lane3" parent="Field/OpponentLanes" instance=ExtResource("2_lane")]
+layout_mode = 2
+
+[node name="PlayerLanes" type="HBoxContainer" parent="Field"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Lane0" parent="Field/PlayerLanes" instance=ExtResource("2_lane")]
+layout_mode = 2
+
+[node name="Lane1" parent="Field/PlayerLanes" instance=ExtResource("2_lane")]
+layout_mode = 2
+
+[node name="Lane2" parent="Field/PlayerLanes" instance=ExtResource("2_lane")]
+layout_mode = 2
+
+[node name="Lane3" parent="Field/PlayerLanes" instance=ExtResource("2_lane")]
+layout_mode = 2
+
+[node name="BattleLog" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -120.0
+offset_right = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="BattleLog"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "Welcome to Card Wars!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="TurnBtn" type="Button" parent="."]
+custom_minimum_size = Vector2(200, 48)
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -265.0
+offset_top = 40.0
+offset_right = -65.0
+offset_bottom = 88.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 14
+text = "⚔️ ATTACK! (End Turn)"
+
+[node name="Footer" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 210)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -210.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_footer")
+
+[node name="PlayerInfo" type="HBoxContainer" parent="Footer"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 4.0
+offset_right = -20.0
+offset_bottom = 28.0
+grow_horizontal = 2
+theme_override_constants/separation = 16
+
+[node name="NameLabel" type="Label" parent="Footer/PlayerInfo"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Finn"
+
+[node name="HpBar" type="ProgressBar" parent="Footer/PlayerInfo"]
+custom_minimum_size = Vector2(250, 16)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp")
+value = 100.0
+show_percentage = false
+
+[node name="HpLabel" type="Label" parent="Footer/PlayerInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Finn: 25 / 25 HP"
+
+[node name="MpContainer" type="HBoxContainer" parent="Footer"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -250.0
+offset_top = 4.0
+offset_right = -20.0
+offset_bottom = 28.0
+grow_horizontal = 0
+alignment = 2
+
+[node name="MpLabel" type="Label" parent="Footer/MpContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "⚡ Magic Points: 2 / 2"
+
+[node name="HandScroll" type="ScrollContainer" parent="Footer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 30.0
+offset_right = -20.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+vertical_scroll_mode = 0
+
+[node name="HandContainer" type="HBoxContainer" parent="Footer/HandScroll"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="EndGameDialog" type="Panel" parent="."]
+visible = false
+custom_minimum_size = Vector2(400, 200)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dialog")
+
+[node name="VBox" type="VBoxContainer" parent="EndGameDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="ResultLabel" type="Label" parent="EndGameDialog/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "VICTORY!"
+horizontal_alignment = 1
+
+[node name="MenuBtn" type="Button" parent="EndGameDialog/VBox"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 14
+text = "Return to Menu"

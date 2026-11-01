@@ -1,0 +1,30 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; but it can be made by hand.
+
+config_version=5
+
+[application]
+
+config/name="Card Wars"
+config/description="Adventure Time: Card Wars - Remake in Godot 4"
+run/main_scene="res://scenes/main_menu.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+config/icon="res://assets/textures/icon.png"
+
+[autoload]
+
+Database="*res://src/autoload/Database.gd"
+GameManager="*res://src/autoload/GameManager.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
