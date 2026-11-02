@@ -33,6 +33,7 @@ if [ -z "$EXE_NAME" ]; then
 fi
 
 APPDIR=$(mktemp -d -t cardwars-appdir-XXXXXX)
+chmod 0755 "$APPDIR"
 trap 'rm -rf "$APPDIR"' EXIT
 
 echo "==> Preparing AppDir at $APPDIR..."
@@ -96,6 +97,9 @@ fi
 
 # Ensure output directory exists
 mkdir -p "$(dirname "$OUTPUT_PATH")"
+
+chmod -R a+rX "$APPDIR"
+chmod a+rx "$APPDIR/AppRun"
 
 echo "==> Running appimagetool..."
 export ARCH=x86_64
