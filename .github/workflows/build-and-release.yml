@@ -29,46 +29,42 @@ jobs:
         with:
           lfs: true
 
-      - name: Create export destination directories
-        run: |
-          mkdir -p godot/builds/linux
-          mkdir -p godot/builds/windows
-          mkdir -p godot/builds/mac
-
       - name: Export Godot Project
+        id: export
         uses: firebelley/godot-export@v8.0.0
         with:
           godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
           godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
           relative_project_path: ./godot
-          use_preset_export_path: true
           archive_output: false
           cache: true
 
       - name: Package Linux (AppImage & Tarball)
         run: |
           mkdir -p release-assets
+          BUILD_DIR="${{ steps.export.outputs.build_directory }}/Linux"
           chmod +x ./scripts/package-appimage.sh
-          ./scripts/package-appimage.sh godot/builds/linux release-assets/CardWars-x86_64.AppImage
-          
-          tar -czvf release-assets/CardWars-Linux.tar.gz -C godot/builds/linux .
+          ./scripts/package-appimage.sh "$BUILD_DIR" release-assets/CardWars-x86_64.AppImage
+          tar -czvf release-assets/CardWars-Linux.tar.gz -C "$BUILD_DIR" .
 
       - name: Package Windows (Zip)
         run: |
           mkdir -p release-assets
-          cd godot/builds/windows
-          zip -r ../../../release-assets/CardWars-Windows.zip .
-          cd ../../..
+          BUILD_DIR="${{ steps.export.outputs.build_directory }}/Windows Desktop"
+          cd "$BUILD_DIR"
+          zip -r "$GITHUB_WORKSPACE/release-assets/CardWars-Windows.zip" .
+          cd "$GITHUB_WORKSPACE"
 
       - name: Package macOS (Zip)
         run: |
           mkdir -p release-assets
-          if [ -f "godot/builds/mac/CardWars.zip" ]; then
-            cp godot/builds/mac/CardWars.zip release-assets/CardWars-macOS.zip
-          elif [ -d "godot/builds/mac" ]; then
-            cd godot/builds/mac
-            zip -r ../../../release-assets/CardWars-macOS.zip .
-            cd ../../..
+          BUILD_DIR="${{ steps.export.outputs.build_directory }}/macOS"
+          if [ -f "$BUILD_DIR/CardWars.zip" ]; then
+            cp "$BUILD_DIR/CardWars.zip" release-assets/CardWars-macOS.zip
+          else
+            cd "$BUILD_DIR"
+            zip -r "$GITHUB_WORKSPACE/release-assets/CardWars-macOS.zip" .
+            cd "$GITHUB_WORKSPACE"
           fi
 
       - name: Upload Build Artifacts
