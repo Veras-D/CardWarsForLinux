@@ -234,20 +234,22 @@
 
 *Reference: All 317 scripts in `Assets/Scripts/Assembly-CSharp/` matching ability patterns*
 
-### Task 3.1: Trigger Event Architecture
-Implement a unified ability trigger pipeline in `AbilitySystem.gd`:
-
-```gdscript
-enum Trigger {
-    ON_FLOOP,         # Manual activation during Action Phase
-    ON_SUMMON,        # Triggered when card enters a lane
-    ON_DEATH,         # Triggered when creature DEF <= 0
-    ON_TURN_START,    # Triggered at the beginning of owner's turn
-    ON_TURN_END,      # Triggered at the end of owner's turn
-    ON_ATTACK,        # Triggered before dealing combat damage
-    STATIC_AURA       # Continuous passive effect (recalculated on board state changes)
-}
-```
+### Task 3.1: Trigger Event Architecture [COMPLETED & VERIFIED]
+- **Status**: **Completed & Verified**
+- **Implementation**:
+  - `AbilitySystem.gd` (`godot/src/battle/AbilitySystem.gd`):
+    - Unified pipeline with `enum Trigger { ON_FLOOP, ON_SUMMON, ON_DEATH, ON_TURN_START, ON_TURN_END, ON_ATTACK, STATIC_AURA }`.
+    - Integrated with standalone `AbilityResolver` and `SystemEventBus` from `godot-systems-library`.
+    - Handles automatic death dispatch via `creature_destroyed` signal on `LaneSlot`.
+    - Resolves core script matrix for entry effects (`CreatureDamageOnEntry`, `HeroDamageOnEntry`), floop abilities (`ATKBonus`, `ATKDEFBonus`, `BonusATKTarget`, `BonusDEFTarget`, `LowerATKOpponent`, `ATKPenaltyFaction`, `SelfAndAdjacentATKBonus`, `LandscapeATKBonus`, `CardsATKBonus`, `ATKBonusDamageSelf`, `SwapATKDEF`, `DrawCards`, `HealHero`, `DamageAll`, `HealTarget`, `ReturnOppnentToHand`, `BlockFloop`, `DamageHeroCards`), death triggers (`DamageHeroOnDeath`, `HealHeroOnDeath`), turn start triggers (`StartTurnHealCreatures`), and attack triggers (`DoubleDamage`).
+  - `BattleController.gd`:
+    - Wired `ability_system` into `setup_match()`, `start_player_turn()`, `_on_player_lane_clicked()`, `_on_floop_requested()`, `execute_battle_phase()`, and `execute_opponent_turn()`.
+  - Automated Test Suite:
+    - `test_ability_system.tscn` / `test_ability_system_node.gd`: 7 comprehensive test suites passing 100% headlessly in engine.
+- **Acceptance Criteria**:
+  - [x] All 7 trigger events properly dispatched at accurate battle lifecycle moments.
+  - [x] Reactive death and entry triggers cleanly resolve without race conditions or memory leaks.
+  - [x] Full automated test coverage verifying trigger pipeline and ability matrix.
 
 ### Task 3.2: Complete Ability Script Matrix
 Implement the core behavior classes:

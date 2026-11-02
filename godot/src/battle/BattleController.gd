@@ -2,6 +2,7 @@ extends Control
 
 const BattleWheelModal = preload("res://src/battle/BattleWheelModal.gd")
 const LeaderPowerButton = preload("res://src/battle/LeaderPowerButton.gd")
+const AbilitySystem = preload("res://src/battle/AbilitySystem.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
@@ -48,6 +49,7 @@ var player_leader_cooldown: int = 0
 var opponent_leader_cooldown: int = 0
 var player_leader_id: String = ""
 var opponent_leader_id: String = ""
+var ability_system: AbilitySystem = null
 
 func _ready() -> void:
 	turn_btn.pressed.connect(_on_turn_button_pressed)
@@ -123,6 +125,11 @@ func setup_match() -> void:
 		o_lane.update_landscape(GameManager.opponent_landscapes[i])
 		opponent_lanes.append(o_lane)
 
+	if ability_system == null:
+		ability_system = AbilitySystem.new()
+		add_child(ability_system)
+	ability_system.setup(self)
+
 	_update_ui()
 
 	# Start Battle BGM using Audio Jukebox
@@ -150,6 +157,9 @@ func start_player_turn() -> void:
 
 	for lane in player_lanes:
 		lane.reset_turn()
+
+	if ability_system:
+		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_START)
 
 	draw_player_card()
 	_update_ui()
@@ -225,6 +235,9 @@ func _on_player_lane_clicked(lane: LaneSlot) -> void:
 	lane.place_creature(card_data)
 	log_message("✨ Summoned %s onto Lane %d (%s)!" % [card_data.get("name", "Creature"), lane.lane_index + 1, lane.landscape])
 
+	if ability_system:
+		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, lane)
+
 	# Remove from hand and reset selection
 	var to_free = selected_card_view
 	_deselect_card()
@@ -250,36 +263,8 @@ func _on_floop_requested(lane: LaneSlot) -> void:
 	_update_ui()
 
 func _execute_floop_ability(source_lane: LaneSlot) -> void:
-	var script_name = source_lane.creature_data.get("script_name", "")
-	var val1 = int(source_lane.creature_data.get("val1", "0"))
-	var val2 = int(source_lane.creature_data.get("val2", "0"))
-
-	match script_name:
-		"ATKPenaltyFaction":
-			# Decrease ATK of opposite creatures (like The Pig)
-			for opp_lane in opponent_lanes:
-				if opp_lane.has_creature:
-					opp_lane.modify_atk(-val2 if val2 > 0 else -1)
-			log_message("Floop: Enemy creatures had their Attack reduced!")
-		"DrawCards":
-			var count = val1 if val1 > 0 else 1
-			for _i in range(count):
-				draw_player_card()
-			log_message("Floop: Drew %d card(s)!" % count)
-		"HealHero":
-			var heal = val1 if val1 > 0 else 2
-			player_hp = min(player_max_hp, player_hp + heal)
-			log_message("Floop: Restored %d HP to your hero!" % heal)
-		"DamageAll":
-			var dmg = val1 if val1 > 0 else 2
-			for opp_lane in opponent_lanes:
-				if opp_lane.has_creature:
-					opp_lane.apply_damage(dmg)
-			log_message("Floop: Dealt %d damage to all opponent creatures!" % dmg)
-		_:
-			# Default Floop bonus: +2 ATK this turn
-			source_lane.modify_atk(2)
-			log_message("Floop: %s gained +2 Attack!" % source_lane.creature_data.get("name", "Creature"))
+	if ability_system:
+		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_FLOOP, source_lane)
 
 func _on_player_leader_power_activated(char_id: String) -> void:
 	if not is_player_turn or player_leader_cooldown > 0:
@@ -389,6 +374,9 @@ func execute_battle_phase() -> void:
 		if not p_lane.has_creature:
 			continue
 
+		if ability_system:
+			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, p_lane)
+
 		var atk = p_lane.current_atk
 		var o_lane = opponent_lanes[i]
 		var target_name = o_lane.creature_data.name if o_lane.has_creature else GameManager.opponent_hero_name
@@ -422,6 +410,9 @@ func execute_battle_phase() -> void:
 			end_match(true)
 			return
 
+	if ability_system:
+		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
+
 	# Opponent AI turn
 	var timer = get_tree().create_timer(1.2)
 	await timer.timeout
@@ -431,6 +422,9 @@ func execute_opponent_turn() -> void:
 	if ResourceLoader.exists("res://assets/audio/sfx/OpponentTurn.wav"):
 		Audio.play_sfx(load("res://assets/audio/sfx/OpponentTurn.wav"))
 	log_message("=== Opponent Turn (%s) ===" % GameManager.opponent_hero_name)
+
+	if ability_system:
+		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_START)
 
 	# Decrement Opponent Leader Cooldown
 	if opponent_leader_cooldown > 0:
@@ -465,6 +459,8 @@ func execute_opponent_turn() -> void:
 					log_message("%s summoned %s into Lane %d (%s)!" % [
 						GameManager.opponent_hero_name, candidate_card.name, o_lane.lane_index + 1, o_lane.landscape
 					])
+					if ability_system:
+						ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, o_lane)
 					break
 
 	# Opponent attacks
@@ -472,6 +468,9 @@ func execute_opponent_turn() -> void:
 		var o_lane = opponent_lanes[i]
 		if not o_lane.has_creature:
 			continue
+
+		if ability_system:
+			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, o_lane)
 
 		var atk = o_lane.current_atk
 		var p_lane = player_lanes[i]
@@ -508,6 +507,9 @@ func execute_opponent_turn() -> void:
 		if player_hp <= 0:
 			end_match(false)
 			return
+
+	if ability_system:
+		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
 
 	var timer = get_tree().create_timer(1.0)
 	await timer.timeout

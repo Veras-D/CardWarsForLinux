@@ -3,6 +3,7 @@ class_name LaneSlot
 
 signal slot_clicked(lane_slot)
 signal floop_requested(lane_slot)
+signal creature_destroyed(lane_slot, dead_data)
 
 @export var is_player: bool = true
 @export var lane_index: int = 0
@@ -180,7 +181,9 @@ func apply_damage(damage: int) -> bool:
 	current_def -= damage
 	_update_card_display()
 	if current_def <= 0:
+		var dead_data = creature_data.duplicate(true)
 		clear_slot()
+		creature_destroyed.emit(self, dead_data)
 		return true # Creature was destroyed
 	return false
 
