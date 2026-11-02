@@ -10,15 +10,20 @@ This document outlines the strict behavioral and architectural rules for this co
 > Instead of building an entire monolithic game that cannot be repurposed, build individual, reusable, and polished game systems — deck engine, lane board, timing wheel, ability interpreter, save vault, audio jukebox — as standalone, decoupled modules.
 
 ### Rules of Separation:
-1. **Zero Game-Specific Coupling in Systems**:
-   - All generic system packages live in `godot/src/systems/<system_name>/`.
+1. **Standalone Systems Library (`godot-systems-library`)**:
+   - All generic game systems live in the external standalone repository:
+     `/home/verivi/Veras/Projects/godot-systems-library/`
+     (GitHub: `https://github.com/Veras-D/godot-systems-library`).
+   - In *Card Wars*, this library is integrated directly as a Git submodule at `godot/src/systems/`.
    - Generic systems **must never** import or reference *Card Wars* specifics (no hardcoded references to "The Pig", "Cornfield", "Finn", or "db_Creatures").
    - Systems deal purely in generic data types and contracts (e.g. `CardData`, `CardCost`, `FactionAffinity`, `SlotIndex`, `HitAreaPercentage`).
 2. **Extraction-Ready for Other Projects**:
-   - Every system directory under `godot/src/systems/` must be structured so the user can copy-paste it directly into an entirely different, independent Godot project and have it work immediately out-of-the-box.
-3. **Isolated Testbed Scenes (`testbed_*.tscn`)**:
+   - Every system directory must use relative preloads (`preload("File.gd")`) so it can be cloned, submoduled, or copy-pasted into any other Godot project without broken paths.
+3. **Dedicated Documentation per System**:
+   - Every module has its own `README.md` with an integration guide and API reference.
+4. **Isolated Testbed Scenes (`testbed_*.tscn`)**:
    - Every single module **must** contain a standalone runnable test scene (e.g. `testbed_deck.tscn`, `testbed_wheel.tscn`).
-   - A developer or agent must be able to run that testbed alone (`godot scenes/.../testbed.tscn`) to test the system in isolation without clicking through menus or running the full battle game.
+   - A developer or agent must be able to run that testbed alone (`godot timing_wheel/testbed_wheel.tscn`) to test the system in isolation without clicking through menus or running the full battle game.
 4. **Card Wars as a Composition Layer**:
    - *Card Wars* itself is purely a **Composition Consumer Layer** (`godot/src/card_wars/` or `godot/src/battle/`).
    - The battle scene simply instantiates these generic systems and wires them together with Card Wars art, blueprints, and Adventure Time characters.
