@@ -58,23 +58,26 @@
 
 ## Epic 1: Match Flow & Pre-Battle Setup
 
-### Task 1.1: Rock-Paper-Scissors (RPS) Turn Decider
+### Task 1.1: Rock-Paper-Scissors (RPS) Turn Decider [COMPLETED]
+- **Status**: **Completed & Verified**
 - **Unity Reference**: `RPSMatrix.cs`, `RPSManager.cs`, `db_RPS.json`.
 - **Godot Implementation**:
-  - Create `res://scenes/components/RPSMinigame.tscn` and `RPSMinigame.gd`.
+  - Create `res://scenes/components/RockPaperScissors.tscn` and `RockPaperScissors.gd`.
   - State Machine: `CHOOSING -> REVEALING -> RESOLVED`.
-  - Display 3 choice buttons: 🪨 Rock, 📄 Paper, ✂️ Scissors.
+  - Display 3 choice buttons: ✊ Rock, ✋ Paper, ✌️ Scissors.
   - Opponent AI randomly selects choice based on weighting matrix (`RPSMatrix.cs`).
   - **Resolution**:
     - Winner gets modal dialog: *"You Won! Choose Turn Order:"* with options `[Go First]` and `[Go Second]`.
-    - Tie triggers re-roll animation.
+    - Tie triggers re-roll animation ("IT'S A TIE! Shoot again!").
+    - If AI wins, AI decides (70% first, 30% second) and match begins.
   - Setting toggle: `Options -> Skip RPS (Randomize First Turn)`.
 - **Acceptance Criteria**:
-  - [ ] Opening match starts with RPS phase unless skipped in Settings.
-  - [ ] Winner can choose turn order; chosen player receives Turn 1.
-  - [ ] Full controller and mouse support.
+  - [x] Opening match starts with RPS phase unless skipped in Settings.
+  - [x] Winner can choose turn order; chosen player receives Turn 1.
+  - [x] Full controller and mouse support.
 
-### Task 1.2: 4-Landscape Placement Phase
+### Task 1.2: 4-Landscape Placement Phase [COMPLETED]
+- **Status**: **Completed & Verified**
 - **Unity Reference**: `LandscapePreviewController.cs`, `ManualLandscapeScript.cs`, `LandscapeType.cs`.
 - **Godot Implementation**:
   - The 4 landscape tiles represent the 4 lanes on each player's side:
@@ -89,13 +92,15 @@
   - [x] Lanes render their assigned landscape theme, texture, and label.
   - [x] Both Player and Opponent lane affinities match their deck configuration.
 
-### Task 1.3: Matchup Intro Screen
+### Task 1.3: Matchup Intro Screen [COMPLETED]
+- **Status**: **Completed & Verified**
 - **Unity Reference**: `CWBattleIntroController.cs`, `CWBattleSequenceController.cs`.
 - **Godot Implementation**:
-  - Split-screen banner showing Player Leader portrait vs. Opponent Leader portrait.
-  - Reads opening voice line from `Assets/AudioClip/` (e.g. Finn: *"Let's play Card Wars!"*).
+  - Split-screen banner showing Player Leader portrait vs. Opponent Leader portrait (`res://scenes/components/MatchIntro.tscn`).
+  - Reads opening voice line from `Assets/AudioClip/` (Finn: *"Finn_Opening.wav"*, Jake: *"Jake_Opening.wav"*).
+  - Displays Leader portraits, HP (25), quotes, and battle intro fanfare.
 - **Acceptance Criteria**:
-  - [ ] Displays Leader names, starting HP (25), and plays VO. Transitions into RPS smoothly.
+  - [x] Displays Leader names, starting HP (25), and plays VO. Transitions into RPS smoothly.
 
 ---
 

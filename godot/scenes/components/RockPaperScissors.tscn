@@ -1,0 +1,211 @@
+[gd_scene format=3 uid="uid://bvyw7g5a4q0xk"]
+
+[ext_resource type="Script" path="res://src/battle/RockPaperScissors.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.05, 0.06, 0.09, 0.94)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.1, 0.13, 0.2, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 0.7, 0.25, 0.9)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_choice_box"]
+bg_color = Color(0.15, 0.18, 0.28, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.6, 0.8, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="RockPaperScissors" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="Modal" type="Panel" parent="."]
+custom_minimum_size = Vector2(560, 380)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -190.0
+offset_right = 280.0
+offset_bottom = 190.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="Content" type="VBoxContainer" parent="Modal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Modal/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 22
+text = "✊ ROCK, PAPER, SCISSORS! ✌️"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Modal/Content"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.95)
+theme_override_font_sizes/font_size = 16
+text = "Rock, Paper, Scissors! Shoot!"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ChoicesContainer" type="HBoxContainer" parent="Modal/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="RockBtn" type="Button" parent="Modal/Content/ChoicesContainer"]
+custom_minimum_size = Vector2(140, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "✊ ROCK"
+
+[node name="PaperBtn" type="Button" parent="Modal/Content/ChoicesContainer"]
+custom_minimum_size = Vector2(140, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "✋ PAPER"
+
+[node name="ScissorsBtn" type="Button" parent="Modal/Content/ChoicesContainer"]
+custom_minimum_size = Vector2(140, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "✌️ SCISSORS"
+
+[node name="ClashContainer" type="HBoxContainer" parent="Modal/Content"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="P1Choice" type="Panel" parent="Modal/Content/ClashContainer"]
+custom_minimum_size = Vector2(180, 80)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_choice_box")
+
+[node name="VBox" type="VBoxContainer" parent="Modal/Content/ClashContainer/P1Choice"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="WhoLabel" type="Label" parent="Modal/Content/ClashContainer/P1Choice/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "YOU"
+horizontal_alignment = 1
+
+[node name="MoveLabel" type="Label" parent="Modal/Content/ClashContainer/P1Choice/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "✊ ROCK"
+horizontal_alignment = 1
+
+[node name="VsLabel" type="Label" parent="Modal/Content/ClashContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+text = "VS"
+horizontal_alignment = 1
+
+[node name="P2Choice" type="Panel" parent="Modal/Content/ClashContainer"]
+custom_minimum_size = Vector2(180, 80)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_choice_box")
+
+[node name="VBox" type="VBoxContainer" parent="Modal/Content/ClashContainer/P2Choice"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="WhoLabel" type="Label" parent="Modal/Content/ClashContainer/P2Choice/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.3, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "OPPONENT"
+horizontal_alignment = 1
+
+[node name="MoveLabel" type="Label" parent="Modal/Content/ClashContainer/P2Choice/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "❓ ..."
+horizontal_alignment = 1
+
+[node name="OrderContainer" type="VBoxContainer" parent="Modal/Content"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="Modal/Content/OrderContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="GoFirstBtn" type="Button" parent="Modal/Content/OrderContainer/HBox"]
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "⚡ GO FIRST (Turn 1)"
+
+[node name="GoSecondBtn" type="Button" parent="Modal/Content/OrderContainer/HBox"]
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🛡️ GO SECOND (Turn 2)"
+
+[node name="AudioSFX" type="AudioStreamPlayer" parent="."]

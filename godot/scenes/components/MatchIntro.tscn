@@ -1,0 +1,197 @@
+[gd_scene format=3 uid="uid://cx6m2v7w0o8ep"]
+
+[ext_resource type="Script" path="res://src/battle/MatchIntro.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.04, 0.05, 0.08, 0.92)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_p1"]
+bg_color = Color(0.12, 0.22, 0.38, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.3, 0.6, 1, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_p2"]
+bg_color = Color(0.38, 0.25, 0.1, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.75, 0.2, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 8
+
+[node name="MatchIntro" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -240.0
+offset_right = 400.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 28
+text = "⚔️ BATTLE MATCHUP ⚔️"
+horizontal_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="P1Card" type="Panel" parent="Content/HBox"]
+custom_minimum_size = Vector2(280, 320)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_p1")
+
+[node name="VBox" type="VBoxContainer" parent="Content/HBox/P1Card"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Portrait" type="TextureRect" parent="Content/HBox/P1Card/VBox"]
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+size_flags_horizontal = 4
+expand_mode = 1
+stretch_mode = 6
+
+[node name="NameLabel" type="Label" parent="Content/HBox/P1Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "FINN"
+horizontal_alignment = 1
+
+[node name="HpLabel" type="Label" parent="Content/HBox/P1Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 16
+text = "❤️ 25 HP"
+horizontal_alignment = 1
+
+[node name="QuoteLabel" type="Label" parent="Content/HBox/P1Card/VBox"]
+custom_minimum_size = Vector2(240, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "\"I'm gonna kick your butt!\""
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="VsLabel" type="Label" parent="Content/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 36
+text = "VS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="P2Card" type="Panel" parent="Content/HBox"]
+custom_minimum_size = Vector2(280, 320)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_p2")
+
+[node name="VBox" type="VBoxContainer" parent="Content/HBox/P2Card"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Portrait" type="TextureRect" parent="Content/HBox/P2Card/VBox"]
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+size_flags_horizontal = 4
+expand_mode = 1
+stretch_mode = 6
+
+[node name="NameLabel" type="Label" parent="Content/HBox/P2Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "JAKE"
+horizontal_alignment = 1
+
+[node name="HpLabel" type="Label" parent="Content/HBox/P2Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 16
+text = "❤️ 25 HP"
+horizontal_alignment = 1
+
+[node name="QuoteLabel" type="Label" parent="Content/HBox/P2Card/VBox"]
+custom_minimum_size = Vector2(240, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.7, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "\"I do not play such games with cowards!\""
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="StartBtn" type="Button" parent="Content"]
+custom_minimum_size = Vector2(260, 46)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "DECIDE TURN ORDER (RPS) ➔"
+
+[node name="AudioSFX" type="AudioStreamPlayer" parent="."]
+
+[node name="AudioVO" type="AudioStreamPlayer" parent="."]

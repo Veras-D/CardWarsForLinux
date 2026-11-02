@@ -19,6 +19,9 @@ extends Control
 @onready var dialog_label: Label = $EndGameDialog/VBox/ResultLabel
 @onready var dialog_btn: Button = $EndGameDialog/VBox/MenuBtn
 
+@onready var match_intro: Control = $MatchIntro
+@onready var rps_modal: Control = $RockPaperScissors
+
 var player_hp: int = 25
 var player_max_hp: int = 25
 var player_mp: int = 2
@@ -38,8 +41,30 @@ var is_player_turn: bool = true
 func _ready() -> void:
 	turn_btn.pressed.connect(_on_turn_button_pressed)
 	dialog_btn.pressed.connect(_on_menu_button_pressed)
+	match_intro.intro_completed.connect(_on_intro_completed)
+	rps_modal.rps_completed.connect(_on_rps_completed)
+
 	setup_match()
-	start_player_turn()
+	match_intro.play_intro(
+		GameManager.player_hero_name,
+		GameManager.opponent_hero_name,
+		player_max_hp,
+		opponent_max_hp
+	)
+
+func _on_intro_completed() -> void:
+	rps_modal.start_rps(GameManager.opponent_hero_name)
+
+func _on_rps_completed(player_goes_first: bool) -> void:
+	if player_goes_first:
+		log_message("⚡ YOU GO FIRST! (Turn 1)")
+		start_player_turn()
+	else:
+		log_message("🛡️ %s GOES FIRST! (Turn 1)" % GameManager.opponent_hero_name.to_upper())
+		turn_btn.disabled = true
+		turn_btn.text = "Opponent's Turn..."
+		var timer = get_tree().create_timer(1.2)
+		timer.timeout.connect(execute_opponent_turn)
 
 func setup_match() -> void:
 	player_name_label.text = GameManager.player_hero_name
