@@ -22,16 +22,38 @@
 
 ## 1. Core Engine & Architectural Foundations
 
-### Architecture Pattern: Data-Driven ECS / Autoload Node Model
+### Architecture Pattern: Modular Independent Systems + Composition Layer
+> [!IMPORTANT]
+> **Core Engineering Directive**: We build **reusable, standalone game systems** rather than an entangled monolithic game. Every core mechanic is engineered as an **independent, portable module** under `godot/src/systems/` with its own dedicated testbed scene (`testbed_*.tscn`).
+> 
+> Any system module can be extracted directly into other independent Godot projects without modifying its code. Card Wars itself acts as a **Composition Consumer Layer** that injects Adventure Time assets and rules into these systems.
+
+#### Standalone System Packages (Independent Modules):
+1. **`CoreDeckEngine`** (`res://src/systems/deck_engine/`):
+   - Universal Card, Hand, Draw Pile, Discard, and Hand Layout Manager. Works with any card game.
+   - Includes standalone testbed: `testbed_deck.tscn`.
+2. **`BoardLaneSystem`** (`res://src/systems/board_system/`):
+   - Modular 4-Lane / N-Lane grid with affinity validation, occupancy rules, and slot animations.
+   - Includes standalone testbed: `testbed_board.tscn`.
+3. **`TimingWheelSystem`** (`res://src/systems/timing_wheel/`):
+   - Reusable timing roulette wheel minigame (Hit, Crit, Miss sectors + Quick Resolve mode).
+   - Includes standalone testbed: `testbed_wheel.tscn`.
+4. **`AbilityEngine`** (`res://src/systems/ability_engine/`):
+   - Data-driven trigger & action effect interpreter (Damage, Heal, Buff, Mana, Draw, Target Filter).
+   - Includes standalone testbed: `testbed_abilities.tscn`.
+5. **`SaveVault`** (`res://src/systems/save_vault/`):
+   - Universal JSON state serializer with schema verification, atomic file writes, and corruption fallback backups.
+   - Includes standalone testbed: `testbed_save.tscn`.
+6. **`AudioJukebox`** (`res://src/systems/audio_jukebox/`):
+   - Standalone BGM cross-fader and SFX bus pool dispatcher with volume persistence.
+   - Includes standalone testbed: `testbed_audio.tscn`.
+
+#### Card Wars Composition Layer:
 - **`Database.gd`** (`res://src/autoload/Database.gd`):
   - Ingests `db_Creatures.json`, `db_Spells.json`, `db_Buildings.json`, `db_Leaders.json`, and `strings_en.json`.
-  - Caches unified card dictionaries.
+  - Feeds Card Wars blueprints into the generic systems.
 - **`GameManager.gd`** (`res://src/autoload/GameManager.gd`):
   - Holds active match configuration (Player 1 deck, Player 2 / AI deck, landscapes, hero selections, match state).
-- **`AudioManager.gd`** (`res://src/autoload/AudioManager.gd`):
-  - Global audio dispatcher routing SFX, VO, and BGM to 4 distinct Godot audio buses.
-- **`SaveManager.gd`** (`res://src/autoload/SaveManager.gd`):
-  - Persists player inventory, unlocked cards, quest star ratings, coins/gems to `user://save_data.json`.
 
 ---
 
