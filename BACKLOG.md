@@ -38,9 +38,9 @@
 3. **`TimingWheelSystem`** (`res://src/systems/timing_wheel/`):
    - Reusable timing roulette wheel minigame (Hit, Crit, Miss sectors + Quick Resolve mode).
    - Includes standalone testbed: `testbed_wheel.tscn`.
-4. **`AbilityEngine`** (`res://src/systems/ability_engine/`):
-   - Data-driven trigger & action effect interpreter (Damage, Heal, Buff, Mana, Draw, Target Filter).
-   - Includes standalone testbed: `testbed_abilities.tscn`.
+4. **`AbilityEngine`** (`res://src/systems/ability_engine/`) [COMPLETED & VERIFIED]:
+   - Data-driven trigger & action effect interpreter (Damage, Heal, Buff, Mana, Draw, Target Filter, Reactions).
+   - Includes standalone testbed: `testbed_abilities.tscn` and automated test suite: `test_ability_engine.gd`.
 5. **`SaveVault`** (`res://src/systems/save_vault/`):
    - Universal JSON state serializer with schema verification, atomic file writes, and corruption fallback backups.
    - Includes standalone testbed: `testbed_save.tscn`.
