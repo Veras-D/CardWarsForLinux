@@ -86,8 +86,8 @@
     - `5: Candy` (Fionna & Cake expansion)
   - At match start, display an animation placing the 4 chosen landscape tiles into lane slots 0..3 before card draw.
 - **Acceptance Criteria**:
-  - [ ] Lanes render their assigned landscape theme, texture, and label.
-  - [ ] Both Player and Opponent lane affinities match their deck configuration.
+  - [x] Lanes render their assigned landscape theme, texture, and label.
+  - [x] Both Player and Opponent lane affinities match their deck configuration.
 
 ### Task 1.3: Matchup Intro Screen
 - **Unity Reference**: `CWBattleIntroController.cs`, `CWBattleSequenceController.cs`.
@@ -135,7 +135,8 @@
   - [ ] Building cards can be placed in empty building slots of any lane.
   - [ ] Passive lane bonuses (ATK/DEF) update dynamically when creatures enter/leave the lane.
 
-### Task 2.4: Landscape Affinity Enforcer
+### Task 2.4: Landscape Affinity Enforcer [COMPLETED]
+- **Status**: **Completed & Verified**
 - **Unity Reference**: `db_Creatures.json` (`Faction` field), `LandscapeType.cs`.
 - **Godot Implementation**:
   - When dragging or selecting a creature card:
@@ -143,7 +144,7 @@
     - If `card.faction != "Universal"`: valid **only** on lanes where `lane.landscape == card.faction`.
   - Visual feedback: Incompatible lanes display dimmed red border; compatible lanes display pulsating green glow.
 - **Acceptance Criteria**:
-  - [ ] Summons rejected on mismatched landscape with user notification ("Requires Corn Landscape!").
+  - [x] Summons rejected on mismatched landscape with user notification ("Requires Corn Landscape!").
 
 ### Task 2.5: The Battle Wheel (Roulette Minigame)
 - **Unity Reference**: `BattleWheelController.cs`, `db_Leaders.json`.

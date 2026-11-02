@@ -31,12 +31,12 @@ var opponent_deck: Array[String] = [
 	"Creature_HuskerKnight",
 	"Creature_ArcherDan",
 	"Creature_CornRonin",
-	"Creature_Cornball",
+	"Creature_CactusThug",
 	"Creature_HuskerKnight",
 	"Creature_ArcherDan",
 	"Spell_GrainStorm",
 	"Creature_MaizeWalker",
-	"Creature_CornRonin"
+	"Creature_Cornball"
 ]
 
 var player_hero_name: String = "Finn"

@@ -121,12 +121,21 @@ func _select_card(card_view: CardView) -> void:
 	selected_card_view.modulate = Color(1.2, 1.2, 0.8, 1.0)
 	var card_name = selected_card_view.card_data.get("name", "Card")
 	var cost = selected_card_view.card_data.get("cost", 0)
-	log_message("Selected %s (Cost: %d MP). Click an empty lane to summon." % [card_name, cost])
+	var faction = selected_card_view.card_data.get("faction", "")
+	log_message("Selected %s (%s, Cost: %d MP). Click an empty lane to summon." % [card_name, faction, cost])
+
+	# Highlight valid/invalid lanes for the selected card
+	for lane in player_lanes:
+		if not lane.has_creature:
+			var check = lane.can_accept_creature(selected_card_view.card_data)
+			lane.set_highlight(true, check.allowed)
 
 func _deselect_card() -> void:
 	if selected_card_view:
 		selected_card_view.modulate = Color.WHITE
 		selected_card_view = null
+	for lane in player_lanes:
+		lane.set_highlight(false)
 
 func _on_player_lane_clicked(lane: LaneSlot) -> void:
 	if not is_player_turn or selected_card_view == null:
@@ -136,21 +145,25 @@ func _on_player_lane_clicked(lane: LaneSlot) -> void:
 	var cost = card_data.get("cost", 1)
 
 	if player_mp < cost:
-		log_message("Not enough Magic Points! (Need %d MP)" % cost)
+		lane.flash_invalid()
+		log_message("❌ Not enough Magic Points! (Need %d MP, have %d MP)" % [cost, player_mp])
 		return
 
-	if lane.has_creature:
-		log_message("Lane %d already has a creature!" % (lane.lane_index + 1))
+	var check = lane.can_accept_creature(card_data)
+	if not check.allowed:
+		lane.flash_invalid()
+		log_message("❌ Cannot summon: " + check.reason)
 		return
 
-	# Summon creature
+	# Summon creature onto valid lane
 	player_mp -= cost
 	lane.place_creature(card_data)
-	log_message("Summoned %s into Lane %d!" % [card_data.get("name", "Creature"), lane.lane_index + 1])
+	log_message("✨ Summoned %s onto Lane %d (%s)!" % [card_data.get("name", "Creature"), lane.lane_index + 1, lane.landscape])
 
-	# Remove from hand
-	selected_card_view.queue_free()
-	selected_card_view = null
+	# Remove from hand and reset selection
+	var to_free = selected_card_view
+	_deselect_card()
+	to_free.queue_free()
 	_update_ui()
 
 func _on_floop_requested(lane: LaneSlot) -> void:
@@ -249,17 +262,31 @@ func execute_battle_phase() -> void:
 func execute_opponent_turn() -> void:
 	log_message("=== Opponent Turn (%s) ===" % GameManager.opponent_hero_name)
 
-	# AI summons creatures in empty lanes if available
-	for o_lane in opponent_lanes:
-		if not o_lane.has_creature and not opponent_draw_pile.is_empty():
-			var card_id = opponent_draw_pile.pop_back()
-			var card_data = Database.get_card(card_id)
-			if not card_data.is_empty() and card_data.type == "CREATURE":
-				o_lane.place_creature(card_data)
-				log_message("%s summoned %s into Lane %d!" % [
-					GameManager.opponent_hero_name, card_data.name, o_lane.lane_index + 1
-				])
+	# AI summons creatures in compatible empty lanes if available
+	if not opponent_draw_pile.is_empty():
+		var candidate_idx = -1
+		var candidate_card = {}
+		for i in range(opponent_draw_pile.size() - 1, -1, -1):
+			var c_id = opponent_draw_pile[i]
+			var c_data = Database.get_card(c_id)
+			if not c_data.is_empty() and c_data.type == "CREATURE":
+				for o_lane in opponent_lanes:
+					if not o_lane.has_creature and o_lane.can_accept_creature(c_data).allowed:
+						candidate_idx = i
+						candidate_card = c_data
+						break
+			if candidate_idx != -1:
 				break
+
+		if candidate_idx != -1:
+			opponent_draw_pile.remove_at(candidate_idx)
+			for o_lane in opponent_lanes:
+				if not o_lane.has_creature and o_lane.can_accept_creature(candidate_card).allowed:
+					o_lane.place_creature(candidate_card)
+					log_message("%s summoned %s into Lane %d (%s)!" % [
+						GameManager.opponent_hero_name, candidate_card.name, o_lane.lane_index + 1, o_lane.landscape
+					])
+					break
 
 	# Opponent attacks
 	for i in range(4):
