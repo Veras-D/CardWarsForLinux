@@ -1,14 +1,17 @@
 extends Control
 
 const BattleWheelModal = preload("res://src/battle/BattleWheelModal.gd")
+const LeaderPowerButton = preload("res://src/battle/LeaderPowerButton.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
 @onready var opponent_name_label: Label = $Header/OpponentInfo/NameLabel
+@onready var opponent_leader_btn: LeaderPowerButton = $Header/OpponentInfo/OpponentLeaderPower
 
 @onready var player_hp_bar: ProgressBar = $Footer/PlayerInfo/HpBar
 @onready var player_hp_label: Label = $Footer/PlayerInfo/HpLabel
 @onready var player_name_label: Label = $Footer/PlayerInfo/NameLabel
+@onready var player_leader_btn: LeaderPowerButton = $Footer/PlayerInfo/PlayerLeaderPower
 @onready var player_mp_label: Label = $Footer/MpContainer/MpLabel
 
 @onready var opponent_lanes_box: HBoxContainer = $Field/OpponentLanes
@@ -40,6 +43,11 @@ var selected_card_view: CardView = null
 var player_lanes: Array[LaneSlot] = []
 var opponent_lanes: Array[LaneSlot] = []
 var is_player_turn: bool = true
+
+var player_leader_cooldown: int = 0
+var opponent_leader_cooldown: int = 0
+var player_leader_id: String = ""
+var opponent_leader_id: String = ""
 
 func _ready() -> void:
 	turn_btn.pressed.connect(_on_turn_button_pressed)
@@ -87,6 +95,19 @@ func setup_match() -> void:
 	player_lanes.clear()
 	opponent_lanes.clear()
 
+	# Initialize Leaders & Cooldowns
+	var p_leader = Database.get_leader(GameManager.player_hero_name)
+	player_leader_id = p_leader.get("character_id", GameManager.player_hero_name)
+	player_leader_cooldown = p_leader.get("cooldown", 5)
+	player_leader_btn.setup(player_leader_id, true)
+	if not player_leader_btn.power_activated.is_connected(_on_player_leader_power_activated):
+		player_leader_btn.power_activated.connect(_on_player_leader_power_activated)
+
+	var o_leader = Database.get_leader(GameManager.opponent_hero_name)
+	opponent_leader_id = o_leader.get("character_id", GameManager.opponent_hero_name)
+	opponent_leader_cooldown = o_leader.get("cooldown", 3)
+	opponent_leader_btn.setup(opponent_leader_id, false)
+
 	for i in range(4):
 		var p_lane = player_lanes_box.get_child(i) as LaneSlot
 		p_lane.is_player = true
@@ -121,6 +142,11 @@ func start_player_turn() -> void:
 		Audio.play_sfx(load("res://assets/audio/sfx/YourTurn.wav"))
 	player_max_mp = min(10, player_max_mp + 1)
 	player_mp = player_max_mp
+
+	# Decrement Leader Cooldown
+	if player_leader_cooldown > 0:
+		player_leader_cooldown = max(0, player_leader_cooldown - 1)
+	player_leader_btn.update_cooldown(player_leader_cooldown)
 
 	for lane in player_lanes:
 		lane.reset_turn()
@@ -255,6 +281,97 @@ func _execute_floop_ability(source_lane: LaneSlot) -> void:
 			source_lane.modify_atk(2)
 			log_message("Floop: %s gained +2 Attack!" % source_lane.creature_data.get("name", "Creature"))
 
+func _on_player_leader_power_activated(char_id: String) -> void:
+	if not is_player_turn or player_leader_cooldown > 0:
+		return
+	_execute_leader_power(true, char_id)
+
+func _execute_leader_power(is_player_owner: bool, char_id: String) -> void:
+	var leader = Database.get_leader(char_id)
+	var script_name = leader.get("script_name", "")
+	var hero_name = leader.get("name", char_id)
+
+	# Audio feedback
+	if ResourceLoader.exists("res://assets/audio/sfx/LeaderPower.wav"):
+		Audio.play_sfx(load("res://assets/audio/sfx/LeaderPower.wav"))
+
+	var vo_path = "res://assets/audio/vo/%s_Power.wav" % char_id
+	if ResourceLoader.exists(vo_path):
+		var timer = get_tree().create_timer(0.12)
+		timer.timeout.connect(func(): Audio.play_sfx(load(vo_path)))
+
+	var lanes = player_lanes if is_player_owner else opponent_lanes
+	var owner_tag = "YOU" if is_player_owner else GameManager.opponent_hero_name
+
+	match script_name:
+		"GainActionPointsLeader":
+			var val = int(leader.get("val1", "2"))
+			if val <= 0:
+				val = 2
+			if is_player_owner:
+				player_mp = min(10, player_mp + val)
+				log_message("⚡ %s activated %s's Power: Gained +%d Magic Points!" % [owner_tag, hero_name, val])
+			else:
+				log_message("⚡ %s activated %s's Power: Gained +%d Action Points!" % [owner_tag, hero_name, val])
+		"ATKBonusFactionCreaturesLeader":
+			var faction = leader.get("for_faction", "Corn")
+			var val = int(leader.get("val1", "3"))
+			if val <= 0:
+				val = 3
+			var buffed_count = 0
+			for lane in lanes:
+				if lane.has_creature:
+					var c_fac = lane.creature_data.get("faction", "")
+					if c_fac.to_lower() == faction.to_lower() or faction == "":
+						lane.modify_atk(val)
+						buffed_count += 1
+			log_message("⚡ %s activated %s's Power: +%d ATK to %d friendly %s creature(s)!" % [owner_tag, hero_name, val, buffed_count, faction])
+		"HealAllCreaturesLeader":
+			var healed_count = 0
+			for lane in lanes:
+				if lane.has_creature:
+					lane.heal_to_full()
+					healed_count += 1
+			log_message("⚡ %s activated %s's Power: %d friendly creature(s) healed to full DEF!" % [owner_tag, hero_name, healed_count])
+		"ATKBonusAllCreaturesLeader":
+			var val = int(leader.get("val1", "2"))
+			if val <= 0:
+				val = 2
+			var buffed_count = 0
+			for lane in lanes:
+				if lane.has_creature:
+					lane.modify_atk(val)
+					buffed_count += 1
+			log_message("⚡ %s activated %s's Power: +%d ATK to %d friendly creature(s)!" % [owner_tag, hero_name, val, buffed_count])
+		"DrawCardsLeader":
+			var count = int(leader.get("val1", "2"))
+			if count <= 0:
+				count = 2
+			if is_player_owner:
+				for _i in range(count):
+					draw_player_card()
+				player_mp = min(10, player_mp + 1)
+				log_message("⚡ %s activated %s's Power: Drew %d card(s) and gained 1 MP!" % [owner_tag, hero_name, count])
+			else:
+				log_message("⚡ %s activated %s's Power: Drew cards!" % [owner_tag, hero_name])
+		_:
+			for lane in lanes:
+				if lane.has_creature:
+					lane.modify_atk(1)
+			log_message("⚡ %s activated %s's Leader Power!" % [owner_tag, hero_name])
+
+	# Reset Cooldown
+	var base_cooldown = leader.get("cooldown", 3)
+	if is_player_owner:
+		player_leader_cooldown = base_cooldown
+		player_leader_btn.update_cooldown(player_leader_cooldown)
+	else:
+		opponent_leader_cooldown = base_cooldown
+		opponent_leader_btn.update_cooldown(opponent_leader_cooldown)
+		opponent_leader_btn.trigger_activation_anim()
+
+	_update_ui()
+
 func _on_turn_button_pressed() -> void:
 	if not is_player_turn:
 		return
@@ -314,6 +431,15 @@ func execute_opponent_turn() -> void:
 	if ResourceLoader.exists("res://assets/audio/sfx/OpponentTurn.wav"):
 		Audio.play_sfx(load("res://assets/audio/sfx/OpponentTurn.wav"))
 	log_message("=== Opponent Turn (%s) ===" % GameManager.opponent_hero_name)
+
+	# Decrement Opponent Leader Cooldown
+	if opponent_leader_cooldown > 0:
+		opponent_leader_cooldown = max(0, opponent_leader_cooldown - 1)
+	opponent_leader_btn.update_cooldown(opponent_leader_cooldown)
+
+	# If Opponent Leader Ability is ready, trigger it during Action Phase!
+	if opponent_leader_cooldown == 0:
+		_execute_leader_power(false, opponent_leader_id)
 
 	# AI summons creatures in compatible empty lanes if available
 	if not opponent_draw_pile.is_empty():

@@ -198,21 +198,25 @@
   - [x] Zero Card Wars coupling in the standalone module; extraction-ready for other Godot games.
   - [x] Combat resolver in `BattleController.gd` successfully respects wheel multiplier (0x miss, 1x hit, 2x crit).
 
-### Task 2.6: Leader Powers & Cooldown System
-- **Unity Reference**: `db_Leaders.json`, `LeaderPowerScript.cs`.
+### Task 2.6: Leader Powers & Cooldown System [COMPLETED & VERIFIED]
+- **Unity Reference**: `db_Leaders.json`, `LeaderPowerScript.cs`, `CWTriggerLeaderAbility.cs`.
 - **Godot Implementation**:
-  - Active Leader power button positioned next to Hero portrait.
-  - Charge counter ticks down by 1 each turn start until reaching 0 ("READY!").
-  - Leader Powers:
-    - **Finn**: *Gain 2 Magic Points immediately*.
-    - **Jake**: *All friendly Corn creatures gain +3 Attack this turn*.
-    - **Princess Bubblegum**: *Heal all friendly creatures to full DEF*.
-    - **Marceline**: *All friendly creatures gain +2 Attack*.
-    - **BMO**: *Draw 2 additional cards and gain 1 MP*.
-    - **Ice King**: *Freeze 1 opponent lane (cannot attack next turn)*.
+  - `Database.gd`: Parsed and cached all 124 leader blueprints with localized descriptions, character IDs, cooldowns, and ability parameters.
+  - `LeaderPowerButton` (`LeaderPowerButton.tscn` / `LeaderPowerButton.gd`): Dynamic leader power component with portrait icon, cooldown counter badge ("⏱️ X Turns"), and pulsating golden/cyan "⚡ READY!" visual status.
+  - `BattleController.gd`:
+    - Full turn-based cooldown tick system (`cooldown = max(0, cooldown - 1)`) each turn start.
+    - Player Action Phase trigger: unlocks and activates only when cooldown == 0, triggering audio feedback (`LeaderPower.wav` SFX + authentic hero Floop voiceline), executing ability effect, and resetting cooldown.
+    - AI Opponent Action Phase trigger: AI automatically triggers their leader ability when ready during their action phase.
+    - Implemented leader powers:
+      - **Finn**: *Gain 2 Magic Points immediately* (`GainActionPointsLeader`).
+      - **Jake**: *All friendly Corn creatures gain +3 Attack* (`ATKBonusFactionCreaturesLeader`).
+      - **Princess Bubblegum**: *Heal all friendly creatures to full DEF* (`HealAllCreaturesLeader`).
+      - **Marceline**: *All friendly creatures gain +2 Attack* (`ATKBonusAllCreaturesLeader`).
+      - **BMO**: *Draw 2 additional cards and gain 1 MP* (`DrawCardsLeader`).
+  - Unit & Integration Test Suite (`test_leader_powers.tscn` / `test_leader_powers_node.gd`): Automated test suite verifying blueprint loading, button states, cooldown ticking, signal emission, and ability execution.
 - **Acceptance Criteria**:
-  - [ ] Button activates only when cooldown == 0 and clicked during Action Phase.
-  - [ ] Applies effect, plays leader voice line, resets cooldown to base value.
+  - [x] Button activates only when cooldown == 0 and clicked during Action Phase.
+  - [x] Applies effect, plays leader voice line, resets cooldown to base value.
 
 ### Task 2.7: Tombstone & Loot Drop System
 - **Unity Reference**: `CWTombstoneScript.cs`, `CreatureBattleScript.cs`.

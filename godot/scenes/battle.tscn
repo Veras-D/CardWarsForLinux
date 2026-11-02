@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/components/MatchIntro.tscn" id="3_intro"]
 [ext_resource type="PackedScene" path="res://scenes/components/RockPaperScissors.tscn" id="4_rps"]
 [ext_resource type="PackedScene" path="res://scenes/components/BattleWheelModal.tscn" id="5_wheel"]
+[ext_resource type="PackedScene" path="res://scenes/components/LeaderPowerButton.tscn" id="6_leader"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.0823529, 0.101961, 0.14902, 1)
@@ -77,6 +78,10 @@ offset_right = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 16
+
+[node name="OpponentLeaderPower" parent="Header/OpponentInfo" instance=ExtResource("6_leader")]
+layout_mode = 2
+size_flags_vertical = 4
 
 [node name="NameLabel" type="Label" parent="Header/OpponentInfo"]
 custom_minimum_size = Vector2(100, 0)
@@ -203,9 +208,13 @@ anchor_right = 1.0
 offset_left = 20.0
 offset_top = 4.0
 offset_right = -20.0
-offset_bottom = 28.0
+offset_bottom = 38.0
 grow_horizontal = 2
 theme_override_constants/separation = 16
+
+[node name="PlayerLeaderPower" parent="Footer/PlayerInfo" instance=ExtResource("6_leader")]
+layout_mode = 2
+size_flags_vertical = 4
 
 [node name="NameLabel" type="Label" parent="Footer/PlayerInfo"]
 custom_minimum_size = Vector2(100, 0)
@@ -234,7 +243,7 @@ anchor_right = 1.0
 offset_left = -250.0
 offset_top = 4.0
 offset_right = -20.0
-offset_bottom = 28.0
+offset_bottom = 38.0
 grow_horizontal = 0
 alignment = 2
 

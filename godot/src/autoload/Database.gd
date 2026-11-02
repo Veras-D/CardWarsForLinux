@@ -3,6 +3,7 @@ extends Node
 var localized_strings: Dictionary = {}
 var texture_map: Dictionary = {}
 var cards_db: Dictionary = {}
+var leaders_db: Dictionary = {}
 var creatures_list: Array = []
 var spells_list: Array = []
 var buildings_list: Array = []
@@ -11,8 +12,8 @@ func _ready() -> void:
 	load_localizations()
 	load_textures()
 	load_blueprints()
-	print("[Database] Loaded %d total cards (%d creatures, %d spells, %d buildings)" % [
-		cards_db.size(), creatures_list.size(), spells_list.size(), buildings_list.size()
+	print("[Database] Loaded %d total cards (%d creatures, %d spells, %d buildings, %d leaders)" % [
+		cards_db.size(), creatures_list.size(), spells_list.size(), buildings_list.size(), leaders_db.size()
 	])
 
 func load_localizations() -> void:
@@ -35,6 +36,37 @@ func load_blueprints() -> void:
 	_load_creatures()
 	_load_spells()
 	_load_buildings()
+	_load_leaders()
+
+func _load_leaders() -> void:
+	var path = "res://data/db_Leaders.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK:
+		return
+	for item in json.data:
+		var val1 = str(item.get("Val1", ""))
+		var val2 = str(item.get("Val2", ""))
+		var char_id = item.get("CharacterID", "")
+		var id = item.get("ID", "")
+		var leader = {
+			"id": id,
+			"character_id": char_id,
+			"name": localize(item.get("Name", "")),
+			"desc": localize(item.get("Desc", ""), val1, val2),
+			"cooldown": int(item.get("Cooldown", "0")),
+			"base_hp": int(item.get("BaseHP", "25")),
+			"script_name": item.get("ScriptName", ""),
+			"val1": val1,
+			"val2": val2,
+			"for_faction": item.get("forFaction", ""),
+			"sprite_name": item.get("SpriteName", "")
+		}
+		leaders_db[id] = leader
+		if char_id != "" and not leaders_db.has(char_id):
+			leaders_db[char_id] = leader
 
 func _load_creatures() -> void:
 	var path = "res://data/db_Creatures.json"
@@ -117,6 +149,9 @@ func localize(key: String, val1: String = "", val2: String = "") -> String:
 
 func get_card(id: String) -> Dictionary:
 	return cards_db.get(id, {})
+
+func get_leader(character_or_leader_id: String) -> Dictionary:
+	return leaders_db.get(character_or_leader_id, {})
 
 func get_card_texture(texture_path: String) -> Texture2D:
 	if ResourceLoader.exists(texture_path):

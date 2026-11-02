@@ -192,6 +192,12 @@ func modify_def(delta: int) -> void:
 	current_def = max(0, current_def + delta)
 	_update_card_display()
 
+func heal_to_full() -> void:
+	if has_creature:
+		var max_def = creature_data.get("def", current_def)
+		current_def = max_def
+		_update_card_display()
+
 func set_flooped(state: bool) -> void:
 	is_flooped = state
 	var card_node = _get_card_node()
