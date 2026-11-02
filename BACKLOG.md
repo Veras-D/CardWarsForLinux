@@ -29,9 +29,9 @@
 > Any system module can be extracted directly into other independent Godot projects without modifying its code. Card Wars itself acts as a **Composition Consumer Layer** that injects Adventure Time assets and rules into these systems.
 
 #### Standalone System Packages (Independent Modules):
-1. **`CoreDeckEngine`** (`res://src/systems/deck_engine/`):
-   - Universal Card, Hand, Draw Pile, Discard, and Hand Layout Manager. Works with any card game.
-   - Includes standalone testbed: `testbed_deck.tscn`.
+1. **`CoreDeckEngine`** (`res://src/systems/deck_engine/`) [COMPLETED & VERIFIED]:
+   - Universal CardData model, Deck (Draw/Discard/Banish piles with Fisher-Yates shuffle and discard recycling), and HandManager with parabolic arc and fan layout.
+   - Includes standalone testbed: `testbed_deck.tscn` and automated test suite: `test_deck_engine.gd`.
 2. **`BoardLaneSystem`** (`res://src/systems/board_system/`):
    - Modular 4-Lane / N-Lane grid with affinity validation, occupancy rules, and slot animations.
    - Includes standalone testbed: `testbed_board.tscn`.
