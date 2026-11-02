@@ -1,5 +1,7 @@
 extends Control
 
+const BattleWheelModal = preload("res://src/battle/BattleWheelModal.gd")
+
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
 @onready var opponent_name_label: Label = $Header/OpponentInfo/NameLabel
@@ -21,6 +23,7 @@ extends Control
 
 @onready var match_intro: Control = $MatchIntro
 @onready var rps_modal: Control = $RockPaperScissors
+@onready var wheel_modal: BattleWheelModal = $BattleWheelModal
 
 var player_hp: int = 25
 var player_max_hp: int = 25
@@ -271,22 +274,31 @@ func execute_battle_phase() -> void:
 
 		var atk = p_lane.current_atk
 		var o_lane = opponent_lanes[i]
+		var target_name = o_lane.creature_data.name if o_lane.has_creature else GameManager.opponent_hero_name
 
-		if ResourceLoader.exists("res://assets/audio/sfx/Ring_Hit.wav"):
-			Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Ring_Hit.wav"), 0.0, 0.1)
+		# Trigger Battle Wheel minigame
+		wheel_modal.start_attack_clash(
+			p_lane.creature_data.name,
+			target_name,
+			atk,
+			true
+		)
+		var clash_res = await wheel_modal.clash_resolved
+		var final_damage: int = clash_res.final_damage
+
+		if clash_res.id == "crit":
+			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [p_lane.creature_data.name, final_damage])
+		elif clash_res.id == "miss":
+			log_message("❌ MISSED! %s's attack missed completely!" % p_lane.creature_data.name)
+		else:
+			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [p_lane.creature_data.name, final_damage, target_name])
 
 		if o_lane.has_creature:
-			log_message("%s attacks opponent's %s for %d damage!" % [
-				p_lane.creature_data.name, o_lane.creature_data.name, atk
-			])
-			var destroyed = o_lane.apply_damage(atk)
+			var destroyed = o_lane.apply_damage(final_damage)
 			if destroyed:
-				log_message("Opponent's creature was destroyed!")
+				log_message("Opponent's %s was destroyed!" % o_lane.creature_data.name)
 		else:
-			log_message("%s attacks %s directly for %d damage!" % [
-				p_lane.creature_data.name, GameManager.opponent_hero_name, atk
-			])
-			opponent_hp = max(0, opponent_hp - atk)
+			opponent_hp = max(0, opponent_hp - final_damage)
 
 		_update_ui()
 		if opponent_hp <= 0:
@@ -337,19 +349,34 @@ func execute_opponent_turn() -> void:
 
 		var atk = o_lane.current_atk
 		var p_lane = player_lanes[i]
+		var target_name = p_lane.creature_data.name if p_lane.has_creature else GameManager.player_hero_name
+
+		# Opponent wheel clash (quick-resolve mode)
+		wheel_modal.start_attack_clash(
+			o_lane.creature_data.name,
+			target_name,
+			atk,
+			false, # is_player
+			0.80,
+			0.07,
+			true # quick resolve for AI
+		)
+		var clash_res = await wheel_modal.clash_resolved
+		var final_damage: int = clash_res.final_damage
+
+		if clash_res.id == "crit":
+			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [o_lane.creature_data.name, final_damage])
+		elif clash_res.id == "miss":
+			log_message("❌ MISSED! %s's attack missed!" % o_lane.creature_data.name)
+		else:
+			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [o_lane.creature_data.name, final_damage, target_name])
 
 		if p_lane.has_creature:
-			log_message("%s attacks your %s for %d damage!" % [
-				o_lane.creature_data.name, p_lane.creature_data.name, atk
-			])
-			var destroyed = p_lane.apply_damage(atk)
+			var destroyed = p_lane.apply_damage(final_damage)
 			if destroyed:
-				log_message("Your creature was destroyed!")
+				log_message("Your %s was destroyed!" % p_lane.creature_data.name)
 		else:
-			log_message("%s attacks you directly for %d damage!" % [
-				o_lane.creature_data.name, atk
-			])
-			player_hp = max(0, player_hp - atk)
+			player_hp = max(0, player_hp - final_damage)
 
 		_update_ui()
 		if player_hp <= 0:

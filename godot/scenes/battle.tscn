@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://c34e8kfy7m2w8" path="res://scenes/components/LaneSlot.tscn" id="2_lane"]
 [ext_resource type="PackedScene" path="res://scenes/components/MatchIntro.tscn" id="3_intro"]
 [ext_resource type="PackedScene" path="res://scenes/components/RockPaperScissors.tscn" id="4_rps"]
+[ext_resource type="PackedScene" path="res://scenes/components/BattleWheelModal.tscn" id="5_wheel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.0823529, 0.101961, 0.14902, 1)
@@ -305,6 +306,10 @@ theme_override_font_sizes/font_size = 14
 text = "Return to Menu"
 
 [node name="RockPaperScissors" parent="." instance=ExtResource("4_rps")]
+visible = false
+layout_mode = 1
+
+[node name="BattleWheelModal" parent="." instance=ExtResource("5_wheel")]
 visible = false
 layout_mode = 1
 

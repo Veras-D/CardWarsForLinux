@@ -182,6 +182,10 @@
     - `WheelSpinner.gd`: Procedural custom vector drawing (`_draw()`), state machine (`IDLE`, `SPINNING`, `STOPPING`, `RESOLVED`), needle rotation, smooth deceleration curve, and input handling.
     - `WheelSpinner.tscn`: Reusable wheel visual node.
     - `testbed_wheel.tscn`: Standalone interactive testbed with live presets, customizable sliders, real-time log, and 1,000-spin Monte Carlo simulation.
+  - Card Wars Composition Component:
+    - `BattleWheelModal.gd` & `BattleWheelModal.tscn`: Integrates `WheelSpinner` into `scenes/battle.tscn`.
+    - Wired into `BattleController.gd`: Clashes dynamically trigger during player attacks (interactive Space/Click timing stop) and AI attacks (quick-resolve mode).
+    - Audio integration: plays `Ring_Drop.wav`, `Ring_Crit.wav`, `Ring_Hit.wav`, and `Ring_Miss.wav`.
   - Slices configured per leader from `db_Leaders.json`:
     - `Ring_P1_CritAreaRange` (7% of wheel $\rightarrow$ **Critical Hit: 2x ATK Damage**).
     - `Ring_P1_HitAreaRange` (80% of wheel $\rightarrow$ **Normal Hit: 1.0x ATK Damage**).
@@ -191,7 +195,8 @@
   - [x] Wheel appears during creature clash when enabled.
   - [x] Accurate hit detection based on needle angle; correct damage multipliers applied.
   - [x] Standalone testbed scene (`testbed_wheel.tscn`) runs and tests the system in complete isolation.
-  - [x] Zero Card Wars coupling; extraction-ready for other Godot games.
+  - [x] Zero Card Wars coupling in the standalone module; extraction-ready for other Godot games.
+  - [x] Combat resolver in `BattleController.gd` successfully respects wheel multiplier (0x miss, 1x hit, 2x crit).
 
 ### Task 2.6: Leader Powers & Cooldown System
 - **Unity Reference**: `db_Leaders.json`, `LeaderPowerScript.cs`.
