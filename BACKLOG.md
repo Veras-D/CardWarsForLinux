@@ -41,9 +41,9 @@
 4. **`AbilityEngine`** (`res://src/systems/ability_engine/`) [COMPLETED & VERIFIED]:
    - Data-driven trigger & action effect interpreter (Damage, Heal, Buff, Mana, Draw, Target Filter, Reactions).
    - Includes standalone testbed: `testbed_abilities.tscn` and automated test suite: `test_ability_engine.gd`.
-5. **`SaveVault`** (`res://src/systems/save_vault/`):
-   - Universal JSON state serializer with schema verification, atomic file writes, and corruption fallback backups.
-   - Includes standalone testbed: `testbed_save.tscn`.
+5. **`SaveVault`** (`res://src/systems/save_vault/`) [COMPLETED & VERIFIED]:
+   - Universal JSON state serializer with schema verification, atomic file writes (.tmp swap), SHA-256 checksums, and corruption fallback backups (.bak).
+   - Includes standalone testbed: `testbed_save.tscn` and automated test suite: `test_save_vault.gd`.
 6. **`AudioJukebox`** (`res://src/systems/audio_jukebox/`) [COMPLETED & VERIFIED]:
    - Standalone BGM dual-player cross-fader and zero-allocation SFX bus pool dispatcher with volume control and procedural sound synthesis.
    - Includes standalone testbed: `testbed_audio.tscn` and automated test suite: `test_audio_manager.gd`.
