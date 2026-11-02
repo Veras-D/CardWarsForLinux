@@ -581,6 +581,32 @@ Implement the core behavior classes:
   - [ ] Sand Lands and later campaign areas display their respective environmental backdrops.
   - [ ] Quest 36 has proper objectives; Volcano and damage FX animate visibly; models render without polygon clipping.
 
+### Task 10.13: De-Mobileization & Anti-Penny-Pinching Pass (Laxbby Fork & Obsidian Edition)
+- **Source**: [`Laxbby/CardWars`](https://github.com/Laxbby/CardWars) fork & Community *Obsidian Edition*.
+- **Motivation**:
+  - The original mobile title was laden with aggressive free-to-play gating: artificial stamina wait timers, microscopic 50-card inventory limits, heavily biased 50,000:1 daily spin wheels, and stingy quest card drop rates.
+  - Laxbby's fork eliminated these pain points to deliver a genuine premium PC game experience without feeling cheaty.
+- **Godot Implementation**:
+  - **Instant / Unlimited Stamina**:
+    - Remove the 15-minute stamina restoration wait timer (`Stamina_Restoration_Rate = 0` / instantaneous refill) in `db_Parameters.json`. Players can play unlimited matches consecutively.
+  - **1,000 Card Starter Inventory & Free Expansions**:
+    - Set default `New_Player_Max_Inventory` to `1000` (up from 50) and remove coin/gem costs for further inventory upgrades in `db_Cost.json` and `db_CardBox.json`.
+  - **Equalized Daily Gift Wheel & Free Re-Spins**:
+    - Overhaul `db_DailyGift.json`:
+      - Remove redundant stamina heart prizes; replace with gem rewards (10, 50, 69, 100 gems).
+      - Set `RetryGemCost` to `0` (free re-spins).
+      - Equalize probability weights across all wheel segments (`Rarity = 1`).
+  - **Boosted Quest Loot & Card Drop Rates**:
+    - Scale drop probability formula by ~25% in `BattleController.gd` (matching Laxbby's `Random.Range(0f, 0.8f)` threshold) for creature cards, coins, and craft materials.
+  - **Gameplay Preset Toggle in Settings**:
+    - Add setting toggle: `PC Modern (Generous / No Stamina Timer)` vs `Retro Mobile 2014 (Classic Stamina & Micro-Capacities)` for purists.
+- **Acceptance Criteria**:
+  - [ ] Stamina refills immediately after matches; players never get locked out by energy timers.
+  - [ ] New profiles start with 1,000 inventory slots.
+  - [ ] Daily gift wheel awards gems without stamina filler and allows free re-spins with equalized odds.
+  - [ ] Quest loot and card drops occur noticeably more frequently.
+  - [ ] Toggle in Settings allows switching between Modern PC and Classic rulesets.
+
 ---
 
 ## 12. Milestone Roadmap & Implementation Order
