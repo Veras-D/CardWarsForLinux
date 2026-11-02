@@ -417,6 +417,105 @@ Implement the core behavior classes:
 
 ---
 
+## Epic 10: Community Bug Fixes, Upstream PR Integration & Balance Patches
+
+> [!NOTE]
+> Synthesized from community discussions on `r/CardWars`, the **Card Wars Revived** community, and PRs/issues on the upstream repository (`shishkabob27/CardWars`).
+
+### Task 10.1: Fionna & Cake Level 1 & Level 24 Black Screen / Freeze Fix
+- **Reported in**: Upstream Issue #28, #37, #45; Reddit post `1wwhzpd` (*"Black screen stuck on level 24"*).
+- **Issue**:
+  - In the original PC port, transitioning out of cutscenes or loading the board on Fionna & Cake Quests 1 and 24 triggers an unhandled null scene exception, stranding the player on an infinite black screen.
+- **Godot Implementation**:
+  - Implement cutscene state machine (`CutscenePlayer.gd`) with failsafe transition timers (if animation event doesn't trigger within 5 seconds, forcefully advance to the board).
+  - Explicitly validate scene loading before hiding loading masks.
+- **Acceptance Criteria**:
+  - [ ] Fionna & Cake Quests 1 and 24 load seamlessly into gameplay without black screen locks or input freezes.
+
+### Task 10.2: Upstream PR #16 & #42 Spell Balance Integration (Witch Way & Brief Power)
+- **Reported in**: Upstream PR #16, Issue #42; Reddit community tournament decks discussion.
+- **Issue**:
+  - `Witch Way` (1 Magic Point: gain action points for each landscape type) + `Brief Power` (originally 1 MP: reduce cost of all cards by 1) enabled degenerate Turn 1 One-Turn-Kill (OTK) rainbow loops.
+  - Upstream PR #16 partially adjusted spell costs:
+    - `BriefPower`: cost increased from 1 to 3.
+    - `LonelyHearts`: cost increased from 1 to 3 (preventing cheap instant kill of single creatures).
+    - `Volcano`: cost reduced from 4 to 3 (making building removal viable).
+    - `ClairvoyantDaggerStorm`: cost reduced from 3 to 2 (making double damage accessible).
+    - `UnemptyCoffin`: cost increased from 2 to 3.
+- **Godot Implementation**:
+  - Integrate these balanced costs into `godot/data/db_Spells.json`.
+  - Nerf `Witch Way` cost from 1 to 3 (or cap max generated Magic Points) to resolve Issue #42 and curb Turn 1 OTK abuse.
+  - Implement a "Balance Mode" toggle in Settings: `Community Competitive` vs `Original Mobile 2014`.
+- **Acceptance Criteria**:
+  - [ ] Spells reflect updated costs in `godot/data/db_Spells.json`.
+  - [ ] Infinite Turn 1 mana ramp loops with Witch Way + Brief Power are prevented in competitive mode.
+
+### Task 10.3: Upstream PR #10, #11 & #17 Creature Stats & Localization Fixes
+- **Reported in**: Upstream PR #10, #11 (`Full balance db_Creatures.json` / `CW_Balancechanges.pdf`), PR #17 (`Update EN_Descriptions.bytes`).
+- **Issue**:
+  - Severe stat inflation and unbalanced Floop costs on mid-tier creatures ruined deck variety in the late game.
+  - Description typos and missing ability text on Corn Dog, Fluffantry, Mother Fluff Bucket, Nice Bird, and Snuggle Tree.
+- **Godot Implementation**:
+  - Incorporate the creature stat balance curve from `CW_Balancechanges.pdf` into `godot/data/db_Creatures.json`.
+  - Apply the corrected card descriptions from PR #17 into `godot/data/strings_en.json`.
+- **Acceptance Criteria**:
+  - [ ] Creature stats match the balanced specification without breaking gold card tiers.
+  - [ ] Description cards for Corn Dog, Fluffantry, Mother Fluff Bucket, Nice Bird, and Snuggle Tree are fully readable and accurate.
+
+### Task 10.4: Safe Save Profile Manager & Corruption Recovery (No Bundled Glitched Saves)
+- **Reported in**: Reddit posts `1riwdhj`, `1w8mlhk`, `1wrp9by`, Upstream Issue #27, #43.
+- **Issue**:
+  - Upstream repository releases shipped with hardcoded / bundled debug saves ("100 gem glitched save"), which caused new players to load broken states, losing all hearts and cards when trying to modify or wipe their progress.
+- **Godot Implementation**:
+  - Implement `SaveManager.gd` with clean first-run profile generation:
+    - Never bundle a dirty save with game binaries.
+    - Automatic backup saving to `user://save_backup.json` on each mission complete.
+    - Schema validation on boot: if save is invalid, repair missing keys or prompt user to restore from backup rather than wiping to "0 hearts".
+- **Acceptance Criteria**:
+  - [ ] New installation boots into a clean starter profile with standard tutorial progress.
+  - [ ] Modifying or corrupting `user://save_data.json` triggers automatic restoration from backup.
+
+### Task 10.5: Quick Battle / Wheel Skip Option for Competitive & Local 2P
+- **Reported in**: Reddit post `1rd5w97` (*"i really hope you get rid of the wheel mechanic in PVP its what people mainly dislike"*).
+- **Issue**:
+  - The spinning battle wheel is considered the most tedious aspect of matches, particularly in competitive play and grinding quests.
+- **Godot Implementation**:
+  - Add "Combat Resolution Mode" in Settings:
+    - `Full Battle Wheel` (classic spinner with manual tap / stop).
+    - `Quick Resolve` (deterministic hit/miss based on card base accuracy stats without spinning animations).
+    - `Auto-Spin 2x / 3x Speed` (automated spinner at fast speed).
+- **Acceptance Criteria**:
+  - [ ] When Quick Resolve is enabled, lane combats resolve immediately with calculated damage numbers.
+
+### Task 10.6: Fix Algebraic Chest Loot Tables & Upstream FX Audio
+- **Reported in**: Upstream Issue #24 (*"cant get rares in algebraic chest"*), PR #12 (*"AudioSource conversion on FX"*), Issue #14 (*"No music track for Hunson Abadeer"*).
+- **Issue**:
+  - `db_GachaWeights.json` misconfigured drops, preventing rare/algebraic cards from dropping in Algebraic chests.
+  - Unity FX prefabs had audio source detachments causing silent spell effects.
+  - Hunson Abadeer quests had missing BGM references resulting in silence during battle.
+- **Godot Implementation**:
+  - Fix probability tables in `godot/data/db_GachaWeights.json` ensuring 100% accurate drop rates for 3-star, 4-star, and 5-star cards in Algebraic and Premium chests.
+  - Ensure all spell and attack FX trigger through Godot's `AudioManager` sound buses.
+  - Map Hunson Abadeer quest IDs to Nightosphere combat music stems.
+- **Acceptance Criteria**:
+  - [ ] Algebraic chest consistently drops expected rare and algebraic rarity cards.
+  - [ ] All spell effects have accompanying audio.
+  - [ ] Hunson Abadeer quests play proper BGM track.
+
+### Task 10.7: Promotional Code Redemption System & "Chill Camera" Mode
+- **Reported in**: Reddit post `1rsentt` (*"How to get Holiday Lumpy Space Princess with redeem code"*), Upstream Issue #31 (*"Idea: Chill Camera mode"*), Issue #23 (*"Holiday chests"*).
+- **Issue**:
+  - Players wanting holiday variants (Holiday LSP, Christmas Magic Hot Dog Pie) had no way to claim them since mobile redeem servers are decommissioned.
+  - Players requested a calm 2D / isometric board view for desktop.
+- **Godot Implementation**:
+  - Add "Redeem Code" modal in Main Menu supporting legacy codes (`LUMPS`, `AVALANCHE`, `BRIEFPOWER`, `PIGS`, etc.) to unlock promo cards directly in inventory.
+  - Add "Chill Camera" view mode (orthographic/top-down 2D view with static lighting) toggleable during battle.
+- **Acceptance Criteria**:
+  - [ ] Entering `LUMPS` unlocks Holiday Lumpy Space Princess card into inventory.
+  - [ ] Chill Camera toggle flattens the board view for a clean desktop presentation.
+
+---
+
 ## 12. Milestone Roadmap & Implementation Order
 
 ```mermaid
@@ -425,4 +524,5 @@ flowchart TD
     M2 --> M3["Milestone 3: Deck Builder & Progression<br>(Deck Editor, Quality Fusion, Inventory)"]
     M3 --> M4["Milestone 4: Full Campaign & Modes<br>(346 Quests, Fionna & Cake, Daily Dungeons, El Fisto)"]
     M4 --> M5["Milestone 5: Economy, Polish & Releases<br>(Chests, Localization, Settings, Multiplatform AppImage)"]
+    M5 --> M6["Milestone 6: Community Patches & Balance<br>(Fionna & Cake Fix, Spell Rebalance, Promo Codes, Chill Mode)"]
 ```
