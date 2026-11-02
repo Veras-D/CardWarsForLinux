@@ -44,9 +44,9 @@
 5. **`SaveVault`** (`res://src/systems/save_vault/`):
    - Universal JSON state serializer with schema verification, atomic file writes, and corruption fallback backups.
    - Includes standalone testbed: `testbed_save.tscn`.
-6. **`AudioJukebox`** (`res://src/systems/audio_jukebox/`):
-   - Standalone BGM cross-fader and SFX bus pool dispatcher with volume persistence.
-   - Includes standalone testbed: `testbed_audio.tscn`.
+6. **`AudioJukebox`** (`res://src/systems/audio_jukebox/`) [COMPLETED & VERIFIED]:
+   - Standalone BGM dual-player cross-fader and zero-allocation SFX bus pool dispatcher with volume control and procedural sound synthesis.
+   - Includes standalone testbed: `testbed_audio.tscn` and automated test suite: `test_audio_manager.gd`.
 
 #### Card Wars Composition Layer:
 - **`Database.gd`** (`res://src/autoload/Database.gd`):

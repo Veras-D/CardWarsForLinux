@@ -101,12 +101,21 @@ func setup_match() -> void:
 
 	_update_ui()
 
+	# Start Battle BGM using Audio Jukebox
+	var bgm_path = "res://assets/audio/bgm/%s.wav" % GameManager.player_hero_name
+	if ResourceLoader.exists(bgm_path):
+		Audio.play_bgm(load(bgm_path), 1.5)
+	elif ResourceLoader.exists("res://assets/audio/bgm/MainMenu.wav"):
+		Audio.play_bgm(load("res://assets/audio/bgm/MainMenu.wav"), 1.5)
+
 	# Initial 4-card hand
 	for _i in range(4):
 		draw_player_card()
 
 func start_player_turn() -> void:
 	is_player_turn = true
+	if ResourceLoader.exists("res://assets/audio/sfx/YourTurn.wav"):
+		Audio.play_sfx(load("res://assets/audio/sfx/YourTurn.wav"))
 	player_max_mp = min(10, player_max_mp + 1)
 	player_mp = player_max_mp
 
@@ -142,6 +151,8 @@ func _on_hand_card_clicked(card_view: CardView) -> void:
 
 func _select_card(card_view: CardView) -> void:
 	_deselect_card()
+	if ResourceLoader.exists("res://assets/audio/sfx/Click.wav"):
+		Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Click.wav"), -6.0, 0.08)
 	selected_card_view = card_view
 	selected_card_view.modulate = Color(1.2, 1.2, 0.8, 1.0)
 	var card_name = selected_card_view.card_data.get("name", "Card")
@@ -261,6 +272,9 @@ func execute_battle_phase() -> void:
 		var atk = p_lane.current_atk
 		var o_lane = opponent_lanes[i]
 
+		if ResourceLoader.exists("res://assets/audio/sfx/Ring_Hit.wav"):
+			Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Ring_Hit.wav"), 0.0, 0.1)
+
 		if o_lane.has_creature:
 			log_message("%s attacks opponent's %s for %d damage!" % [
 				p_lane.creature_data.name, o_lane.creature_data.name, atk
@@ -285,6 +299,8 @@ func execute_battle_phase() -> void:
 	execute_opponent_turn()
 
 func execute_opponent_turn() -> void:
+	if ResourceLoader.exists("res://assets/audio/sfx/OpponentTurn.wav"):
+		Audio.play_sfx(load("res://assets/audio/sfx/OpponentTurn.wav"))
 	log_message("=== Opponent Turn (%s) ===" % GameManager.opponent_hero_name)
 
 	# AI summons creatures in compatible empty lanes if available

@@ -16,6 +16,7 @@ config/icon="res://assets/textures/icon.png"
 
 Database="*res://src/autoload/Database.gd"
 GameManager="*res://src/autoload/GameManager.gd"
+Audio="*res://src/systems/audio_jukebox/AudioManager.gd"
 
 [display]
 
