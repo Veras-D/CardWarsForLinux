@@ -1,0 +1,2737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Wars: Godot 4 PC Remake - Master Engineering Backlog</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --surface: #111827;
+      --surface-hover: #172033;
+      --card: #141d2e;
+      --card-hover: #1c283f;
+      --border: #1f293d;
+      --border-focus: #38bdf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --cyan: #38bdf8;
+      --gold: #facc15;
+      --green: #34d399;
+      --purple: #c084fc;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(180deg, #131c2e 0%, #0d1422 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 36px 0 28px;
+      margin-bottom: 24px;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      font-size: 2.4rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+    }
+
+    .tagline {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+
+    /* Progress Widget */
+    .progress-widget {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      min-width: 280px;
+    }
+
+    .progress-widget-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .progress-widget-top .pct {
+      color: var(--green);
+    }
+
+    .progress-track {
+      background: #090d16;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #38bdf8 100%);
+      width: 30.4%;
+      border-radius: 4px;
+    }
+
+    /* Sticky Controls Bar (No Horizontal Overflow!) */
+    .toolbar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 16px;
+      z-index: 50;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .toolbar-left {
+      display: flex;
+      gap: 10px;
+      flex: 1;
+      min-width: 280px;
+      flex-wrap: wrap;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px 8px 34px;
+      color: #fff;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .search-wrap .icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .dropdown-wrap select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .dropdown-wrap select:focus {
+      border-color: var(--border-focus);
+    }
+
+    .toolbar-right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--card-hover);
+      color: #fff;
+    }
+
+    .btn.active {
+      background: var(--cyan);
+      color: #090d16;
+      border-color: var(--cyan);
+      font-weight: 700;
+    }
+
+    /* Epic Section Containers */
+    .epic-block {
+      margin-bottom: 32px;
+    }
+
+    .epic-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+      margin-bottom: 12px;
+    }
+
+    .epic-header:hover {
+      background: var(--surface-hover);
+    }
+
+    .epic-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .epic-icon {
+      font-size: 1.4rem;
+    }
+
+    .epic-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .epic-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .epic-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .epic-count-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #090d16;
+      border: 1px solid var(--border);
+      color: var(--cyan);
+    }
+
+    .epic-chevron {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      transition: transform 0.2s;
+    }
+
+    .epic-block.collapsed .epic-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .epic-tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .epic-block.collapsed .epic-tasks-list {
+      display: none;
+    }
+
+    /* Task Card Design */
+    .task-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .task-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: var(--card-hover);
+    }
+
+    .task-card.completed {
+      border-left: 4px solid var(--green);
+    }
+
+    .task-card.planned {
+      border-left: 4px solid var(--text-dim);
+    }
+
+    .task-header {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      gap: 14px;
+    }
+
+    .task-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .task-id {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #090d16;
+      border: 1px solid var(--border);
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+
+    .task-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .task-snippet {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-left: 6px;
+    }
+
+    .task-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .status-badge.completed {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .status-badge.planned {
+      background: rgba(100, 116, 139, 0.15);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .task-chevron {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+
+    .task-card.open .task-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Task Expanded Body */
+    .task-body {
+      display: none;
+      padding: 0 18px 18px;
+      border-top: 1px solid rgba(31, 41, 61, 0.6);
+      background: #0f1624;
+      font-size: 0.9rem;
+    }
+
+    .task-card.open .task-body {
+      display: block;
+    }
+
+    .task-body-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .body-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .box-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+
+    .ref-line {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .ref-line code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: #fff;
+      background: #090d16;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .criteria-list {
+      list-style: none;
+    }
+
+    .criteria-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .icon-done {
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .icon-pending {
+      color: var(--text-dim);
+    }
+
+    /* Parameters & Roadmap Section */
+    .static-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+
+    .static-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--card);
+      padding: 10px 14px;
+      color: #fff;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    tr:hover td {
+      background: var(--card-hover);
+      color: #fff;
+    }
+
+    td code {
+      font-family: var(--mono);
+      color: var(--cyan);
+      font-size: 0.8rem;
+    }
+
+    td.val {
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* Milestone Cards */
+    .milestone-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .milestone-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .milestone-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .milestone-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .milestone-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="brand-group">
+          <span class="brand-icon">⚔️</span>
+          <div>
+            <h1>Card Wars: Master Engineering Backlog</h1>
+            <div class="tagline">Godot 4 PC Remake • Standalone Game Systems &amp; Composition Architecture</div>
+          </div>
+        </div>
+
+        <div class="progress-widget">
+          <div class="progress-widget-top">
+            <span>Overall Progress</span>
+            <span class="pct">14 / 46 Tasks Done (30.4%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Unified Sticky Controls (No Horizontal Overflow Bar) -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-wrap">
+          <span class="icon">🔍</span>
+          <input type="text" id="task-search" placeholder="Filter tasks, scripts, or acceptance criteria...">
+        </div>
+
+        <div class="dropdown-wrap">
+          <select id="epic-filter">
+            <option value="all">All Epics &amp; Systems (46 Tasks)</option>
+            <option value="systems">📦 Systems Library (6/6)</option>
+            <option value="epic1">⚔️ Epic 1: Match Flow (3/3)</option>
+            <option value="epic2">🛡️ Epic 2: Combat Engine (3/7)</option>
+            <option value="epic3">🔮 Epic 3: Ability System (1/2)</option>
+            <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (0/2)</option>
+            <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (0/2)</option>
+            <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (0/2)</option>
+            <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (0/4)</option>
+            <option value="epic8">💰 Epic 8: Economy &amp; Gacha (0/2)</option>
+            <option value="epic9">⚙️ Epic 9: UI, Settings &amp; CI/CD (1/3)</option>
+            <option value="epic10">🔧 Epic 10: Community Patches (0/13)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <button class="btn active" data-status-filter="all">All</button>
+        <button class="btn" data-status-filter="completed">✅ Done (14)</button>
+        <button class="btn" data-status-filter="planned">⏳ Planned (32)</button>
+        <button class="btn" id="btn-toggle-all">↕️ Expand All</button>
+      </div>
+    </div>
+
+    <!-- Epics Listing -->
+    <div id="epics-container">
+
+      <div class="epic-block" id="epic-sec-systems" data-epic="systems">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">📦</span>
+            <div>
+              <div class="epic-name">Systems Library</div>
+              <div class="epic-desc">Universal, decoupled modules under godot/src/systems/ with dedicated testbed scenes.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">6 / 6 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-1</span>
+                <span class="task-title">Core Deck Engine</span>
+                <span class="task-snippet">— Universal CardData model, Deck (Draw/Discard/Banish with Fisher-Yates shuffle), and HandManager with fan layout.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/deck_engine/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes standalone testbed 'testbed_deck.tscn' and test suite 'test_deck_engine.gd'. Unified affinity and faction handling.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Zero Card Wars coupling; standalone testbed runs in isolation.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Unified affinity and faction data handling.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-2</span>
+                <span class="task-title">Board Lane System</span>
+                <span class="task-snippet">— Modular 4-Lane / N-Lane grid with affinity validation, multi-layer occupancy (unit + building), and Universal Spatial Topology Protocol.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/board_system/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_board.tscn' and 'test_board_system.gd'. Supports grid Vector2i and hex Vector3i topology querying.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Drag-drop affinity validation connected with custom validators.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Spatial protocol (get_adjacent_units, get_opposing_units, get_units_in_radius) verified.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-3</span>
+                <span class="task-title">Timing Wheel System</span>
+                <span class="task-snippet">— Reusable roulette timing wheel minigame with needle deceleration, Hit/Crit/Miss sectors, and Quick-Resolve roller.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/timing_wheel/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_wheel.tscn' and 1,000-spin Monte Carlo simulation. Wired to BattleWheelModal in battle scene.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Standalone testbed scene runs in complete isolation.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>BattleController clashes respect multipliers (0x miss, 1x hit, 2x crit).</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-4</span>
+                <span class="task-title">Ability Engine</span>
+                <span class="task-snippet">— Data-driven trigger & action effect interpreter with Universal Spatial Topology Protocol.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/ability_engine/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_abilities.tscn' and 'test_ability_engine.gd'. Discard effect (DISCARD_CARD) and all 8 target scopes implemented.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Universal Spatial Topology Protocol connects context coordinates directly to board topologies.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>DISCARD_CARD effect executed cleanly.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-5</span>
+                <span class="task-title">Save Vault</span>
+                <span class="task-snippet">— JSON state serializer with runtime schema validation, atomic file writes (.tmp swap), SHA-256 checksums, and backup recovery (.bak).</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/save_vault/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_save.tscn' and 'test_save_vault.gd'. Verified corruption recovery and backup rotation.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Runtime schema enforcement with validate_v1_schema().</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Automatic corruption recovery and backup rotation verified.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-6</span>
+                <span class="task-title">Audio Jukebox</span>
+                <span class="task-snippet">— Standalone BGM dual-player cross-fader and zero-allocation SFX bus pool dispatcher with pitch variation.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/audio_jukebox/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_audio.tscn' and 'test_audio_manager.gd'. Procedural sound synthesis and 4-bus architecture.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Seamless BGM crossfading and SFX bus dispatching.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Pitch variation and procedural audio verified.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic1" data-epic="epic1">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">⚔️</span>
+            <div>
+              <div class="epic-name">Epic 1: Match Flow</div>
+              <div class="epic-desc">Opening turn decider, landscape placement, and match fanfare.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">3 / 3 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 1.1</span>
+                <span class="task-title">Rock-Paper-Scissors (RPS) Turn Decider</span>
+                <span class="task-snippet">— Pre-battle RPS turn decider with AI probability weighting matrix, tie re-rolls, and turn selection modal.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>RPSMatrix.cs, RPSManager.cs, db_RPS.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">State machine CHOOSING -> REVEALING -> RESOLVED. Winner selects Go First or Go Second. Option to skip RPS in settings.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Opening match starts with RPS phase unless skipped in Settings.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Winner can choose turn order; chosen player receives Turn 1.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Full controller and mouse support.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 1.2</span>
+                <span class="task-title">4-Landscape Placement Phase</span>
+                <span class="task-snippet">— 4 landscape tiles per player (Corn, Plains, Swamp, Cotton, Sand, Candy) with thematic art and badges.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>LandscapePreviewController.cs, ManualLandscapeScript.cs</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Lanes render their assigned landscape theme, texture, and label. Both Player and Opponent lane affinities match deck configuration.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Lanes render assigned landscape theme, texture, and label.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Both Player and Opponent lane affinities match deck configuration.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 1.3</span>
+                <span class="task-title">Matchup Intro Screen</span>
+                <span class="task-snippet">— Split-screen banner with Leader portraits, 25 HP bars, opening quotes, voice lines, and fanfare.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>CWBattleIntroController.cs, CWBattleSequenceController.cs</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Plays Finn_Opening.wav / Jake_Opening.wav VO. Displays Leader names and starting HP (25). Transitions into RPS smoothly.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Displays Leader names, starting HP (25), and plays VO. Transitions into RPS smoothly.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic2" data-epic="epic2">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">🛡️</span>
+            <div>
+              <div class="epic-name">Epic 2: Combat Engine</div>
+              <div class="epic-desc">Combat phases, spell casting, buildings, battle wheel roulette, and leader powers.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">3 / 7 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 2.1</span>
+                <span class="task-title">Phase State Machine (BattlePhaseManager.gd)</span>
+                <span class="task-snippet">— Enforces START_TURN -> ACTION_PHASE -> BATTLE_WHEEL_PHASE -> COMBAT_RESOLUTION -> END_TURN sequence.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Turn phases architecture</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Draws 1 card, replenishes MP (min 10, current + 1), unfloops creatures, ticks cooldowns, resolves lanes 0 to 3.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Turn transitions cannot be skipped or bypassed out of sequence.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Actions correctly spend Magic Points; players cannot act with insufficient MP.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 2.2</span>
+                <span class="task-title">Spell Cards System</span>
+                <span class="task-snippet">— Casting Board/Hero Spells and Targeted Spells (with draggable arrow) from hand, consuming MP.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_Spells.json, CardType.cs, SpellResolver.cs</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">All 48 spells in db_Spells.json (e.g. GrainStorm, HotDogRain, ScrollOfBadBreath, Teleport). Dissolve VFX and discard.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>All 48 spells in db_Spells.json can be cast with valid targeting.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Magic Points deducted; spells move to discard pile upon completion.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 2.3</span>
+                <span class="task-title">Building Cards System</span>
+                <span class="task-snippet">— BuildingSlot sub-node behind creature in LaneSlot. Continuous passive auras and lane durability.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_Buildings.json, BuildingScript.cs</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Placing a building occupies the slot; applies continuous aura to the creature in that lane. Buildings possess DEF or persist.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Building cards can be placed in empty building slots of any lane.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Passive lane bonuses (ATK/DEF) update dynamically when creatures enter/leave.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 2.4</span>
+                <span class="task-title">Landscape Affinity Enforcer</span>
+                <span class="task-snippet">— Strict summon affinity validation. Universal deployable anywhere; faction cards only on matching terrain.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_Creatures.json (Faction), LandscapeType.cs</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Visual feedback with red flash on invalid drops and green pulse on valid slots. Tested with user warning alerts.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Summons rejected on mismatched landscape with user notification ('Requires Corn Landscape!').</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 2.5</span>
+                <span class="task-title">The Battle Wheel (Roulette Minigame)</span>
+                <span class="task-snippet">— Timing wheel roulette clash minigame integrated into combat. Critical (2x), Normal (1x), and Miss (0x).</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>BattleWheelController.cs, db_Leaders.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Dynamic timing stop on Space/Click for player; instant quick-resolve for opponent AI. Audio triggers Ring_Crit, Ring_Hit, Ring_Miss.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Wheel appears during creature clash when enabled.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Accurate hit detection based on needle angle; correct damage multipliers applied.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Combat resolver in BattleController.gd respects wheel multiplier.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 2.6</span>
+                <span class="task-title">Leader Powers & Cooldown System</span>
+                <span class="task-snippet">— 124 leader blueprints, dynamic cooldown badge ('⏱️ X Turns'), pulsing '⚡ READY!', and action phase activation.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_Leaders.json, LeaderPowerScript.cs</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Turn cooldown ticking, authentic audio (LeaderPower.wav + VO), and ability matrix for Finn, Jake, PB, Marceline, and BMO.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Button activates only when cooldown == 0 and clicked during Action Phase.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Applies effect, plays leader voice line, resets cooldown to base value.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Automated test suite test_leader_powers.tscn passed 100%.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 2.7</span>
+                <span class="task-title">Tombstone & Loot Drop System</span>
+                <span class="task-snippet">— Creature DEF reaching 0 spawns Tombstone in lane and rolls drop tables for Gold Bags / Loot Cards.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>CWTombstoneScript.cs, db_DropProfile.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Destruction VFX, Tombstone.tscn spawned in lane, drop chance rolls from db_DropProfile.json, clears at end of turn.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Creature death spawns Tombstone; loot cards collected into player session inventory.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic3" data-epic="epic3">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">🔮</span>
+            <div>
+              <div class="epic-name">Epic 3: Ability System</div>
+              <div class="epic-desc">Unified trigger event pipeline and resolution matrix for 317 card scripts.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">1 / 2 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 3.1</span>
+                <span class="task-title">Trigger Event Architecture</span>
+                <span class="task-snippet">— Unified trigger event pipeline: ON_FLOOP, ON_SUMMON, ON_DEATH, ON_TURN_START, ON_TURN_END, ON_ATTACK, STATIC_AURA.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>AbilitySystem.gd, LaneSlot.creature_destroyed</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Wired into BattleController.gd. Resolves 20+ blueprint scripts (entry damage, floop buffs/swaps/pig debuff, death reactions, turn heals). Automated test suite test_ability_system.tscn passed 100%.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>All 7 trigger events properly dispatched at accurate battle lifecycle moments.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Reactive death and entry triggers cleanly resolve without race conditions.</span>
+        </li><li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Full automated test coverage verifying trigger pipeline and ability matrix.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 3.2</span>
+                <span class="task-title">Complete Ability Script Matrix (317 Scripts)</span>
+                <span class="task-snippet">— Covers all 317 card scripts across Stat Modifiers, Board Control & Movement, Card Economy, and Hero Health Manipulators.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Assets/Scripts/Assembly-CSharp/*Ability*.cs</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Teleport, SacrificeForMP, ReturnDiscardCard, DamageOpponentDiscardPile, HealHeroATK, ATKBonusAdjacentEmpty, AdjacentDEFBonus.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Ability system cleanly resolves any card's ScriptName, Val1, and Val2 from db_Creatures.json without hardcoded card IDs.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic4" data-epic="epic4">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">🎭</span>
+            <div>
+              <div class="epic-name">Epic 4: Face Rigs & Audio</div>
+              <div class="epic-desc">UV keyframed character facial rigging for 38 heroes and 4-bus audio engine.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">0 / 2 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 4.1</span>
+                <span class="task-title">Character Facial Animation Rig</span>
+                <span class="task-snippet">— UV coordinate keyframe animation shader for 38 Adventure Time characters across 5 emoting states.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Assets/StreamingAssets/CharacterFaceAnim/ (38 rigs)</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">States: IDLE (blinking/breathing), PLAY_CARD, TAKE_DAMAGE, VICTORY, DEFEAT (Dweeb cup). Finn, Jake, Marceline, BMO, PB, Ice King, etc.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Facial features animate smoothly according to original JSON timing.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Emote states trigger dynamically during match events.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 4.2</span>
+                <span class="task-title">Comprehensive Audio Engine</span>
+                <span class="task-snippet">— 4 audio buses (Master, Music, SFX, Voice), randomized sound pools, and character battle voice lines.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Assets/AudioClip/ (500+ .wav files), VOManager.cs</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Finn ('Floop the pig!', 'Algebraic!'), Jake ('Oh man!'), Lemongrab ('Unacceptable!'). Clean mixing without clipping.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Full audio coverage across all game events with zero audio clipping or overlapping distortion.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic5" data-epic="epic5">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">🎮</span>
+            <div>
+              <div class="epic-name">Epic 5: Gamepad & 2P</div>
+              <div class="epic-desc">Native gamepad/Steam Deck focus navigation and local 2P (shared/hotseat).</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">0 / 2 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 5.1</span>
+                <span class="task-title">Gamepad & Steam Deck Support</span>
+                <span class="task-snippet">— Full controller navigation graph (D-Pad lane jumping, A/Cross summon, X/Square floop, RB attack, LB leader).</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>InputMap Focus Graph, Steam Deck 1280x800</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Auto-detects Xbox, PlayStation, and Steam Deck glyphs dynamically. 100% playable without mouse.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>100% of menus and gameplay accessible via controller alone without touching a mouse.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Verified on Steam Deck (1280x800 native resolution).</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 5.2</span>
+                <span class="task-title">Local 2-Player Multiplayer</span>
+                <span class="task-snippet">— Shared Screen (Dual Gamepads with split view) and Hotseat Pass & Play with privacy transitions between turns.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Shared Screen vs Hotseat Pass & Play</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Custom match setup: custom decks, leaders, and landscapes for Player 1 and Player 2.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Two players can complete a full 1v1 match on a single PC or Steam Deck.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic6" data-epic="epic6">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">🃏</span>
+            <div>
+              <div class="epic-name">Epic 6: Deck Building</div>
+              <div class="epic-desc">Card box deck builder, quality tiers (Standard/Gold/Obsidian), and fusion engine.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">0 / 2 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 6.1</span>
+                <span class="task-title">Deck Builder Interface (DeckBuilder.tscn)</span>
+                <span class="task-snippet">— Owned card grid, filters (Faction, Type, Cost), live mana curve bar chart, and legal deck validator.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>CWDeckBuildDeckController.cs, db_Decks.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Validation prevents saving illegal decks (< 10 cards, > 25 cards, > 4 copies). Saves to user://decks/*.json.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Players can construct, rename, and save custom decks to user://decks/*.json.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 6.2</span>
+                <span class="task-title">Card Quality & Fusion Engine</span>
+                <span class="task-snippet">— Card quality tiers (Standard -> Gold [+10% stats] -> Obsidian [+25% stats]) and 204 fusion recipes.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Quality.cs, db_Fusion.json (204 recipes)</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Gold foil card frame shader, Obsidian dark animated shader. Consumes duplicate base cards + gold coins.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Card fusion correctly consumes materials and adds upgraded card to inventory.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic7" data-epic="epic7">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">🗺️</span>
+            <div>
+              <div class="epic-name">Epic 7: Campaign & Quests</div>
+              <div class="epic-desc">346 campaign quest nodes, Fionna & Cake expansion, daily dungeons, and El Fisto arena.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">0 / 4 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 7.1</span>
+                <span class="task-title">Main Campaign Quest Map (346 Quests)</span>
+                <span class="task-snippet">— Interactive Land of Ooo world map with 346 quest nodes unlocking sequentially with opponent decks and dialogue.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>CWMapController.cs, db_Quest.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Roads draw and unlock upon victory. Reads opponent deck, leader, and hero dialogue from db_Quest.json.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Progression unlocks nodes sequentially; victory records stars and drops loot.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 7.2</span>
+                <span class="task-title">3-Star Quest Objectives</span>
+                <span class="task-snippet">— Match condition auditor for 3-star quest ratings (Star 1: Win; Star 2: Condition; Star 3: HP threshold).</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_QuestConditions.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Star totals unlock bonus reward chests on the world map. Post-battle screen audits objectives.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Post-battle screen audits objectives and awards 1-3 stars accurately.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 7.3</span>
+                <span class="task-title">Fionna & Cake Expansion Campaign</span>
+                <span class="task-snippet">— Alternate campaign map toggle switching to Fionna & Cake World with Candy landscapes, leaders, and cards.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_FCMap.json (10 quests)</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">10-node campaign map with authentic Fionna & Cake opponents and rewards.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>10-node campaign map with authentic Fionna & Cake opponents and rewards.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 7.4</span>
+                <span class="task-title">Daily Dungeons & El Fisto Arena</span>
+                <span class="task-snippet">— 7 Daily Dungeons rotating on system weekday + 8-round survival ladder where damage carries over.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_Dungeon.json, db_ElFisto.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Monday Plains through Sunday Double Coins. El Fisto Arena gauntlet tracks consecutive wins.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Daily dungeons unlock on corresponding system days; El Fisto gauntlet tracks consecutive wins.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic8" data-epic="epic8">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">💰</span>
+            <div>
+              <div class="epic-name">Epic 8: Economy & Gacha</div>
+              <div class="epic-desc">100% Free offline economy, hero levels 1-50, and animated chest openings.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">0 / 2 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 8.1</span>
+                <span class="task-title">In-Game Economy & Progression (100% Free)</span>
+                <span class="task-snippet">— Gold Coins, Algebraic Gems, and Hero XP (levels 1-50 unlocking base HP and ability upgrades). Zero MTX.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_RankUp.json (Hero levels 1-50)</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Coins and gems balance updates in header; hero levels persist across sessions.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Coins and gems balance updates in header; hero levels persist across sessions.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 8.2</span>
+                <span class="task-title">Chest Opening Gacha System</span>
+                <span class="task-snippet">— Cool Chest (Coins) and Algebraic Chest (Gems) with 3D/2D burst animation sequence and rarity color bursts.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_GachaWeights.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Correctly rolls drop rates from db_GachaWeights.json; adds acquired cards to inventory.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Correctly rolls drop rates from db_GachaWeights.json; adds acquired cards to inventory.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic9" data-epic="epic9">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">⚙️</span>
+            <div>
+              <div class="epic-name">Epic 9: UI & Settings</div>
+              <div class="epic-desc">7-language localization, graphics/audio accessibility, and headless multiplatform CI/CD.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">1 / 3 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 9.1</span>
+                <span class="task-title">Multilingual Localization System</span>
+                <span class="task-snippet">— Full text translation for EN, DE, ES, FR, IT, PT, and LatAm with dynamic runtime dropdown switching.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Assets/Resources/languages/ (7 languages)</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">100% of in-game text translates immediately upon language selection.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>100% of in-game text translates immediately upon language selection.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 9.2</span>
+                <span class="task-title">Settings & Accessibility Menu</span>
+                <span class="task-snippet">— Graphics (Fullscreen, 1280x800 Deck, VSync), 4 Audio bus sliders, combat speed (1x, 1.5x, 2x), and save config.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>user://settings.cfg</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Settings persist to user://settings.cfg.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Settings persist to user://settings.cfg.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 9.3</span>
+                <span class="task-title">Automated Multiplatform CI/CD</span>
+                <span class="task-snippet">— Zero-license GitHub Actions workflow building headless Godot 4 exports for Linux AppImage, Windows, and macOS.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed & Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Release v0.2.3, .github/workflows/build-and-release.yml</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Produces portable 25.5 MB CardWars-x86_64.AppImage, Windows zip, and macOS Universal package on tag push.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-done">✓</span>
+          <span>Pushing a tag automatically produces downloadable Linux AppImage, Windows zip, and macOS zip releases on GitHub.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epic-block" id="epic-sec-epic10" data-epic="epic10">
+        <div class="epic-header" onclick="toggleEpic(this.parentElement)">
+          <div class="epic-title-group">
+            <span class="epic-icon">🔧</span>
+            <div>
+              <div class="epic-name">Epic 10: Community Fixes</div>
+              <div class="epic-desc">Community bug fixes, spell OTK rebalancing, de-mobileization, and Laxbby enhancements.</div>
+            </div>
+          </div>
+          <div class="epic-badge-group">
+            <span class="epic-count-badge">0 / 13 Done</span>
+            <span class="epic-chevron">▼</span>
+          </div>
+        </div>
+
+        <div class="epic-tasks-list">
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.1</span>
+                <span class="task-title">Fionna & Cake Level 1 & 24 Freeze Fix</span>
+                <span class="task-snippet">— Failsafe cutscene timer and validated scene transitions to prevent infinite black screens on quests 1 and 24.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Upstream Issue #28, #37, #45, Reddit 1wwhzpd</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Cutscene state machine with failsafe transition timers (advances to board within 5s if animation event drops).</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Fionna & Cake Quests 1 and 24 load seamlessly into gameplay without black screen locks or input freezes.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.2</span>
+                <span class="task-title">Upstream PR #16 & #42 Spell Balance (Witch Way & Brief Power)</span>
+                <span class="task-snippet">— Curbs Turn 1 OTK mana loops by balancing spell costs and providing Community Competitive vs Original Mobile toggle.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Upstream PR #16, Issue #42</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">BriefPower (cost 3), LonelyHearts (cost 3), Volcano (cost 3), ClairvoyantDaggerStorm (cost 2), Witch Way nerf/cap.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Spells reflect updated costs in db_Spells.json.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Infinite Turn 1 mana ramp loops with Witch Way + Brief Power are prevented in competitive mode.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.3</span>
+                <span class="task-title">Upstream PR #10, #11 & #17 Creature Stats & Localization Fixes</span>
+                <span class="task-snippet">— Balances mid-tier creature stats curve and patches typos on Corn Dog, Fluffantry, Mother Fluff Bucket, Nice Bird, Snuggle Tree.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>PR #10, #11 (CW_Balancechanges.pdf), PR #17</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Incorporates creature stat balance curve into db_Creatures.json and corrected descriptions into strings_en.json.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Creature stats match balanced specification without breaking gold card tiers.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Card descriptions are fully readable and accurate.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.4</span>
+                <span class="task-title">Safe Save Profile Manager (No Bundled Dirty Saves)</span>
+                <span class="task-snippet">— Eliminates broken bundled starter saves; generates clean first-run profiles with mission backups and corruption repair.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Issue #27, #43, Reddit 1riwdhj</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Automatic backup saving to user://save_backup.json on mission complete. Schema validation on boot.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>New installation boots into a clean starter profile with standard tutorial progress.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Corrupting save_data.json triggers automatic restoration from backup.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.5</span>
+                <span class="task-title">Quick Battle / Wheel Skip Option for Competitive & 2P</span>
+                <span class="task-snippet">— Settings toggle: Full Battle Wheel vs Quick Resolve (instant deterministic math) vs Auto-Spin 2x/3x Speed.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Reddit 1rd5w97</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Resolves lane combat immediately with calculated damage numbers when enabled.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>When Quick Resolve is enabled, lane combats resolve immediately with calculated damage numbers.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.6</span>
+                <span class="task-title">Fix Algebraic Chest Loot Tables & Upstream FX Audio</span>
+                <span class="task-snippet">— Fixes drop tables so Algebraic chests reliably drop Rare/Algebraic cards; maps Hunson Abadeer Nightosphere BGM.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Issue #24, PR #12, Issue #14</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Corrects probability tables in db_GachaWeights.json. Ensures all spell effects have accompanying audio.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Algebraic chest consistently drops expected rare and algebraic rarity cards.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>All spell effects have accompanying audio; Hunson quests play proper BGM.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.7</span>
+                <span class="task-title">Promotional Code Redemption & Chill Camera Mode</span>
+                <span class="task-snippet">— Main menu promo code modal (LUMPS, AVALANCHE) for holiday variants; top-down orthographic 2D board camera toggle.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Reddit 1rsentt, Issue #31, Issue #23</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Redeem Code modal in Main Menu supporting legacy codes. Chill Camera view mode toggleable during battle.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Entering LUMPS unlocks Holiday Lumpy Space Princess card into inventory.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Chill Camera toggle flattens the board view for a clean desktop presentation.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.8</span>
+                <span class="task-title">Tutorial Battle Ring Softlock & Desktop Video Playback Fix</span>
+                <span class="task-snippet">— Replaces broken mobile ring overlays and mobile video APIs with native Godot UI and VideoStreamPlayer.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Issue #2, Issue #4</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Clean UI tutorial overlay with explicit skip options and cross-platform video rendering.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>First-time tutorial completes smoothly without softlocking.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Intros and cutscenes render cleanly across all platforms.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.9</span>
+                <span class="task-title">AI Behavior Overhaul: Lane Replacement & Counter Selection</span>
+                <span class="task-snippet">— Prohibits AI from overwriting healthy creatures; prioritizes direct open hero attacks and strategic Floops.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Issue #8, Issue #33</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Strict prohibition on replacing existing creature unless all lanes full and candidate has strictly higher value.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>AI never overwrites an existing creature when an empty lane exists.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>AI strategically plays counters and activates Floops when beneficial.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.10</span>
+                <span class="task-title">Card Script Mechanics Bug Fixes (Corn Dog, Snuggle Tree, Fluffantry)</span>
+                <span class="task-snippet">— Fixes self-buff bug on Corn Dog, 0 HP heal bug on Snuggle Tree, and direct hero heal trigger on Fluffantry.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Issue #15</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Verifies and corrects logic in CardEffects.gd for all three cards.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Corn Dog buffs neighbors, Snuggle Tree heals neighbors, and Fluffantry heals the hero as described on cards.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.11</span>
+                <span class="task-title">Offline Economy: Gold-to-Gems Converter & Scaled Star Rewards</span>
+                <span class="task-snippet">— Offline Gem Exchange in Shop (5,000 Coins = 1 Gem) and scalable Gem milestone rewards on boss campaign quests.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Issue #9, Issue #19</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Allows players to purchase Gems using earned Gold Coins without requiring microtransactions.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Players can purchase Gems using earned in-game Gold Coins in the Shop.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Star milestones award scalable Gem rewards.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.12</span>
+                <span class="task-title">Campaign Environments, Missing Strings & Visual Polish</span>
+                <span class="task-snippet">— Swaps 3D map backdrops based on quest landscape; patches missing Quest 36 string, Volcano lava VFX, and mesh vertex fix.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Issue #6, #13, #36, #40, #41</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Dynamically instantiates background boards (Plains, Sand, Ice, Cemetery, Nightosphere) based on quest blueprint.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Sand Lands and later areas display respective environmental backdrops.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Quest 36 has proper objectives; Volcano and damage FX animate visibly.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">Task 10.13</span>
+                <span class="task-title">De-Mobileization & Anti-Penny-Pinching Pass (Laxbby Fork)</span>
+                <span class="task-snippet">— Instant unlimited stamina (no timers), 1,000 starter inventory slots, equalized daily wheel with free re-spins, boosted loot.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>Laxbby/CardWars fork, Obsidian Edition</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Stamina restoration rate set to 0 (instant refill). Daily gift wheel awards gems with equalized probabilities. PC Modern vs Retro Mobile setting toggle.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Stamina refills immediately after matches; players never locked out by energy timers.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>New profiles start with 1,000 inventory slots.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Daily gift wheel awards gems and allows free re-spins with equalized odds.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- Global Game Parameters & Balance Constants Section -->
+    <div class="static-card" id="sec-parameters">
+      <div class="static-title">⚙️ Global Game Parameters &amp; Balance Constants</div>
+      <div style="color: var(--text-muted); font-size: 0.88rem;">Source of Truth: <code>Assets/StreamingAssets/Blueprints/db_Parameters.json</code></div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Constant Identifier</th>
+              <th>Value</th>
+              <th>Gameplay Effect &amp; Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Starting_Magic_Points</code></td>
+              <td class="val">2</td>
+              <td>Base MP given to players on Turn 1</td>
+            </tr>
+            <tr>
+              <td><code>Max_Magic_Points</code></td>
+              <td class="val">10</td>
+              <td>Hard cap on turn Magic Points</td>
+            </tr>
+            <tr>
+              <td><code>Min_Cards_In_Deck</code></td>
+              <td class="val">10</td>
+              <td>Minimum legal deck size</td>
+            </tr>
+            <tr>
+              <td><code>Max_Cards_In_Deck</code></td>
+              <td class="val">25</td>
+              <td>Maximum legal deck size</td>
+            </tr>
+            <tr>
+              <td><code>Max_Duplicates_In_Deck</code></td>
+              <td class="val">4</td>
+              <td>Maximum copies of a single card allowed</td>
+            </tr>
+            <tr>
+              <td><code>New_Player_Max_Inventory</code></td>
+              <td class="val">50</td>
+              <td>Base Card Box inventory slots (Overhauled to 1,000 in PC Modern mode)</td>
+            </tr>
+            <tr>
+              <td><code>New_Player_Max_Stamina</code></td>
+              <td class="val">5</td>
+              <td>Maximum Heart stamina</td>
+            </tr>
+            <tr>
+              <td><code>Stamina_Restoration_Rate</code></td>
+              <td class="val">15</td>
+              <td>Minutes elapsed to restore 1 Heart (0 / Instant in PC Modern mode)</td>
+            </tr>
+            <tr>
+              <td><code>New_Player_Coins</code></td>
+              <td class="val">0</td>
+              <td>Starting Gold coins</td>
+            </tr>
+            <tr>
+              <td><code>New_Player_Gems</code></td>
+              <td class="val">5</td>
+              <td>Starting Algebraic Gems</td>
+            </tr>
+            <tr>
+              <td><code>Max_Leader_Level</code></td>
+              <td class="val">50</td>
+              <td>Hero Leader level cap</td>
+            </tr>
+            <tr>
+              <td><code>Dungeon_Min_Level</code></td>
+              <td class="val">5</td>
+              <td>Hero level required to enter Daily Dungeons</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Milestone Roadmap Section -->
+    <div class="static-card" id="sec-roadmap">
+      <div class="static-title">🚀 Milestone Roadmap &amp; Implementation Order</div>
+      <div style="color: var(--text-muted); font-size: 0.88rem;">Sequential implementation path from Combat Depth to Community Balance Patches.</div>
+      <div class="milestone-grid">
+        <div class="milestone-box">
+          <span class="milestone-badge">Milestone 1</span>
+          <div class="milestone-title">Combat Depth &amp; Field Systems</div>
+          <div class="milestone-desc">Spells, Buildings, Landscape Rules, Battle Wheel Resolver, Leader Powers &amp; Cooldowns, Tombstones &amp; Drop Tables.</div>
+        </div>
+        <div class="milestone-box">
+          <span class="milestone-badge">Milestone 2</span>
+          <div class="milestone-title">Controls, Rigging &amp; Audio</div>
+          <div class="milestone-desc">Gamepad &amp; Steam Deck Focus Graph, Local 2P Multiplayer, SFX Audio Bus Pools, 38 Animated Character Face Rigs.</div>
+        </div>
+        <div class="milestone-box">
+          <span class="milestone-badge">Milestone 3</span>
+          <div class="milestone-title">Deck Building &amp; Quality Fusion</div>
+          <div class="milestone-desc">Deck Editor, Card Quality Tiers (Standard, Gold, Obsidian), Fusion Engine (204 recipes), 1,000 Inventory slots.</div>
+        </div>
+        <div class="milestone-box">
+          <span class="milestone-badge">Milestone 4</span>
+          <div class="milestone-title">Campaign, Expansions &amp; Arenas</div>
+          <div class="milestone-desc">346 Quests across Land of Ooo, Fionna &amp; Cake expansion, 7 Daily Dungeons, El Fisto Survival Gauntlet.</div>
+        </div>
+        <div class="milestone-box">
+          <span class="milestone-badge">Milestone 5</span>
+          <div class="milestone-title">Economy, Settings &amp; Multiplatform</div>
+          <div class="milestone-desc">Chests (Cool &amp; Algebraic), Multilingual Localization (7 languages), Settings Menu, Multiplatform AppImage / Win / Mac CI/CD.</div>
+        </div>
+        <div class="milestone-box">
+          <span class="milestone-badge">Milestone 6</span>
+          <div class="milestone-title">Community Patches &amp; AI Polish</div>
+          <div class="milestone-desc">Fionna &amp; Cake Level 1/24 Fix, Spell OTK Rebalancing, Promo Codes, Chill Camera, AI Overhaul, Anti-Penny-Pinching Pass.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      Card Wars: Godot 4 PC Remake • Single-Source Interactive Engineering Manual • Built with Google Antigravity
+    </footer>
+
+  </main>
+
+  <!-- Interactive Filtering & Toggle Script -->
+  <script>
+    const searchInput = document.getElementById('task-search');
+    const epicFilter = document.getElementById('epic-filter');
+    const statusButtons = document.querySelectorAll('[data-status-filter]');
+    const btnToggleAll = document.getElementById('btn-toggle-all');
+
+    const epicBlocks = document.querySelectorAll('.epic-block');
+    const taskCards = document.querySelectorAll('.task-card');
+
+    let activeStatus = 'all';
+    let areAllExpanded = false;
+
+    // Status Filter Buttons
+    statusButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        statusButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeStatus = btn.dataset.statusFilter;
+        filterDashboard();
+      });
+    });
+
+    // Epic Dropdown Filter
+    epicFilter.addEventListener('change', () => {
+      filterDashboard();
+    });
+
+    // Search Input
+    searchInput.addEventListener('input', () => {
+      filterDashboard();
+    });
+
+    // Expand/Collapse All
+    btnToggleAll.addEventListener('click', () => {
+      areAllExpanded = !areAllExpanded;
+      taskCards.forEach(c => {
+        if (areAllExpanded) c.classList.add('open');
+        else c.classList.remove('open');
+      });
+      btnToggleAll.textContent = areAllExpanded ? '↕️ Collapse All' : '↕️ Expand All';
+    });
+
+    // Accordion on Epic Header
+    function toggleEpic(epicBlock) {
+      epicBlock.classList.toggle('collapsed');
+    }
+
+    // Accordion on Task Header
+    function toggleTask(taskCard) {
+      taskCard.classList.toggle('open');
+    }
+
+    // Filter Logic
+    function filterDashboard() {
+      const q = searchInput.value.toLowerCase().trim();
+      const selectedEpic = epicFilter.value;
+
+      epicBlocks.forEach(epic => {
+        const epicId = epic.dataset.epic;
+        const matchesEpic = (selectedEpic === 'all' || selectedEpic === epicId);
+
+        let visibleTasksInEpic = 0;
+        const tasks = epic.querySelectorAll('.task-card');
+
+        tasks.forEach(card => {
+          const status = card.dataset.status;
+          const text = card.innerText.toLowerCase();
+
+          const matchesStatus = (activeStatus === 'all' || activeStatus === status);
+          const matchesQuery = !q || text.includes(q);
+
+          if (matchesEpic && matchesStatus && matchesQuery) {
+            card.style.display = 'block';
+            visibleTasksInEpic++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        // Hide entire epic if no tasks match
+        if (matchesEpic && visibleTasksInEpic > 0) {
+          epic.style.display = 'block';
+        } else {
+          epic.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
