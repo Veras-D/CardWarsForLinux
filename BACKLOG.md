@@ -32,9 +32,9 @@
 1. **`CoreDeckEngine`** (`res://src/systems/deck_engine/`) [COMPLETED & VERIFIED]:
    - Universal CardData model, Deck (Draw/Discard/Banish piles with Fisher-Yates shuffle and discard recycling), and HandManager with parabolic arc and fan layout.
    - Includes standalone testbed: `testbed_deck.tscn` and automated test suite: `test_deck_engine.gd`.
-2. **`BoardLaneSystem`** (`res://src/systems/board_system/`):
-   - Modular 4-Lane / N-Lane grid with affinity validation, occupancy rules, and slot animations.
-   - Includes standalone testbed: `testbed_board.tscn`.
+2. **`BoardLaneSystem`** (`res://src/systems/board_system/`) [COMPLETED & VERIFIED]:
+   - Modular 4-Lane / N-Lane grid with affinity validation, multi-layer occupancy rules (unit + building), opposing lane lookup, and slot animations (damage shake, summon pulse).
+   - Includes standalone testbed: `testbed_board.tscn` and automated test suite: `test_board_system.gd`.
 3. **`TimingWheelSystem`** (`res://src/systems/timing_wheel/`):
    - Reusable timing roulette wheel minigame (Hit, Crit, Miss sectors + Quick Resolve mode).
    - Includes standalone testbed: `testbed_wheel.tscn`.
