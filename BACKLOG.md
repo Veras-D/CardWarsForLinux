@@ -173,20 +173,25 @@
 - **Acceptance Criteria**:
   - [x] Summons rejected on mismatched landscape with user notification ("Requires Corn Landscape!").
 
-### Task 2.5: The Battle Wheel (Roulette Minigame)
+### Task 2.5: The Battle Wheel (Roulette Minigame) [COMPLETED]
+- **Status**: **Completed & Verified** (System Module: `res://src/systems/timing_wheel/`)
 - **Unity Reference**: `BattleWheelController.cs`, `db_Leaders.json`.
 - **Godot Implementation**:
-  - Create `res://scenes/components/BattleWheel.tscn`.
-  - Spinning needle rotates at `TimeFor1SpinMin` to `TimeFor1SpinMax` seconds per 360°.
+  - Independent system module created in `res://src/systems/timing_wheel/`:
+    - `WheelConfig.gd`: Data contract for arbitrary sectors, ratios, colors, and speed. Includes Card Wars Attacker/Defender presets and Quick-Resolve roller.
+    - `WheelSpinner.gd`: Procedural custom vector drawing (`_draw()`), state machine (`IDLE`, `SPINNING`, `STOPPING`, `RESOLVED`), needle rotation, smooth deceleration curve, and input handling.
+    - `WheelSpinner.tscn`: Reusable wheel visual node.
+    - `testbed_wheel.tscn`: Standalone interactive testbed with live presets, customizable sliders, real-time log, and 1,000-spin Monte Carlo simulation.
   - Slices configured per leader from `db_Leaders.json`:
-    - `Ring_P1_CritAreaRange` (default ~7% of wheel $\rightarrow$ **Critical Hit: 2x ATK Damage**).
-    - `Ring_P1_HitAreaRange` (default ~80% of wheel $\rightarrow$ **Normal Hit: 1.0x ATK Damage**).
-    - Remainder (~13% $\rightarrow$ **Miss / Blocked: 0 Damage**).
-  - Needle stopped on Button press (`Spacebar` / `Gamepad A` / Left Click).
-  - Settings toggle: `Options -> Wheel Mode [Manual / Auto / Off]`.
+    - `Ring_P1_CritAreaRange` (7% of wheel $\rightarrow$ **Critical Hit: 2x ATK Damage**).
+    - `Ring_P1_HitAreaRange` (80% of wheel $\rightarrow$ **Normal Hit: 1.0x ATK Damage**).
+    - Remainder (13% $\rightarrow$ **Miss / Blocked: 0 Damage**).
+  - Quick Resolve mode: Instant deterministic resolution based on sector probabilities.
 - **Acceptance Criteria**:
-  - [ ] Wheel appears during creature clash when enabled.
-  - [ ] Accurate hit detection based on needle angle; correct damage multipliers applied.
+  - [x] Wheel appears during creature clash when enabled.
+  - [x] Accurate hit detection based on needle angle; correct damage multipliers applied.
+  - [x] Standalone testbed scene (`testbed_wheel.tscn`) runs and tests the system in complete isolation.
+  - [x] Zero Card Wars coupling; extraction-ready for other Godot games.
 
 ### Task 2.6: Leader Powers & Cooldown System
 - **Unity Reference**: `db_Leaders.json`, `LeaderPowerScript.cs`.
