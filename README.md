@@ -18,15 +18,24 @@ Think you've got what it takes to be crowned a Cool Guy, or will you end up drin
 
 It's CARD WARS! 
 
-## Download
+## Download & Play (Godot 4 PC Remake)
 
-* [Latest Windows Version](https://github.com/shishkabob27/CardWars/releases/latest/download/CardWars-Windows.zip)
-* Mac Version - Coming Soon
-* Linux Version - Coming Soon
+Automated releases generated with Godot 4:
 
-## Images
-![CardWars_r8d9H393Tp](https://i.imgur.com/cXUolY0.jpg)
-![CardWars_F7nDRbIxel](https://i.imgur.com/N3BH326.jpg)
+* 🐧 **[Latest Linux AppImage](https://github.com/Veras-D/CardWarsForLinux/releases/latest/download/CardWars-x86_64.AppImage)** *(Portable single-file executable, works on all modern distros & Steam Deck)*
+* 🐧 **[Latest Linux Tarball](https://github.com/Veras-D/CardWarsForLinux/releases/latest/download/CardWars-Linux.tar.gz)**
+* 🪟 **[Latest Windows 64-bit](https://github.com/Veras-D/CardWarsForLinux/releases/latest/download/CardWars-Windows.zip)**
+* 🍎 **[Latest macOS Universal](https://github.com/Veras-D/CardWarsForLinux/releases/latest/download/CardWars-macOS.zip)**
 
-## Contributing
-Card Wars uses Unity 2017.4.40f1. No other dependencies are required.
+### Running on Linux
+```bash
+chmod +x CardWars-x86_64.AppImage
+./CardWars-x86_64.AppImage
+```
+
+---
+
+## Project Structure
+* **`godot/`**: Modern open-source **Godot 4.7+ PC Remake** (active development). See [godot/README.md](godot/README.md).
+* **`BACKLOG.md`**: Master engineering backlog and architecture specification for completing all game systems. See [BACKLOG.md](BACKLOG.md).
+* **`Assets/`** & **`ProjectSettings/`**: Original decompiled Unity 2017.4 assets preserved for historical reference and asset extraction.
