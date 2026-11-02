@@ -514,6 +514,73 @@ Implement the core behavior classes:
   - [ ] Entering `LUMPS` unlocks Holiday Lumpy Space Princess card into inventory.
   - [ ] Chill Camera toggle flattens the board view for a clean desktop presentation.
 
+### Task 10.8: Tutorial Battle Ring Softlock & Desktop Video Playback Fix
+- **Reported in**: Upstream Issue #2 (*"Battle Ring tutorial causes game to softlock"*), Issue #4 (*"Fionna & Cake intro does not play: Handheld.PlayFullScreenMovie unavailable on desktop"*).
+- **Issue**:
+  - Upstream port softlocked during the initial tutorial when trying to trigger mobile-exclusive battle ring overlays.
+  - Fionna & Cake intro movie crashed or skipped because Unity's `Handheld.PlayFullScreenMovie` only works on Android/iOS.
+- **Godot Implementation**:
+  - Implement a clean Godot UI tutorial overlay with explicit skip options and keyboard/controller focus support.
+  - Use Godot's cross-platform `VideoStreamPlayer` node to render cutscenes on Linux, Windows, and macOS natively without mobile API dependencies.
+- **Acceptance Criteria**:
+  - [ ] First-time tutorial completes smoothly without softlocking.
+  - [ ] Intros and cutscenes render cleanly across all platforms.
+
+### Task 10.9: AI Behavior Overhaul: Lane Replacement & Counter Selection
+- **Reported in**: Upstream Issue #8 (*"Opponent plays minion on top of existing one"*), Issue #33 (*"Ai opponents are really easy to beat"*).
+- **Issue**:
+  - Upstream AI frequently overwrote its own full-health, high-tier creatures with weaker ones even when empty lanes were available.
+  - AI made suboptimal Floop activations and failed to prioritize direct attacks when lanes were open.
+- **Godot Implementation**:
+  - Overhaul AI decision trees in `godot/src/battle/BattleController.gd`:
+    - Strict prohibition on replacing an existing creature unless all 4 lanes are occupied AND the card in hand has strictly higher net value.
+    - Lane prioritization: direct open opponent hero attacks take precedence over attacking high-DEF walled creatures.
+    - Smart Floop activation logic evaluating board state before burning Magic Points.
+- **Acceptance Criteria**:
+  - [ ] AI never overwrites an existing creature when an empty lane exists.
+  - [ ] AI strategically plays counters and activates Floops when beneficial.
+
+### Task 10.10: Card Script Mechanics Bug Fixes (Corn Dog, Snuggle Tree, Fluffantry)
+- **Reported in**: Upstream Issue #15 (*"Some cards mechanics are broken"*).
+- **Issue**:
+  - `Corn Dog`: Floop incorrectly buffed itself instead of adjacent creatures.
+  - `Snuggle Tree`: Floop healed adjacent creatures for 0 HP due to missing integer argument.
+  - `Fluffantry`: Hero heal failed to trigger upon Floop activation.
+- **Godot Implementation**:
+  - Verify and correct the logic in `CardEffects.gd` for all three cards:
+    - `Corn Dog`: apply `+2 ATK` to left and right adjacent lane creatures.
+    - `Snuggle Tree`: apply designated heal amount (e.g., `+5 HP`) to adjacent friendly creatures.
+    - `Fluffantry`: trigger direct hero heal event on player controller.
+- **Acceptance Criteria**:
+  - [ ] Corn Dog buffs neighbors, Snuggle Tree heals neighbors, and Fluffantry heals the hero as described on cards.
+
+### Task 10.11: Offline Economy: Gold-to-Gems Converter & Scaled Star Rewards
+- **Reported in**: Upstream Issue #9 (*"Rebalance To Gems"*), Issue #19 (*"Suggestion: Coins for Gems"*).
+- **Issue**:
+  - In the original mobile title, premium chests and deck expansions required purchasing Gems with microtransactions. With servers down, players hit a progression bottleneck or resort to cheat mods.
+- **Godot Implementation**:
+  - Introduce an offline "Gem Exchange" in the Shop allowing players to spend surplus gold coins for gems (e.g. 5,000 Coins = 1 Gem).
+  - Scale single-player star rewards: granting bonus lump sums of Gems on milestone campaign quests (e.g. 3-5 Gems on boss stages).
+- **Acceptance Criteria**:
+  - [ ] Players can purchase Gems using earned in-game Gold Coins in the Shop.
+  - [ ] Star milestones award scalable Gem rewards without requiring microtransactions.
+
+### Task 10.12: Campaign Environments, Missing Strings & Visual Polish
+- **Reported in**: Upstream Issue #6 (*"Some animations absent"*), Issue #13 (*"Missing quest label on quest 36"*), Issue #36 (*"All campaign quests in treehouse map"*), Issue #40 (*"Immortal maize walker 3D model disfigured"*), Issue #41 (*"Party God quest icon not showing"*).
+- **Issue**:
+  - Upstream port failed to swap 3D map backdrops, locking all campaign levels to the Treehouse winter map.
+  - Missing string for Quest 36 3rd star condition (`* MISSING QUEST *`).
+  - Missing combat VFX (Volcano lava lane overlay, spell hammer damage punch).
+  - Model rendering anomaly on Immortal Maize Walker and missing Party God icon.
+- **Godot Implementation**:
+  - Environment loader: dynamically instantiate background boards (Plains, Sand, Ice, Cemetery, Nightosphere) based on quest blueprint landscape faction.
+  - Populate missing localized description for Quest 36 condition.
+  - Add Volcano lava ground particle shader and damage impact FX.
+  - Correct model mesh vertex orientation for Immortal Maize Walker and patch Party God icon texture.
+- **Acceptance Criteria**:
+  - [ ] Sand Lands and later campaign areas display their respective environmental backdrops.
+  - [ ] Quest 36 has proper objectives; Volcano and damage FX animate visibly; models render without polygon clipping.
+
 ---
 
 ## 12. Milestone Roadmap & Implementation Order
