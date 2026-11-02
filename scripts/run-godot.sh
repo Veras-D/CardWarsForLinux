@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Launch the Godot 4 Card Wars project
+# NOTE: Never silence or suppress any warnings or errors (e.g. X11/XIM input warnings, engine logs).
+# Full diagnostic and debug output must always remain visible in terminal for debugging.
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GODOT_BIN="${GODOT_BIN:-/home/verivi/.local/bin/godot}"
 
