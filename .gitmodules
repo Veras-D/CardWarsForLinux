@@ -1,0 +1,3 @@
+[submodule "godot/src/systems"]
+	path = godot/src/systems
+	url = https://github.com/Veras-D/godot-systems-library.git
