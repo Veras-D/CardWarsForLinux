@@ -402,18 +402,20 @@ Implement the core behavior classes:
 - **Acceptance Criteria**:
   - [ ] Settings persist to `user://settings.cfg`.
 
-### Task 9.3: Automated Multiplatform CI/CD (Zero Licenses Required)
+### Task 9.3: Automated Multiplatform CI/CD (Zero Licenses Required) [COMPLETED]
+- **Status**: **Completed & Verified** (Release [v0.2.3](https://github.com/Veras-D/CardWarsForLinux/releases/tag/v0.2.3))
 - **Godot Implementation**:
   - Configure Godot export presets (`export_presets.cfg`):
     - Linux/X11 (`CardWars.x86_64`)
     - Windows Desktop (`CardWars.exe`)
-    - macOS (`CardWars.app`)
-  - Create `.github/workflows/godot-build-and-release.yml`:
+    - macOS Universal (`CardWars.app`)
+  - Create `.github/workflows/build-and-release.yml`:
     - Uses official headless Godot 4 builder (requires **zero licenses, zero activation files, zero serials**).
-    - Automatically packages Linux build into single-file portable `CardWars-x86_64.AppImage`.
+    - Automatically packages Linux build into single-file portable `CardWars-x86_64.AppImage` (25.5 MB).
+    - Generates Windows (`CardWars-Windows.zip`, 32.8 MB), Linux (`CardWars-Linux.tar.gz`, 27.0 MB), and macOS Universal (`CardWars-macOS.zip`, 54.9 MB).
     - Creates GitHub Releases on tag push (`v*`).
 - **Acceptance Criteria**:
-  - [ ] Pushing a tag automatically produces downloadable Linux AppImage, Windows zip, and macOS zip releases on GitHub.
+  - [x] Pushing a tag automatically produces downloadable Linux AppImage, Windows zip, and macOS zip releases on GitHub. (Verified live on Release v0.2.3)
 
 ---
 
