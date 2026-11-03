@@ -5,6 +5,8 @@ const LeaderPowerButton = preload("res://src/battle/LeaderPowerButton.gd")
 const AbilitySystem = preload("res://src/battle/AbilitySystem.gd")
 const BattlePhaseManager = preload("res://src/battle/BattlePhaseManager.gd")
 const SpellResolver = preload("res://src/battle/SpellResolver.gd")
+const LootRoller = preload("res://src/battle/LootRoller.gd")
+const Tombstone = preload("res://src/battle/Tombstone.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
@@ -48,6 +50,12 @@ var selected_card_view: CardView = null
 var player_lanes: Array[LaneSlot] = []
 var opponent_lanes: Array[LaneSlot] = []
 var is_player_turn: bool = true
+
+# Session loot & drop tracking
+var session_gold: int = 0
+var session_loot_cards: Array[String] = []
+var loot_drops_count: int = 0
+var drop_profile_id: String = "Quest01"
 
 var player_leader_cooldown: int = 0
 var opponent_leader_cooldown: int = 0
@@ -108,6 +116,9 @@ func setup_match() -> void:
 	opponent_lanes.clear()
 	player_discard_pile.clear()
 	opponent_discard_pile.clear()
+	session_gold = 0
+	session_loot_cards.clear()
+	loot_drops_count = 0
 
 	# Initialize Leaders & Cooldowns
 	var p_leader = Database.get_leader(GameManager.player_hero_name)
@@ -131,6 +142,10 @@ func setup_match() -> void:
 			p_lane.slot_clicked.connect(_on_lane_clicked)
 		if not p_lane.floop_requested.is_connected(_on_floop_requested):
 			p_lane.floop_requested.connect(_on_floop_requested)
+		if not p_lane.creature_destroyed.is_connected(_on_creature_destroyed):
+			p_lane.creature_destroyed.connect(_on_creature_destroyed)
+		if not p_lane.loot_collected.is_connected(_on_loot_collected):
+			p_lane.loot_collected.connect(_on_loot_collected)
 		player_lanes.append(p_lane)
 
 		var o_lane = opponent_lanes_box.get_child(i) as LaneSlot
@@ -139,6 +154,10 @@ func setup_match() -> void:
 		o_lane.update_landscape(GameManager.opponent_landscapes[i])
 		if not o_lane.slot_clicked.is_connected(_on_lane_clicked):
 			o_lane.slot_clicked.connect(_on_lane_clicked)
+		if not o_lane.creature_destroyed.is_connected(_on_creature_destroyed):
+			o_lane.creature_destroyed.connect(_on_creature_destroyed)
+		if not o_lane.loot_collected.is_connected(_on_loot_collected):
+			o_lane.loot_collected.connect(_on_loot_collected)
 		opponent_lanes.append(o_lane)
 
 	if ability_system == null:
@@ -192,7 +211,10 @@ func start_player_turn() -> void:
 	player_leader_btn.update_cooldown(player_leader_cooldown)
 
 	for lane in player_lanes:
+		lane.clear_tombstone()
 		lane.reset_turn()
+	for lane in opponent_lanes:
+		lane.clear_tombstone()
 
 	if ability_system:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_START)
@@ -585,6 +607,11 @@ func execute_opponent_turn() -> void:
 		Audio.play_sfx(load("res://assets/audio/sfx/OpponentTurn.wav"))
 	log_message("=== Opponent Turn (%s) ===" % GameManager.opponent_hero_name)
 
+	for lane in player_lanes:
+		lane.clear_tombstone()
+	for lane in opponent_lanes:
+		lane.clear_tombstone()
+
 	if ability_system:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_START)
 
@@ -735,11 +762,56 @@ func execute_opponent_turn() -> void:
 func end_match(victory: bool) -> void:
 	if phase_manager != null:
 		phase_manager.end_match(victory)
+	if GameManager:
+		GameManager.add_rewards(session_gold, session_loot_cards)
 	dialog_panel.visible = true
+	var reward_text = ""
+	if session_gold > 0 or not session_loot_cards.is_empty():
+		reward_text = "\n\nRewards:\n💰 Gold: +%d" % session_gold
+		if not session_loot_cards.is_empty():
+			reward_text += "\n🎁 Cards Won: %d" % session_loot_cards.size()
 	if victory:
-		dialog_label.text = "🏆 VICTORY! 🏆\nYou are crowned a Cool Guy!"
+		dialog_label.text = "🏆 VICTORY! 🏆\nYou are crowned a Cool Guy!" + reward_text
 	else:
-		dialog_label.text = "💀 DEFEAT! 💀\nYou drank from the Dweeb Cup!"
+		dialog_label.text = "💀 DEFEAT! 💀\nYou drank from the Dweeb Cup!" + reward_text
+
+func _on_creature_destroyed(lane: LaneSlot, dead_data: Dictionary) -> void:
+	var creature_name = dead_data.get("name", "Creature")
+	if not lane.is_player:
+		# Opponent creature died -> roll drop table
+		var candidate_cards = GameManager.opponent_deck
+		var drop = LootRoller.roll_drop(drop_profile_id, loot_drops_count, candidate_cards)
+		loot_drops_count += 1
+		lane.spawn_tombstone(drop)
+		if drop.type == "CARD":
+			log_message("🎁 Opponent's %s dropped a Card Chest!" % creature_name)
+		elif drop.type == "GOLD":
+			log_message("💰 Opponent's %s dropped a Gold Bag!" % creature_name)
+		else:
+			log_message("🪦 Opponent's %s was destroyed!" % creature_name)
+	else:
+		lane.spawn_tombstone({
+			"type": "TOMBSTONE",
+			"card_id": "",
+			"card_name": "",
+			"amount": 0,
+			"texture_path": "res://assets/textures/props/Tombstone.png",
+			"icon": "🪦",
+			"label": "R.I.P."
+		})
+		log_message("Your %s was destroyed!" % creature_name)
+
+func _on_loot_collected(lane: LaneSlot, loot_type: String, drop_data: Dictionary) -> void:
+	if loot_type == "GOLD":
+		var amt = int(drop_data.get("amount", 0))
+		session_gold += amt
+		log_message("💰 Collected %d Gold Coins!" % amt)
+	elif loot_type == "CARD":
+		var c_id = str(drop_data.get("card_id", ""))
+		var c_name = str(drop_data.get("card_name", "Mystery Card"))
+		session_loot_cards.append(c_id)
+		log_message("🎁 Collected Card: %s!" % c_name)
+	_update_ui()
 
 func log_message(text: String) -> void:
 	log_label.text = text

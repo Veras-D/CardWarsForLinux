@@ -6,6 +6,8 @@ signal floop_requested(lane_slot)
 signal creature_destroyed(lane_slot, dead_data)
 signal building_placed(lane_slot, building_data)
 signal building_destroyed(lane_slot, building_data)
+signal tombstone_spawned(lane_slot, drop_data)
+signal loot_collected(lane_slot, loot_type, drop_data)
 
 @export var is_player: bool = true
 @export var lane_index: int = 0
@@ -16,6 +18,8 @@ var current_atk: int = 0
 var current_def: int = 0
 var is_flooped: bool = false
 var has_creature: bool = false
+var has_tombstone: bool = false
+var active_tombstone: Control = null
 
 # Building slot state
 var has_building: bool = false
@@ -165,6 +169,8 @@ func flash_valid() -> void:
 	_pulse_tween.tween_callback(func(): set_highlight(false))
 
 func place_creature(card: Dictionary) -> void:
+	if has_tombstone:
+		clear_tombstone()
 	creature_data = card.duplicate(true)
 	current_atk = creature_data.get("atk", 0) + building_aura_atk
 	current_def = creature_data.get("def", 0) + building_aura_def
@@ -326,10 +332,54 @@ func clear_slot() -> void:
 	current_def = 0
 	is_flooped = false
 	floop_btn.visible = false
-	empty_label.visible = true
+	empty_label.visible = not has_tombstone
 	set_highlight(false)
 	for child in card_container.get_children():
-		child.queue_free()
+		if child != active_tombstone:
+			child.queue_free()
+
+func spawn_tombstone(drop_info: Dictionary = {}) -> Control:
+	if has_tombstone and is_instance_valid(active_tombstone):
+		active_tombstone.queue_free()
+
+	has_tombstone = true
+	var tombstone_scene = preload("res://scenes/components/Tombstone.tscn")
+	var tombstone = tombstone_scene.instantiate()
+	active_tombstone = tombstone
+
+	if drop_info.is_empty():
+		drop_info = {
+			"type": "TOMBSTONE",
+			"amount": 0,
+			"card_id": "",
+			"card_name": "",
+			"texture_path": "res://assets/textures/props/Tombstone.png",
+			"icon": "🪦",
+			"label": "R.I.P."
+		}
+
+	tombstone.setup(drop_info)
+	tombstone.collected.connect(func(loot_type: String, data: Dictionary):
+		has_tombstone = false
+		active_tombstone = null
+		loot_collected.emit(self, loot_type, data)
+	)
+
+	card_container.add_child(tombstone)
+	empty_label.visible = false
+	tombstone_spawned.emit(self, drop_info)
+	return tombstone
+
+func clear_tombstone() -> void:
+	if active_tombstone and is_instance_valid(active_tombstone):
+		if active_tombstone.has_method("fade_out_and_remove"):
+			active_tombstone.fade_out_and_remove()
+		else:
+			active_tombstone.queue_free()
+	has_tombstone = false
+	active_tombstone = null
+	if not has_creature:
+		empty_label.visible = true
 
 func _update_card_display() -> void:
 	var card_node = _get_card_node()

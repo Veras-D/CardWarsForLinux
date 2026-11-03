@@ -50,6 +50,15 @@ var opponent_landscapes: Array[String] = ["Corn", "Corn", "Sand", "Corn"]
 # Wheel mode: "NORMAL" (interactive roulette), "QUICK" (auto quick-resolve)
 var wheel_mode: String = "NORMAL"
 
+# Session & persistent rewards
+var player_coins: int = 0
+var player_inventory_cards: Array[String] = []
+
+func add_rewards(coins: int, cards: Array[String]) -> void:
+	player_coins += coins
+	for c in cards:
+		player_inventory_cards.append(c)
+
 func start_battle() -> void:
 	current_state = MatchState.BATTLE
 	get_tree().change_scene_to_file("res://scenes/battle.tscn")
