@@ -34,7 +34,7 @@ var opponent_deck: Array[String] = [
 	"Creature_CactusThug",
 	"Creature_HuskerKnight",
 	"Creature_ArcherDan",
-	"Spell_GrainStorm",
+	"Spell_PieStorm",
 	"Creature_MaizeWalker",
 	"Creature_Cornball"
 ]

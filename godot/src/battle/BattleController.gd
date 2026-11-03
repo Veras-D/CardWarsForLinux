@@ -4,6 +4,7 @@ const BattleWheelModal = preload("res://src/battle/BattleWheelModal.gd")
 const LeaderPowerButton = preload("res://src/battle/LeaderPowerButton.gd")
 const AbilitySystem = preload("res://src/battle/AbilitySystem.gd")
 const BattlePhaseManager = preload("res://src/battle/BattlePhaseManager.gd")
+const SpellResolver = preload("res://src/battle/SpellResolver.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
@@ -40,6 +41,8 @@ var opponent_max_hp: int = 25
 
 var player_draw_pile: Array[String] = []
 var opponent_draw_pile: Array[String] = []
+var player_discard_pile: Array[String] = []
+var opponent_discard_pile: Array[String] = []
 var selected_card_view: CardView = null
 
 var player_lanes: Array[LaneSlot] = []
@@ -52,6 +55,7 @@ var player_leader_id: String = ""
 var opponent_leader_id: String = ""
 var ability_system: AbilitySystem = null
 var phase_manager: BattlePhaseManager = null
+var spell_resolver: SpellResolver = null
 
 func _ready() -> void:
 	turn_btn.pressed.connect(_on_turn_button_pressed)
@@ -102,6 +106,8 @@ func setup_match() -> void:
 
 	player_lanes.clear()
 	opponent_lanes.clear()
+	player_discard_pile.clear()
+	opponent_discard_pile.clear()
 
 	# Initialize Leaders & Cooldowns
 	var p_leader = Database.get_leader(GameManager.player_hero_name)
@@ -121,14 +127,18 @@ func setup_match() -> void:
 		p_lane.is_player = true
 		p_lane.lane_index = i
 		p_lane.update_landscape(GameManager.player_landscapes[i])
-		p_lane.slot_clicked.connect(_on_player_lane_clicked)
-		p_lane.floop_requested.connect(_on_floop_requested)
+		if not p_lane.slot_clicked.is_connected(_on_lane_clicked):
+			p_lane.slot_clicked.connect(_on_lane_clicked)
+		if not p_lane.floop_requested.is_connected(_on_floop_requested):
+			p_lane.floop_requested.connect(_on_floop_requested)
 		player_lanes.append(p_lane)
 
 		var o_lane = opponent_lanes_box.get_child(i) as LaneSlot
 		o_lane.is_player = false
 		o_lane.lane_index = i
 		o_lane.update_landscape(GameManager.opponent_landscapes[i])
+		if not o_lane.slot_clicked.is_connected(_on_lane_clicked):
+			o_lane.slot_clicked.connect(_on_lane_clicked)
 		opponent_lanes.append(o_lane)
 
 	if ability_system == null:
@@ -139,6 +149,11 @@ func setup_match() -> void:
 	if phase_manager == null:
 		phase_manager = BattlePhaseManager.new()
 		add_child(phase_manager)
+
+	if spell_resolver == null:
+		spell_resolver = SpellResolver.new()
+		add_child(spell_resolver)
+	spell_resolver.setup(self)
 
 	_update_ui()
 
@@ -209,7 +224,11 @@ func _on_hand_card_clicked(card_view: CardView) -> void:
 	if not is_action_allowed():
 		return
 	if selected_card_view == card_view:
-		_deselect_card()
+		# If clicking an already selected non-targeted spell, cast it!
+		if card_view.card_data.get("type") == "SPELL" and spell_resolver and not spell_resolver.is_targeted(card_view.card_data):
+			_cast_selected_spell_on_lane(null)
+		else:
+			_deselect_card()
 	else:
 		_select_card(card_view)
 
@@ -219,16 +238,30 @@ func _select_card(card_view: CardView) -> void:
 		Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Click.wav"), -6.0, 0.08)
 	selected_card_view = card_view
 	selected_card_view.modulate = Color(1.2, 1.2, 0.8, 1.0)
-	var card_name = selected_card_view.card_data.get("name", "Card")
-	var cost = selected_card_view.card_data.get("cost", 0)
-	var faction = selected_card_view.card_data.get("faction", "")
-	log_message("Selected %s (%s, Cost: %d MP). Click an empty lane to summon." % [card_name, faction, cost])
+	var card_data = selected_card_view.card_data
+	var card_name = card_data.get("name", "Card")
+	var cost = card_data.get("cost", 0)
+	var faction = card_data.get("faction", "")
+	var card_type = card_data.get("type", "CREATURE")
 
-	# Highlight valid/invalid lanes for the selected card
-	for lane in player_lanes:
-		if not lane.has_creature:
-			var check = lane.can_accept_creature(selected_card_view.card_data)
-			lane.set_highlight(true, check.allowed)
+	if card_type == "SPELL":
+		if spell_resolver and spell_resolver.is_targeted(card_data):
+			log_message("Selected %s (Spell, Cost: %d MP). Click a valid target lane to cast." % [card_name, cost])
+			var valid_targets = spell_resolver.get_valid_lane_targets(card_data, true)
+			for lane in player_lanes:
+				lane.set_highlight(lane in valid_targets, lane in valid_targets)
+			for lane in opponent_lanes:
+				lane.set_highlight(lane in valid_targets, lane in valid_targets)
+		else:
+			log_message("Selected %s (Spell, Cost: %d MP). Click again or click any lane to cast." % [card_name, cost])
+			for lane in player_lanes:
+				lane.set_highlight(true, true)
+	else:
+		log_message("Selected %s (%s, Cost: %d MP). Click an empty lane to summon." % [card_name, faction, cost])
+		for lane in player_lanes:
+			if not lane.has_creature:
+				var check = lane.can_accept_creature(card_data)
+				lane.set_highlight(true, check.allowed)
 
 func _deselect_card() -> void:
 	if selected_card_view:
@@ -236,14 +269,24 @@ func _deselect_card() -> void:
 		selected_card_view = null
 	for lane in player_lanes:
 		lane.set_highlight(false)
+	for lane in opponent_lanes:
+		lane.set_highlight(false)
 
-func _on_player_lane_clicked(lane: LaneSlot) -> void:
+func _on_lane_clicked(lane: LaneSlot) -> void:
 	if not is_action_allowed() or selected_card_view == null:
 		return
 
 	var card_data = selected_card_view.card_data
-	var cost = card_data.get("cost", 1)
+	var card_type = card_data.get("type", "CREATURE")
 
+	if card_type == "SPELL":
+		_cast_selected_spell_on_lane(lane)
+		return
+
+	if not lane.is_player:
+		return
+
+	var cost = card_data.get("cost", 1)
 	if player_mp < cost:
 		lane.flash_invalid()
 		log_message("❌ Not enough Magic Points! (Need %d MP, have %d MP)" % [cost, player_mp])
@@ -268,6 +311,49 @@ func _on_player_lane_clicked(lane: LaneSlot) -> void:
 	_deselect_card()
 	to_free.queue_free()
 	_update_ui()
+
+func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
+	if selected_card_view == null or not is_action_allowed():
+		return false
+
+	var card_data = selected_card_view.card_data
+	var cost = card_data.get("cost", 1)
+
+	if player_mp < cost:
+		if target_lane:
+			target_lane.flash_invalid()
+		log_message("❌ Not enough Magic Points! (Need %d MP, have %d MP)" % [cost, player_mp])
+		return false
+
+	if spell_resolver:
+		if spell_resolver.is_targeted(card_data):
+			var valid_targets = spell_resolver.get_valid_lane_targets(card_data, true)
+			if target_lane == null or not (target_lane in valid_targets):
+				if target_lane:
+					target_lane.flash_invalid()
+				log_message("❌ Invalid target for %s!" % card_data.get("name", "Spell"))
+				return false
+
+		# Deduct MP
+		player_mp -= cost
+
+		if ResourceLoader.exists("res://assets/audio/sfx/LeaderPower.wav"):
+			Audio.play_sfx(load("res://assets/audio/sfx/LeaderPower.wav"), -6.0)
+
+		var res = spell_resolver.cast_spell(card_data, target_lane, true)
+		log_message("✨ Cast %s! %s" % [card_data.get("name", "Spell"), res.get("message", "")])
+	else:
+		player_mp -= cost
+
+	# Move to discard pile
+	player_discard_pile.append(card_data.get("id", ""))
+
+	# Remove from hand and reset selection
+	var to_free = selected_card_view
+	_deselect_card()
+	to_free.queue_free()
+	_update_ui()
+	return true
 
 func _on_floop_requested(lane: LaneSlot) -> void:
 	if not is_action_allowed() or not lane.has_creature or lane.is_flooped:
@@ -507,6 +593,27 @@ func execute_opponent_turn() -> void:
 					])
 					if ability_system:
 						ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, o_lane)
+					break
+
+	# AI casts spells if available in draw pile
+	if not opponent_draw_pile.is_empty() and spell_resolver != null:
+		for i in range(opponent_draw_pile.size() - 1, -1, -1):
+			var c_id = opponent_draw_pile[i]
+			var c_data = Database.get_card(c_id)
+			if not c_data.is_empty() and c_data.get("type") == "SPELL":
+				var check = spell_resolver.can_cast(c_data, 10, false)
+				if check.allowed:
+					opponent_draw_pile.remove_at(i)
+					var target: LaneSlot = null
+					if spell_resolver.is_targeted(c_data):
+						var targets = spell_resolver.get_valid_lane_targets(c_data, false)
+						if not targets.is_empty():
+							target = targets[0]
+					var res = spell_resolver.cast_spell(c_data, target, false)
+					opponent_discard_pile.append(c_id)
+					log_message("%s cast %s! %s" % [
+						GameManager.opponent_hero_name, c_data.get("name", "Spell"), res.get("message", "")
+					])
 					break
 
 	# Opponent attacks
