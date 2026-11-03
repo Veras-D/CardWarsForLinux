@@ -17,10 +17,18 @@ signal intro_completed
 @onready var audio_sfx: AudioStreamPlayer = $AudioSFX
 @onready var audio_vo: AudioStreamPlayer = $AudioVO
 
+@export var vo_volume_db: float = -12.0
+@export var sfx_volume_db: float = -10.0
+
 var _auto_timer: SceneTreeTimer = null
 
 func _ready() -> void:
 	start_btn.pressed.connect(_on_start_pressed)
+	audio_vo.volume_db = vo_volume_db
+	audio_sfx.volume_db = sfx_volume_db
+	if AudioServer.get_bus_index("SFX") != -1:
+		audio_vo.bus = "SFX"
+		audio_sfx.bus = "SFX"
 
 func play_intro(player_name: String, opponent_name: String, p1_max_hp: int, p2_max_hp: int) -> void:
 	visible = true

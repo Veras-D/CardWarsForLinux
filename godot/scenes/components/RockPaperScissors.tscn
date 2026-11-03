@@ -209,3 +209,5 @@ theme_override_font_sizes/font_size = 14
 text = "🛡️ GO SECOND (Turn 2)"
 
 [node name="AudioSFX" type="AudioStreamPlayer" parent="."]
+volume_db = -6.0
+bus = &"SFX"

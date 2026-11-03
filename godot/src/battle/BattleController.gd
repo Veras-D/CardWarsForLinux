@@ -283,7 +283,7 @@ func _execute_leader_power(is_player_owner: bool, char_id: String) -> void:
 	var vo_path = "res://assets/audio/vo/%s_Power.wav" % char_id
 	if ResourceLoader.exists(vo_path):
 		var timer = get_tree().create_timer(0.12)
-		timer.timeout.connect(func(): Audio.play_sfx(load(vo_path)))
+		timer.timeout.connect(func(): Audio.play_sfx(load(vo_path), -8.0))
 
 	var lanes = player_lanes if is_player_owner else opponent_lanes
 	var owner_tag = "YOU" if is_player_owner else GameManager.opponent_hero_name
