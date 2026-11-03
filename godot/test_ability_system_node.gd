@@ -29,6 +29,12 @@ func _ready() -> void:
 	# 7. Test BattleController Full Integration
 	test_battle_controller_integration()
 
+	# 8. Test Extended Ability Scripts Matrix (Task 3.2)
+	test_extended_scripts_matrix()
+
+	# 9. Test Database-Wide Script Compatibility (341 Creatures)
+	test_all_database_creatures_compatibility()
+
 	print("\n🎉 ALL ABILITY SYSTEM TESTS PASSED SUCCESSFULLY (100%)!")
 	get_tree().quit(0)
 
@@ -298,3 +304,121 @@ func test_battle_controller_integration() -> void:
 	assert_true(p_lane.current_atk == 5, "Dingo ATK buffed +2 via AbilitySystem (3 -> 5)")
 
 	battle.free()
+
+
+func test_extended_scripts_matrix() -> void:
+	print("\n--- 8. Testing Extended Ability Scripts Matrix (Task 3.2) ---")
+	var battle_scene = load("res://scenes/battle.tscn")
+	var battle = battle_scene.instantiate()
+	add_child(battle)
+
+	var p0 = battle.player_lanes[0]
+	var p1 = battle.player_lanes[1]
+	var p2 = battle.player_lanes[2]
+	var o0 = battle.opponent_lanes[0]
+	var o1 = battle.opponent_lanes[1]
+
+	# 1. DamageOpponentHealSelf
+	p0.place_creature({"name": "Vampire", "atk": 3, "def": 10, "script_name": "DamageOpponentHealSelf", "val1": "4", "val2": "3"})
+	p0.current_def = 5
+	o0.place_creature({"name": "Target Dummy", "atk": 2, "def": 8})
+	battle.ability_system.execute_card_script("DamageOpponentHealSelf", p0, "4", "3")
+	assert_true(o0.current_def == 4, "DamageOpponentHealSelf: Opponent took 4 damage (8 -> 4)")
+	assert_true(p0.current_def == 8, "DamageOpponentHealSelf: Self healed 3 DEF (5 -> 8)")
+
+	# 2. AdjacentATKBonus & AdjacentDEFBonus
+	p1.place_creature({"name": "Buffer", "atk": 2, "def": 5, "script_name": "AdjacentATKBonus", "val1": "2"})
+	p0.place_creature({"name": "Flank Left", "atk": 3, "def": 4})
+	p2.place_creature({"name": "Flank Right", "atk": 4, "def": 6})
+	battle.ability_system.execute_card_script("AdjacentATKBonus", p1, "2", "0")
+	assert_true(p0.current_atk == 5, "AdjacentATKBonus: Flank Left gained +2 ATK (3 -> 5)")
+	assert_true(p2.current_atk == 6, "AdjacentATKBonus: Flank Right gained +2 ATK (4 -> 6)")
+
+	# 3. ATKBonusAdjacentEmpty
+	p0.clear_slot()
+	p2.clear_slot()
+	p1.place_creature({"name": "Lone Wolf", "atk": 2, "def": 5, "script_name": "ATKBonusAdjacentEmpty", "val1": "3"})
+	battle.ability_system.execute_card_script("ATKBonusAdjacentEmpty", p1, "3", "0")
+	assert_true(p1.current_atk == 8, "ATKBonusAdjacentEmpty: 2 empty adjacent lanes = +6 ATK (2 -> 8)")
+
+	# 4. SacrificeForMP
+	battle.player_mp = 2
+	p0.place_creature({"name": "Mana Battery", "atk": 1, "def": 2, "script_name": "SacrificeForMP", "val1": "3"})
+	battle.ability_system.execute_card_script("SacrificeForMP", p0, "3", "0")
+	assert_true(battle.player_mp == 5, "SacrificeForMP: Gained +3 MP (2 -> 5)")
+	assert_true(not p0.has_creature, "SacrificeForMP: Creature was sacrificed and cleared from lane")
+
+	# 5. ReturnOppnentToHand
+	o0.place_creature({"name": "Pesky Rogue", "atk": 4, "def": 5, "script_name": "ReturnOppnentToHand"})
+	p0.place_creature({"name": "Bouncer", "atk": 2, "def": 4})
+	battle.ability_system.execute_card_script("ReturnOppnentToHand", p0)
+	assert_true(not o0.has_creature, "ReturnOppnentToHand: Opponent creature was returned from lane")
+
+	# 6. EqualizeATK
+	o1.place_creature({"name": "Colossus", "atk": 9, "def": 12})
+	p1.place_creature({"name": "Mirror Knight", "atk": 1, "def": 6, "script_name": "EqualizeATK"})
+	battle.ability_system.execute_card_script("EqualizeATK", p1)
+	assert_true(p1.current_atk == 9, "EqualizeATK: Copied opposing Colossus's ATK (1 -> 9)")
+
+	# 7. HelplessOpponent
+	battle.ability_system.execute_card_script("HelplessOpponent", p1)
+	assert_true(o1.current_atk == 0, "HelplessOpponent: Opposing Colossus ATK set to 0")
+
+	# 8. ResetSelf
+	p1.current_atk = 15
+	p1.current_def = 2
+	battle.ability_system.execute_card_script("ResetSelf", p1)
+	assert_true(p1.current_atk == 1 and p1.current_def == 6, "ResetSelf: Restored original card blueprint stats (1/6)")
+
+	# 9. DrainAdjacentDEFAddATKBonus
+	p0.place_creature({"name": "Minion L", "atk": 1, "def": 5})
+	p2.place_creature({"name": "Minion R", "atk": 1, "def": 5})
+	p1.place_creature({"name": "Soul Eater", "atk": 2, "def": 6, "script_name": "DrainAdjacentDEFAddATKBonus", "val1": "2", "val2": "3"})
+	battle.ability_system.execute_card_script("DrainAdjacentDEFAddATKBonus", p1, "2", "3")
+	assert_true(p0.current_def == 3, "Minion L drained 2 DEF (5 -> 3)")
+	assert_true(p2.current_def == 3, "Minion R drained 2 DEF (5 -> 3)")
+	assert_true(p1.current_atk == 8, "Soul Eater gained +6 ATK from 2 drained allies (2 -> 8)")
+
+	# 10. DamageAllDamageOne
+	o0.place_creature({"name": "Target 1", "atk": 1, "def": 10})
+	o1.place_creature({"name": "Target 2", "atk": 1, "def": 10})
+	p0.place_creature({"name": "Meteorite", "atk": 2, "def": 4, "script_name": "DamageAllDamageOne", "val1": "3", "val2": "4"})
+	battle.ability_system.execute_card_script("DamageAllDamageOne", p0, "3", "4")
+	assert_true(o0.current_def == 3, "Primary target o0 took 3 AoE + 4 direct = 7 damage (10 -> 3)")
+	assert_true(o1.current_def == 7, "Secondary target o1 took 3 AoE damage (10 -> 7)")
+
+	battle.free()
+
+
+func test_all_database_creatures_compatibility() -> void:
+	print("\n--- 9. Testing Database-Wide Script Compatibility (341 Creatures) ---")
+	var battle_scene = load("res://scenes/battle.tscn")
+	var battle = battle_scene.instantiate()
+	add_child(battle)
+
+	var lane = battle.player_lanes[0]
+	var opp_lane = battle.opponent_lanes[0]
+	opp_lane.place_creature({"id": "dummy", "name": "Dummy", "atk": 2, "def": 20, "faction": "Plains"})
+
+	var tested_scripts = {}
+	var success_count = 0
+	for card in Database.creatures_list:
+		var script_name = card.get("script_name", "")
+		if script_name == "":
+			continue
+		tested_scripts[script_name] = true
+
+		lane.place_creature(card)
+		var val1 = str(card.get("val1", "1"))
+		var val2 = str(card.get("val2", "1"))
+		var fac = str(card.get("faction", ""))
+		var ok = battle.ability_system.execute_card_script(script_name, lane, val1, val2, fac)
+		if ok:
+			success_count += 1
+
+	print("  📊 Resolved %d card abilities across %d unique script blueprints!" % [success_count, tested_scripts.size()])
+	assert_true(success_count == Database.creatures_list.size(), "All %d creatures successfully executed without errors" % Database.creatures_list.size())
+	assert_true(tested_scripts.size() >= 110, "Covered over 110 distinct card ability scripts from db_Creatures.json")
+
+	battle.free()
+

@@ -229,18 +229,20 @@ func start_player_turn() -> void:
 	turn_btn.text = "⚔️ ATTACK! (End Turn)"
 	turn_btn.disabled = false
 
+func add_card_to_hand(card_data: Dictionary) -> void:
+	if card_data.is_empty():
+		return
+	var card_scene = preload("res://scenes/components/CardView.tscn").instantiate()
+	hand_container.add_child(card_scene)
+	card_scene.render_card(card_data)
+	card_scene.card_clicked.connect(_on_hand_card_clicked)
+
 func draw_player_card() -> void:
 	if player_draw_pile.is_empty():
 		return
 	var card_id = player_draw_pile.pop_back()
 	var card_data = Database.get_card(card_id)
-	if card_data.is_empty():
-		return
-
-	var card_scene = preload("res://scenes/components/CardView.tscn").instantiate()
-	hand_container.add_child(card_scene)
-	card_scene.render_card(card_data)
-	card_scene.card_clicked.connect(_on_hand_card_clicked)
+	add_card_to_hand(card_data)
 
 func _on_hand_card_clicked(card_view: CardView) -> void:
 	if not is_action_allowed():

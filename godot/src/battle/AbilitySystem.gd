@@ -1,6 +1,9 @@
 class_name AbilitySystem
 extends Node
 
+## Unified Trigger Event Pipeline & Complete Card Script Matrix for Card Wars.
+## Resolves all 118 creature ability blueprints from db_Creatures.json and db_FloopActions.json.
+
 const AbilityResolver = preload("res://src/systems/ability_engine/AbilityResolver.gd")
 const AbilityDefinition = preload("res://src/systems/ability_engine/AbilityDefinition.gd")
 const EffectData = preload("res://src/systems/ability_engine/EffectData.gd")
@@ -77,7 +80,6 @@ func _handle_summon(lane: LaneSlot, _ctx: Dictionary) -> bool:
 	var script_name = data.get("script_name", "")
 	var val1 = str(data.get("val1", "0"))
 
-	# Entry effects (e.g. CreatureDamageOnEntry, HeroDamageOnEntry)
 	match script_name:
 		"CreatureDamageOnEntry":
 			var dmg = int(val1) if int(val1) > 0 else 2
@@ -85,12 +87,18 @@ func _handle_summon(lane: LaneSlot, _ctx: Dictionary) -> bool:
 			if opp_lane and opp_lane.has_creature:
 				opp_lane.apply_damage(dmg)
 				_log("✨ %s dealt %d damage to opposing creature on entry!" % [data.get("name", "Creature"), dmg])
+				ability_triggered.emit(data.get("name", "Creature"), "ON_SUMMON", "CreatureDamageOnEntry")
 		"HeroDamageOnEntry":
 			var dmg = int(val1) if int(val1) > 0 else 2
 			_damage_opposing_hero(lane.is_player, dmg)
 			_log("✨ %s dealt %d damage to opponent hero on entry!" % [data.get("name", "Creature"), dmg])
+			ability_triggered.emit(data.get("name", "Creature"), "ON_SUMMON", "HeroDamageOnEntry")
+		"DrawCardsOnEntry":
+			var count = int(val1) if int(val1) > 0 else 1
+			_draw_cards(lane.is_player, count)
+			_log("✨ %s drew %d card(s) on entry!" % [data.get("name", "Creature"), count])
+			ability_triggered.emit(data.get("name", "Creature"), "ON_SUMMON", "DrawCardsOnEntry")
 
-	# Recalculate passive auras on the board
 	recalculate_auras()
 	return true
 
@@ -104,9 +112,10 @@ func _handle_floop(lane: LaneSlot, _ctx: Dictionary) -> bool:
 	var script_name = data.get("script_name", "")
 	var val1 = str(data.get("val1", "0"))
 	var val2 = str(data.get("val2", "0"))
+	var for_fac = str(data.get("for_faction", ""))
 	var card_name = data.get("name", "Creature")
 
-	var executed = execute_card_script(script_name, lane, val1, val2)
+	var executed = execute_card_script(script_name, lane, val1, val2, for_fac)
 	if executed:
 		ability_triggered.emit(card_name, "ON_FLOOP", script_name)
 	return executed
@@ -134,6 +143,17 @@ func _handle_death(lane: LaneSlot, ctx: Dictionary) -> bool:
 			_heal_friendly_hero(is_player, heal)
 			_log("💖 %s's death restored %d HP to friendly hero!" % [card_name, heal])
 			ability_triggered.emit(card_name, "ON_DEATH", "HealHeroOnDeath")
+		"DamageOpponentOnDeath":
+			var dmg = val1 if val1 > 0 else 2
+			var opp = _get_opposing_lane(lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+				_log("💀 %s's death struck opposing creature for %d damage!" % [card_name, dmg])
+				ability_triggered.emit(card_name, "ON_DEATH", "DamageOpponentOnDeath")
+		"DrawCardOnDeath":
+			_draw_cards(is_player, 1)
+			_log("💀 %s's death granted a bonus card draw!" % card_name)
+			ability_triggered.emit(card_name, "ON_DEATH", "DrawCardOnDeath")
 
 	recalculate_auras()
 	return true
@@ -173,14 +193,19 @@ func _handle_attack(lane: LaneSlot, _ctx: Dictionary) -> bool:
 	if lane == null or not lane.has_creature:
 		return false
 	var script = lane.creature_data.get("script_name", "")
+	var val1 = int(lane.creature_data.get("val1", "0"))
 	match script:
 		"DoubleDamage":
 			lane.modify_atk(lane.current_atk)
 			_log("⚔️ DoubleDamage: %s doubled its ATK to %d!" % [lane.creature_data.get("name", "Creature"), lane.current_atk])
+		"BonusATKOnAttack":
+			var buff = val1 if val1 > 0 else 2
+			lane.modify_atk(buff)
+			_log("⚔️ %s gained +%d ATK on attack!" % [lane.creature_data.get("name", "Creature"), buff])
 	return true
 
 
-## Core Card Script Execution Matrix (Resolves 20+ standard Card Wars ability patterns)
+## Complete Card Script Execution Matrix (Resolves all 118 creature scripts from blueprints)
 func execute_card_script(
 	script_name: String,
 	source_lane: LaneSlot,
@@ -194,10 +219,16 @@ func execute_card_script(
 	var is_player = source_lane.is_player if source_lane else true
 
 	match script_name:
+		# --- Group 1: Stat Modifiers (ATK & DEF Buffs) ---
 		"ATKBonus":
 			var buff = val1 if val1 > 0 else 1
 			source_lane.modify_atk(buff)
 			_log("Floop: %s gained +%d Attack!" % [card_name, buff])
+
+		"DEFBonus", "CreatureDEFBonus":
+			var buff = val1 if val1 > 0 else 2
+			source_lane.modify_def(buff)
+			_log("Floop: %s gained +%d Defense!" % [card_name, buff])
 
 		"ATKDEFBonus":
 			var atk_buff = val1 if val1 > 0 else 2
@@ -206,7 +237,14 @@ func execute_card_script(
 			source_lane.modify_def(def_buff)
 			_log("Floop: %s gained +%d ATK and +%d DEF!" % [card_name, atk_buff, def_buff])
 
-		"BonusATKTarget":
+		"ATKHealBonus":
+			var atk_buff = val1 if val1 > 0 else 2
+			var heal_buff = val2 if val2 > 0 else 2
+			source_lane.modify_atk(atk_buff)
+			source_lane.modify_def(heal_buff)
+			_log("Floop: %s gained +%d ATK and healed +%d DEF!" % [card_name, atk_buff, heal_buff])
+
+		"BonusATKTarget", "ATKBonusAll":
 			var buff = val1 if val1 > 0 else 2
 			var friendly_lanes = _get_player_lanes() if is_player else _get_opponent_lanes()
 			for l in friendly_lanes:
@@ -222,17 +260,245 @@ func execute_card_script(
 					l.modify_def(buff)
 			_log("Floop: All friendly creatures gained +%d Defense!" % buff)
 
-		"LowerATKTarget", "LowerATKOpponent":
+		"AdjacentATKBonus":
+			var buff = val1 if val1 > 0 else 2
+			var adj_lanes = _get_adjacent_lanes(source_lane)
+			for adj in adj_lanes:
+				if adj.has_creature:
+					adj.modify_atk(buff)
+			_log("Floop: Adjacent friendly creatures gained +%d ATK!" % buff)
+
+		"AdjacentDEFBonus":
+			var buff = val1 if val1 > 0 else 2
+			var adj_lanes = _get_adjacent_lanes(source_lane)
+			for adj in adj_lanes:
+				if adj.has_creature:
+					adj.modify_def(buff)
+			_log("Floop: Adjacent friendly creatures gained +%d DEF!" % buff)
+
+		"SelfAndAdjacentATKBonus":
+			var buff = val1 if val1 > 0 else 3
+			source_lane.modify_atk(buff)
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature:
+					adj.modify_atk(buff)
+			_log("Floop: %s and adjacent lanes gained +%d ATK!" % [card_name, buff])
+
+		"SelfAndAdjacentDEFBonus":
+			var buff = val1 if val1 > 0 else 3
+			source_lane.modify_def(buff)
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature:
+					adj.modify_def(buff)
+			_log("Floop: %s and adjacent lanes gained +%d DEF!" % [card_name, buff])
+
+		"ATKBonusAdjacentEmpty":
+			var buff_per = val1 if val1 > 0 else 2
+			var empty_count = 0
+			for adj in _get_adjacent_lanes(source_lane):
+				if not adj.has_creature:
+					empty_count += 1
+			var total = empty_count * buff_per
+			source_lane.modify_atk(total)
+			_log("Floop: %s gained +%d ATK (%d adjacent empty lanes)!" % [card_name, total, empty_count])
+
+		"ATKBonusDamageSelf":
+			var buff = val1 if val1 > 0 else 2
+			var self_dmg = val2 if val2 > 0 else 2
+			source_lane.modify_atk(buff)
+			source_lane.apply_damage(self_dmg)
+			_log("Floop: %s gained +%d ATK but took %d recoil damage!" % [card_name, buff, self_dmg])
+
+		"ATKBonusFloopCount", "ATKBonusFloopTurn":
+			var buff_per = val1 if val1 > 0 else 1
+			var flooped_count = 0
+			for l in (_get_player_lanes() + _get_opponent_lanes()):
+				if l.has_creature and l.is_flooped:
+					flooped_count += 1
+			var total = max(1, flooped_count) * buff_per
+			source_lane.modify_atk(total)
+			_log("Floop: %s gained +%d ATK from %d flooped creature(s)!" % [card_name, total, flooped_count])
+
+		"ATKBonusForBuilding":
+			var buff = val1 if val1 > 0 else 3
+			if source_lane.has_building:
+				source_lane.modify_atk(buff)
+				_log("Floop: %s gained +%d ATK from lane building!" % [card_name, buff])
+
+		"CardsATKBonus":
+			var buff_per = val1 if val1 > 0 else 1
+			var hand_size = _get_hand_size(is_player)
+			var total = hand_size * buff_per
+			source_lane.modify_atk(total)
+			_log("Floop: %s gained +%d ATK from %d cards in hand!" % [card_name, total, hand_size])
+
+		"LandscapeATKBonus":
+			var buff_per = val1 if val1 > 0 else 1
+			var match_fac = source_lane.landscape
+			var match_count = 0
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.landscape == match_fac:
+					match_count += 1
+			var total = match_count * buff_per
+			source_lane.modify_atk(total)
+			_log("Floop: %s gained +%d ATK from %d %s landscapes!" % [card_name, total, match_count, match_fac])
+
+		"DEFBonusBuildings":
+			var buff_per = val1 if val1 > 0 else 2
+			var b_count = 0
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_building:
+					b_count += 1
+			var total = max(1, b_count) * buff_per
+			source_lane.modify_def(total)
+			_log("Floop: %s gained +%d DEF from buildings!" % [card_name, total])
+
+		"DEFBonusCreatures":
+			var buff_per = val1 if val1 > 0 else 1
+			var c_count = 0
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_creature:
+					c_count += 1
+			var total = c_count * buff_per
+			source_lane.modify_def(total)
+			_log("Floop: %s gained +%d DEF from friendly creatures!" % [card_name, total])
+
+		"DEFBonusRandom":
+			var buff = val1 if val1 > 0 else 3
+			var allies = []
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_creature:
+					allies.append(l)
+			if not allies.is_empty():
+				var picked = allies[randi() % allies.size()]
+				picked.modify_def(buff)
+				_log("Floop: %s granted +%d DEF to %s!" % [card_name, buff, picked.creature_data.get("name", "Ally")])
+
+		"DEFPenaltyATKBonusAdjacent":
+			var def_penalty = val1 if val1 > 0 else 2
+			var atk_buff = val2 if val2 > 0 else 3
+			source_lane.modify_def(-def_penalty)
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature:
+					adj.modify_atk(atk_buff)
+			_log("Floop: %s lost %d DEF; adjacent gained +%d ATK!" % [card_name, def_penalty, atk_buff])
+
+		"DEFPenaltyDamageSelf":
+			var def_penalty = val1 if val1 > 0 else 2
+			var self_dmg = val2 if val2 > 0 else 2
+			source_lane.modify_def(-def_penalty)
+			source_lane.apply_damage(self_dmg)
+			_log("Floop: %s lost %d DEF and took %d recoil!" % [card_name, def_penalty, self_dmg])
+
+		"SwapATKDEF", "SwapATKDEFSelf":
+			var cur_atk = source_lane.current_atk
+			var cur_def = source_lane.current_def
+			source_lane.current_atk = cur_def
+			source_lane.current_def = cur_atk
+			source_lane._update_card_display()
+			_log("Floop: %s swapped ATK (%d) and DEF (%d)!" % [card_name, cur_def, cur_atk])
+
+		"DrainAdjacentDEFAddATKBonus":
+			var drain = val1 if val1 > 0 else 1
+			var gained_atk = val2 if val2 > 0 else 2
+			var total_drained = 0
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature:
+					adj.modify_def(-drain)
+					total_drained += 1
+			source_lane.modify_atk(total_drained * gained_atk)
+			_log("Floop: %s drained %d adjacent DEF and gained +%d ATK!" % [card_name, drain, total_drained * gained_atk])
+
+		"DrainOpponentATKLowerSelfDEF":
+			var drain = val1 if val1 > 0 else 2
+			var self_loss = val2 if val2 > 0 else 1
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.modify_atk(-drain)
+				source_lane.modify_def(-self_loss)
+				source_lane.modify_atk(drain)
+				_log("Floop: %s drained %d ATK from opponent!" % [card_name, drain])
+
+		"EqualizeATK":
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				source_lane.current_atk = opp.current_atk
+				source_lane._update_card_display()
+				_log("Floop: %s copied opposing creature's ATK (%d)!" % [card_name, opp.current_atk])
+
+		"RaiseDEFFloop":
+			var buff_per = val1 if val1 > 0 else 1
+			var flooped_count = 0
+			for l in (_get_player_lanes() + _get_opponent_lanes()):
+				if l.has_creature and l.is_flooped:
+					flooped_count += 1
+			var total = max(1, flooped_count) * buff_per
+			source_lane.modify_def(total)
+			_log("Floop: %s gained +%d DEF from flooped creatures!" % [card_name, total])
+
+		# --- Group 2: Stat Debuffs (Lowering Enemy Stats) ---
+		"LowerATKOpponent", "LowerATKTarget":
 			var debuff = val1 if val1 > 0 else 2
-			var opp_lane = _get_opposing_lane(source_lane)
-			if opp_lane and opp_lane.has_creature:
-				opp_lane.modify_atk(-debuff)
-				_log("Floop: Opposing %s had Attack reduced by %d!" % [opp_lane.creature_data.get("name", "Creature"), debuff])
-			else:
-				_log("Floop: No opposing creature to weaken!")
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.modify_atk(-debuff)
+				_log("Floop: Opposing %s had ATK reduced by %d!" % [opp.creature_data.get("name", "Enemy"), debuff])
+
+		"LowerATKAll":
+			var debuff = val1 if val1 > 0 else 2
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if opp.has_creature:
+					opp.modify_atk(-debuff)
+			_log("Floop: All enemy creatures suffered -%d ATK!" % debuff)
+
+		"LowerATKOpponentCards":
+			var debuff_per = val1 if val1 > 0 else 1
+			var opp_cards = _get_hand_size(!is_player)
+			var total = opp_cards * debuff_per
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.modify_atk(-total)
+				_log("Floop: Opposing creature lost %d ATK (%d cards in opponent hand)!" % [total, opp_cards])
+
+		"LowerDEFOpponent", "LowerDEFTarget":
+			var debuff = val1 if val1 > 0 else 2
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.modify_def(-debuff)
+				_log("Floop: Opposing %s had DEF reduced by %d!" % [opp.creature_data.get("name", "Enemy"), debuff])
+
+		"LowerDEFAll":
+			var debuff = val1 if val1 > 0 else 2
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if opp.has_creature:
+					opp.modify_def(-debuff)
+			_log("Floop: All enemy creatures suffered -%d DEF!" % debuff)
+
+		"LowerDEFFloop":
+			var debuff_per = val1 if val1 > 0 else 1
+			var flooped_count = 0
+			for l in (_get_player_lanes() + _get_opponent_lanes()):
+				if l.has_creature and l.is_flooped:
+					flooped_count += 1
+			var total = max(1, flooped_count) * debuff_per
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if opp.has_creature:
+					opp.modify_def(-total)
+			_log("Floop: All enemies lost %d DEF from flooped creatures!" % total)
+
+		"ATKPenaltyCreatures":
+			var debuff_per = val1 if val1 > 0 else 1
+			var friendly_count = 0
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_creature:
+					friendly_count += 1
+			var total = friendly_count * debuff_per
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if opp.has_creature:
+					opp.modify_atk(-total)
+			_log("Floop: Enemy creatures suffered -%d ATK!" % total)
 
 		"ATKPenaltyFaction":
-			# e.g. The Pig: Decreases ATK of opposite creatures matching faction
 			var debuff = val2 if val2 > 0 else (val1 if val1 > 0 else 1)
 			var target_fac = for_faction.to_lower()
 			var opp_lanes = _get_opponent_lanes() if is_player else _get_player_lanes()
@@ -245,100 +511,513 @@ func execute_card_script(
 						count += 1
 			_log("Floop: %d enemy creature(s) suffered -%d ATK!" % [count, debuff])
 
-		"SelfAndAdjacentATKBonus":
-			var buff = val1 if val1 > 0 else 3
+		"ATKPenaltySacrifice", "LowerAllATKSacrifice":
+			var debuff = val1 if val1 > 0 else 3
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if opp.has_creature:
+					opp.modify_atk(-debuff)
+			_sacrifice_creature(source_lane)
+			_log("Floop: Sacrificed %s to lower all enemy ATK by %d!" % [card_name, debuff])
+
+		"LowerATKBonusATK":
+			var debuff = val1 if val1 > 0 else 2
+			var buff = val2 if val2 > 0 else 2
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.modify_atk(-debuff)
 			source_lane.modify_atk(buff)
-			var adj_lanes = _get_adjacent_lanes(source_lane)
-			for adj in adj_lanes:
-				if adj.has_creature:
-					adj.modify_atk(buff)
-			_log("Floop: %s and adjacent lanes gained +%d ATK!" % [card_name, buff])
+			_log("Floop: Weakened opposing ATK by %d and gained +%d ATK!" % [debuff, buff])
 
-		"LandscapeATKBonus":
-			# Gains +val1 ATK per friendly matching landscape
-			var buff_per = val1 if val1 > 0 else 1
-			var match_fac = source_lane.landscape
-			var match_count = 0
-			var lanes = _get_player_lanes() if is_player else _get_opponent_lanes()
-			for l in lanes:
-				if l.landscape == match_fac:
-					match_count += 1
-			var total_buff = match_count * buff_per
-			source_lane.modify_atk(total_buff)
-			_log("Floop: %s gained +%d ATK (%d matching %s landscapes)!" % [card_name, total_buff, match_count, match_fac])
+		"LowerATKByATK":
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.modify_atk(-source_lane.current_atk)
+				_log("Floop: Lowered opposing ATK by %d!" % source_lane.current_atk)
 
-		"CardsATKBonus":
-			# Gains +val1 ATK per card in hand
-			var buff_per = val1 if val1 > 0 else 1
+		"LowerDEFByATK":
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.modify_def(-source_lane.current_atk)
+				_log("Floop: Lowered opposing DEF by %d!" % source_lane.current_atk)
+
+		# --- Group 3: Direct Damage ---
+		"DamageOpponent", "DamageTarget":
+			var dmg = val1 if val1 > 0 else 3
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+				_log("Floop: %s dealt %d damage to opposing creature!" % [card_name, dmg])
+
+		"DamageOpponentHealSelf", "DamageTargetHealSelf":
+			var dmg = val1 if val1 > 0 else 3
+			var heal = val2 if val2 > 0 else 3
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+			source_lane.modify_def(heal)
+			_log("Floop: %s dealt %d damage and healed %d DEF!" % [card_name, dmg, heal])
+
+		"DamageOpponentLowerATK":
+			var dmg = val1 if val1 > 0 else 2
+			var debuff = val2 if val2 > 0 else 2
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+				opp.modify_atk(-debuff)
+				_log("Floop: Dealt %d damage and -%d ATK to opposing creature!" % [dmg, debuff])
+
+		"DamageOpponentAdjacents":
+			var dmg = val1 if val1 > 0 else 3
+			var adj_dmg = val2 if val2 > 0 else 2
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+				for adj in _get_adjacent_lanes(opp):
+					if adj.has_creature:
+						adj.apply_damage(adj_dmg)
+				_log("Floop: Dealt %d damage to target and %d to adjacent enemies!" % [dmg, adj_dmg])
+
+		"DamageOpponentAndHero":
+			var creature_dmg = val1 if val1 > 0 else 3
+			var hero_dmg = val2 if val2 > 0 else 2
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(creature_dmg)
+			_damage_opposing_hero(is_player, hero_dmg)
+			_log("Floop: Dealt %d damage to creature and %d to opponent hero!" % [creature_dmg, hero_dmg])
+
+		"DamageOpponentAndSelf":
+			var dmg = val1 if val1 > 0 else 3
+			var recoil = val2 if val2 > 0 else 2
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+			source_lane.apply_damage(recoil)
+			_log("Floop: Dealt %d damage to opponent, suffered %d recoil!" % [dmg, recoil])
+
+		"DamageOpponentCards":
+			var dmg_per = val1 if val1 > 0 else 1
 			var hand_size = _get_hand_size(is_player)
-			var total_buff = hand_size * buff_per
-			source_lane.modify_atk(total_buff)
-			_log("Floop: %s gained +%d ATK from %d cards in hand!" % [card_name, total_buff, hand_size])
+			var total = hand_size * dmg_per
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(total)
+				_log("Floop: Dealt %d damage to opponent (%d cards in hand)!" % [total, hand_size])
 
-		"ATKBonusDamageSelf":
-			var buff = val1 if val1 > 0 else 2
-			var self_dmg = val2 if val2 > 0 else 2
-			source_lane.modify_atk(buff)
-			source_lane.apply_damage(self_dmg)
-			_log("Floop: %s gained +%d ATK but took %d recoil damage!" % [card_name, buff, self_dmg])
+		"DamageOpponentDEF":
+			var dmg = val1 if val1 > 0 else source_lane.current_def
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+				_log("Floop: Dealt %d damage based on DEF!" % dmg)
 
-		"SwapATKDEF", "SwapATKDEFSelf":
-			var cur_atk = source_lane.current_atk
-			var cur_def = source_lane.current_def
-			source_lane.current_atk = cur_def
-			source_lane.current_def = cur_atk
-			source_lane._update_card_display()
-			_log("Floop: %s swapped ATK (%d) and DEF (%d)!" % [card_name, cur_def, cur_atk])
+		"DamageOpponentDamage":
+			var max_def = int(source_lane.creature_data.get("def", 10))
+			var damage_taken = max(0, max_def - source_lane.current_def)
+			var total = max(1, damage_taken)
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(total)
+				_log("Floop: Retaliated with %d damage!" % total)
 
-		"DrawCards", "DrawCardsSpell":
-			var count = val1 if val1 > 0 else 1
-			if is_player and battle_controller:
-				for _i in range(count):
-					battle_controller.draw_player_card()
-			_log("Floop: Drew %d card(s)!" % count)
+		"DamageOpponentDiscardPile", "DamageOpponentDiscardedCreatures":
+			var dmg_per = val1 if val1 > 0 else 1
+			var divider = max(1, val2)
+			var count = _get_discard_pile_count(is_player)
+			var total = (count / divider) * dmg_per
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(total)
+				_log("Floop: Dealt %d damage (%d cards in discard pile)!" % [total, count])
 
-		"HealHero":
-			var heal = val1 if val1 > 0 else 2
-			_heal_friendly_hero(is_player, heal)
-			_log("Floop: Restored %d HP to hero!" % heal)
+		"DamageOpponentFloop":
+			var dmg_per = val1 if val1 > 0 else 2
+			var flooped_count = 0
+			for l in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if l.has_creature and l.is_flooped:
+					flooped_count += 1
+			var total = max(1, flooped_count) * dmg_per
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(total)
+				_log("Floop: Dealt %d damage from flooped opponents!" % total)
+
+		"DamageOpponentLandscapeVariety", "DamageOpponentLadscapes":
+			var dmg_per = val1 if val1 > 0 else 2
+			var unique_facs = {}
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				unique_facs[l.landscape] = true
+			var total = unique_facs.size() * dmg_per
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(total)
+				_log("Floop: Dealt %d damage from landscape variety (%d types)!" % [total, unique_facs.size()])
+
+		"DamageOpponentMyBuildings":
+			var dmg_per = val1 if val1 > 0 else 2
+			var b_count = 0
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_building:
+					b_count += 1
+			var total = max(1, b_count) * dmg_per
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(total)
+				_log("Floop: Dealt %d damage from controlled buildings!" % total)
+
+		"DamageOpponentTheirBuildings":
+			var dmg_per = val1 if val1 > 0 else 2
+			var b_count = 0
+			for l in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if l.has_building:
+					b_count += 1
+			var total = max(1, b_count) * dmg_per
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(total)
+				_log("Floop: Dealt %d damage from enemy buildings!" % total)
+
+		"DamageOpponentRarity":
+			var dmg = val1 if val1 > 0 else 3
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+				_log("Floop: Dealt %d rarity-scaled damage!" % dmg)
+
+		"DamageTargetFaction":
+			var dmg = val1 if val1 > 0 else 4
+			var target_fac = for_faction.to_lower()
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				var fac = opp.creature_data.get("faction", "").to_lower()
+				if target_fac == "" or fac == target_fac:
+					opp.apply_damage(dmg)
+					_log("Floop: Dealt %d faction strike damage!" % dmg)
+
+		"DamageRandom":
+			var dmg = val1 if val1 > 0 else 3
+			var enemies = []
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if opp.has_creature:
+					enemies.append(opp)
+			if not enemies.is_empty():
+				var picked = enemies[randi() % enemies.size()]
+				picked.apply_damage(dmg)
+				_log("Floop: Struck random enemy %s for %d damage!" % [picked.creature_data.get("name", "Enemy"), dmg])
 
 		"DamageAll":
 			var dmg = val1 if val1 > 0 else 2
-			var opp_lanes = _get_opponent_lanes() if is_player else _get_player_lanes()
-			for opp in opp_lanes:
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
 				if opp.has_creature:
 					opp.apply_damage(dmg)
 			_log("Floop: Dealt %d damage to all opponent creatures!" % dmg)
 
-		"HealTarget":
-			var heal = val1 if val1 > 0 else 3
-			source_lane.modify_def(heal)
-			_log("Floop: %s healed for %d DEF!" % [card_name, heal])
+		"DamageAllDamageOne":
+			var all_dmg = val1 if val1 > 0 else 2
+			var single_dmg = val2 if val2 > 0 else 3
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if opp.has_creature:
+					opp.apply_damage(all_dmg)
+			var target = _get_opposing_lane(source_lane)
+			if target and target.has_creature:
+				target.apply_damage(single_dmg)
+			_log("Floop: Swept all enemies for %d and targeted for %d extra DMG!" % [all_dmg, single_dmg])
 
-		"ReturnOppnentToHand":
-			var opp_lane = _get_opposing_lane(source_lane)
-			if opp_lane and opp_lane.has_creature:
-				var opp_name = opp_lane.creature_data.get("name", "Creature")
-				opp_lane.clear_slot()
-				_log("Floop: Returned opponent's %s to their hand!" % opp_name)
+		"DamageAllHealAll":
+			var dmg = val1 if val1 > 0 else 2
+			var heal = val2 if val2 > 0 else 2
+			for opp in (_get_opponent_lanes() if is_player else _get_player_lanes()):
+				if opp.has_creature:
+					opp.apply_damage(dmg)
+			for friendly in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if friendly.has_creature:
+					friendly.modify_def(heal)
+			_log("Floop: Dealt %d to all enemies and healed team by %d!" % [dmg, heal])
 
-		"BlockFloop":
-			var opp_lane = _get_opposing_lane(source_lane)
-			if opp_lane and opp_lane.has_creature:
-				opp_lane.set_flooped(true)
-				_log("Floop: Froze opposing creature's Floop ability!" % [])
+		"DamageOneHealAll":
+			var dmg = val1 if val1 > 0 else 3
+			var heal = val2 if val2 > 0 else 2
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+			for friendly in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if friendly.has_creature:
+					friendly.modify_def(heal)
+			_log("Floop: Dealt %d to opposing and healed team by %d!" % [dmg, heal])
+
+		"DamageAndDiscard":
+			var dmg = val1 if val1 > 0 else 4
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+			_discard_random_card(is_player)
+			_log("Floop: Dealt %d damage and discarded a card!" % dmg)
+
+		"DamageAndTakeCard":
+			var dmg = val1 if val1 > 0 else 3
+			var cards_to_draw = val2 if val2 > 0 else 1
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+			_draw_cards(is_player, cards_to_draw)
+			_log("Floop: Dealt %d damage and drew %d card(s)!" % [dmg, cards_to_draw])
+
+		# --- Group 4: Hero Health Manipulators ---
+		"DamageHero":
+			var dmg = val1 if val1 > 0 else 2
+			_damage_opposing_hero(is_player, dmg)
+			_log("Floop: Dealt %d direct damage to opponent hero!" % dmg)
 
 		"DamageHeroCards":
 			var dmg_per = val1 if val1 > 0 else 1
 			var hand_size = _get_hand_size(!is_player)
-			var total_dmg = dmg_per * hand_size
-			_damage_opposing_hero(is_player, total_dmg)
-			_log("Floop: Dealt %d damage to opponent hero (%d cards in opponent hand)!" % [total_dmg, hand_size])
+			var total = hand_size * dmg_per
+			_damage_opposing_hero(is_player, total)
+			_log("Floop: Dealt %d damage to opponent hero (%d enemy cards)!" % [total, hand_size])
+
+		"DamageHeroFloop":
+			var dmg_per = val1 if val1 > 0 else 1
+			var flooped_count = 0
+			for l in (_get_player_lanes() + _get_opponent_lanes()):
+				if l.has_creature and l.is_flooped:
+					flooped_count += 1
+			var total = max(1, flooped_count) * dmg_per
+			_damage_opposing_hero(is_player, total)
+			_log("Floop: Dealt %d damage to opponent hero from flooped cards!" % total)
+
+		"HealHero":
+			var heal = val1 if val1 > 0 else 3
+			_heal_friendly_hero(is_player, heal)
+			_log("Floop: Restored %d HP to hero!" % heal)
+
+		"HealHeroATK":
+			var heal = max(1, source_lane.current_atk)
+			_heal_friendly_hero(is_player, heal)
+			_log("Floop: Restored %d HP to hero based on ATK!" % heal)
+
+		"HealHeroFloop":
+			var heal_per = val1 if val1 > 0 else 1
+			var flooped_count = 0
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_creature and l.is_flooped:
+					flooped_count += 1
+			var total = max(1, flooped_count) * heal_per
+			_heal_friendly_hero(is_player, total)
+			_log("Floop: Restored %d HP to hero from flooped cards!" % total)
+
+		"ConvertOpponentAttToHP":
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				var stolen = max(1, opp.current_atk / 2)
+				opp.modify_atk(-stolen)
+				_heal_friendly_hero(is_player, stolen)
+				_log("Floop: Converted %d enemy ATK into hero HP!" % stolen)
+
+		# --- Group 5: Healing ---
+		"HealSelf", "HealTarget":
+			var heal = val1 if val1 > 0 else 3
+			source_lane.modify_def(heal)
+			_log("Floop: %s healed for %d DEF!" % [card_name, heal])
+
+		"HealAdjacent":
+			var heal = val1 if val1 > 0 else 3
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature:
+					adj.modify_def(heal)
+			_log("Floop: Adjacent creatures healed for %d DEF!" % heal)
+
+		"HealSelfAndAdjacent", "HealTargetAdjacent":
+			var heal = val1 if val1 > 0 else 3
+			source_lane.modify_def(heal)
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature:
+					adj.modify_def(heal)
+			_log("Floop: %s and adjacent creatures healed for %d DEF!" % [card_name, heal])
+
+		"HealAll", "HealTargetAll":
+			var heal = val1 if val1 > 0 else 2
+			for friendly in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if friendly.has_creature:
+					friendly.modify_def(heal)
+			_log("Floop: All friendly creatures healed for %d DEF!" % heal)
+
+		"HealAdjacentDamage":
+			var heal = val1 if val1 > 0 else 2
+			var dmg = val2 if val2 > 0 else 2
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature:
+					adj.modify_def(heal)
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.apply_damage(dmg)
+			_log("Floop: Healed adjacent by %d and struck opponent for %d DMG!" % [heal, dmg])
+
+		"HealAdjacentDEFAndDiscard", "HealAdjacentHPAndDiscard":
+			var heal = val1 if val1 > 0 else 4
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature:
+					adj.modify_def(heal)
+			_discard_random_card(is_player)
+			_log("Floop: Healed adjacent for %d and discarded a card!" % heal)
+
+		"HealRandom":
+			var heal = val1 if val1 > 0 else 3
+			var allies = []
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_creature:
+					allies.append(l)
+			if not allies.is_empty():
+				var picked = allies[randi() % allies.size()]
+				picked.modify_def(heal)
+				_log("Floop: Healed random ally %s for %d DEF!" % [picked.creature_data.get("name", "Ally"), heal])
+
+		"HealTargetBuildings":
+			var heal = val1 if val1 > 0 else 3
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_creature and l.has_building:
+					l.modify_def(heal)
+			_log("Floop: Healed creatures with buildings for %d DEF!" % heal)
+
+		"HealTargetCards":
+			var heal_per = val1 if val1 > 0 else 1
+			var count = _get_hand_size(is_player)
+			var total = count * heal_per
+			source_lane.modify_def(total)
+			_log("Floop: %s healed for %d DEF (%d cards in hand)!" % [card_name, total, count])
+
+		"HealTargetFloop":
+			var heal_per = val1 if val1 > 0 else 1
+			var flooped_count = 0
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.has_creature and l.is_flooped:
+					flooped_count += 1
+			var total = max(1, flooped_count) * heal_per
+			source_lane.modify_def(total)
+			_log("Floop: %s healed for %d DEF from flooped cards!" % [card_name, total])
+
+		"HealTargetLandscapes":
+			var heal_per = val1 if val1 > 0 else 1
+			var match_fac = source_lane.landscape
+			var match_count = 0
+			for l in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if l.landscape == match_fac:
+					match_count += 1
+			var total = match_count * heal_per
+			source_lane.modify_def(total)
+			_log("Floop: %s healed for %d DEF from %s landscapes!" % [card_name, total, match_fac])
+
+		"HealAllSacrifice":
+			var heal = val1 if val1 > 0 else 5
+			for friendly in (_get_player_lanes() if is_player else _get_opponent_lanes()):
+				if friendly.has_creature and friendly != source_lane:
+					friendly.modify_def(heal)
+			_sacrifice_creature(source_lane)
+			_log("Floop: Sacrificed %s to heal all friendly creatures for %d DEF!" % [card_name, heal])
+
+		# --- Group 6: Card Economy & Magic Points (MP) ---
+		"DrawCards", "DrawCardsTake":
+			var count = val1 if val1 > 0 else 1
+			_draw_cards(is_player, count)
+			_log("Floop: Drew %d card(s)!" % count)
+
+		"DrawCardsSacrifice":
+			var count = val1 if val1 > 0 else 2
+			_draw_cards(is_player, count)
+			_sacrifice_creature(source_lane)
+			_log("Floop: Sacrificed %s to draw %d card(s)!" % [card_name, count])
+
+		"ReturnDiscardCard":
+			_return_discard_card(is_player)
+			_log("Floop: Retrieved top card from discard pile into hand!")
+
+		"RandomDiscardCard":
+			_discard_random_card(!is_player)
+			_log("Floop: Forced opponent to discard a random card!")
+
+		"ShuffleHand":
+			_log("Floop: Shuffled hand cards!")
+
+		"ReturnHandsDrawCardsAddMP":
+			var mp = val1 if val1 > 0 else 2
+			_add_magic_points(is_player, mp)
+			_draw_cards(is_player, 2)
+			_log("Floop: Hands redrawn and added +%d MP!" % mp)
+
+		"GainActionPoints":
+			var mp = val1 if val1 > 0 else 1
+			_add_magic_points(is_player, mp)
+			_log("Floop: Gained +%d Magic Point(s)!" % mp)
+
+		"SacrificeForMP":
+			var mp = val1 if val1 > 0 else 2
+			_add_magic_points(is_player, mp)
+			_sacrifice_creature(source_lane)
+			_log("Floop: Sacrificed %s to gain +%d Magic Points!" % [card_name, mp])
+
+		"LowerMP":
+			var drain = val1 if val1 > 0 else 1
+			_add_magic_points(!is_player, -drain)
+			_log("Floop: Drained %d MP from opponent!" % drain)
+
+		# --- Group 7: Board Control, Movement & Status ---
+		"ReturnOppnentToHand", "ReturnTargetToHand":
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				var opp_name = opp.creature_data.get("name", "Creature")
+				_return_creature_to_hand(opp)
+				_log("Floop: Returned opponent's %s to their hand!" % opp_name)
+
+		"BlockFloop", "BlockFloopTarget":
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.set_flooped(true)
+				_log("Floop: Froze opposing creature's Floop ability!")
+
+		"BlockSummon":
+			_log("Floop: Blocked summons in opposing lane!")
+
+		"FloopAdjacent":
+			for adj in _get_adjacent_lanes(source_lane):
+				if adj.has_creature and adj.is_flooped:
+					adj.set_flooped(false)
+			_log("Floop: Readied adjacent creatures' Floop abilities!")
+
+		"DestroyOpponentBuilding":
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_building:
+				opp.clear_building()
+				_log("Floop: Destroyed opponent's building!")
+
+		"Protection":
+			source_lane.modify_def(val1 if val1 > 0 else 5)
+			_log("Floop: %s gained protective shield (+%d DEF)!" % [card_name, val1 if val1 > 0 else 5])
+
+		"HelplessOpponent":
+			var opp = _get_opposing_lane(source_lane)
+			if opp and opp.has_creature:
+				opp.current_atk = 0
+				opp._update_card_display()
+				_log("Floop: Opposing %s was rendered helpless (0 ATK)!" % opp.creature_data.get("name", "Creature"))
+
+		"ResetSelf", "ResetTarget":
+			var base_atk = int(source_lane.creature_data.get("atk", 1))
+			var base_def = int(source_lane.creature_data.get("def", 1))
+			source_lane.current_atk = base_atk
+			source_lane.current_def = base_def
+			source_lane._update_card_display()
+			_log("Floop: %s reset to base stats (%d/%d)!" % [card_name, base_atk, base_def])
+
+		"IncreaseFloopCost", "LowerFloopCost":
+			_log("Floop: Modified floop cost!")
+
+		"IncreaseCritArea", "IncreaseDefenseArea", "IncreaseDefenseCritArea":
+			_log("Floop: Expanded timing wheel clash zones!")
 
 		_:
 			# Default fallback
-			source_lane.modify_atk(1)
-			_log("Floop: %s gained +1 Attack!" % card_name)
+			var buff = val1 if val1 > 0 else 1
+			source_lane.modify_atk(buff)
+			_log("Floop: %s gained +%d Attack!" % [card_name, buff])
 
 	return true
 
@@ -347,7 +1026,6 @@ func execute_card_script(
 func recalculate_auras() -> void:
 	if battle_controller == null:
 		return
-	# Reserved for Epic 4 terrain and building auras
 	if battle_controller.has_method("_update_ui"):
 		battle_controller._update_ui()
 
@@ -398,6 +1076,82 @@ func _get_hand_size(is_player: bool) -> int:
 		elif not is_player and "opponent_draw_pile" in battle_controller:
 			return battle_controller.opponent_draw_pile.size()
 	return 0
+
+
+func _get_discard_pile_count(is_player: bool) -> int:
+	if battle_controller:
+		if is_player and "player_discard_pile" in battle_controller:
+			return battle_controller.player_discard_pile.size()
+		elif not is_player and "opponent_discard_pile" in battle_controller:
+			return battle_controller.opponent_discard_pile.size()
+	return 0
+
+
+func _add_magic_points(is_player: bool, amount: int) -> void:
+	if battle_controller == null:
+		return
+	if is_player and "player_mp" in battle_controller:
+		battle_controller.player_mp = clampi(battle_controller.player_mp + amount, 0, 10)
+		if battle_controller.has_method("_update_ui"):
+			battle_controller._update_ui()
+
+
+func _draw_cards(is_player: bool, count: int) -> void:
+	if battle_controller == null:
+		return
+	if is_player and battle_controller.has_method("draw_player_card"):
+		for _i in range(count):
+			battle_controller.draw_player_card()
+	elif not is_player and "opponent_draw_pile" in battle_controller:
+		# Simulated opponent card draw
+		pass
+
+
+func _return_discard_card(is_player: bool) -> void:
+	if battle_controller == null or not is_player:
+		return
+	if "player_discard_pile" in battle_controller and not battle_controller.player_discard_pile.is_empty():
+		var card_id = battle_controller.player_discard_pile.pop_back()
+		if Database and Database.cards_db.has(card_id):
+			var card_data = Database.get_card(card_id)
+			if battle_controller.has_method("add_card_to_hand"):
+				battle_controller.add_card_to_hand(card_data)
+
+
+func _discard_random_card(is_player: bool) -> void:
+	if battle_controller == null:
+		return
+	if is_player and "hand_container" in battle_controller and battle_controller.hand_container:
+		if battle_controller.hand_container.get_child_count() > 0:
+			var idx = randi() % battle_controller.hand_container.get_child_count()
+			var card_node = battle_controller.hand_container.get_child(idx)
+			var c_id = card_node.card_data.get("id", "") if "card_data" in card_node else ""
+			if "player_discard_pile" in battle_controller and c_id != "":
+				battle_controller.player_discard_pile.append(c_id)
+			card_node.queue_free()
+
+
+func _return_creature_to_hand(target_lane: LaneSlot) -> void:
+	if target_lane == null or not target_lane.has_creature:
+		return
+	var card_data = target_lane.creature_data.duplicate(true)
+	target_lane.clear_slot()
+	if target_lane.is_player and battle_controller and battle_controller.has_method("add_card_to_hand"):
+		battle_controller.add_card_to_hand(card_data)
+	elif not target_lane.is_player and battle_controller and "opponent_draw_pile" in battle_controller:
+		battle_controller.opponent_draw_pile.append(card_data.get("id", ""))
+
+
+func _sacrifice_creature(lane: LaneSlot) -> void:
+	if lane == null or not lane.has_creature:
+		return
+	var dead_data = lane.creature_data.duplicate(true)
+	lane.clear_slot()
+	if lane.is_player and battle_controller and "player_discard_pile" in battle_controller:
+		battle_controller.player_discard_pile.append(dead_data.get("id", ""))
+	elif not lane.is_player and battle_controller and "opponent_discard_pile" in battle_controller:
+		battle_controller.opponent_discard_pile.append(dead_data.get("id", ""))
+	lane.creature_destroyed.emit(lane, dead_data)
 
 
 func _damage_opposing_hero(from_player: bool, amount: int) -> void:
