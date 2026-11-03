@@ -3,6 +3,7 @@ extends Control
 const BattleWheelModal = preload("res://src/battle/BattleWheelModal.gd")
 const LeaderPowerButton = preload("res://src/battle/LeaderPowerButton.gd")
 const AbilitySystem = preload("res://src/battle/AbilitySystem.gd")
+const BattlePhaseManager = preload("res://src/battle/BattlePhaseManager.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
@@ -50,6 +51,7 @@ var opponent_leader_cooldown: int = 0
 var player_leader_id: String = ""
 var opponent_leader_id: String = ""
 var ability_system: AbilitySystem = null
+var phase_manager: BattlePhaseManager = null
 
 func _ready() -> void:
 	turn_btn.pressed.connect(_on_turn_button_pressed)
@@ -71,11 +73,15 @@ func _on_intro_completed() -> void:
 func _on_rps_completed(player_goes_first: bool) -> void:
 	if player_goes_first:
 		log_message("⚡ YOU GO FIRST! (Turn 1)")
+		if phase_manager:
+			phase_manager.start_battle(0)
 		start_player_turn()
 	else:
 		log_message("🛡️ %s GOES FIRST! (Turn 1)" % GameManager.opponent_hero_name.to_upper())
 		turn_btn.disabled = true
 		turn_btn.text = "Opponent's Turn..."
+		if phase_manager:
+			phase_manager.start_battle(1)
 		var timer = get_tree().create_timer(1.2)
 		timer.timeout.connect(execute_opponent_turn)
 
@@ -130,6 +136,10 @@ func setup_match() -> void:
 		add_child(ability_system)
 	ability_system.setup(self)
 
+	if phase_manager == null:
+		phase_manager = BattlePhaseManager.new()
+		add_child(phase_manager)
+
 	_update_ui()
 
 	# Start Battle BGM using Audio Jukebox
@@ -143,8 +153,19 @@ func setup_match() -> void:
 	for _i in range(4):
 		draw_player_card()
 
+func is_action_allowed() -> bool:
+	if phase_manager != null and phase_manager.get_current_phase() != BattlePhaseManager.Phase.NONE:
+		return phase_manager.is_action_allowed(0)
+	return is_player_turn
+
 func start_player_turn() -> void:
 	is_player_turn = true
+	if phase_manager != null:
+		if phase_manager.get_current_phase() == BattlePhaseManager.Phase.NONE:
+			phase_manager.start_battle(0)
+		elif phase_manager.get_current_phase() != BattlePhaseManager.Phase.START_TURN:
+			phase_manager.transition_to(BattlePhaseManager.Phase.START_TURN)
+
 	if ResourceLoader.exists("res://assets/audio/sfx/YourTurn.wav"):
 		Audio.play_sfx(load("res://assets/audio/sfx/YourTurn.wav"))
 	player_max_mp = min(10, player_max_mp + 1)
@@ -163,6 +184,10 @@ func start_player_turn() -> void:
 
 	draw_player_card()
 	_update_ui()
+
+	if phase_manager != null:
+		phase_manager.transition_to(BattlePhaseManager.Phase.ACTION_PHASE)
+
 	log_message("Your turn! (Action Phase) - Play cards or Floop abilities.")
 	turn_btn.text = "⚔️ ATTACK! (End Turn)"
 	turn_btn.disabled = false
@@ -181,7 +206,7 @@ func draw_player_card() -> void:
 	card_scene.card_clicked.connect(_on_hand_card_clicked)
 
 func _on_hand_card_clicked(card_view: CardView) -> void:
-	if not is_player_turn:
+	if not is_action_allowed():
 		return
 	if selected_card_view == card_view:
 		_deselect_card()
@@ -213,7 +238,7 @@ func _deselect_card() -> void:
 		lane.set_highlight(false)
 
 func _on_player_lane_clicked(lane: LaneSlot) -> void:
-	if not is_player_turn or selected_card_view == null:
+	if not is_action_allowed() or selected_card_view == null:
 		return
 
 	var card_data = selected_card_view.card_data
@@ -245,7 +270,7 @@ func _on_player_lane_clicked(lane: LaneSlot) -> void:
 	_update_ui()
 
 func _on_floop_requested(lane: LaneSlot) -> void:
-	if not is_player_turn or not lane.has_creature or lane.is_flooped:
+	if not is_action_allowed() or not lane.has_creature or lane.is_flooped:
 		return
 
 	var data = lane.creature_data
@@ -267,7 +292,7 @@ func _execute_floop_ability(source_lane: LaneSlot) -> void:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_FLOOP, source_lane)
 
 func _on_player_leader_power_activated(char_id: String) -> void:
-	if not is_player_turn or player_leader_cooldown > 0:
+	if not is_action_allowed() or player_leader_cooldown > 0:
 		return
 	_execute_leader_power(true, char_id)
 
@@ -358,7 +383,7 @@ func _execute_leader_power(is_player_owner: bool, char_id: String) -> void:
 	_update_ui()
 
 func _on_turn_button_pressed() -> void:
-	if not is_player_turn:
+	if not is_action_allowed():
 		return
 	_deselect_card()
 	execute_battle_phase()
@@ -366,6 +391,8 @@ func _on_turn_button_pressed() -> void:
 func execute_battle_phase() -> void:
 	is_player_turn = false
 	turn_btn.disabled = true
+	if phase_manager != null:
+		phase_manager.transition_to(BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE)
 	log_message("=== BATTLE PHASE! ===")
 
 	# Player attacks
@@ -373,6 +400,9 @@ func execute_battle_phase() -> void:
 		var p_lane = player_lanes[i]
 		if not p_lane.has_creature:
 			continue
+
+		if phase_manager != null:
+			phase_manager.start_combat_lane(i)
 
 		if ability_system:
 			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, p_lane)
@@ -390,6 +420,10 @@ func execute_battle_phase() -> void:
 		)
 		var clash_res = await wheel_modal.clash_resolved
 		var final_damage: int = clash_res.final_damage
+
+		if phase_manager != null:
+			phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
+			phase_manager.resolve_combat_lane(i, clash_res)
 
 		if clash_res.id == "crit":
 			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [p_lane.creature_data.name, final_damage])
@@ -413,12 +447,19 @@ func execute_battle_phase() -> void:
 	if ability_system:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
 
+	if phase_manager != null:
+		phase_manager.transition_to(BattlePhaseManager.Phase.END_TURN)
+
 	# Opponent AI turn
 	var timer = get_tree().create_timer(1.2)
 	await timer.timeout
 	execute_opponent_turn()
 
 func execute_opponent_turn() -> void:
+	if phase_manager != null:
+		if phase_manager.get_current_phase() != BattlePhaseManager.Phase.START_TURN:
+			phase_manager.transition_to(BattlePhaseManager.Phase.START_TURN)
+
 	if ResourceLoader.exists("res://assets/audio/sfx/OpponentTurn.wav"):
 		Audio.play_sfx(load("res://assets/audio/sfx/OpponentTurn.wav"))
 	log_message("=== Opponent Turn (%s) ===" % GameManager.opponent_hero_name)
@@ -430,6 +471,9 @@ func execute_opponent_turn() -> void:
 	if opponent_leader_cooldown > 0:
 		opponent_leader_cooldown = max(0, opponent_leader_cooldown - 1)
 	opponent_leader_btn.update_cooldown(opponent_leader_cooldown)
+
+	if phase_manager != null:
+		phase_manager.transition_to(BattlePhaseManager.Phase.ACTION_PHASE)
 
 	# If Opponent Leader Ability is ready, trigger it during Action Phase!
 	if opponent_leader_cooldown == 0:
@@ -464,10 +508,16 @@ func execute_opponent_turn() -> void:
 					break
 
 	# Opponent attacks
+	if phase_manager != null:
+		phase_manager.transition_to(BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE)
+
 	for i in range(4):
 		var o_lane = opponent_lanes[i]
 		if not o_lane.has_creature:
 			continue
+
+		if phase_manager != null:
+			phase_manager.start_combat_lane(i)
 
 		if ability_system:
 			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, o_lane)
@@ -488,6 +538,10 @@ func execute_opponent_turn() -> void:
 		)
 		var clash_res = await wheel_modal.clash_resolved
 		var final_damage: int = clash_res.final_damage
+
+		if phase_manager != null:
+			phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
+			phase_manager.resolve_combat_lane(i, clash_res)
 
 		if clash_res.id == "crit":
 			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [o_lane.creature_data.name, final_damage])
@@ -511,11 +565,16 @@ func execute_opponent_turn() -> void:
 	if ability_system:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
 
+	if phase_manager != null:
+		phase_manager.transition_to(BattlePhaseManager.Phase.END_TURN)
+
 	var timer = get_tree().create_timer(1.0)
 	await timer.timeout
 	start_player_turn()
 
 func end_match(victory: bool) -> void:
+	if phase_manager != null:
+		phase_manager.end_match(victory)
 	dialog_panel.visible = true
 	if victory:
 		dialog_label.text = "🏆 VICTORY! 🏆\nYou are crowned a Cool Guy!"
