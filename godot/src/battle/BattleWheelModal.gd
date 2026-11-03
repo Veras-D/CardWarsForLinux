@@ -63,7 +63,34 @@ func start_attack_clash(
 	tw.tween_property(self, "modulate", Color.WHITE, 0.25)
 
 	# Configure Attacker Wheel
-	var cfg = WheelConfig.create_card_wars_attacker(hit_ratio, crit_ratio)
+	var miss_ratio = max(0.0, 1.0 - (hit_ratio + crit_ratio))
+	var sectors = [
+		{
+			"id": "crit",
+			"name": "CRITICAL HIT!",
+			"ratio": crit_ratio,
+			"color": Color(0.1, 1.0, 0.3, 1.0), # Neon Green
+			"multiplier": 2.0,
+			"is_success": true
+		},
+		{
+			"id": "hit",
+			"name": "HIT",
+			"ratio": hit_ratio,
+			"color": Color(0.95, 0.85, 0.2, 1.0), # Gold/Yellow
+			"multiplier": 1.0,
+			"is_success": true
+		},
+		{
+			"id": "miss",
+			"name": "MISS",
+			"ratio": miss_ratio,
+			"color": Color(0.85, 0.2, 0.2, 1.0), # Crimson Red
+			"multiplier": 0.0,
+			"is_success": false
+		}
+	]
+	var cfg = WheelConfig.create_custom(sectors, 1600.0)
 	spinner.setup(cfg)
 
 	_is_quick_mode = force_quick or GameManager.wheel_mode == "QUICK" or not is_player
