@@ -93,7 +93,8 @@ func start_attack_clash(
 	var cfg = WheelConfig.create_custom(sectors, 1600.0)
 	spinner.setup(cfg)
 
-	_is_quick_mode = force_quick or GameManager.wheel_mode == "QUICK" or not is_player
+	var is_gm_quick: bool = (GameManager.get("wheel_mode") == "QUICK") if GameManager else false
+	_is_quick_mode = force_quick or is_gm_quick or not is_player
 
 	if _is_quick_mode:
 		# Quick resolve: show brief spin then resolve

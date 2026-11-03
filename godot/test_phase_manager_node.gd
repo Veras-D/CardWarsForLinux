@@ -13,6 +13,7 @@ func _ready() -> void:
 	test_action_permissions()
 	test_turn_rotation_and_counter()
 	test_match_over()
+	test_battle_controller_combat_flow()
 
 	print("\n🎉 ALL BATTLE PHASE MANAGER TESTS PASSED SUCCESSFULLY (100%)!")
 	get_tree().quit(0)
@@ -168,3 +169,37 @@ func test_match_over() -> void:
 	assert_true(pm.get_current_phase() == BattlePhaseManager.Phase.MATCH_OVER, "Current phase is MATCH_OVER")
 	assert_true(not pm.can_transition_to(BattlePhaseManager.Phase.START_TURN), "No transitions allowed after MATCH_OVER")
 	pm.free()
+
+func test_battle_controller_combat_flow() -> void:
+	print("\n--- 7. Testing Battle Controller & Wheel Clash Regression ---")
+	var b_scene = load("res://scenes/battle.tscn")
+	var battle = b_scene.instantiate()
+	add_child(battle)
+
+	assert_true(GameManager.wheel_mode == "NORMAL", "GameManager.wheel_mode is initialized")
+	assert_true(battle.wheel_modal != null, "Battle has wheel_modal")
+
+	# Setup a creature on player lane 0 and opponent lane 0
+	battle.player_lanes[0].place_creature({
+		"name": "Test Pig",
+		"atk": 5,
+		"def": 2
+	})
+	battle.opponent_lanes[0].place_creature({
+		"name": "Test Cornball",
+		"atk": 1,
+		"def": 3
+	})
+
+	# Test destroying creature through apply_damage (regression check for creature_data.name)
+	var opp_lane = battle.opponent_lanes[0]
+	var opp_name = opp_lane.creature_data.get("name", "Creature")
+	var destroyed = opp_lane.apply_damage(10)
+	assert_true(destroyed, "Opponent creature destroyed by lethal damage")
+	assert_true(opp_lane.has_creature == false, "Opponent lane is now empty")
+
+	# Test wheel modal clash invocation doesn't crash on wheel_mode
+	battle.wheel_modal.start_attack_clash("Test Pig", "Jake", 5, true, 0.8, 0.05, true)
+	assert_true(battle.wheel_modal.visible == true, "Wheel modal is displayed for clash")
+
+	battle.free()

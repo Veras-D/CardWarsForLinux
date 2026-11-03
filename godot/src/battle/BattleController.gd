@@ -407,13 +407,14 @@ func execute_battle_phase() -> void:
 		if ability_system:
 			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, p_lane)
 
+		var attacker_name = p_lane.creature_data.get("name", "Creature")
 		var atk = p_lane.current_atk
 		var o_lane = opponent_lanes[i]
-		var target_name = o_lane.creature_data.name if o_lane.has_creature else GameManager.opponent_hero_name
+		var target_name = o_lane.creature_data.get("name", "Creature") if o_lane.has_creature else GameManager.opponent_hero_name
 
 		# Trigger Battle Wheel minigame
 		wheel_modal.start_attack_clash(
-			p_lane.creature_data.name,
+			attacker_name,
 			target_name,
 			atk,
 			true
@@ -426,16 +427,17 @@ func execute_battle_phase() -> void:
 			phase_manager.resolve_combat_lane(i, clash_res)
 
 		if clash_res.id == "crit":
-			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [p_lane.creature_data.name, final_damage])
+			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [attacker_name, final_damage])
 		elif clash_res.id == "miss":
-			log_message("❌ MISSED! %s's attack missed completely!" % p_lane.creature_data.name)
+			log_message("❌ MISSED! %s's attack missed completely!" % attacker_name)
 		else:
-			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [p_lane.creature_data.name, final_damage, target_name])
+			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
 
 		if o_lane.has_creature:
+			var target_creature_name = o_lane.creature_data.get("name", "Creature")
 			var destroyed = o_lane.apply_damage(final_damage)
 			if destroyed:
-				log_message("Opponent's %s was destroyed!" % o_lane.creature_data.name)
+				log_message("Opponent's %s was destroyed!" % target_creature_name)
 		else:
 			opponent_hp = max(0, opponent_hp - final_damage)
 
@@ -501,7 +503,7 @@ func execute_opponent_turn() -> void:
 				if not o_lane.has_creature and o_lane.can_accept_creature(candidate_card).allowed:
 					o_lane.place_creature(candidate_card)
 					log_message("%s summoned %s into Lane %d (%s)!" % [
-						GameManager.opponent_hero_name, candidate_card.name, o_lane.lane_index + 1, o_lane.landscape
+						GameManager.opponent_hero_name, candidate_card.get("name", "Creature"), o_lane.lane_index + 1, o_lane.landscape
 					])
 					if ability_system:
 						ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, o_lane)
@@ -522,13 +524,14 @@ func execute_opponent_turn() -> void:
 		if ability_system:
 			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, o_lane)
 
+		var attacker_name = o_lane.creature_data.get("name", "Creature")
 		var atk = o_lane.current_atk
 		var p_lane = player_lanes[i]
-		var target_name = p_lane.creature_data.name if p_lane.has_creature else GameManager.player_hero_name
+		var target_name = p_lane.creature_data.get("name", "Creature") if p_lane.has_creature else GameManager.player_hero_name
 
 		# Opponent wheel clash (quick-resolve mode)
 		wheel_modal.start_attack_clash(
-			o_lane.creature_data.name,
+			attacker_name,
 			target_name,
 			atk,
 			false, # is_player
@@ -544,16 +547,17 @@ func execute_opponent_turn() -> void:
 			phase_manager.resolve_combat_lane(i, clash_res)
 
 		if clash_res.id == "crit":
-			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [o_lane.creature_data.name, final_damage])
+			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [attacker_name, final_damage])
 		elif clash_res.id == "miss":
-			log_message("❌ MISSED! %s's attack missed!" % o_lane.creature_data.name)
+			log_message("❌ MISSED! %s's attack missed!" % attacker_name)
 		else:
-			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [o_lane.creature_data.name, final_damage, target_name])
+			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
 
 		if p_lane.has_creature:
+			var target_creature_name = p_lane.creature_data.get("name", "Creature")
 			var destroyed = p_lane.apply_damage(final_damage)
 			if destroyed:
-				log_message("Your %s was destroyed!" % p_lane.creature_data.name)
+				log_message("Your %s was destroyed!" % target_creature_name)
 		else:
 			player_hp = max(0, player_hp - final_damage)
 

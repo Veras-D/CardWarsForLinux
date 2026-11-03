@@ -47,6 +47,9 @@ var opponent_hero_name: String = "Jake"
 var opponent_hero_max_hp: int = 25
 var opponent_landscapes: Array[String] = ["Corn", "Corn", "Sand", "Corn"]
 
+# Wheel mode: "NORMAL" (interactive roulette), "QUICK" (auto quick-resolve)
+var wheel_mode: String = "NORMAL"
+
 func start_battle() -> void:
 	current_state = MatchState.BATTLE
 	get_tree().change_scene_to_file("res://scenes/battle.tscn")
