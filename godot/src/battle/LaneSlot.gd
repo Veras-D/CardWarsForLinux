@@ -4,6 +4,8 @@ class_name LaneSlot
 signal slot_clicked(lane_slot)
 signal floop_requested(lane_slot)
 signal creature_destroyed(lane_slot, dead_data)
+signal building_placed(lane_slot, building_data)
+signal building_destroyed(lane_slot, building_data)
 
 @export var is_player: bool = true
 @export var lane_index: int = 0
@@ -15,6 +17,12 @@ var current_def: int = 0
 var is_flooped: bool = false
 var has_creature: bool = false
 
+# Building slot state
+var has_building: bool = false
+var building_data: Dictionary = {}
+var building_aura_atk: int = 0
+var building_aura_def: int = 0
+
 @onready var bg_panel: Panel = $BgPanel
 @onready var terrain_texture: TextureRect = $TerrainTexture
 @onready var highlight_border: Panel = $HighlightBorder
@@ -22,6 +30,9 @@ var has_creature: bool = false
 @onready var card_container: CenterContainer = $CardContainer
 @onready var floop_btn: Button = $FloopBtn
 @onready var empty_label: Label = $EmptyLabel
+@onready var building_slot: Panel = $BuildingSlot
+@onready var building_icon: TextureRect = $BuildingSlot/BuildingIcon
+@onready var building_label: Label = $BuildingSlot/BuildingLabel
 
 const LANDSCAPE_METADATA = {
 	"Plains": {
@@ -155,8 +166,8 @@ func flash_valid() -> void:
 
 func place_creature(card: Dictionary) -> void:
 	creature_data = card.duplicate(true)
-	current_atk = creature_data.get("atk", 0)
-	current_def = creature_data.get("def", 0)
+	current_atk = creature_data.get("atk", 0) + building_aura_atk
+	current_def = creature_data.get("def", 0) + building_aura_def
 	is_flooped = false
 	has_creature = true
 	empty_label.visible = false
@@ -169,11 +180,107 @@ func place_creature(card: Dictionary) -> void:
 	var card_scene = preload("res://scenes/components/CardView.tscn").instantiate()
 	card_container.add_child(card_scene)
 	card_scene.render_card(creature_data)
+	if building_aura_atk > 0 or building_aura_def > 0:
+		card_scene.update_stats(current_atk, current_def)
 
 	var floop_cost = creature_data.get("floop_cost", 0)
 	floop_btn.visible = (is_player and floop_cost > 0)
 
 	flash_valid()
+
+func can_accept_building(building: Dictionary) -> Dictionary:
+	if has_building:
+		return {
+			"allowed": false,
+			"reason": "Lane already has a building (%s)!" % building_data.get("name", "Building")
+		}
+	var faction = building.get("faction", "Universal")
+	if faction != "Universal" and faction.to_lower() != landscape.to_lower():
+		return {
+			"allowed": false,
+			"reason": "Building requires %s landscape, but lane is %s." % [faction, landscape]
+		}
+	return {
+		"allowed": true,
+		"reason": ""
+	}
+
+func place_building(building: Dictionary) -> void:
+	building_data = building.duplicate(true)
+	has_building = true
+
+	var script = building_data.get("script_name", "")
+	var val1 = int(building_data.get("val1", "0"))
+	var val2 = int(building_data.get("val2", "0"))
+
+	building_aura_atk = 0
+	building_aura_def = 0
+
+	match script:
+		"ATKBonusBuilding":
+			building_aura_atk = val1 if val1 > 0 else 3
+		"DEFBonusBuilding":
+			building_aura_def = val1 if val1 > 0 else 3
+		"ATKDEFBonusBuilding", "ATKDEFBonusEmptyLanes":
+			building_aura_atk = val1 if val1 > 0 else 2
+			building_aura_def = val2 if val2 > 0 else 2
+		"ATKBonusCreatures":
+			building_aura_atk = val1 if val1 > 0 else 2
+		"DEFBonusCreaturesBuilding":
+			building_aura_def = val1 if val1 > 0 else 2
+		_:
+			building_aura_def = val1 if val1 > 0 else 1
+
+	# If creature is already in this lane, apply aura dynamically!
+	if has_creature:
+		current_atk += building_aura_atk
+		current_def += building_aura_def
+		_update_card_display()
+
+	_update_building_display()
+	flash_valid()
+	building_placed.emit(self, building_data)
+
+func clear_building() -> Dictionary:
+	if not has_building:
+		return {}
+	var removed = building_data.duplicate(true)
+	if has_creature:
+		current_atk = max(0, current_atk - building_aura_atk)
+		current_def = max(1, current_def - building_aura_def)
+		_update_card_display()
+
+	has_building = false
+	building_data.clear()
+	building_aura_atk = 0
+	building_aura_def = 0
+	_update_building_display()
+	building_destroyed.emit(self, removed)
+	return removed
+
+func clear_all() -> void:
+	clear_slot()
+	clear_building()
+
+func get_building_aura() -> Dictionary:
+	return {
+		"atk": building_aura_atk,
+		"def": building_aura_def
+	}
+
+func _update_building_display() -> void:
+	if building_slot:
+		building_slot.visible = has_building
+		if has_building:
+			var b_name = building_data.get("name", "Building")
+			var aura_str = ""
+			if building_aura_atk > 0 and building_aura_def > 0:
+				aura_str = " (+%d/%d)" % [building_aura_atk, building_aura_def]
+			elif building_aura_atk > 0:
+				aura_str = " (+%d ATK)" % building_aura_atk
+			elif building_aura_def > 0:
+				aura_str = " (+%d DEF)" % building_aura_def
+			building_label.text = "🏰 %s%s" % [b_name, aura_str]
 
 func apply_damage(damage: int) -> bool:
 	if not has_creature:

@@ -256,6 +256,11 @@ func _select_card(card_view: CardView) -> void:
 			log_message("Selected %s (Spell, Cost: %d MP). Click again or click any lane to cast." % [card_name, cost])
 			for lane in player_lanes:
 				lane.set_highlight(true, true)
+	elif card_type == "BUILDING":
+		log_message("Selected %s (Building, Cost: %d MP). Click an empty building slot to construct." % [card_name, cost])
+		for lane in player_lanes:
+			var check = lane.can_accept_building(card_data)
+			lane.set_highlight(check.allowed, check.allowed)
 	else:
 		log_message("Selected %s (%s, Cost: %d MP). Click an empty lane to summon." % [card_name, faction, cost])
 		for lane in player_lanes:
@@ -281,6 +286,34 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 
 	if card_type == "SPELL":
 		_cast_selected_spell_on_lane(lane)
+		return
+
+	if card_type == "BUILDING":
+		if not lane.is_player:
+			return
+		var cost = card_data.get("cost", 1)
+		if player_mp < cost:
+			lane.flash_invalid()
+			log_message("❌ Not enough Magic Points! (Need %d MP, have %d MP)" % [cost, player_mp])
+			return
+		var check = lane.can_accept_building(card_data)
+		if not check.allowed:
+			lane.flash_invalid()
+			log_message("❌ Cannot build: " + check.reason)
+			return
+
+		# Construct building
+		player_mp -= cost
+		lane.place_building(card_data)
+		log_message("🏰 Constructed %s on Lane %d (%s)!" % [card_data.get("name", "Building"), lane.lane_index + 1, lane.landscape])
+
+		if ResourceLoader.exists("res://assets/audio/sfx/Click.wav"):
+			Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Click.wav"), -4.0, 0.05)
+
+		var to_free = selected_card_view
+		_deselect_card()
+		to_free.queue_free()
+		_update_ui()
 		return
 
 	if not lane.is_player:
@@ -594,6 +627,22 @@ func execute_opponent_turn() -> void:
 					if ability_system:
 						ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, o_lane)
 					break
+
+	# AI constructs buildings if available in draw pile
+	if not opponent_draw_pile.is_empty():
+		for i in range(opponent_draw_pile.size() - 1, -1, -1):
+			var c_id = opponent_draw_pile[i]
+			var c_data = Database.get_card(c_id)
+			if not c_data.is_empty() and c_data.get("type") == "BUILDING":
+				for o_lane in opponent_lanes:
+					if not o_lane.has_building and o_lane.can_accept_building(c_data).allowed:
+						opponent_draw_pile.remove_at(i)
+						o_lane.place_building(c_data)
+						log_message("%s constructed %s on Lane %d (%s)!" % [
+							GameManager.opponent_hero_name, c_data.get("name", "Building"), o_lane.lane_index + 1, o_lane.landscape
+						])
+						break
+				break
 
 	# AI casts spells if available in draw pile
 	if not opponent_draw_pile.is_empty() and spell_resolver != null:
