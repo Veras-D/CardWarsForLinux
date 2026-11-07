@@ -80,16 +80,17 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 16
 
-[node name="OpponentLeaderPower" parent="Header/OpponentInfo" instance=ExtResource("6_leader")]
-layout_mode = 2
-size_flags_vertical = 4
-
 [node name="OpponentFaceRig" parent="Header/OpponentInfo" instance=ExtResource("7_face")]
 layout_mode = 2
 size_flags_vertical = 4
 character_id = "Jake"
 
+[node name="OpponentLeaderPower" parent="Header/OpponentInfo" instance=ExtResource("6_leader")]
+layout_mode = 2
+size_flags_vertical = 4
+
 [node name="NameLabel" type="Label" parent="Header/OpponentInfo"]
+visible = false
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
@@ -218,16 +219,17 @@ offset_bottom = 38.0
 grow_horizontal = 2
 theme_override_constants/separation = 16
 
-[node name="PlayerLeaderPower" parent="Footer/PlayerInfo" instance=ExtResource("6_leader")]
-layout_mode = 2
-size_flags_vertical = 4
-
 [node name="PlayerFaceRig" parent="Footer/PlayerInfo" instance=ExtResource("7_face")]
 layout_mode = 2
 size_flags_vertical = 4
 character_id = "Finn"
 
+[node name="PlayerLeaderPower" parent="Footer/PlayerInfo" instance=ExtResource("6_leader")]
+layout_mode = 2
+size_flags_vertical = 4
+
 [node name="NameLabel" type="Label" parent="Footer/PlayerInfo"]
+visible = false
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16

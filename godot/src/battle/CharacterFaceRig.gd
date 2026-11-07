@@ -113,12 +113,10 @@ func setup(char_id: String) -> void:
 	var m_rect = _get_mouth_rect()
 	if m_rect and face_tex:
 		m_rect.texture = face_tex
-		m_rect.visible = true
 
 	var e_rect = _get_eyes_rect()
 	if e_rect and face_tex:
 		e_rect.texture = face_tex
-		e_rect.visible = true
 
 	# 2. Base Portrait (Leader round avatar / body texture)
 	var round_portrait_path = "res://assets/textures/leaders/%s_Round.png" % char_id
@@ -184,6 +182,16 @@ func play_animation(anim_name: String, return_to_idle: bool = true) -> bool:
 			mouth_keyframes.append(kf)
 
 	anim_duration = max(0.4, max_time)
+
+	# Show animated facial feature overlays only during active emotes;
+	# in Idle, the crisp BasePortrait (Finn_Round.png / Jake_Round.png) is displayed cleanly.
+	var is_idle = (anim_name == "Idle" or anim_name == "CardIdle")
+	var m_rect = _get_mouth_rect()
+	var e_rect = _get_eyes_rect()
+	if m_rect:
+		m_rect.visible = (not is_idle) and (not mouth_keyframes.is_empty())
+	if e_rect:
+		e_rect.visible = (not is_idle) and (not eyes_keyframes.is_empty())
 
 	# Apply initial frame if keyframes are defined
 	if not mouth_keyframes.is_empty():

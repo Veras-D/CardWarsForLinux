@@ -88,8 +88,6 @@ func _ready() -> void:
 	)
 
 func _on_intro_completed() -> void:
-	if vo_manager:
-		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.OPENING, true, true)
 	rps_modal.start_rps(GameManager.opponent_hero_name)
 
 func _on_rps_completed(player_goes_first: bool) -> void:
