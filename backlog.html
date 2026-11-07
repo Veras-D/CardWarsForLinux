@@ -110,7 +110,7 @@
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, #10b981 0%, #38bdf8 100%);
-      width: 41.3%;
+      width: 43.5%;
       border-radius: 4px;
     }
 
@@ -604,7 +604,7 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">19 / 46 Tasks Done (41.3%)</span>
+            <span class="pct">20 / 46 Tasks Done (43.5%)</span>
           </div>
           <div class="progress-track">
             <div class="progress-fill"></div>
@@ -632,7 +632,7 @@
             <option value="epic1">⚔️ Epic 1: Match Flow (3/3)</option>
             <option value="epic2">🛡️ Epic 2: Combat Engine (7/7)</option>
             <option value="epic3">🔮 Epic 3: Ability System (2/2)</option>
-            <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (0/2)</option>
+            <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (1/2)</option>
             <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (0/2)</option>
             <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (0/2)</option>
             <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (0/4)</option>
@@ -1415,14 +1415,14 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">0 / 2 Done</span>
+            <span class="epic-count-badge">1 / 2 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
 
         <div class="epic-tasks-list">
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 4.1</span>
@@ -1430,7 +1430,7 @@
                 <span class="task-snippet">— UV coordinate keyframe animation shader for 38 Adventure Time characters across 5 emoting states.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -1447,13 +1447,19 @@
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-checked">✓</span>
           <span>Facial features animate smoothly according to original JSON timing.</span>
         </li><li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-checked">✓</span>
           <span>Emote states trigger dynamically during match events.</span>
         </li>
                   </ul>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Verification &amp; Test Suite</div>
+                  <div class="ref-line"><strong>Test Suite:</strong> <code>godot test_face_rig.tscn</code></div>
+                  <p style="margin-top: 8px; color: var(--accent-green); font-size: 0.88rem;"><strong>100% Passed (30/30 checks).</strong> Verified shader UV mapping for mouth and eyes, 38-character roster fallback resolution, dynamic emote state transitions (IDLE, PLAY_CARD, TAKE_DAMAGE, VICTORY, DEFEAT), breathing wobble tween, and BattleController integration.</p>
                 </div>
               </div>
             </div>

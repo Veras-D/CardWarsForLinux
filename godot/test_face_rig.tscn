@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c7m5f4x9v1b2n"]
+
+[ext_resource type="Script" path="res://test_face_rig_node.gd" id="1_test"]
+
+[node name="TestFaceRig" type="Node"]
+script = ExtResource("1_test")

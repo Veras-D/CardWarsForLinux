@@ -7,16 +7,19 @@ const BattlePhaseManager = preload("res://src/battle/BattlePhaseManager.gd")
 const SpellResolver = preload("res://src/battle/SpellResolver.gd")
 const LootRoller = preload("res://src/battle/LootRoller.gd")
 const Tombstone = preload("res://src/battle/Tombstone.gd")
+const CharacterFaceRig = preload("res://src/battle/CharacterFaceRig.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
 @onready var opponent_name_label: Label = $Header/OpponentInfo/NameLabel
 @onready var opponent_leader_btn: LeaderPowerButton = $Header/OpponentInfo/OpponentLeaderPower
+@onready var opponent_face_rig: CharacterFaceRig = $Header/OpponentInfo/OpponentFaceRig
 
 @onready var player_hp_bar: ProgressBar = $Footer/PlayerInfo/HpBar
 @onready var player_hp_label: Label = $Footer/PlayerInfo/HpLabel
 @onready var player_name_label: Label = $Footer/PlayerInfo/NameLabel
 @onready var player_leader_btn: LeaderPowerButton = $Footer/PlayerInfo/PlayerLeaderPower
+@onready var player_face_rig: CharacterFaceRig = $Footer/PlayerInfo/PlayerFaceRig
 @onready var player_mp_label: Label = $Footer/MpContainer/MpLabel
 
 @onready var opponent_lanes_box: HBoxContainer = $Field/OpponentLanes
@@ -132,6 +135,13 @@ func setup_match() -> void:
 	opponent_leader_id = o_leader.get("character_id", GameManager.opponent_hero_name)
 	opponent_leader_cooldown = o_leader.get("cooldown", 3)
 	opponent_leader_btn.setup(opponent_leader_id, false)
+
+	if player_face_rig:
+		player_face_rig.setup(GameManager.player_hero_name)
+		player_face_rig.play_emote(CharacterFaceRig.EmoteState.IDLE)
+	if opponent_face_rig:
+		opponent_face_rig.setup(GameManager.opponent_hero_name)
+		opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.IDLE)
 
 	for i in range(4):
 		var p_lane = player_lanes_box.get_child(i) as LaneSlot
@@ -331,6 +341,9 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 		lane.place_building(card_data)
 		log_message("🏰 Constructed %s on Lane %d (%s)!" % [card_data.get("name", "Building"), lane.lane_index + 1, lane.landscape])
 
+		if player_face_rig:
+			player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+
 		if ResourceLoader.exists("res://assets/audio/sfx/Click.wav"):
 			Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Click.wav"), -4.0, 0.05)
 
@@ -359,6 +372,9 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 	player_mp -= cost
 	lane.place_creature(card_data)
 	log_message("✨ Summoned %s onto Lane %d (%s)!" % [card_data.get("name", "Creature"), lane.lane_index + 1, lane.landscape])
+
+	if player_face_rig:
+		player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
 
 	if ability_system:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, lane)
@@ -401,6 +417,9 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 		log_message("✨ Cast %s! %s" % [card_data.get("name", "Spell"), res.get("message", "")])
 	else:
 		player_mp -= cost
+
+	if player_face_rig:
+		player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
 
 	# Move to discard pile
 	player_discard_pile.append(card_data.get("id", ""))
@@ -455,6 +474,13 @@ func _execute_leader_power(is_player_owner: bool, char_id: String) -> void:
 
 	var lanes = player_lanes if is_player_owner else opponent_lanes
 	var owner_tag = "YOU" if is_player_owner else GameManager.opponent_hero_name
+
+	if is_player_owner:
+		if player_face_rig:
+			player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+	else:
+		if opponent_face_rig:
+			opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
 
 	match script_name:
 		"GainActionPointsLeader":
@@ -581,8 +607,12 @@ func execute_battle_phase() -> void:
 			var destroyed = o_lane.apply_damage(final_damage)
 			if destroyed:
 				log_message("Opponent's %s was destroyed!" % target_creature_name)
+				if opponent_face_rig:
+					opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
 		else:
 			opponent_hp = max(0, opponent_hp - final_damage)
+			if opponent_face_rig:
+				opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
 
 		_update_ui()
 		if opponent_hp <= 0:
@@ -653,6 +683,8 @@ func execute_opponent_turn() -> void:
 					log_message("%s summoned %s into Lane %d (%s)!" % [
 						GameManager.opponent_hero_name, candidate_card.get("name", "Creature"), o_lane.lane_index + 1, o_lane.landscape
 					])
+					if opponent_face_rig:
+						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
 					if ability_system:
 						ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, o_lane)
 					break
@@ -670,6 +702,8 @@ func execute_opponent_turn() -> void:
 						log_message("%s constructed %s on Lane %d (%s)!" % [
 							GameManager.opponent_hero_name, c_data.get("name", "Building"), o_lane.lane_index + 1, o_lane.landscape
 						])
+						if opponent_face_rig:
+							opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
 						break
 				break
 
@@ -692,6 +726,8 @@ func execute_opponent_turn() -> void:
 					log_message("%s cast %s! %s" % [
 						GameManager.opponent_hero_name, c_data.get("name", "Spell"), res.get("message", "")
 					])
+					if opponent_face_rig:
+						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
 					break
 
 	# Opponent attacks
@@ -743,8 +779,12 @@ func execute_opponent_turn() -> void:
 			var destroyed = p_lane.apply_damage(final_damage)
 			if destroyed:
 				log_message("Your %s was destroyed!" % target_creature_name)
+				if player_face_rig:
+					player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
 		else:
 			player_hp = max(0, player_hp - final_damage)
+			if player_face_rig:
+				player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
 
 		_update_ui()
 		if player_hp <= 0:
@@ -762,6 +802,17 @@ func execute_opponent_turn() -> void:
 	start_player_turn()
 
 func end_match(victory: bool) -> void:
+	if victory:
+		if player_face_rig:
+			player_face_rig.play_emote(CharacterFaceRig.EmoteState.VICTORY)
+		if opponent_face_rig:
+			opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.DEFEAT)
+	else:
+		if player_face_rig:
+			player_face_rig.play_emote(CharacterFaceRig.EmoteState.DEFEAT)
+		if opponent_face_rig:
+			opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.VICTORY)
+
 	if phase_manager != null:
 		phase_manager.end_match(victory)
 	if GameManager:
