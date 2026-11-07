@@ -1,0 +1,228 @@
+[gd_scene format=3 uid="uid://d3k8x7w2p1m4q"]
+
+[ext_resource type="Script" path="res://src/ui/DeckBuilder.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.075, 0.095, 0.14, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.11, 0.135, 0.2, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.69, 0.27, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="DeckBuilder" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="MainVBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = -18.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="TopBar" type="VBoxContainer" parent="MainVBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HBox" type="HBoxContainer" parent="MainVBox/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BackBtn" type="Button" parent="MainVBox/TopBar/HBox"]
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 2
+text = "⬅ Back"
+
+[node name="TitleLabel" type="Label" parent="MainVBox/TopBar/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.82, 0.32, 1)
+theme_override_font_sizes/font_size = 20
+text = "🃏 DECK BUILDER"
+
+[node name="DeckNameEdit" type="LineEdit" parent="MainVBox/TopBar/HBox"]
+custom_minimum_size = Vector2(210, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter Deck Name..."
+text = "Finn Starter Deck"
+
+[node name="PresetSelect" type="OptionButton" parent="MainVBox/TopBar/HBox"]
+custom_minimum_size = Vector2(220, 34)
+layout_mode = 2
+
+[node name="SaveBtn" type="Button" parent="MainVBox/TopBar/HBox"]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+text = "💾 Save & Equip"
+
+[node name="ClearBtn" type="Button" parent="MainVBox/TopBar/HBox"]
+custom_minimum_size = Vector2(90, 36)
+layout_mode = 2
+text = "🗑️ Clear"
+
+[node name="StatusBanner" type="Label" parent="MainVBox/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.85, 0.96, 1)
+theme_override_font_sizes/font_size = 12
+text = "Build a legal deck of 10 to 25 cards (maximum 4 copies of any single card)."
+
+[node name="ContentSplit" type="HSplitContainer" parent="MainVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 760
+
+[node name="LeftCollection" type="VBoxContainer" parent="MainVBox/ContentSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="FilterRow" type="HBoxContainer" parent="MainVBox/ContentSplit/LeftCollection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SearchEdit" type="LineEdit" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
+custom_minimum_size = Vector2(160, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "🔍 Search name, ability, ID..."
+
+[node name="FactionSelect" type="OptionButton" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
+custom_minimum_size = Vector2(135, 32)
+layout_mode = 2
+
+[node name="TypeSelect" type="OptionButton" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
+custom_minimum_size = Vector2(135, 32)
+layout_mode = 2
+
+[node name="CostSelect" type="OptionButton" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
+custom_minimum_size = Vector2(115, 32)
+layout_mode = 2
+
+[node name="CollectionCountLabel" type="Label" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "416 Cards"
+horizontal_alignment = 2
+
+[node name="Scroll" type="ScrollContainer" parent="MainVBox/ContentSplit/LeftCollection"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CollectionGrid" type="GridContainer" parent="MainVBox/ContentSplit/LeftCollection/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 5
+
+[node name="RightDeckPanel" type="VBoxContainer" parent="MainVBox/ContentSplit"]
+custom_minimum_size = Vector2(390, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConfigBox" type="VBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LeaderRow" type="HBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LeaderLabel" type="Label" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LeaderRow"]
+layout_mode = 2
+text = "👑 Hero Leader:"
+
+[node name="LeaderSelect" type="OptionButton" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LandscapesRow" type="HBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Lane0Btn" type="Button" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LandscapesRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "L1: Plains"
+
+[node name="Lane1Btn" type="Button" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LandscapesRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "L2: Plains"
+
+[node name="Lane2Btn" type="Button" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LandscapesRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "L3: Cotton"
+
+[node name="Lane3Btn" type="Button" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LandscapesRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "L4: Plains"
+
+[node name="ManaCurveBox" type="VBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CurveTitle" type="Label" parent="MainVBox/ContentSplit/RightDeckPanel/ManaCurveBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "📊 Mana Cost Curve (0 - 5+ MP)"
+
+[node name="BarsHBox" type="HBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel/ManaCurveBox"]
+custom_minimum_size = Vector2(0, 82)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DeckHeaderRow" type="HBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel"]
+layout_mode = 2
+
+[node name="DeckCountLabel" type="Label" parent="MainVBox/ContentSplit/RightDeckPanel/DeckHeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+text = "Deck: 10 / 25 Cards"
+
+[node name="ValidationLabel" type="Label" parent="MainVBox/ContentSplit/RightDeckPanel/DeckHeaderRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "✅ Legal Deck"
+
+[node name="DeckScroll" type="ScrollContainer" parent="MainVBox/ContentSplit/RightDeckPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DeckListVBox" type="VBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel/DeckScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4

@@ -8,6 +8,8 @@ var drop_profiles_db: Dictionary = {}
 var creatures_list: Array = []
 var spells_list: Array = []
 var buildings_list: Array = []
+var all_cards_list: Array = []
+var preset_decks_db: Dictionary = {}
 
 func _ready() -> void:
 	load_localizations()
@@ -39,6 +41,11 @@ func load_blueprints() -> void:
 	_load_buildings()
 	_load_leaders()
 	_load_drop_profiles()
+	_load_preset_decks()
+	all_cards_list.clear()
+	all_cards_list.append_array(creatures_list)
+	all_cards_list.append_array(spells_list)
+	all_cards_list.append_array(buildings_list)
 
 func _load_leaders() -> void:
 	var path = "res://data/db_Leaders.json"
@@ -220,4 +227,31 @@ func _load_drop_profiles() -> void:
 
 func get_drop_profile(profile_id: String) -> Dictionary:
 	return drop_profiles_db.get(profile_id, {})
+
+func _load_preset_decks() -> void:
+	var path = "res://data/db_Decks.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	var current_did: String = ""
+	for item in json.data:
+		var raw_did = str(item.get("DeckID", "")).strip_edges()
+		if raw_did != "":
+			current_did = raw_did
+			if not preset_decks_db.has(current_did):
+				preset_decks_db[current_did] = []
+		if current_did == "":
+			continue
+		var cid = str(item.get("Cards", item.get("Card", ""))).strip_edges()
+		if cid == "":
+			continue
+		var qty = int(item.get("Quantity", "1"))
+		for _i in range(max(1, qty)):
+			preset_decks_db[current_did].append(cid)
+
+func get_preset_deck(deck_id: String) -> Array:
+	return preset_decks_db.get(deck_id, []).duplicate()
 

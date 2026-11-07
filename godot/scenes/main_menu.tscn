@@ -72,6 +72,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "⚔️ Play Battle (Finn vs Jake)"
 
+[node name="DeckBuilderBtn" type="Button" parent="CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "🃏 Deck Builder"
+
 [node name="CompendiumBtn" type="Button" parent="CenterContainer/VBox"]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
