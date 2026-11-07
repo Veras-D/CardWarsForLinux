@@ -8,6 +8,7 @@ const SpellResolver = preload("res://src/battle/SpellResolver.gd")
 const LootRoller = preload("res://src/battle/LootRoller.gd")
 const Tombstone = preload("res://src/battle/Tombstone.gd")
 const CharacterFaceRig = preload("res://src/battle/CharacterFaceRig.gd")
+const VOManager = preload("res://src/battle/VOManager.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
@@ -67,8 +68,12 @@ var opponent_leader_id: String = ""
 var ability_system: AbilitySystem = null
 var phase_manager: BattlePhaseManager = null
 var spell_resolver: SpellResolver = null
+var vo_manager: VOManager = null
 
 func _ready() -> void:
+	vo_manager = VOManager.new()
+	add_child(vo_manager)
+
 	turn_btn.pressed.connect(_on_turn_button_pressed)
 	dialog_btn.pressed.connect(_on_menu_button_pressed)
 	match_intro.intro_completed.connect(_on_intro_completed)
@@ -83,6 +88,8 @@ func _ready() -> void:
 	)
 
 func _on_intro_completed() -> void:
+	if vo_manager:
+		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.OPENING, true, true)
 	rps_modal.start_rps(GameManager.opponent_hero_name)
 
 func _on_rps_completed(player_goes_first: bool) -> void:
@@ -343,6 +350,8 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 
 		if player_face_rig:
 			player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+		if vo_manager:
+			vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.PLAY_BUILDING, true)
 
 		if ResourceLoader.exists("res://assets/audio/sfx/Click.wav"):
 			Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Click.wav"), -4.0, 0.05)
@@ -375,6 +384,8 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 
 	if player_face_rig:
 		player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+	if vo_manager:
+		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.PLAY_CREATURE, true)
 
 	if ability_system:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, lane)
@@ -420,6 +431,8 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 
 	if player_face_rig:
 		player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+	if vo_manager:
+		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.PLAY_SPELL, true)
 
 	# Move to discard pile
 	player_discard_pile.append(card_data.get("id", ""))
@@ -446,6 +459,11 @@ func _on_floop_requested(lane: LaneSlot) -> void:
 	lane.set_flooped(true)
 	log_message("Flooped %s!" % data.get("name", "Creature"))
 
+	if vo_manager:
+		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.FLOOP, true)
+	if ResourceLoader.exists("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"):
+		Audio.play_sfx_with_variation(load("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"), -3.0)
+
 	_execute_floop_ability(lane)
 	_update_ui()
 
@@ -467,11 +485,6 @@ func _execute_leader_power(is_player_owner: bool, char_id: String) -> void:
 	if ResourceLoader.exists("res://assets/audio/sfx/LeaderPower.wav"):
 		Audio.play_sfx(load("res://assets/audio/sfx/LeaderPower.wav"))
 
-	var vo_path = "res://assets/audio/vo/%s_Power.wav" % char_id
-	if ResourceLoader.exists(vo_path):
-		var timer = get_tree().create_timer(0.12)
-		timer.timeout.connect(func(): Audio.play_sfx(load(vo_path), -8.0))
-
 	var lanes = player_lanes if is_player_owner else opponent_lanes
 	var owner_tag = "YOU" if is_player_owner else GameManager.opponent_hero_name
 
@@ -481,6 +494,9 @@ func _execute_leader_power(is_player_owner: bool, char_id: String) -> void:
 	else:
 		if opponent_face_rig:
 			opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+
+	if vo_manager:
+		vo_manager.play_event(hero_name, VOManager.VOEvent.LEADER_ABILITY, is_player_owner)
 
 	match script_name:
 		"GainActionPointsLeader":
@@ -597,10 +613,16 @@ func execute_battle_phase() -> void:
 
 		if clash_res.id == "crit":
 			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [attacker_name, final_damage])
+			if ResourceLoader.exists("res://assets/audio/sfx/Ring_Crit.wav"):
+				Audio.play_sfx(load("res://assets/audio/sfx/Ring_Crit.wav"))
 		elif clash_res.id == "miss":
 			log_message("❌ MISSED! %s's attack missed completely!" % attacker_name)
+			if ResourceLoader.exists("res://assets/audio/sfx/Ring_Miss.wav"):
+				Audio.play_sfx(load("res://assets/audio/sfx/Ring_Miss.wav"))
 		else:
 			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
+			if ResourceLoader.exists("res://assets/audio/sfx/Ring_Hit.wav"):
+				Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Ring_Hit.wav"))
 
 		if o_lane.has_creature:
 			var target_creature_name = o_lane.creature_data.get("name", "Creature")
@@ -609,10 +631,15 @@ func execute_battle_phase() -> void:
 				log_message("Opponent's %s was destroyed!" % target_creature_name)
 				if opponent_face_rig:
 					opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+				if vo_manager:
+					vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.DESTROY_CREATURE, true)
+					vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, false)
 		else:
 			opponent_hp = max(0, opponent_hp - final_damage)
 			if opponent_face_rig:
 				opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+			if vo_manager:
+				vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.HERO_DAMAGED, false)
 
 		_update_ui()
 		if opponent_hp <= 0:
@@ -685,6 +712,8 @@ func execute_opponent_turn() -> void:
 					])
 					if opponent_face_rig:
 						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+					if vo_manager:
+						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.PLAY_CREATURE, false)
 					if ability_system:
 						ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, o_lane)
 					break
@@ -704,6 +733,8 @@ func execute_opponent_turn() -> void:
 						])
 						if opponent_face_rig:
 							opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+						if vo_manager:
+							vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.PLAY_BUILDING, false)
 						break
 				break
 
@@ -728,6 +759,8 @@ func execute_opponent_turn() -> void:
 					])
 					if opponent_face_rig:
 						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+					if vo_manager:
+						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.PLAY_SPELL, false)
 					break
 
 	# Opponent attacks
@@ -769,10 +802,16 @@ func execute_opponent_turn() -> void:
 
 		if clash_res.id == "crit":
 			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [attacker_name, final_damage])
+			if ResourceLoader.exists("res://assets/audio/sfx/Ring_Crit.wav"):
+				Audio.play_sfx(load("res://assets/audio/sfx/Ring_Crit.wav"))
 		elif clash_res.id == "miss":
 			log_message("❌ MISSED! %s's attack missed!" % attacker_name)
+			if ResourceLoader.exists("res://assets/audio/sfx/Ring_Miss.wav"):
+				Audio.play_sfx(load("res://assets/audio/sfx/Ring_Miss.wav"))
 		else:
 			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
+			if ResourceLoader.exists("res://assets/audio/sfx/Ring_Hit.wav"):
+				Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Ring_Hit.wav"))
 
 		if p_lane.has_creature:
 			var target_creature_name = p_lane.creature_data.get("name", "Creature")
@@ -781,10 +820,15 @@ func execute_opponent_turn() -> void:
 				log_message("Your %s was destroyed!" % target_creature_name)
 				if player_face_rig:
 					player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+				if vo_manager:
+					vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.DESTROY_CREATURE, false)
+					vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, true)
 		else:
 			player_hp = max(0, player_hp - final_damage)
 			if player_face_rig:
 				player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+			if vo_manager:
+				vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.HERO_DAMAGED, true)
 
 		_update_ui()
 		if player_hp <= 0:
@@ -807,11 +851,21 @@ func end_match(victory: bool) -> void:
 			player_face_rig.play_emote(CharacterFaceRig.EmoteState.VICTORY)
 		if opponent_face_rig:
 			opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.DEFEAT)
+		if vo_manager:
+			vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.WIN, true, true)
+			vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.LOSE, false, true)
+		if ResourceLoader.exists("res://assets/audio/sfx/FX_BattleEnd_P1Win.wav"):
+			Audio.play_sfx(load("res://assets/audio/sfx/FX_BattleEnd_P1Win.wav"), -2.0)
 	else:
 		if player_face_rig:
 			player_face_rig.play_emote(CharacterFaceRig.EmoteState.DEFEAT)
 		if opponent_face_rig:
 			opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.VICTORY)
+		if vo_manager:
+			vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.LOSE, true, true)
+			vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.WIN, false, true)
+		if ResourceLoader.exists("res://assets/audio/sfx/FX_BattleEnd_Defeat.wav"):
+			Audio.play_sfx(load("res://assets/audio/sfx/FX_BattleEnd_Defeat.wav"), -2.0)
 
 	if phase_manager != null:
 		phase_manager.end_match(victory)

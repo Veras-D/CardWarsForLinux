@@ -110,7 +110,7 @@
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, #10b981 0%, #38bdf8 100%);
-      width: 43.5%;
+      width: 45.7%;
       border-radius: 4px;
     }
 
@@ -604,7 +604,7 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">20 / 46 Tasks Done (43.5%)</span>
+            <span class="pct">21 / 46 Tasks Done (45.7%)</span>
           </div>
           <div class="progress-track">
             <div class="progress-fill"></div>
@@ -632,7 +632,7 @@
             <option value="epic1">⚔️ Epic 1: Match Flow (3/3)</option>
             <option value="epic2">🛡️ Epic 2: Combat Engine (7/7)</option>
             <option value="epic3">🔮 Epic 3: Ability System (2/2)</option>
-            <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (1/2)</option>
+            <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (2/2)</option>
             <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (0/2)</option>
             <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (0/2)</option>
             <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (0/4)</option>
@@ -1415,7 +1415,7 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">1 / 2 Done</span>
+            <span class="epic-count-badge">2 / 2 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
@@ -1465,7 +1465,7 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 4.2</span>
@@ -1473,7 +1473,7 @@
                 <span class="task-snippet">— 4 audio buses (Master, Music, SFX, Voice), randomized sound pools, and character battle voice lines.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -1490,10 +1490,16 @@
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-checked">✓</span>
           <span>Full audio coverage across all game events with zero audio clipping or overlapping distortion.</span>
         </li>
                   </ul>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Verification &amp; Test Suite</div>
+                  <div class="ref-line"><strong>Test Suite:</strong> <code>godot test_audio_engine.tscn</code></div>
+                  <p style="margin-top: 8px; color: var(--accent-green); font-size: 0.88rem;"><strong>100% Passed (40/40 checks).</strong> Verified 4 audio buses (Master, Music, SFX, Voice), volume control dB-linear conversions and muting, dynamic SFX pooling with pitch variance, dedicated voice routing and anti-repetition catalog, db_CharacterVO rule parsing, hero name normalization across 8+ leaders, and full BattleController integration.</p>
                 </div>
               </div>
             </div>

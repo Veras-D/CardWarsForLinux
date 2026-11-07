@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dp6m8v7y4k1xq"]
+
+[ext_resource type="Script" path="res://test_audio_engine_node.gd" id="1_test"]
+
+[node name="TestAudioEngine" type="Node"]
+script = ExtResource("1_test")
