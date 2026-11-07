@@ -110,7 +110,7 @@
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, #10b981 0%, #38bdf8 100%);
-      width: 47.8%;
+      width: 50.0%;
       border-radius: 4px;
     }
 
@@ -604,7 +604,7 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">22 / 46 Tasks Done (47.8%)</span>
+            <span class="pct">23 / 46 Tasks Done (50.0%)</span>
           </div>
           <div class="progress-track">
             <div class="progress-fill"></div>
@@ -634,7 +634,7 @@
             <option value="epic3">🔮 Epic 3: Ability System (2/2)</option>
             <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (2/2)</option>
             <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (0/2)</option>
-            <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (1/2)</option>
+            <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (2/2)</option>
             <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (0/4)</option>
             <option value="epic8">💰 Epic 8: Economy &amp; Gacha (0/2)</option>
             <option value="epic9">⚙️ Epic 9: UI, Settings &amp; CI/CD (1/3)</option>
@@ -645,8 +645,8 @@
 
       <div class="toolbar-right">
         <button class="btn active" data-status-filter="all">All</button>
-        <button class="btn" data-status-filter="completed">✅ Done (22)</button>
-        <button class="btn" data-status-filter="planned">⏳ Planned (24)</button>
+        <button class="btn" data-status-filter="completed">✅ Done (23)</button>
+        <button class="btn" data-status-filter="planned">⏳ Planned (23)</button>
         <button class="btn" id="btn-toggle-all">↕️ Expand All</button>
       </div>
     </div>
@@ -1607,7 +1607,7 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">1 / 2 Done</span>
+            <span class="epic-count-badge">2 / 2 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
@@ -1654,7 +1654,7 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 6.2</span>
@@ -1662,7 +1662,7 @@
                 <span class="task-snippet">— Card quality tiers (Standard -> Gold [+10% stats] -> Obsidian [+25% stats]) and 204 fusion recipes.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -1679,10 +1679,16 @@
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-checked">✓</span>
           <span>Card fusion correctly consumes materials and adds upgraded card to inventory.</span>
         </li>
                   </ul>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Verification &amp; Test Suite</div>
+                  <div class="ref-line"><strong>Test Suite:</strong> <code>godot test_fusion_engine.tscn</code></div>
+                  <p style="margin-top: 8px; color: var(--accent-green); font-size: 0.88rem;"><strong>100% Passed (46/46 checks).</strong> Verified Standard/Gold (+10% stats)/Obsidian (+25% stats) quality scaling, Gold Foil and Obsidian Dark animated card shaders on CardView, all 204 recipes parsed from db_Fusion.json, ingredient &amp; coin deduction on fusion execution, and interactive Fusion Lab modal inside DeckBuilder.</p>
                 </div>
               </div>
             </div>

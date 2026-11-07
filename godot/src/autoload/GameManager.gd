@@ -51,26 +51,38 @@ var opponent_landscapes: Array[String] = ["Corn", "Corn", "Sand", "Corn"]
 var wheel_mode: String = "NORMAL"
 
 # Session & persistent rewards
-var player_coins: int = 0
+var player_coins: int = 5000
 var player_inventory_cards: Array[String] = []
+var owned_card_counts: Dictionary = {}
 var active_deck_name: String = "Finn Starter Deck"
 
 func add_rewards(coins: int, cards: Array[String]) -> void:
 	player_coins += coins
 	for c in cards:
 		player_inventory_cards.append(c)
+		if not owned_card_counts.is_empty():
+			owned_card_counts[c] = int(owned_card_counts.get(c, 0)) + 1
 
 func get_owned_card_counts() -> Dictionary:
-	var counts: Dictionary = {}
-	# All cards in current player_deck + starter pool have at least 4 copies available by default,
-	# plus any additional cards earned from loot drops.
-	for c in Database.all_cards_list:
-		var cid = str(c.get("id", ""))
-		if cid != "":
-			counts[cid] = 4
-	for c in player_inventory_cards:
-		counts[c] = counts.get(c, 0) + 1
-	return counts
+	if owned_card_counts.is_empty():
+		for c in Database.all_cards_list:
+			var cid = str(c.get("id", ""))
+			if cid != "":
+				owned_card_counts[cid] = 4
+		for c in player_inventory_cards:
+			owned_card_counts[c] = int(owned_card_counts.get(c, 0)) + 1
+	return owned_card_counts
+
+func craft_fusion_recipe(recipe: Dictionary) -> Dictionary:
+	var counts = get_owned_card_counts()
+	var FusionEngine = preload("res://src/cards/FusionEngine.gd")
+	var res = FusionEngine.execute_fusion(recipe, counts, player_coins)
+	if res.get("ok", false):
+		player_coins = int(res.get("new_coins", player_coins))
+		var out_id = str(res.get("output_card_id", ""))
+		if out_id != "":
+			player_inventory_cards.append(out_id)
+	return res
 
 func apply_custom_deck(deck_data: Dictionary) -> void:
 	if deck_data.is_empty():

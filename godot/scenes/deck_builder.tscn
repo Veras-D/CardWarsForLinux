@@ -83,6 +83,11 @@ custom_minimum_size = Vector2(140, 36)
 layout_mode = 2
 text = "💾 Save & Equip"
 
+[node name="FusionBtn" type="Button" parent="MainVBox/TopBar/HBox"]
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+text = "⚗️ Fusion Lab"
+
 [node name="ClearBtn" type="Button" parent="MainVBox/TopBar/HBox"]
 custom_minimum_size = Vector2(90, 36)
 layout_mode = 2
@@ -226,3 +231,80 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
+
+[node name="FusionModal" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 70.0
+offset_top = 46.0
+offset_right = -70.0
+offset_bottom = -46.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="FusionModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = -18.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="FusionModal/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="FusionModal/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+text = "⚗️ CARD FUSION LAB (204 Recipes • Standard / Gold / Obsidian)"
+
+[node name="CoinsLabel" type="Label" parent="FusionModal/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.35, 1)
+theme_override_font_sizes/font_size = 15
+text = "🪙 5000 Coins"
+
+[node name="CloseFusionBtn" type="Button" parent="FusionModal/VBox/Header"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+text = "✖ Close"
+
+[node name="FilterBar" type="HBoxContainer" parent="FusionModal/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FusionSearchEdit" type="LineEdit" parent="FusionModal/VBox/FilterBar"]
+custom_minimum_size = Vector2(220, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "🔍 Search fusion recipes or ingredients..."
+
+[node name="QualityFilterSelect" type="OptionButton" parent="FusionModal/VBox/FilterBar"]
+custom_minimum_size = Vector2(180, 32)
+layout_mode = 2
+
+[node name="FusionStatusLabel" type="Label" parent="FusionModal/VBox/FilterBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Select a recipe to craft."
+
+[node name="RecipeScroll" type="ScrollContainer" parent="FusionModal/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RecipeListVBox" type="VBoxContainer" parent="FusionModal/VBox/RecipeScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6

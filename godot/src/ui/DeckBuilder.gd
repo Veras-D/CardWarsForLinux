@@ -7,10 +7,12 @@ class_name DeckBuilder
 ## Leader & 4-Lane Landscape configuration, and saving/loading custom decks to user://decks/*.json.
 
 const DeckValidator = preload("res://src/cards/DeckValidator.gd")
+const FusionEngine = preload("res://src/cards/FusionEngine.gd")
 const CardViewScene = preload("res://scenes/components/CardView.tscn")
 
 signal deck_saved(deck_name: String, file_path: String)
 signal deck_loaded(deck_name: String)
+signal card_fused(output_card_id: String)
 
 const AVAILABLE_LEADERS: Array[String] = [
 	"Finn",
@@ -48,8 +50,20 @@ var max_grid_render: int = 80 # Cap live Node instantiation per page/query for i
 @onready var deck_name_edit: LineEdit = $MainVBox/TopBar/HBox/DeckNameEdit
 @onready var preset_select: OptionButton = $MainVBox/TopBar/HBox/PresetSelect
 @onready var save_btn: Button = $MainVBox/TopBar/HBox/SaveBtn
+@onready var fusion_btn: Button = $MainVBox/TopBar/HBox/FusionBtn
 @onready var clear_btn: Button = $MainVBox/TopBar/HBox/ClearBtn
 @onready var status_banner: Label = $MainVBox/TopBar/StatusBanner
+
+@onready var fusion_modal: Panel = $FusionModal
+@onready var fusion_coins_label: Label = $FusionModal/VBox/Header/CoinsLabel
+@onready var close_fusion_btn: Button = $FusionModal/VBox/Header/CloseFusionBtn
+@onready var fusion_search_edit: LineEdit = $FusionModal/VBox/FilterBar/FusionSearchEdit
+@onready var quality_filter_select: OptionButton = $FusionModal/VBox/FilterBar/QualityFilterSelect
+@onready var fusion_status_label: Label = $FusionModal/VBox/FilterBar/FusionStatusLabel
+@onready var recipe_list_vbox: VBoxContainer = $FusionModal/VBox/RecipeScroll/RecipeListVBox
+
+var fusion_search_text: String = ""
+var selected_fusion_quality: int = -1 # -1 = ALL, 0 = Standard, 1 = Gold, 2 = Obsidian
 
 @onready var search_edit: LineEdit = $MainVBox/ContentSplit/LeftCollection/FilterRow/SearchEdit
 @onready var faction_select: OptionButton = $MainVBox/ContentSplit/LeftCollection/FilterRow/FactionSelect
@@ -113,6 +127,17 @@ func _setup_filter_controls() -> void:
 		cost_select.add_item("Cost: 5+ MP")
 		cost_select.set_item_metadata(cost_select.item_count - 1, 5)
 
+	if quality_filter_select:
+		quality_filter_select.clear()
+		quality_filter_select.add_item("Quality: ALL")
+		quality_filter_select.set_item_metadata(0, -1)
+		quality_filter_select.add_item("Quality: Standard")
+		quality_filter_select.set_item_metadata(1, FusionEngine.QualityTier.STANDARD)
+		quality_filter_select.add_item("✨ Quality: Gold (+10%)")
+		quality_filter_select.set_item_metadata(2, FusionEngine.QualityTier.GOLD)
+		quality_filter_select.add_item("🔮 Quality: Obsidian (+25%)")
+		quality_filter_select.set_item_metadata(3, FusionEngine.QualityTier.OBSIDIAN)
+
 
 func _setup_leader_and_landscape_controls() -> void:
 	if leader_select:
@@ -136,6 +161,20 @@ func _connect_signals() -> void:
 		back_btn.pressed.connect(_on_back_pressed)
 	if save_btn:
 		save_btn.pressed.connect(_on_save_pressed)
+	if fusion_btn:
+		fusion_btn.pressed.connect(open_fusion_modal)
+	if close_fusion_btn:
+		close_fusion_btn.pressed.connect(close_fusion_modal)
+	if fusion_search_edit:
+		fusion_search_edit.text_changed.connect(func(q):
+			fusion_search_text = q
+			refresh_fusion_modal()
+		)
+	if quality_filter_select:
+		quality_filter_select.item_selected.connect(func(idx):
+			selected_fusion_quality = int(quality_filter_select.get_item_metadata(idx))
+			refresh_fusion_modal()
+		)
 	if clear_btn:
 		clear_btn.pressed.connect(_on_clear_pressed)
 	if deck_name_edit:
@@ -538,6 +577,123 @@ func _on_clear_pressed() -> void:
 
 func _on_back_pressed() -> void:
 	GameManager.return_to_menu()
+
+
+func open_fusion_modal() -> void:
+	if fusion_modal:
+		fusion_modal.visible = true
+		refresh_fusion_modal()
+
+
+func close_fusion_modal() -> void:
+	if fusion_modal:
+		fusion_modal.visible = false
+
+
+func refresh_fusion_modal() -> void:
+	if recipe_list_vbox == null:
+		return
+
+	if fusion_coins_label:
+		fusion_coins_label.text = "🪙 %d Coins" % GameManager.player_coins
+
+	for child in recipe_list_vbox.get_children():
+		recipe_list_vbox.remove_child(child)
+		child.queue_free()
+
+	var owned = GameManager.get_owned_card_counts()
+	var q_lower = fusion_search_text.strip_edges().to_lower()
+	var shown_count = 0
+
+	for rec in Database.fusion_recipes_list:
+		var out_id = str(rec.get("card_id", ""))
+		var out_card = Database.get_card(out_id)
+		var out_name = str(out_card.get("name", out_id))
+		var r_quality = int(rec.get("quality", FusionEngine.QualityTier.STANDARD))
+
+		if selected_fusion_quality >= 0 and r_quality != selected_fusion_quality:
+			continue
+
+		if q_lower != "":
+			var match_found = (q_lower in out_name.to_lower()) or (q_lower in out_id.to_lower())
+			if not match_found:
+				for ing in rec.get("ingredients", []):
+					var ing_id = str(ing.get("card_id", ""))
+					var ing_card = Database.get_card(ing_id)
+					var ing_name = str(ing_card.get("name", ing_id))
+					if (q_lower in ing_name.to_lower()) or (q_lower in ing_id.to_lower()):
+						match_found = true
+						break
+			if not match_found:
+				continue
+
+		shown_count += 1
+		if shown_count > 60:
+			break
+
+		var check = FusionEngine.can_craft_recipe(rec, owned, GameManager.player_coins)
+		var can_craft = check.get("can_craft", false)
+
+		var row = HBoxContainer.new()
+		row.custom_minimum_size = Vector2(0, 34)
+
+		var q_badge = "✨ [GOLD] " if r_quality == FusionEngine.QualityTier.GOLD else ("🔮 [OBSIDIAN] " if r_quality == FusionEngine.QualityTier.OBSIDIAN else "")
+		var out_lbl = Label.new()
+		out_lbl.custom_minimum_size = Vector2(230, 0)
+		out_lbl.text = "%s%s (Own: %d)" % [q_badge, out_name, int(owned.get(out_id, 0))]
+		out_lbl.modulate = Color(1.0, 0.9, 0.4, 1.0) if r_quality == FusionEngine.QualityTier.GOLD else Color.WHITE
+		row.add_child(out_lbl)
+
+		var ing_parts: Array[String] = []
+		for ing in rec.get("ingredients", []):
+			var icid = str(ing.get("card_id", ""))
+			var ireq = int(ing.get("count", 1))
+			var ihave = int(owned.get(icid, 0))
+			var icard = Database.get_card(icid)
+			var iname = str(icard.get("name", icid))
+			ing_parts.append("%s (%d/%d)" % [iname, ihave, ireq])
+
+		var ing_lbl = Label.new()
+		ing_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		ing_lbl.text = "Requires: " + ", ".join(ing_parts)
+		ing_lbl.modulate = Color(0.8, 0.88, 0.96, 1.0)
+		row.add_child(ing_lbl)
+
+		var cost_lbl = Label.new()
+		cost_lbl.custom_minimum_size = Vector2(95, 0)
+		cost_lbl.text = "🪙 %d" % int(rec.get("cost", 0))
+		cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(cost_lbl)
+
+		var fuse_action_btn = Button.new()
+		fuse_action_btn.custom_minimum_size = Vector2(95, 28)
+		fuse_action_btn.text = "⚗️ Fuse!" if can_craft else "Locked"
+		fuse_action_btn.disabled = not can_craft
+		fuse_action_btn.pressed.connect(func(): craft_recipe(rec))
+		row.add_child(fuse_action_btn)
+
+		recipe_list_vbox.add_child(row)
+
+
+func craft_recipe(recipe: Dictionary) -> Dictionary:
+	var res = GameManager.craft_fusion_recipe(recipe)
+	if res.get("ok", false):
+		var out_id = str(res.get("output_card_id", ""))
+		var out_card = Database.get_card(out_id)
+		var out_name = str(out_card.get("name", out_id))
+		if fusion_status_label:
+			fusion_status_label.text = "✅ Fused %s! Added to inventory." % out_name
+			fusion_status_label.modulate = Color(0.3, 0.98, 0.5, 1.0)
+		_set_status("⚗️ Fused '%s'!" % out_name, Color(0.3, 0.98, 0.5, 1.0))
+		refresh_fusion_modal()
+		refresh_all()
+		card_fused.emit(out_id)
+	else:
+		var reason = str(res.get("reason", "Cannot fuse."))
+		if fusion_status_label:
+			fusion_status_label.text = "⚠️ " + reason
+			fusion_status_label.modulate = Color(1.0, 0.45, 0.4, 1.0)
+	return res
 
 
 func _set_status(msg: String, col: Color = Color.WHITE) -> void:

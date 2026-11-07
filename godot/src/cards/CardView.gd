@@ -1,11 +1,16 @@
 extends Control
 class_name CardView
 
+const FusionEngine = preload("res://src/cards/FusionEngine.gd")
+const GoldFoilShader = preload("res://src/shaders/card_gold_foil.gdshader")
+const ObsidianDarkShader = preload("res://src/shaders/card_obsidian_dark.gdshader")
+
 signal card_clicked(card_view)
 
 @export var card_data: Dictionary = {}
 var is_flooped: bool = false
 var can_play: bool = true
+var current_quality: int = FusionEngine.QualityTier.STANDARD
 
 @onready var panel: Panel = $Panel
 @onready var title_label: Label = $Panel/Margin/VBox/TitleLabel
@@ -26,9 +31,20 @@ func _ready() -> void:
 
 func render_card(data: Dictionary) -> void:
 	card_data = data
-	title_label.text = data.get("name", "Card")
-	desc_label.text = data.get("desc", "")
+	var q_tier = FusionEngine.get_card_quality(data)
+	current_quality = q_tier
+
+	var prefix = ""
+	if q_tier == FusionEngine.QualityTier.GOLD:
+		prefix = "✨ "
+	elif q_tier == FusionEngine.QualityTier.OBSIDIAN:
+		prefix = "🔮 "
+
+	title_label.text = prefix + str(data.get("name", "Card"))
+	desc_label.text = str(data.get("desc", ""))
 	cost_label.text = str(data.get("cost", 1))
+
+	_apply_quality_visuals(q_tier)
 
 	var tex_path = data.get("texture_path", "")
 	if tex_path != "":
@@ -51,6 +67,23 @@ func render_card(data: Dictionary) -> void:
 		atk_badge.visible = false
 		def_badge.visible = false
 		floop_badge.visible = false
+
+func _apply_quality_visuals(q_tier: int) -> void:
+	if panel == null:
+		return
+	if q_tier == FusionEngine.QualityTier.GOLD:
+		var mat = ShaderMaterial.new()
+		mat.shader = GoldFoilShader
+		panel.material = mat
+		title_label.modulate = Color(1.0, 0.92, 0.45, 1.0)
+	elif q_tier == FusionEngine.QualityTier.OBSIDIAN:
+		var mat = ShaderMaterial.new()
+		mat.shader = ObsidianDarkShader
+		panel.material = mat
+		title_label.modulate = Color(0.88, 0.65, 1.0, 1.0)
+	else:
+		panel.material = null
+		title_label.modulate = Color.WHITE
 
 func set_flooped(flooped: bool) -> void:
 	is_flooped = flooped

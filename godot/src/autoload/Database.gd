@@ -10,6 +10,8 @@ var spells_list: Array = []
 var buildings_list: Array = []
 var all_cards_list: Array = []
 var preset_decks_db: Dictionary = {}
+var fusion_recipes_list: Array[Dictionary] = []
+var fusion_recipes_db: Dictionary = {}
 
 func _ready() -> void:
 	load_localizations()
@@ -35,6 +37,8 @@ func load_textures() -> void:
 		if json.parse(file.get_as_text()) == OK:
 			texture_map = json.data
 
+const FusionEngine = preload("res://src/cards/FusionEngine.gd")
+
 func load_blueprints() -> void:
 	_load_creatures()
 	_load_spells()
@@ -42,6 +46,7 @@ func load_blueprints() -> void:
 	_load_leaders()
 	_load_drop_profiles()
 	_load_preset_decks()
+	_load_fusion_recipes()
 	all_cards_list.clear()
 	all_cards_list.append_array(creatures_list)
 	all_cards_list.append_array(spells_list)
@@ -128,6 +133,10 @@ func _parse_card(data: Dictionary, card_type: String) -> Dictionary:
 	if tex_path == "":
 		tex_path = texture_map.get(id, "res://assets/textures/icon.png")
 
+	var raw_atk = int(data.get("ATK", "0"))
+	var raw_def = int(data.get("DEF", "0"))
+	var quality_tier = FusionEngine.get_card_quality(id)
+
 	return {
 		"id": id,
 		"type": card_type,
@@ -136,8 +145,12 @@ func _parse_card(data: Dictionary, card_type: String) -> Dictionary:
 		"desc": localize(desc_key, val1, val2),
 		"faction": data.get("Faction", "Universal"),
 		"cost": int(data.get("Cost", "1")),
-		"atk": int(data.get("ATK", "0")),
-		"def": int(data.get("DEF", "0")),
+		"atk": raw_atk,
+		"def": raw_def,
+		"base_atk": raw_atk,
+		"base_def": raw_def,
+		"quality": quality_tier,
+		"quality_name": FusionEngine.get_quality_name(quality_tier),
 		"floop_cost": int(data.get("FloopCost", "0")),
 		"ability_type": data.get("AbilityType", "NONE"),
 		"script_name": data.get("ScriptName", ""),
@@ -254,4 +267,15 @@ func _load_preset_decks() -> void:
 
 func get_preset_deck(deck_id: String) -> Array:
 	return preset_decks_db.get(deck_id, []).duplicate()
+
+func _load_fusion_recipes() -> void:
+	fusion_recipes_list = FusionEngine.load_fusion_recipes("res://data/db_Fusion.json")
+	fusion_recipes_db.clear()
+	for rec in fusion_recipes_list:
+		var cid = str(rec.get("card_id", ""))
+		if cid != "":
+			fusion_recipes_db[cid] = rec
+
+func get_fusion_recipe(card_id: String) -> Dictionary:
+	return fusion_recipes_db.get(card_id, {})
 
