@@ -1,0 +1,95 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/TreeFort_FloorCeiling.obj" id="1_floor"]
+[ext_resource type="ArrayMesh" path="res://assets/models/TreeFort_Furniture.obj" id="2_furniture"]
+[ext_resource type="ArrayMesh" path="res://assets/models/TreeFort_Table.obj" id="3_table"]
+[ext_resource type="ArrayMesh" path="res://assets/models/TreeFort_Table_Objects.obj" id="4_tableobj"]
+[ext_resource type="ArrayMesh" path="res://assets/models/Finn.obj" id="5_finn"]
+[ext_resource type="ArrayMesh" path="res://assets/models/Jake.obj" id="6_jake"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/environment/TreeFort_Floor.png" id="7_tfloor"]
+[ext_resource type="Texture2D" path="res://assets/textures/environment/TreeFort_Atlas.png" id="8_tatlas"]
+[ext_resource type="Texture2D" path="res://assets/textures/environment/TreeFort_Table.png" id="9_ttable"]
+[ext_resource type="Texture2D" path="res://assets/textures/environment/Treefort_Table_Objects.png" id="10_ttableobj"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/Finn.png" id="11_tfinn"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/Jake.png" id="12_tjake"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/Logo.png" id="13_tlogo"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Floor"]
+shading_mode = 0
+albedo_texture = ExtResource("7_tfloor")
+texture_filter = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_Furniture"]
+shading_mode = 0
+albedo_texture = ExtResource("8_tatlas")
+texture_filter = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_Table"]
+shading_mode = 0
+albedo_texture = ExtResource("9_ttable")
+texture_filter = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_TableObj"]
+shading_mode = 0
+albedo_texture = ExtResource("10_ttableobj")
+texture_filter = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_Finn"]
+shading_mode = 0
+albedo_texture = ExtResource("11_tfinn")
+texture_filter = 2
+
+[sub_resource type="StandardMaterial3D" id="Mat_Jake"]
+shading_mode = 0
+albedo_texture = ExtResource("12_tjake")
+texture_filter = 2
+
+[sub_resource type="Environment" id="Env_Treehouse"]
+background_mode = 1
+background_color = Color(0.72, 0.88, 0.98, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+
+[node name="TreehouseMenu3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_Treehouse")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.85, 3.2)
+current = true
+fov = 60.0
+
+[node name="FloorCeiling" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_floor")
+surface_material_override/0 = SubResource("Mat_Floor")
+
+[node name="Furniture" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_furniture")
+surface_material_override/0 = SubResource("Mat_Furniture")
+
+[node name="Table" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = ExtResource("3_table")
+surface_material_override/0 = SubResource("Mat_Table")
+
+[node name="TableObjects" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = ExtResource("4_tableobj")
+surface_material_override/0 = SubResource("Mat_TableObj")
+
+[node name="Finn" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, -2.1)
+mesh = ExtResource("5_finn")
+surface_material_override/0 = SubResource("Mat_Finn")
+
+[node name="Jake" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -2.2, -0.4, -0.2)
+mesh = ExtResource("6_jake")
+surface_material_override/0 = SubResource("Mat_Jake")
+
+[node name="Logo" type="Sprite3D" parent="."]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 1.45, -0.2)
+billboard = 1
+texture = ExtResource("13_tlogo")

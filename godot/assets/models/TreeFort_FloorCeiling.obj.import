@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://b5m1echhjv056"
+path="res://.godot/imported/TreeFort_FloorCeiling.obj-63199d9cc684aa1803657fcb0a31d41d.mesh"
+
+[deps]
+
+files=["res://.godot/imported/TreeFort_FloorCeiling.obj-63199d9cc684aa1803657fcb0a31d41d.mesh"]
+
+source_file="res://assets/models/TreeFort_FloorCeiling.obj"
+dest_files=["res://.godot/imported/TreeFort_FloorCeiling.obj-63199d9cc684aa1803657fcb0a31d41d.mesh", "res://.godot/imported/TreeFort_FloorCeiling.obj-63199d9cc684aa1803657fcb0a31d41d.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
