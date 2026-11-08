@@ -7,6 +7,7 @@ extends Control
 @onready var deck_builder_btn: Button = $CenterContainer/VBox/DeckBuilderBtn
 @onready var chests_btn: Button = $CenterContainer/VBox/ChestsBtn
 @onready var compendium_btn: Button = $CenterContainer/VBox/CompendiumBtn
+@onready var settings_btn: Button = $CenterContainer/VBox/SettingsBtn
 @onready var quit_btn: Button = $CenterContainer/VBox/QuitBtn
 
 @onready var compendium_dialog: Panel = $CompendiumDialog
@@ -16,6 +17,7 @@ extends Control
 @onready var chest_modal: Control = $ChestOpeningModal
 @onready var versus_modal: Control = $VersusSetupModal
 @onready var lan_modal: Control = $LanLobbyModal
+@onready var settings_modal: Control = $SettingsModal
 
 func _ready() -> void:
 	play_btn.pressed.connect(_on_play_pressed)
@@ -30,6 +32,8 @@ func _ready() -> void:
 	if chests_btn:
 		chests_btn.pressed.connect(_on_chests_pressed)
 	compendium_btn.pressed.connect(_on_compendium_pressed)
+	if settings_btn:
+		settings_btn.pressed.connect(_on_settings_pressed)
 	quit_btn.pressed.connect(_on_quit_pressed)
 	close_compendium_btn.pressed.connect(_on_close_compendium_pressed)
 	compendium_dialog.visible = false
@@ -39,6 +43,8 @@ func _ready() -> void:
 		versus_modal.visible = false
 	if lan_modal:
 		lan_modal.visible = false
+	if settings_modal:
+		settings_modal.visible = false
 	play_btn.text = "⚔️ Quick Battle (%s vs %s)" % [GameManager.player_hero_name, GameManager.opponent_hero_name]
 
 func _on_play_pressed() -> void:
@@ -54,6 +60,10 @@ func _on_versus_pressed() -> void:
 func _on_lan_pressed() -> void:
 	if lan_modal:
 		lan_modal.open_modal()
+
+func _on_settings_pressed() -> void:
+	if settings_modal:
+		settings_modal.open_modal()
 
 func _on_campaign_pressed() -> void:
 	GameManager.open_campaign_map()

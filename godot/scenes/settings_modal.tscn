@@ -1,0 +1,327 @@
+[gd_scene load_steps=3 format=3 uid="uid://settings_modal_001"]
+
+[ext_resource type="Script" path="res://src/ui/SettingsModal.gd" id="1_modal"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.12, 0.17, 0.97)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 0.65, 0.2, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 18
+
+[node name="SettingsModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_modal")
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(720, 540)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="VBoxContainer" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="CenterContainer/Panel/VBox/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "⚙️ Game Options & Preferences"
+horizontal_alignment = 1
+
+[node name="TabContainer" type="TabContainer" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Audio" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
+layout_mode = 2
+
+[node name="AudioVBox" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Audio"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="AudioGrid" type="GridContainer" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 18
+theme_override_constants/v_separation = 14
+columns = 4
+
+[node name="MasterName" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+layout_mode = 2
+text = "Master Volume:"
+
+[node name="MasterSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.05
+value = 0.8
+
+[node name="MasterLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+text = "80%"
+
+[node name="MasterMute" type="CheckBox" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mute"
+
+[node name="BgmName" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+layout_mode = 2
+text = "Music (BGM):"
+
+[node name="BgmSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.05
+value = 0.8
+
+[node name="BgmLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+text = "80%"
+
+[node name="BgmMute" type="CheckBox" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mute"
+
+[node name="SfxName" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+layout_mode = 2
+text = "Sound Effects (SFX):"
+
+[node name="SfxSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.05
+value = 0.85
+
+[node name="SfxLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+text = "85%"
+
+[node name="SfxMute" type="CheckBox" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mute"
+
+[node name="VoName" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+layout_mode = 2
+text = "Voice Over (VO):"
+
+[node name="VoSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.05
+value = 0.9
+
+[node name="VoLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+text = "90%"
+
+[node name="VoMute" type="CheckBox" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mute"
+
+[node name="TestSfxBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 32)
+layout_mode = 2
+size_flags_horizontal = 0
+text = "🔊 Test Sound Effect"
+
+[node name="Display" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="DisplayGrid" type="GridContainer" parent="CenterContainer/Panel/VBox/TabContainer/Display"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 18
+theme_override_constants/v_separation = 14
+columns = 2
+
+[node name="ModeLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+layout_mode = 2
+text = "Window Mode:"
+
+[node name="ModeOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ResLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+layout_mode = 2
+text = "Screen Resolution:"
+
+[node name="ResOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VsyncLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+layout_mode = 2
+text = "V-Sync:"
+
+[node name="VsyncOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FpsLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+layout_mode = 2
+text = "Max Framerate (FPS):"
+
+[node name="FpsOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ScaleNameLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+layout_mode = 2
+text = "Interface Scale:"
+
+[node name="ScaleBox" type="HBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ScaleSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid/ScaleBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.75
+max_value = 2.0
+step = 0.25
+value = 1.0
+
+[node name="ScaleLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid/ScaleBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "1.00x"
+
+[node name="Controls" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="ControlsVBox" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Controls"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="RebindHeader" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Controls/ControlsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
+text = "Click a key to rebind, then press any Keyboard key or Gamepad button:"
+
+[node name="RebindScroll" type="ScrollContainer" parent="CenterContainer/Panel/VBox/TabContainer/Controls/ControlsVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RebindList" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Controls/ControlsVBox/RebindScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ResetControlsBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Controls/ControlsVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 32)
+layout_mode = 2
+size_flags_horizontal = 0
+text = "🔄 Reset Controls to Default"
+
+[node name="FooterBar" type="HBoxContainer" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 2
+
+[node name="ResetAllBtn" type="Button" parent="CenterContainer/Panel/VBox/FooterBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 34)
+layout_mode = 2
+text = "Reset All Defaults"
+
+[node name="CancelBtn" type="Button" parent="CenterContainer/Panel/VBox/FooterBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 34)
+layout_mode = 2
+text = "Cancel"
+
+[node name="SaveCloseBtn" type="Button" parent="CenterContainer/Panel/VBox/FooterBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 34)
+layout_mode = 2
+text = "💾 Apply & Close"

@@ -31,7 +31,7 @@ This document defines the standalone, decoupled game systems in **`godot-systems
 | **SYS-9** | `node_map_system/` | Directed Graph Campaign Map | ✅ Production | Epic 7 (Tasks 7.1–7.4) | `testbed_nodemap.tscn` |
 | **SYS-10** | `local_multiplayer/` | Hotseat Pass & Play / Dual Gamepad | ✅ Production | Epic 5 (Task 5.1) | `testbed_local_multiplayer.tscn` |
 | **SYS-11** | `network_multiplayer/` | Local LAN Discovery & Turn-Action RPC | ✅ Production | Epic 5 (Task 5.2) | `testbed_network_multiplayer.tscn` |
-| **SYS-12** | `settings_vault/` | Audio Bus, Display & Keybind Manager | 📋 Planned | Epic 9 (Task 9.1) | `testbed_settings.tscn` |
+| **SYS-12** | `settings_vault/` | Audio Bus, Display & Keybind Manager | ✅ Production | Epic 9 (Task 9.1) | `testbed_settings.tscn` |
 
 ---
 

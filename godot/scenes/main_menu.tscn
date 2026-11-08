@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://src/ui/ChestOpeningModal.tscn" id="3_chest_modal"]
 [ext_resource type="PackedScene" path="res://scenes/versus_setup_modal.tscn" id="4_versus"]
 [ext_resource type="PackedScene" path="res://scenes/lan_lobby_modal.tscn" id="5_lan"]
+[ext_resource type="PackedScene" path="res://scenes/settings_modal.tscn" id="6_settings"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.0823529, 0.101961, 0.14902, 1)
@@ -119,6 +120,13 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "📖 Card Compendium"
 
+[node name="SettingsBtn" type="Button" parent="CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "⚙️ Game Settings"
+
 [node name="QuitBtn" type="Button" parent="CenterContainer/VBox"]
 custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
@@ -191,5 +199,9 @@ visible = false
 layout_mode = 1
 
 [node name="LanLobbyModal" parent="." instance=ExtResource("5_lan")]
+visible = false
+layout_mode = 1
+
+[node name="SettingsModal" parent="." instance=ExtResource("6_settings")]
 visible = false
 layout_mode = 1

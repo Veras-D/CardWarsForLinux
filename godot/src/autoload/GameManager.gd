@@ -22,6 +22,10 @@ const MatchRulesConfig = preload("res://src/systems/local_multiplayer/MatchRules
 const LanDiscovery = preload("res://src/systems/network_multiplayer/LanDiscovery.gd")
 const NetworkSessionManager = preload("res://src/systems/network_multiplayer/NetworkSessionManager.gd")
 const TurnActionProtocol = preload("res://src/systems/network_multiplayer/TurnActionProtocol.gd")
+const SettingsManager = preload("res://src/systems/settings_vault/SettingsManager.gd")
+
+# Settings Vault (SYS-12 / Task 9.1)
+var settings_manager: SettingsManager = null
 
 # Local Multiplayer & Gamepad (SYS-10 / Epic 5)
 var match_rules: MatchRulesConfig
@@ -125,11 +129,19 @@ const DEFAULT_PROFILE_PATH: String = "user://player_profile.json"
 
 
 func _ready() -> void:
+	_init_settings()
 	_init_wallet()
 	_init_gacha()
 	_init_campaign()
 	load_profile()
 	_update_active_hero_hp()
+
+
+func _init_settings() -> void:
+	if settings_manager == null:
+		settings_manager = SettingsManager.new()
+		add_child(settings_manager)
+		settings_manager.load_settings()
 
 
 # ==============================================================================

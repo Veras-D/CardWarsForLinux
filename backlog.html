@@ -604,10 +604,10 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">31 / 52 Tasks Done (59.6%)</span>
+            <span class="pct">32 / 52 Tasks Done (61.5%)</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 59.6%;"></div>
+            <div class="progress-fill" style="width: 61.5%;"></div>
           </div>
         </div>
       </div>
@@ -2232,7 +2232,7 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">1 / 3 Done</span>
+            <span class="epic-count-badge">2 / 3 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
@@ -2273,15 +2273,15 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 9.2</span>
-                <span class="task-title">Settings & Accessibility Menu</span>
-                <span class="task-snippet">— Graphics (Fullscreen, 1280x800 Deck, VSync), 4 Audio bus sliders, combat speed (1x, 1.5x, 2x), and save config.</span>
+                <span class="task-title">Settings &amp; Accessibility Menu</span>
+                <span class="task-snippet">— Graphics (Fullscreen, 1280x800 Deck, VSync), 4 Audio bus sliders, input remapping, and atomic JSON persistence.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -2290,16 +2290,25 @@
               <div class="task-body-grid">
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
-                  <div class="ref-line"><strong>Reference:</strong> <code>user://settings.cfg</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Settings persist to user://settings.cfg.</p>
+                  <div class="ref-line"><strong>Reference:</strong> <code>SettingsManager (SYS-12), SettingsModal, user://settings.json</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Audio bus volume conversion, graphics/display modes, and custom input remapping.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Settings persist to user://settings.cfg.</span>
+          <span class="icon-completed">✓</span>
+          <span>Settings persist atomically to user://settings.json with auto-loading on game launch.</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>4 Audio bus volume sliders (Master, BGM, SFX, VO) with mute toggles and linear-to-dB conversion.</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Display modes (Windowed, Fullscreen, Exclusive Fullscreen), VSync modes, and Steam Deck 1280x800 resolution support.</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Dynamic input remapping for keyboard and joypad buttons with factory reset.</span>
         </li>
                   </ul>
                 </div>
