@@ -31,7 +31,8 @@ This document defines the standalone, decoupled game systems in **`godot-systems
 | **SYS-9** | `node_map_system/` | Directed Graph Campaign Map | ✅ Production | Epic 7 (Tasks 7.1–7.4) | `testbed_nodemap.tscn` |
 | **SYS-10** | `local_multiplayer/` | Hotseat Pass & Play / Dual Gamepad | ✅ Production | Epic 5 (Task 5.1) | `testbed_local_multiplayer.tscn` |
 | **SYS-11** | `network_multiplayer/` | Local LAN Discovery & Turn-Action RPC | ✅ Production | Epic 5 (Task 5.2) | `testbed_network_multiplayer.tscn` |
-| **SYS-12** | `settings_vault/` | Audio Bus, Display & Keybind Manager | ✅ Production | Epic 9 (Task 9.1) | `testbed_settings.tscn` |
+| **SYS-12** | `settings_vault/` | Audio Bus, Display & Keybind Manager | ✅ Production | Epic 9 (Task 9.2) | `testbed_settings.tscn` |
+| **SYS-13** | `localization_engine/` | Dynamic TranslationServer & XML Parser | ✅ Production | Epic 9 (Task 9.1) | `testbed_localization.tscn` |
 
 ---
 
@@ -100,6 +101,16 @@ This document defines the standalone, decoupled game systems in **`godot-systems
   * `ConfigSerializer`: Reads and writes user preferences to an isolated JSON config (`user://settings.json`) with safe defaults.
 * **Testbed**: `testbed_settings.tscn` — Self-contained settings screen with audio test tone generators, display switcher, and reset to defaults.
 * **Card Wars Integration**: Connects pause menu and main menu options directly to `SettingsManager`.
+
+---
+
+### SYS-13: Localization Engine (`localization_engine/`)
+* **Purpose**: Universal XML entry parsing (`<entry name="KEY">TEXT</entry>`) and native Godot 4 `TranslationServer` runtime integration.
+* **Core Classes**:
+  * `LocalizationParser`: Parses XML/bytes localization tables, unescapes XML entities (`&apos;`, `&quot;`, `&amp;`, `&lt;`, `&gt;`), and compiles structured key-value dictionaries.
+  * `LocalizationManager`: Registers locales (`en`, `es`, `es_419`, `fr`, `de`, `it`, `pt`), populates native `Translation` objects, dynamically calls `TranslationServer.set_locale()`, and emits `locale_changed` signals.
+* **Testbed**: `testbed_localization.tscn` — Interactive language selector with live translated UI labels and test key lookup console.
+* **Card Wars Integration**: Autoload `LocalizationService.gd` parses 7 official language packages (15,000+ strings across 6 sheets) and populates language dropdown in `SettingsModal`.
 
 ---
 

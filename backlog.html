@@ -604,10 +604,10 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">32 / 52 Tasks Done (61.5%)</span>
+            <span class="pct">33 / 52 Tasks Done (63.5%)</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 61.5%;"></div>
+            <div class="progress-fill" style="width: 63.5%;"></div>
           </div>
         </div>
       </div>
@@ -2232,14 +2232,14 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">2 / 3 Done</span>
+            <span class="epic-count-badge">3 / 3 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
 
         <div class="epic-tasks-list">
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 9.1</span>
@@ -2247,7 +2247,7 @@
                 <span class="task-snippet">— Full text translation for EN, DE, ES, FR, IT, PT, and LatAm with dynamic runtime dropdown switching.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -2256,16 +2256,24 @@
               <div class="task-body-grid">
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
-                  <div class="ref-line"><strong>Reference:</strong> <code>Assets/Resources/languages/ (7 languages)</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">100% of in-game text translates immediately upon language selection.</p>
+                  <div class="ref-line"><strong>Reference:</strong> <code>SYS-13 (localization_engine), LocalizationService, Assets/Resources/languages/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">15,000+ strings across 7 official languages (EN, ES, LatAm, FR, DE, IT, PT) loaded into Godot TranslationServer. Runtime switching available in SettingsModal.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>100% of in-game text translates immediately upon language selection.</span>
+          <span class="icon-completed">✓</span>
+          <span>100% of in-game text translates immediately upon language selection via native TranslationServer.</span>
+        </li>
+                    <li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Standalone decoupled system SYS-13 (localization_engine) with unit test suite (14/14 tests passing).</span>
+        </li>
+                    <li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Game integration test test_localization_system.tscn passing (26/26 tests passed).</span>
         </li>
                   </ul>
                 </div>

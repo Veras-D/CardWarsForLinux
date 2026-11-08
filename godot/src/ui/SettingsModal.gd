@@ -27,6 +27,7 @@ var manager: SettingsManagerClass
 @onready var test_sfx_btn: Button = %TestSfxBtn
 
 # Display UI
+@onready var lang_option: OptionButton = %LangOption
 @onready var mode_option: OptionButton = %ModeOption
 @onready var res_option: OptionButton = %ResOption
 @onready var vsync_option: OptionButton = %VsyncOption
@@ -80,6 +81,15 @@ func close_modal() -> void:
 
 
 func _setup_options() -> void:
+	# Languages
+	if lang_option and Localization:
+		lang_option.clear()
+		var langs = Localization.get_supported_languages()
+		for i in range(langs.size()):
+			var item = langs[i]
+			lang_option.add_item("%s (%s)" % [item.name, item.native], i)
+			lang_option.set_item_metadata(i, item.code)
+
 	# Window Mode
 	mode_option.clear()
 	mode_option.add_item("Windowed", DisplayServer.WINDOW_MODE_WINDOWED)
@@ -209,6 +219,14 @@ func _connect_events() -> void:
 
 	test_sfx_btn.pressed.connect(_on_test_sfx_pressed)
 
+	if lang_option:
+		lang_option.item_selected.connect(func(idx):
+			var code = str(lang_option.get_item_metadata(idx))
+			if Localization:
+				Localization.set_language(code)
+			manager.display_settings["language"] = code
+		)
+
 	mode_option.item_selected.connect(func(_idx):
 		var val = mode_option.get_selected_id()
 		manager.set_window_mode(val)
@@ -284,6 +302,13 @@ func _sync_ui_from_manager() -> void:
 	vo_mute.button_pressed = manager.is_bus_muted("VO")
 
 	# Display options
+	if lang_option and Localization:
+		var cur_lang = Localization.get_current_language()
+		for i in range(lang_option.item_count):
+			if str(lang_option.get_item_metadata(i)) == cur_lang:
+				lang_option.selected = i
+				break
+
 	var cur_mode = int(manager.display_settings.get("window_mode", DisplayServer.WINDOW_MODE_WINDOWED))
 	for i in range(mode_option.item_count):
 		if mode_option.get_item_id(i) == cur_mode:
