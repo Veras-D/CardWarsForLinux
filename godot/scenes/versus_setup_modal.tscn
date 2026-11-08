@@ -1,0 +1,171 @@
+[gd_scene load_steps=3 format=3 uid="uid://versus_setup_modal_001"]
+
+[ext_resource type="Script" path="res://src/ui/VersusSetupModal.gd" id="1_modal"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.12, 0.14, 0.18, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 0.65, 0.25, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 16
+
+[node name="VersusSetupModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_modal")
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(640, 460)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="VBoxContainer" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="CenterContainer/Panel/VBox/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "👥 Local 2-Player Versus Setup"
+horizontal_alignment = 1
+
+[node name="ModeOption" type="OptionButton" parent="CenterContainer/Panel/VBox/Header"]
+custom_minimum_size = Vector2(320, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="PlayersGrid" type="HBoxContainer" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="P1Box" type="VBoxContainer" parent="CenterContainer/Panel/VBox/PlayersGrid"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="P1Title" type="Label" parent="CenterContainer/Panel/VBox/PlayersGrid/P1Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "🔵 Player 1"
+horizontal_alignment = 1
+
+[node name="NameEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/PlayersGrid/P1Box"]
+layout_mode = 2
+placeholder_text = "Player 1 Name"
+text = "Player 1"
+
+[node name="HeroLabel" type="Label" parent="CenterContainer/Panel/VBox/PlayersGrid/P1Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Hero Leader:"
+
+[node name="HeroOption" type="OptionButton" parent="CenterContainer/Panel/VBox/PlayersGrid/P1Box"]
+layout_mode = 2
+
+[node name="DeckLabel" type="Label" parent="CenterContainer/Panel/VBox/PlayersGrid/P1Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Active Deck:"
+
+[node name="DeckOption" type="OptionButton" parent="CenterContainer/Panel/VBox/PlayersGrid/P1Box"]
+layout_mode = 2
+
+[node name="DeviceLabel" type="Label" parent="CenterContainer/Panel/VBox/PlayersGrid/P1Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
+theme_override_font_sizes/font_size = 12
+text = "Device: Keyboard / Gamepad 0"
+autowrap_mode = 2
+
+[node name="P2Box" type="VBoxContainer" parent="CenterContainer/Panel/VBox/PlayersGrid"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="P2Title" type="Label" parent="CenterContainer/Panel/VBox/PlayersGrid/P2Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.45, 1)
+theme_override_font_sizes/font_size = 16
+text = "🔴 Player 2"
+horizontal_alignment = 1
+
+[node name="NameEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/PlayersGrid/P2Box"]
+layout_mode = 2
+placeholder_text = "Player 2 Name"
+text = "Player 2"
+
+[node name="HeroLabel" type="Label" parent="CenterContainer/Panel/VBox/PlayersGrid/P2Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Hero Leader:"
+
+[node name="HeroOption" type="OptionButton" parent="CenterContainer/Panel/VBox/PlayersGrid/P2Box"]
+layout_mode = 2
+
+[node name="DeckLabel" type="Label" parent="CenterContainer/Panel/VBox/PlayersGrid/P2Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Active Deck:"
+
+[node name="DeckOption" type="OptionButton" parent="CenterContainer/Panel/VBox/PlayersGrid/P2Box"]
+layout_mode = 2
+
+[node name="DeviceLabel" type="Label" parent="CenterContainer/Panel/VBox/PlayersGrid/P2Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
+theme_override_font_sizes/font_size = 12
+text = "Device: Gamepad 1"
+autowrap_mode = 2
+
+[node name="Spacer" type="Control" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonContainer" type="HBoxContainer" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="StartBtn" type="Button" parent="CenterContainer/Panel/VBox/ButtonContainer"]
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+text = "⚔️ Start Versus Match!"
+
+[node name="CancelBtn" type="Button" parent="CenterContainer/Panel/VBox/ButtonContainer"]
+custom_minimum_size = Vector2(120, 44)
+layout_mode = 2
+text = "Cancel"

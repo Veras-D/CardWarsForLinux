@@ -18,6 +18,25 @@ const ProgressionTracker = preload("res://src/systems/progression_engine/Progres
 const GachaRoller = preload("res://src/systems/progression_engine/GachaRoller.gd")
 const NodeMapGraph = preload("res://src/systems/node_map_system/NodeMapGraph.gd")
 const StarConditionEvaluator = preload("res://src/systems/node_map_system/StarConditionEvaluator.gd")
+const MatchRulesConfig = preload("res://src/systems/local_multiplayer/MatchRulesConfig.gd")
+const LanDiscovery = preload("res://src/systems/network_multiplayer/LanDiscovery.gd")
+const NetworkSessionManager = preload("res://src/systems/network_multiplayer/NetworkSessionManager.gd")
+const TurnActionProtocol = preload("res://src/systems/network_multiplayer/TurnActionProtocol.gd")
+
+# Local Multiplayer & Gamepad (SYS-10 / Epic 5)
+var match_rules: MatchRulesConfig
+var is_local_versus: bool = false
+
+# Network LAN Multiplayer (SYS-11 / Task 5.2)
+var is_network_match: bool = false
+var is_network_host: bool = false
+var network_session: NetworkSessionManager = null
+var network_protocol: TurnActionProtocol = null
+var network_discovery: LanDiscovery = null
+var remote_player_name: String = "Opponent"
+var remote_hero_name: String = "Jake"
+var remote_deck: Array[String] = []
+var remote_landscapes: Array[String] = []
 
 var current_state: MatchState = MatchState.MENU
 
@@ -487,12 +506,72 @@ func open_deck_builder() -> void:
 	get_tree().change_scene_to_file("res://scenes/deck_builder.tscn")
 
 
+func setup_local_versus_match(rules: MatchRulesConfig) -> void:
+	match_rules = rules
+	is_local_versus = true
+	active_quest_id = ""
+
+	player_hero_name = rules.p1_hero_id
+	player_hero_max_hp = get_hero_max_hp(player_hero_name)
+	player_deck = rules.p1_deck.duplicate()
+	player_landscapes = rules.p1_landscapes.duplicate()
+
+	opponent_hero_name = rules.p2_hero_id
+	opponent_hero_max_hp = get_hero_max_hp(opponent_hero_name)
+	opponent_deck = rules.p2_deck.duplicate()
+	opponent_landscapes = rules.p2_landscapes.duplicate()
+
+
+func setup_network_match(p_is_host: bool, local_hero: String, local_deck: Array[String], local_lands: Array[String], session: NetworkSessionManager, protocol: TurnActionProtocol, discovery: LanDiscovery = null) -> void:
+	is_network_match = true
+	is_network_host = p_is_host
+	is_local_versus = false
+	active_quest_id = ""
+
+	network_session = session
+	network_protocol = protocol
+	network_discovery = discovery
+
+	player_hero_name = local_hero
+	player_hero_max_hp = get_hero_max_hp(player_hero_name)
+	player_deck = local_deck.duplicate()
+	player_landscapes = local_lands.duplicate()
+
+
+func apply_remote_handshake(data: Dictionary) -> void:
+	remote_player_name = str(data.get("player_name", "Remote Player"))
+	remote_hero_name = str(data.get("hero", "Jake"))
+	opponent_hero_name = remote_hero_name
+	opponent_hero_max_hp = get_hero_max_hp(opponent_hero_name)
+
+	var r_deck: Array[String] = []
+	for c in data.get("deck", []):
+		r_deck.append(str(c))
+	if not r_deck.is_empty():
+		opponent_deck = r_deck
+		remote_deck = r_deck
+
+	var r_lands: Array[String] = []
+	for l in data.get("landscapes", []):
+		r_lands.append(str(l))
+	if not r_lands.is_empty():
+		opponent_landscapes = r_lands
+		remote_landscapes = r_lands
+
+
 func start_battle() -> void:
 	current_state = MatchState.BATTLE
-	get_tree().change_scene_to_file("res://scenes/battle.tscn")
+	get_tree().call_deferred("change_scene_to_file", "res://scenes/battle.tscn")
 
 
 func return_to_menu() -> void:
+	is_local_versus = false
+	if is_network_match:
+		if network_discovery:
+			network_discovery.stop()
+		if network_session:
+			network_session.close_session()
+		is_network_match = false
 	current_state = MatchState.MENU
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 

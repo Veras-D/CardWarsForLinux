@@ -11,6 +11,11 @@ const CharacterFaceRig = preload("res://src/battle/CharacterFaceRig.gd")
 const VOManager = preload("res://src/battle/VOManager.gd")
 const BattleResultModal = preload("res://src/ui/BattleResultModal.gd")
 const StarConditionEvaluator = preload("res://src/systems/node_map_system/StarConditionEvaluator.gd")
+const MatchRulesConfig = preload("res://src/systems/local_multiplayer/MatchRulesConfig.gd")
+const PlayerInputRouter = preload("res://src/systems/local_multiplayer/PlayerInputRouter.gd")
+const HotseatCurtain = preload("res://src/systems/local_multiplayer/HotseatCurtain.gd")
+const GamepadNavigator = preload("res://src/systems/local_multiplayer/GamepadNavigator.gd")
+const TurnActionProtocol = preload("res://src/systems/network_multiplayer/TurnActionProtocol.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
@@ -50,6 +55,12 @@ var match_factions_played: Array[String] = []
 var match_floops_used: int = 0
 var match_total_mp_spent: int = 0
 
+# SYS-10 Local Multiplayer & Gamepad Support (Epic 5)
+var input_router: PlayerInputRouter
+var gamepad_navigator: GamepadNavigator
+var hotseat_curtain: HotseatCurtain
+var active_versus_player: int = 0 # 0 for P1, 1 for P2
+
 var player_hp: int = 25
 var player_max_hp: int = 25
 var player_mp: int = 2
@@ -87,12 +98,24 @@ func _ready() -> void:
 	vo_manager = VOManager.new()
 	add_child(vo_manager)
 
+	hotseat_curtain = HotseatCurtain.new()
+	add_child(hotseat_curtain)
+	hotseat_curtain.unveil_confirmed.connect(_on_curtain_unveiled)
+
+	var match_cfg = GameManager.match_rules if (GameManager and GameManager.is_local_versus) else MatchRulesConfig.new(MatchRulesConfig.MatchMode.SOLO_VS_AI)
+	input_router = PlayerInputRouter.new(match_cfg)
+	gamepad_navigator = GamepadNavigator.new()
+
 	turn_btn.pressed.connect(_on_turn_button_pressed)
 	dialog_btn.pressed.connect(_on_menu_button_pressed)
 	match_intro.intro_completed.connect(_on_intro_completed)
 	rps_modal.rps_completed.connect(_on_rps_completed)
 
+	if GameManager and GameManager.is_network_match and GameManager.network_protocol:
+		GameManager.network_protocol.action_executed.connect(_on_network_action_executed)
+
 	setup_match()
+	_update_controller_glyphs()
 	match_intro.play_intro(
 		GameManager.player_hero_name,
 		GameManager.opponent_hero_name,
@@ -101,6 +124,9 @@ func _ready() -> void:
 	)
 
 func _on_intro_completed() -> void:
+	if GameManager and GameManager.is_network_match:
+		_on_rps_completed(GameManager.is_network_host)
+		return
 	rps_modal.start_rps(GameManager.opponent_hero_name)
 
 func _on_rps_completed(player_goes_first: bool) -> void:
@@ -376,6 +402,8 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 		if b_fac != "":
 			match_factions_played.append(b_fac)
 		lane.place_building(card_data)
+		if GameManager and GameManager.is_network_match and GameManager.network_protocol:
+			GameManager.network_protocol.send_play_card(str(card_data.get("id", "")), lane.lane_index, false)
 		log_message("🏰 Constructed %s on Lane %d (%s)!" % [card_data.get("name", "Building"), lane.lane_index + 1, lane.landscape])
 
 		if player_face_rig:
@@ -415,6 +443,8 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 	if c_fac != "":
 		match_factions_played.append(c_fac)
 	lane.place_creature(card_data)
+	if GameManager and GameManager.is_network_match and GameManager.network_protocol:
+		GameManager.network_protocol.send_play_card(str(card_data.get("id", "")), lane.lane_index, false)
 	log_message("✨ Summoned %s onto Lane %d (%s)!" % [card_data.get("name", "Creature"), lane.lane_index + 1, lane.landscape])
 
 	if player_face_rig:
@@ -465,6 +495,8 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 			Audio.play_sfx(load("res://assets/audio/sfx/LeaderPower.wav"), -6.0)
 
 		var res = spell_resolver.cast_spell(card_data, target_lane, true)
+		if GameManager and GameManager.is_network_match and GameManager.network_protocol:
+			GameManager.network_protocol.send_play_card(str(card_data.get("id", "")), target_lane.lane_index if target_lane else 0, true)
 		log_message("✨ Cast %s! %s" % [card_data.get("name", "Spell"), res.get("message", "")])
 	else:
 		player_mp -= cost
@@ -501,6 +533,8 @@ func _on_floop_requested(lane: LaneSlot) -> void:
 	match_floops_used += 1
 	match_total_mp_spent += floop_cost
 	lane.set_flooped(true)
+	if GameManager and GameManager.is_network_match and GameManager.network_protocol:
+		GameManager.network_protocol.send_floop(lane.lane_index)
 	log_message("Flooped %s!" % data.get("name", "Creature"))
 
 	if vo_manager:
@@ -518,6 +552,8 @@ func _execute_floop_ability(source_lane: LaneSlot) -> void:
 func _on_player_leader_power_activated(char_id: String) -> void:
 	if not is_action_allowed() or player_leader_cooldown > 0:
 		return
+	if GameManager and GameManager.is_network_match and GameManager.network_protocol:
+		GameManager.network_protocol.send_leader_power(char_id)
 	_execute_leader_power(true, char_id)
 
 func _execute_leader_power(is_player_owner: bool, char_id: String) -> void:
@@ -696,10 +732,176 @@ func execute_battle_phase() -> void:
 	if phase_manager != null:
 		phase_manager.transition_to(BattlePhaseManager.Phase.END_TURN)
 
+	if GameManager and GameManager.is_network_match:
+		if GameManager.network_protocol:
+			GameManager.network_protocol.send_end_turn()
+		turn_btn.disabled = true
+		turn_btn.text = "%s's Turn..." % GameManager.remote_player_name
+		log_message("⏳ Waiting for %s's move..." % GameManager.remote_player_name)
+		return
+
+	if GameManager and GameManager.is_local_versus:
+		var rules = GameManager.match_rules
+		var next_slot = 0 if active_versus_player == 1 else 1
+		var next_name = GameManager.player_hero_name if next_slot == 0 else GameManager.opponent_hero_name
+		if rules and rules.is_hotseat():
+			hotseat_curtain.start_handoff(next_slot, next_name)
+		else:
+			if next_slot == 0:
+				start_player_turn()
+			else:
+				execute_versus_p2_turn()
+		return
+
 	# Opponent AI turn
 	var timer = get_tree().create_timer(1.2)
 	await timer.timeout
 	execute_opponent_turn()
+
+
+func _update_controller_glyphs() -> void:
+	var ctype = PlayerInputRouter.detect_controller_type(0)
+	var rb_glyph = PlayerInputRouter.get_action_glyph("end_turn", ctype)
+	if ctype != MatchRulesConfig.ControllerType.KEYBOARD_MOUSE:
+		turn_btn.text = "End Turn [%s]" % rb_glyph
+
+
+func _register_navigator_zones() -> void:
+	if gamepad_navigator == null:
+		return
+	var hand_nodes: Array = hand_container.get_children()
+	gamepad_navigator.register_zone_nodes(GamepadNavigator.FocusZone.HAND, hand_nodes)
+	gamepad_navigator.register_zone_nodes(GamepadNavigator.FocusZone.LANES, player_lanes)
+	gamepad_navigator.register_zone_nodes(GamepadNavigator.FocusZone.LEADER, [player_leader_btn])
+	gamepad_navigator.register_zone_nodes(GamepadNavigator.FocusZone.END_TURN, [turn_btn])
+
+
+func _on_network_action_executed(sender_id: int, action_type: String, payload: Dictionary) -> void:
+	if not GameManager or not GameManager.is_network_match:
+		return
+	if GameManager.network_session and sender_id == GameManager.network_session.get_local_peer_id():
+		return # Local action already handled locally
+
+	match action_type:
+		TurnActionProtocol.ACTION_PLAY_CARD:
+			var card_id = str(payload.get("card_id", ""))
+			var slot_idx = int(payload.get("target_slot", 0))
+			var is_spell = bool(payload.get("is_spell", false))
+			var c_data = Database.get_card(card_id)
+			if c_data.is_empty():
+				return
+
+			if slot_idx >= 0 and slot_idx < opponent_lanes.size():
+				var o_lane = opponent_lanes[slot_idx]
+				if is_spell or c_data.get("type") == "SPELL":
+					if spell_resolver:
+						spell_resolver.execute_spell(c_data, o_lane, false)
+				elif c_data.get("type") == "BUILDING":
+					o_lane.place_building(c_data)
+				else:
+					o_lane.place_creature(c_data)
+				log_message("%s played %s on Lane %d!" % [GameManager.remote_player_name, c_data.get("name", "Card"), slot_idx + 1])
+				_update_ui()
+
+		TurnActionProtocol.ACTION_FLOOP:
+			var slot_idx = int(payload.get("slot_index", 0))
+			if slot_idx >= 0 and slot_idx < opponent_lanes.size():
+				var o_lane = opponent_lanes[slot_idx]
+				if o_lane.has_creature and not o_lane.is_flooped:
+					o_lane.set_flooped(true)
+					_execute_floop_ability(o_lane)
+					log_message("%s flooped %s on Lane %d!" % [GameManager.remote_player_name, o_lane.creature_data.get("name", "Creature"), slot_idx + 1])
+					_update_ui()
+
+		TurnActionProtocol.ACTION_LEADER_POWER:
+			var hero_id = str(payload.get("hero_id", GameManager.opponent_hero_name))
+			_execute_leader_power(false, hero_id)
+			log_message("%s activated Leader Power!" % GameManager.remote_player_name)
+			_update_ui()
+
+		TurnActionProtocol.ACTION_END_TURN:
+			log_message("=== Your Turn! (%s finished their turn) ===" % GameManager.remote_player_name)
+			start_player_turn()
+
+		TurnActionProtocol.ACTION_SURRENDER:
+			log_message("🏳️ %s surrendered!" % GameManager.remote_player_name)
+			end_match(true)
+
+
+func _on_curtain_unveiled(next_slot: int) -> void:
+	active_versus_player = next_slot
+	if input_router:
+		input_router.set_active_turn_player(next_slot)
+
+	if next_slot == 1:
+		execute_versus_p2_turn()
+	else:
+		start_player_turn()
+
+
+func execute_versus_p2_turn() -> void:
+	is_player_turn = true
+	turn_btn.disabled = false
+	turn_btn.text = "%s: End Turn ➔" % GameManager.opponent_hero_name
+	log_message("=== %s's Turn (P2) ===" % GameManager.opponent_hero_name)
+	_register_navigator_zones()
+	gamepad_navigator.focus_zone(GamepadNavigator.FocusZone.HAND, 0)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if hotseat_curtain and hotseat_curtain.visible:
+		return
+	if result_modal and result_modal.visible:
+		return
+	if input_router == null or gamepad_navigator == null:
+		return
+
+	var routed = input_router.route_input_event(event)
+	if not routed.consumed:
+		return
+
+	if routed.action == "navigate":
+		_register_navigator_zones()
+		gamepad_navigator.navigate(routed.direction)
+		get_viewport().set_input_as_handled()
+	elif routed.action == "end_turn":
+		if is_action_allowed() and not turn_btn.disabled:
+			_on_turn_button_pressed()
+			get_viewport().set_input_as_handled()
+	elif routed.action == "leader_power":
+		if is_action_allowed() and player_leader_cooldown <= 0:
+			_on_player_leader_power_activated(GameManager.player_hero_name)
+			get_viewport().set_input_as_handled()
+	elif routed.action == "floop":
+		var focused = gamepad_navigator.get_focused_node()
+		if focused is LaneSlot and focused.has_creature and not focused.is_flooped:
+			_on_floop_requested(focused)
+			get_viewport().set_input_as_handled()
+	elif routed.action == "confirm":
+		var focused = gamepad_navigator.get_focused_node()
+		if focused is CardView:
+			_on_hand_card_clicked(focused)
+			gamepad_navigator.focus_zone(GamepadNavigator.FocusZone.LANES, 0)
+			get_viewport().set_input_as_handled()
+		elif focused is LaneSlot:
+			if selected_card_view != null:
+				_on_lane_clicked(focused)
+				gamepad_navigator.focus_zone(GamepadNavigator.FocusZone.HAND, 0)
+				get_viewport().set_input_as_handled()
+			elif focused.has_creature and not focused.is_flooped:
+				_on_floop_requested(focused)
+				get_viewport().set_input_as_handled()
+		elif focused == turn_btn:
+			_on_turn_button_pressed()
+			get_viewport().set_input_as_handled()
+		elif focused == player_leader_btn:
+			_on_player_leader_power_activated(GameManager.player_hero_name)
+			get_viewport().set_input_as_handled()
+	elif routed.action == "cancel":
+		if selected_card_view != null:
+			_deselect_card()
+			gamepad_navigator.focus_zone(GamepadNavigator.FocusZone.HAND, 0)
+			get_viewport().set_input_as_handled()
 
 func execute_opponent_turn() -> void:
 	if phase_manager != null:

@@ -29,9 +29,9 @@ This document defines the standalone, decoupled game systems in **`godot-systems
 | **SYS-7** | `crafting_fusion/` | Universal Crafting & Quality Engine | ✅ Production | Epic 6 (Task 6.2) | `testbed_crafting.tscn` |
 | **SYS-8** | `progression_engine/` | Economy Wallet, XP & Gacha Roller | ✅ Production | Epic 8 (Tasks 8.1–8.4) | `testbed_progression.tscn` |
 | **SYS-9** | `node_map_system/` | Directed Graph Campaign Map | ✅ Production | Epic 7 (Tasks 7.1–7.4) | `testbed_nodemap.tscn` |
-| **SYS-10** | `local_multiplayer/` | Hotseat Pass & Play / Dual Gamepad | 📋 Planned | Epic 5 (Task 5.2) | `testbed_local_multiplayer.tscn` |
-| **SYS-11** | `settings_vault/` | Audio Bus, Display & Keybind Manager | 📋 Planned | Epic 9 (Task 9.1) | `testbed_settings.tscn` |
-| **SYS-12** | `gamepad_navigator/` | UI Focus Graph & Virtual D-Pad | 📋 Planned (Later) | Epic 5 (Task 5.1) | `testbed_gamepad.tscn` |
+| **SYS-10** | `local_multiplayer/` | Hotseat Pass & Play / Dual Gamepad | ✅ Production | Epic 5 (Task 5.1) | `testbed_local_multiplayer.tscn` |
+| **SYS-11** | `network_multiplayer/` | Local LAN Discovery & Turn-Action RPC | ✅ Production | Epic 5 (Task 5.2) | `testbed_network_multiplayer.tscn` |
+| **SYS-12** | `settings_vault/` | Audio Bus, Display & Keybind Manager | 📋 Planned | Epic 9 (Task 9.1) | `testbed_settings.tscn` |
 
 ---
 
@@ -78,27 +78,28 @@ This document defines the standalone, decoupled game systems in **`godot-systems
   * `PlayerInputRouter`: Dispatches hardware events (`device_id` / joypad index 0 vs 1, keyboard split) to virtual player slots. Enforces input isolation so inactive players cannot manipulate UI during an active player's turn.
   * `MatchRulesConfig`: Configuration resource defining match format (Hotseat Pass & Play vs. Dual Gamepad Shared-Screen), turn timers, and player loadouts.
 * **Testbed**: `testbed_local_multiplayer.tscn` — 2-player hand simulation demonstrating the hotseat privacy curtain, turn handoff countdown/confirmations, and multi-gamepad device routing.
-* **Card Wars Integration**: Powers Task 5.2 (1v1 local matches on PC / Steam Deck with custom deck selection for P1 and P2).
+* **Card Wars Integration**: Powers Task 5.1 (Gamepad focus navigation & hotseat pass & play).
 
 ---
 
-### SYS-11: Settings Vault (`settings_vault/`)
+### SYS-11: Network Multiplayer & LAN Discovery (`network_multiplayer/`)
+* **Purpose**: Host-Authoritative Turn-Action RPC synchronizer and zero-configuration UDP beacon LAN discovery for Godot 4.x.
+* **Core Classes**:
+  * `LanDiscovery`: Non-blocking UDP broadcast beacon (`255.255.255.255:47777`) on ephemeral sockets to prevent host/client port collisions on the same machine, coupled with dynamic listener and automatic 4.5s host expiry.
+  * `NetworkSessionManager`: Manages `ENetMultiplayerPeer` session lifecycle, connection signals, client/host role states, and teardown.
+  * `TurnActionProtocol`: Reliable action dispatcher (`@rpc("any_peer")` -> `@rpc("authority")`) providing pre-built helpers for handshake loadout exchanges, card plays, lane floops, leader powers, wheel outcomes, and turn handoffs.
+* **Testbed**: `testbed_network_multiplayer.tscn` — Interactive lobby host & scanner, direct IP connect, and live RPC action inspection.
+* **Card Wars Integration**: Powers Task 5.2 (1v1 Local Network / LAN Multiplayer with secret hands and synchronized board turns).
+
+---
+
+### SYS-12: Settings Vault (`settings_vault/`)
 * **Purpose**: Decoupled audio bus volume synchronization, display resolution/modes, VSync, and input rebinding persistence.
 * **Core Classes**:
   * `SettingsManager`: Automatically links UI sliders to Godot audio buses (`Master`, `BGM`, `SFX`), controls window display modes (`Fullscreen`, `Windowed`, `ExclusiveFullscreen`), VSync toggles, and UI scale settings.
   * `ConfigSerializer`: Reads and writes user preferences to an isolated JSON config (`user://settings.json`) with safe defaults.
 * **Testbed**: `testbed_settings.tscn` — Self-contained settings screen with audio test tone generators, display switcher, and reset to defaults.
 * **Card Wars Integration**: Connects pause menu and main menu options directly to `SettingsManager`.
-
----
-
-### SYS-12: Gamepad Navigator (`gamepad_navigator/`)
-* **Purpose**: Universal UI focus navigation graph, virtual D-pad cursor snapping, and dynamic controller button prompt decorators.
-* **Core Classes**:
-  * `FocusGraph`: Automatically links focus neighbors for grid/list UI elements, remembers last-focused element per modal, and handles focus trapping inside active dialogs.
-  * `InputGlyphDecorator`: Swaps UI action prompts dynamically based on active device (Keyboard/Mouse keys $\leftrightarrow$ Xbox / PlayStation / Steam Deck icons).
-* **Testbed**: `testbed_gamepad.tscn` — Complex nested UI with modal overlays navigated strictly via gamepad / keyboard arrows without a mouse cursor.
-* **Card Wars Integration**: Powers Task 5.1 (Gamepad & Steam Deck full navigation support).
 
 ---
 

@@ -1,0 +1,220 @@
+[gd_scene load_steps=3 format=3 uid="uid://lan_lobby_modal_001"]
+
+[ext_resource type="Script" path="res://src/ui/LanLobbyModal.gd" id="1_modal"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.12, 0.14, 0.18, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.25, 0.65, 0.95, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 16
+
+[node name="LanLobbyModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_modal")
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(680, 500)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="VBoxContainer" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="CenterContainer/Panel/VBox/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "🌐 Local Network (LAN) Multiplayer"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContainer/Panel/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "Zero-Configuration UDP Discovery (Port 47777) & Action RPC Turn Sync"
+horizontal_alignment = 1
+
+[node name="TabContainer" type="TabContainer" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Host" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
+layout_mode = 2
+
+[node name="HostVBox" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Host"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="RoomNameLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+layout_mode = 2
+text = "Room Name:"
+
+[node name="RoomNameEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+layout_mode = 2
+text = "Finn's LAN Match"
+
+[node name="HeroLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+layout_mode = 2
+text = "Choose Your Hero:"
+
+[node name="HostHeroOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+layout_mode = 2
+
+[node name="DeckLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+layout_mode = 2
+text = "Choose Your Deck:"
+
+[node name="HostDeckOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+layout_mode = 2
+
+[node name="PortHBox" type="HBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+layout_mode = 2
+
+[node name="PortLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox/PortHBox"]
+layout_mode = 2
+text = "Game Port:"
+
+[node name="HostPortEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox/PortHBox"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "8910"
+
+[node name="HostStartBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "📡 Host LAN Game"
+
+[node name="HostStatusLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "Set room details and click Host."
+horizontal_alignment = 1
+
+[node name="Join" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="JoinVBox" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Join"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="ScanBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
+layout_mode = 2
+text = "🔍 Scan Local Network (UDP 47777)"
+
+[node name="ServerListLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
+layout_mode = 2
+text = "Discovered LAN Hosts (Click to select):"
+
+[node name="ServerList" type="ItemList" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LoadoutGrid" type="GridContainer" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="JoinHeroLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/LoadoutGrid"]
+layout_mode = 2
+text = "Hero:"
+
+[node name="JoinHeroOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/LoadoutGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="JoinDeckLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/LoadoutGrid"]
+layout_mode = 2
+text = "Deck:"
+
+[node name="JoinDeckOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/LoadoutGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DirectHBox" type="HBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DirectIpLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/DirectHBox"]
+layout_mode = 2
+text = "Direct IP:"
+
+[node name="DirectIpEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/DirectHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "127.0.0.1"
+
+[node name="DirectPortEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/DirectHBox"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "8910"
+
+[node name="DirectConnectBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "⚡ Connect & Join Match"
+
+[node name="JoinStatusLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "Scan for local games or enter direct IP."
+horizontal_alignment = 1
+
+[node name="CloseBtn" type="Button" parent="CenterContainer/Panel/VBox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+text = "Close"

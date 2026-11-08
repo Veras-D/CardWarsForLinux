@@ -3,6 +3,8 @@
 [ext_resource type="Script" path="res://src/ui/MainMenu.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://src/ui/EconomyHeader.tscn" id="2_header"]
 [ext_resource type="PackedScene" path="res://src/ui/ChestOpeningModal.tscn" id="3_chest_modal"]
+[ext_resource type="PackedScene" path="res://scenes/versus_setup_modal.tscn" id="4_versus"]
+[ext_resource type="PackedScene" path="res://scenes/lan_lobby_modal.tscn" id="5_lan"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.0823529, 0.101961, 0.14902, 1)
@@ -83,6 +85,20 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 15
 text = "🗺️ Campaign Map (Land of Ooo)"
+
+[node name="VersusBtn" type="Button" parent="CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.3, 1)
+theme_override_font_sizes/font_size = 15
+text = "👥 Local 2-Player Versus"
+
+[node name="LanBtn" type="Button" parent="CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.75, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "🌐 Local LAN Multiplayer"
 
 [node name="DeckBuilderBtn" type="Button" parent="CenterContainer/VBox"]
 custom_minimum_size = Vector2(0, 44)
@@ -167,5 +183,13 @@ theme_override_constants/v_separation = 16
 columns = 7
 
 [node name="ChestOpeningModal" parent="." instance=ExtResource("3_chest_modal")]
+visible = false
+layout_mode = 1
+
+[node name="VersusSetupModal" parent="." instance=ExtResource("4_versus")]
+visible = false
+layout_mode = 1
+
+[node name="LanLobbyModal" parent="." instance=ExtResource("5_lan")]
 visible = false
 layout_mode = 1

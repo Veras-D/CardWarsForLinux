@@ -604,10 +604,10 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">29 / 52 Tasks Done (55.8%)</span>
+            <span class="pct">31 / 52 Tasks Done (59.6%)</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 55.8%;"></div>
+            <div class="progress-fill" style="width: 59.6%;"></div>
           </div>
         </div>
       </div>
@@ -1745,14 +1745,14 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">0 / 2 Done</span>
+            <span class="epic-count-badge">2 / 2 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
 
         <div class="epic-tasks-list">
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 5.1</span>
@@ -1760,7 +1760,7 @@
                 <span class="task-snippet">— Full controller navigation graph (D-Pad lane jumping, A/Cross summon, X/Square floop, RB attack, LB leader).</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -1777,11 +1777,11 @@
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>100% of menus and gameplay accessible via controller alone without touching a mouse.</span>
+          <span class="icon-completed">✓</span>
+          <span>100% of menus and gameplay accessible via controller alone without touching a mouse (SYS-10 GamepadNavigator &amp; PlayerInputRouter).</span>
         </li><li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Verified on Steam Deck (1280x800 native resolution).</span>
+          <span class="icon-completed">✓</span>
+          <span>Verified on Steam Deck (1280x800 native resolution, RB/LB/D-Pad navigation and dynamic controller glyphs).</span>
         </li>
                   </ul>
                 </div>
@@ -1789,15 +1789,15 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 5.2</span>
-                <span class="task-title">Local 2-Player Multiplayer</span>
-                <span class="task-snippet">— Shared Screen (Dual Gamepads with split view) and Hotseat Pass & Play with privacy transitions between turns.</span>
+                <span class="task-title">Local Network (LAN) &amp; 2-Player Multiplayer</span>
+                <span class="task-snippet">— Zero-config UDP LAN discovery (47777), Host-Authoritative Turn-Action RPC (8910), secret hands, direct IP fallback, and Hotseat Pass &amp; Play.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -1806,16 +1806,22 @@
               <div class="task-body-grid">
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
-                  <div class="ref-line"><strong>Reference:</strong> <code>Shared Screen vs Hotseat Pass & Play</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Custom match setup: custom decks, leaders, and landscapes for Player 1 and Player 2.</p>
+                  <div class="ref-line"><strong>Reference:</strong> <code>LanDiscovery (UDP 47777), NetworkSessionManager, TurnActionProtocol (RPC 8910), HotseatCurtain</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Custom match setup: custom decks, leaders, and landscapes for Player 1 and Player 2 across LAN Wi-Fi or on a single machine.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Two players can complete a full 1v1 match on a single PC or Steam Deck.</span>
+          <span class="icon-completed">✓</span>
+          <span>Zero-configuration LAN auto-discovery via UDP heartbeat beacon (47777) and Direct IP fallback connect (SYS-11).</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Host-Authoritative Turn-Action RPC synchronization with secret hand privacy and synchronized board turns.</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Hotseat Pass &amp; Play with privacy curtain transitions for couch play on a single screen (SYS-10).</span>
         </li>
                   </ul>
                 </div>
