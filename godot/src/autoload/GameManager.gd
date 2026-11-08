@@ -5,6 +5,8 @@ signal player_currencies_updated(coins: int, gems: int)
 signal hero_leveled_up(hero_id: String, old_level: int, new_level: int, new_max_hp: int)
 signal chest_opened(chest_type: String, rolls: Array)
 signal quest_completed(quest_id: String, stars: int, rewards: Dictionary)
+signal elfisto_round_cleared(round_num: int, reward: Dictionary)
+signal elfisto_run_ended(cleared_all: bool, final_round: int)
 
 enum MatchState {
 	MENU,
@@ -125,6 +127,14 @@ const STAR_MILESTONES: Array[Dictionary] = [
 	{"stars": 200, "type": "chest", "chest_type": "algebraic_chest", "amount": 3, "label": "200 ⭐ Milestone: 3x Algebraic Chests"}
 ]
 var claimed_star_milestones: Array[int] = []
+
+# Daily Dungeons & El Fisto Arena (Task 7.4)
+var dungeon_stage_clears: Dictionary = {}
+var elfisto_current_round: int = 1
+var elfisto_highest_round: int = 1
+var elfisto_consecutive_wins: int = 0
+var elfisto_hero_hp_current: int = -1
+var elfisto_is_active_run: bool = false
 
 const DEFAULT_PROFILE_PATH: String = "user://player_profile.json"
 
@@ -306,6 +316,12 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"campaign": campaign_graph.serialize() if campaign_graph != null else {},
 		"fc_campaign": fc_campaign_graph.serialize() if fc_campaign_graph != null else {},
 		"claimed_star_milestones": claimed_star_milestones,
+		"dungeon_stage_clears": dungeon_stage_clears,
+		"elfisto": {
+			"current_round": elfisto_current_round,
+			"highest_round": elfisto_highest_round,
+			"consecutive_wins": elfisto_consecutive_wins
+		},
 		"active_deck_name": active_deck_name,
 		"player_hero_name": player_hero_name,
 		"player_inventory_cards": player_inventory_cards,
@@ -367,6 +383,13 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		claimed_star_milestones.clear()
 		for m in data["claimed_star_milestones"]:
 			claimed_star_milestones.append(int(m))
+	if data.has("dungeon_stage_clears") and typeof(data["dungeon_stage_clears"]) == TYPE_DICTIONARY:
+		dungeon_stage_clears = data["dungeon_stage_clears"].duplicate(true)
+	if data.has("elfisto") and typeof(data["elfisto"]) == TYPE_DICTIONARY:
+		var ef = data["elfisto"]
+		elfisto_current_round = int(ef.get("current_round", 1))
+		elfisto_highest_round = int(ef.get("highest_round", 1))
+		elfisto_consecutive_wins = int(ef.get("consecutive_wins", 0))
 
 	_update_active_hero_hp()
 	player_currencies_updated.emit(get_coins(), get_gems())
@@ -465,9 +488,14 @@ func add_rewards(coins: int, cards: Array[String], xp: int = 0) -> void:
 	if xp > 0:
 		add_hero_xp(player_hero_name, xp)
 	for c in cards:
-		player_inventory_cards.append(c)
+		add_card_to_inventory(c)
+
+
+func add_card_to_inventory(card_id: String) -> void:
+	if card_id != "":
+		player_inventory_cards.append(card_id)
 		if not owned_card_counts.is_empty():
-			owned_card_counts[c] = int(owned_card_counts.get(c, 0)) + 1
+			owned_card_counts[card_id] = int(owned_card_counts.get(card_id, 0)) + 1
 
 
 func get_owned_card_counts() -> Dictionary:
@@ -791,4 +819,90 @@ func launch_quest_battle(quest_id: String) -> bool:
 func open_campaign_map() -> void:
 	current_state = MatchState.MENU
 	get_tree().change_scene_to_file("res://scenes/campaign_map.tscn")
+
+
+# ==============================================================================
+# DAILY DUNGEONS & EL FISTO ARENA (Task 7.4)
+# ==============================================================================
+
+## Daily Dungeon stage queries & progression
+func get_dungeon_max_cleared_stage(dungeon_name: String) -> int:
+	return int(dungeon_stage_clears.get(dungeon_name, 0))
+
+
+func is_dungeon_stage_unlocked(dungeon_name: String, stage_index: int) -> bool:
+	if stage_index == 0:
+		return true
+	return get_dungeon_max_cleared_stage(dungeon_name) >= stage_index
+
+
+func complete_dungeon_stage(dungeon_name: String, stage_index: int) -> void:
+	var curr = get_dungeon_max_cleared_stage(dungeon_name)
+	if stage_index + 1 > curr:
+		dungeon_stage_clears[dungeon_name] = stage_index + 1
+	save_profile()
+
+
+## El Fisto Survival Gauntlet lifecycle
+func start_elfisto_run() -> void:
+	elfisto_current_round = 1
+	elfisto_consecutive_wins = 0
+	_update_active_hero_hp()
+	elfisto_hero_hp_current = player_hero_max_hp
+	elfisto_is_active_run = true
+
+
+func record_elfisto_battle_result(won: bool, remaining_hp: int) -> Dictionary:
+	if not elfisto_is_active_run:
+		start_elfisto_run()
+
+	if won:
+		elfisto_consecutive_wins += 1
+		elfisto_hero_hp_current = maxi(1, remaining_hp)
+		var round_data = Database.get_elfisto_round(elfisto_current_round)
+
+		var reward_type = str(round_data.get("reward_type", ""))
+		var reward_qty = int(round_data.get("reward_quantity", 1))
+		var awarded_dict: Dictionary = {"type": reward_type, "quantity": reward_qty}
+
+		if reward_type == "Gems":
+			add_gems(reward_qty)
+		elif reward_type.begins_with("Card "):
+			var card_id = reward_type.replace("Card ", "").strip_edges()
+			add_card_to_inventory(card_id)
+			awarded_dict["card_id"] = card_id
+
+		var completed_round = elfisto_current_round
+		var is_cleared_all = (completed_round >= 8)
+		elfisto_round_cleared.emit(completed_round, awarded_dict)
+
+		if not is_cleared_all:
+			elfisto_current_round += 1
+			elfisto_highest_round = maxi(elfisto_highest_round, elfisto_current_round)
+		else:
+			elfisto_is_active_run = false
+			elfisto_hero_hp_current = -1
+			elfisto_run_ended.emit(true, 8)
+
+		save_profile()
+		return {
+			"won": true,
+			"round": completed_round,
+			"reward": awarded_dict,
+			"cleared_gauntlet": is_cleared_all,
+			"next_round": elfisto_current_round,
+			"remaining_hp": elfisto_hero_hp_current
+		}
+	else:
+		var ended_round = elfisto_current_round
+		elfisto_is_active_run = false
+		elfisto_hero_hp_current = -1
+		elfisto_current_round = 1
+		elfisto_run_ended.emit(false, ended_round)
+		save_profile()
+		return {
+			"won": false,
+			"round": ended_round,
+			"reset": true
+		}
 

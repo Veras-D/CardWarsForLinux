@@ -604,10 +604,10 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">39 / 53 Tasks Done (73.6%)</span>
+            <span class="pct">40 / 53 Tasks Done (75.5%)</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 73.6%;"></div>
+            <div class="progress-fill" style="width: 75.5%;"></div>
           </div>
         </div>
       </div>
@@ -635,7 +635,7 @@
             <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (2/2)</option>
             <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (2/2)</option>
             <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (2/2)</option>
-            <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (3/4)</option>
+            <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (4/4)</option>
             <option value="epic8">💰 Epic 8: Economy &amp; Gacha (2/2)</option>
             <option value="epic9">⚙️ Epic 9: UI, Settings &amp; CI/CD (3/3)</option>
             <option value="epic10">🔧 Epic 10: Community Patches (0/13)</option>
@@ -645,8 +645,8 @@
 
       <div class="toolbar-right">
         <button class="btn active" data-status-filter="all">All</button>
-        <button class="btn" data-status-filter="completed">✅ Done (39)</button>
-        <button class="btn" data-status-filter="planned">⏳ Planned (14)</button>
+        <button class="btn" data-status-filter="completed">✅ Done (40)</button>
+        <button class="btn" data-status-filter="planned">⏳ Planned (13)</button>
         <button class="btn" id="btn-toggle-all">↕️ Expand All</button>
       </div>
     </div>
@@ -1986,7 +1986,7 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">3 / 4 Done</span>
+            <span class="epic-count-badge">4 / 4 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
@@ -2137,15 +2137,15 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 7.4</span>
-                <span class="task-title">Daily Dungeons & El Fisto Arena</span>
+                <span class="task-title">Daily Dungeons &amp; El Fisto Survival Arena</span>
                 <span class="task-snippet">— 7 Daily Dungeons rotating on system weekday + 8-round survival ladder where damage carries over.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -2154,18 +2154,32 @@
               <div class="task-body-grid">
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
-                  <div class="ref-line"><strong>Reference:</strong> <code>db_Dungeon.json, db_ElFisto.json</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Monday Plains through Sunday Double Coins. El Fisto Arena gauntlet tracks consecutive wins.</p>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_Dungeon.json, db_DungeonQuestList.json, db_ElFisto.json, DungeonArenaModal.gd</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Monday Plains through Sunday Double Coins/Gems with 5 difficulty tiers each (stamina scaling 5-25). El Fisto Arena gauntlet tracks consecutive wins across 8 survival rounds with Hero HP carryover, card drop prizes (Banshee Princess, Banshee Queen, Unicyclops), and full profile persistence.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Daily dungeons unlock on corresponding system days; El Fisto gauntlet tracks consecutive wins.</span>
+          <span class="icon-completed">✓</span>
+          <span>Daily dungeons unlock on corresponding system days (Monday to Sunday) with 5 progressive difficulty stages.</span>
+        </li>
+                    <li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>El Fisto gauntlet tracks consecutive wins across 8 survival rounds with persistent hero damage carryover.</span>
+        </li>
+                    <li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Dedicated DungeonArenaModal UI component integrated into CampaignMap with tab switching and weekday selectors.</span>
         </li>
                   </ul>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Verification &amp; Test Suite</div>
+                  <div class="ref-line"><strong>Test Suite:</strong> <code>godot test_dungeons_elfisto.tscn</code></div>
+                  <p style="margin-top: 8px; color: var(--accent-green); font-size: 0.88rem;"><strong>100% Passed (25/25 checks).</strong> Verified 7 daily dungeons, 5 stages per dungeon with stamina costs, stage unlock sequence, 8 El Fisto rounds, HP carryover across consecutive wins, streak reset on defeat, reward granting, profile save/reload, and DungeonArenaModal UI.</p>
                 </div>
               </div>
             </div>

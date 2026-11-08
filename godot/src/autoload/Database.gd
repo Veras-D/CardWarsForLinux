@@ -23,6 +23,9 @@ var fc_quests_list: Array[Dictionary] = []
 var quest_conditions_db: Dictionary = {}
 var map_regions_list: Array[Dictionary] = []
 var fc_map_regions_list: Array[Dictionary] = []
+var daily_dungeons_list: Array[Dictionary] = []
+var dungeon_stages_db: Dictionary = {}
+var elfisto_rounds_list: Array[Dictionary] = []
 
 func _ready() -> void:
 	load_localizations()
@@ -66,6 +69,8 @@ func load_blueprints() -> void:
 	_load_quests()
 	_load_map_regions()
 	_load_fc_map()
+	_load_dungeons()
+	_load_elfisto()
 	all_cards_list.clear()
 	all_cards_list.append_array(creatures_list)
 	all_cards_list.append_array(spells_list)
@@ -675,6 +680,86 @@ func get_fc_quests() -> Array[Dictionary]:
 	for q in fc_quests_list:
 		res.append(q.duplicate(true))
 	return res
+
+func _load_dungeons() -> void:
+	var path_d = "res://data/db_Dungeon.json"
+	if FileAccess.file_exists(path_d):
+		var file = FileAccess.open(path_d, FileAccess.READ)
+		var json = JSON.new()
+		if json.parse(file.get_as_text()) == OK and typeof(json.data) == TYPE_ARRAY:
+			daily_dungeons_list.clear()
+			for item in json.data:
+				daily_dungeons_list.append(item)
+
+	var path_stages = "res://data/db_DungeonQuestList.json"
+	if FileAccess.file_exists(path_stages):
+		var file = FileAccess.open(path_stages, FileAccess.READ)
+		var json = JSON.new()
+		if json.parse(file.get_as_text()) == OK and typeof(json.data) == TYPE_ARRAY:
+			dungeon_stages_db.clear()
+			for item in json.data:
+				var d_name = str(item.get("dungeon", "")).strip_edges()
+				if not dungeon_stages_db.has(d_name):
+					dungeon_stages_db[d_name] = []
+				dungeon_stages_db[d_name].append({
+					"dungeon": d_name,
+					"quest_id": str(item.get("questID", "")).strip_edges(),
+					"heart_cost": int(item.get("heartCost", "5"))
+				})
+
+func _load_elfisto() -> void:
+	var path = "res://data/db_ElFisto.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	elfisto_rounds_list.clear()
+	for item in json.data:
+		elfisto_rounds_list.append({
+			"round": int(item.get("Round", "1")),
+			"quest_id": str(item.get("QuestID", "")).strip_edges(),
+			"reward_type": str(item.get("RewardType", "")).strip_edges(),
+			"reward_name": str(item.get("RewardName", "")).strip_edges(),
+			"reward_quantity": int(item.get("RewardQuantity", "1")),
+			"reward_icon": str(item.get("RewardIcon", "")).strip_edges(),
+			"chance_to_appear": float(item.get("ChanceToAppear", "1.0")),
+			"battles_needed": int(item.get("BattlesNeeded", "1"))
+		})
+
+func get_daily_dungeons() -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for d in daily_dungeons_list:
+		res.append(d.duplicate(true))
+	return res
+
+func get_dungeon_stages(dungeon_name: String) -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	if dungeon_stages_db.has(dungeon_name):
+		for s in dungeon_stages_db[dungeon_name]:
+			res.append(s.duplicate(true))
+	return res
+
+func get_dungeon_for_weekday(weekday: int) -> Dictionary:
+	var dungeon_idx = (weekday - 1) % 7
+	if dungeon_idx < 0:
+		dungeon_idx = 6
+	if dungeon_idx >= 0 and dungeon_idx < daily_dungeons_list.size():
+		return daily_dungeons_list[dungeon_idx].duplicate(true)
+	return {}
+
+func get_elfisto_rounds() -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for r in elfisto_rounds_list:
+		res.append(r.duplicate(true))
+	return res
+
+func get_elfisto_round(round_number: int) -> Dictionary:
+	for r in elfisto_rounds_list:
+		if r.get("round", 0) == round_number:
+			return r.duplicate(true)
+	return {}
 
 
 

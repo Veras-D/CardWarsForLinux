@@ -1,0 +1,191 @@
+[gd_scene format=3 uid="uid://dungeon_arena_modal_001"]
+
+[ext_resource type="Script" path="res://src/ui/DungeonArenaModal.gd" id="1_modal_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+bg_color = Color(0, 0, 0, 0.75)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.12, 0.18, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 0.65, 0.25, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_info"]
+bg_color = Color(0.06, 0.08, 0.12, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="DungeonArenaModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_modal_script")
+
+[node name="DimOverlay" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
+
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(760, 560)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -280.0
+offset_right = 380.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Panel/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+text = "⚔️ DUNGEONS & SURVIVAL ARENA"
+
+[node name="CloseBtn" type="Button" parent="Panel/VBox/Header"]
+custom_minimum_size = Vector2(40, 32)
+layout_mode = 2
+text = "✖"
+
+[node name="TabBar" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DungeonsTabBtn" type="Button" parent="Panel/VBox/TabBar"]
+custom_minimum_size = Vector2(180, 36)
+layout_mode = 2
+text = "📅 Daily Dungeons"
+
+[node name="ElFistoTabBtn" type="Button" parent="Panel/VBox/TabBar"]
+custom_minimum_size = Vector2(180, 36)
+layout_mode = 2
+text = "🥊 El Fisto Gauntlet"
+
+[node name="HSeparator" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="ContentArea" type="Control" parent="Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DungeonsView" type="VBoxContainer" parent="Panel/VBox/ContentArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="WeekdayBar" type="HBoxContainer" parent="Panel/VBox/ContentArea/DungeonsView"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="DungeonInfo" type="PanelContainer" parent="Panel/VBox/ContentArea/DungeonsView"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_info")
+
+[node name="VBox" type="VBoxContainer" parent="Panel/VBox/ContentArea/DungeonsView/DungeonInfo"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Panel/VBox/ContentArea/DungeonsView/DungeonInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+text = "🏛️ MONDAY DUNGEON"
+
+[node name="Desc" type="Label" parent="Panel/VBox/ContentArea/DungeonsView/DungeonInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "Clear daily elemental stages to claim bonus crafting ingredients and rare creatures."
+
+[node name="StagesScroll" type="ScrollContainer" parent="Panel/VBox/ContentArea/DungeonsView"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StagesList" type="VBoxContainer" parent="Panel/VBox/ContentArea/DungeonsView/StagesScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ElFistoView" type="VBoxContainer" parent="Panel/VBox/ContentArea"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="StatsPanel" type="PanelContainer" parent="Panel/VBox/ContentArea/ElFistoView"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_info")
+
+[node name="VBox" type="VBoxContainer" parent="Panel/VBox/ContentArea/ElFistoView/StatsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="StatusLabel" type="Label" parent="Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+text = "🥊 Status: READY TO ENTER (Round 1 / 8)"
+
+[node name="HpLabel" type="Label" parent="Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
+text = "❤️ Survival HP: 45 / 45"
+
+[node name="RecordLabel" type="Label" parent="Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
+text = "🏆 Highest Round: 1 | 🔥 Win Streak: 0"
+
+[node name="LadderScroll" type="ScrollContainer" parent="Panel/VBox/ContentArea/ElFistoView"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LadderList" type="VBoxContainer" parent="Panel/VBox/ContentArea/ElFistoView/LadderScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="ActionBtn" type="Button" parent="Panel/VBox/ContentArea/ElFistoView"]
+custom_minimum_size = Vector2(260, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "🥊 Enter El Fisto Arena (Round 1)"

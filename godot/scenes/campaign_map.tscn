@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://src/ui/EconomyHeader.tscn" id="2_header"]
 [ext_resource type="Script" path="res://src/systems/node_map_system/NodeMapRenderer.gd" id="3_renderer_script"]
 [ext_resource type="Texture2D" path="res://assets/textures/questmap/QuestMap_Ground.png" id="4_ground_tex"]
+[ext_resource type="PackedScene" path="res://scenes/dungeon_arena_modal.tscn" id="5_dungeon_modal"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.08, 0.1, 0.14, 1)
@@ -82,6 +83,11 @@ text = "🗺️ LAND OF OOO CAMPAIGN"
 custom_minimum_size = Vector2(170, 34)
 layout_mode = 2
 text = "🍰 Fionna & Cake"
+
+[node name="DungeonArenaBtn" type="Button" parent="VBox/TopBar"]
+custom_minimum_size = Vector2(160, 34)
+layout_mode = 2
+text = "🏛️ Dungeons & Arena"
 
 [node name="EconomyHeader" parent="VBox/TopBar" instance=ExtResource("2_header")]
 layout_mode = 2
@@ -235,3 +241,6 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 15
 text = "⚔️ Battle Quest 1!"
+
+[node name="DungeonArenaModal" parent="." instance=ExtResource("5_dungeon_modal")]
+visible = false

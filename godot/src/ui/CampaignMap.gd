@@ -9,9 +9,13 @@ var current_world: CampaignWorld = CampaignWorld.LAND_OF_OOO
 @onready var map_renderer: NodeMapRenderer = $VBox/MapArea/MapRenderer
 @onready var title_label: Label = $VBox/TopBar/Title
 @onready var world_toggle_btn: Button = $VBox/TopBar/WorldToggleBtn
+@onready var dungeon_arena_btn: Button = $VBox/TopBar/DungeonArenaBtn
 @onready var total_stars_label: Label = $VBox/TopBar/RightGroup/TotalStarsLabel
 @onready var back_btn: Button = $VBox/TopBar/BackBtn
 @onready var regions_bar: HBoxContainer = $VBox/RegionsBar
+
+# Dungeons & Arena Modal
+@onready var dungeon_arena_modal: Control = $DungeonArenaModal
 
 # Quest Detail Modal
 @onready var detail_modal: Control = $QuestDetailModal
@@ -34,6 +38,8 @@ func _ready() -> void:
 		back_btn.pressed.connect(_on_back_pressed)
 	if world_toggle_btn:
 		world_toggle_btn.pressed.connect(_toggle_campaign_world)
+	if dungeon_arena_btn:
+		dungeon_arena_btn.pressed.connect(_on_dungeon_arena_pressed)
 	if modal_close_btn:
 		modal_close_btn.pressed.connect(func(): detail_modal.visible = false)
 	if modal_battle_btn:
@@ -58,6 +64,11 @@ func _ready() -> void:
 		GameManager.fc_campaign_graph.node_completed.connect(func(_nid, _s, _f): _refresh_stats())
 
 	_refresh_stats()
+
+
+func _on_dungeon_arena_pressed() -> void:
+	if dungeon_arena_modal:
+		dungeon_arena_modal.open_modal()
 
 
 func _toggle_campaign_world() -> void:
