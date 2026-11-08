@@ -78,6 +78,11 @@ theme_override_colors/font_color = Color(0.95, 0.8, 0.3, 1)
 theme_override_font_sizes/font_size = 20
 text = "🗺️ LAND OF OOO CAMPAIGN"
 
+[node name="WorldToggleBtn" type="Button" parent="VBox/TopBar"]
+custom_minimum_size = Vector2(170, 34)
+layout_mode = 2
+text = "🍰 Fionna & Cake"
+
 [node name="EconomyHeader" parent="VBox/TopBar" instance=ExtResource("2_header")]
 layout_mode = 2
 size_flags_horizontal = 3

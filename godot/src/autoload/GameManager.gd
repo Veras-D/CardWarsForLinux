@@ -110,6 +110,7 @@ var gacha_roller: GachaRoller
 
 # Campaign & World Map System (SYS-9)
 var campaign_graph: NodeMapGraph
+var fc_campaign_graph: NodeMapGraph
 var active_quest_id: String = ""
 
 # Star Milestones & Rewards (Task 7.2)
@@ -303,6 +304,7 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"heroes": hero_data,
 		"gacha_pity": gacha_roller.serialize_pity() if gacha_roller != null else {},
 		"campaign": campaign_graph.serialize() if campaign_graph != null else {},
+		"fc_campaign": fc_campaign_graph.serialize() if fc_campaign_graph != null else {},
 		"claimed_star_milestones": claimed_star_milestones,
 		"active_deck_name": active_deck_name,
 		"player_hero_name": player_hero_name,
@@ -359,6 +361,8 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		gacha_roller.deserialize_pity(data["gacha_pity"])
 	if data.has("campaign") and typeof(data["campaign"]) == TYPE_DICTIONARY and campaign_graph != null:
 		campaign_graph.deserialize(data["campaign"])
+	if data.has("fc_campaign") and typeof(data["fc_campaign"]) == TYPE_DICTIONARY and fc_campaign_graph != null:
+		fc_campaign_graph.deserialize(data["fc_campaign"])
 	if data.has("claimed_star_milestones") and typeof(data["claimed_star_milestones"]) == TYPE_ARRAY:
 		claimed_star_milestones.clear()
 		for m in data["claimed_star_milestones"]:
@@ -593,28 +597,48 @@ func return_to_menu() -> void:
 # ==============================================================================
 
 func _init_campaign() -> void:
-	if campaign_graph != null and not campaign_graph.get_all_nodes().is_empty():
-		return
 	if campaign_graph == null:
 		campaign_graph = NodeMapGraph.new()
+	if fc_campaign_graph == null:
+		fc_campaign_graph = NodeMapGraph.new()
 
-	for qid in Database.quests_db.keys():
-		var q = Database.quests_db[qid]
-		campaign_graph.add_node({
-			"id": qid,
-			"title": "Quest " + str(q.get("label", qid)),
-			"position": q.get("position", Vector2.ZERO),
-			"state": NodeMapGraph.NodeState.LOCKED,
-			"prerequisites": q.get("prerequisites", []),
-			"connections": q.get("unlock_ids", []),
-			"conditions": q.get("conditions", []),
-			"metadata": q
-		})
+	if campaign_graph.get_all_nodes().is_empty():
+		for q in Database.main_quests_list:
+			var qid = q.get("id", "")
+			campaign_graph.add_node({
+				"id": qid,
+				"title": "Quest " + str(q.get("label", qid)),
+				"position": q.get("position", Vector2.ZERO),
+				"state": NodeMapGraph.NodeState.LOCKED,
+				"prerequisites": q.get("prerequisites", []),
+				"connections": q.get("unlock_ids", []),
+				"conditions": q.get("conditions", []),
+				"metadata": q
+			})
 
-	# Ensure Quest 1 starts UNLOCKED
-	if campaign_graph.has_node("1"):
-		campaign_graph.set_node_state("1", NodeMapGraph.NodeState.UNLOCKED)
-	campaign_graph.evaluate_unlocks()
+		# Ensure Quest 1 starts UNLOCKED
+		if campaign_graph.has_node("1"):
+			campaign_graph.set_node_state("1", NodeMapGraph.NodeState.UNLOCKED)
+		campaign_graph.evaluate_unlocks()
+
+	if fc_campaign_graph.get_all_nodes().is_empty():
+		for q in Database.fc_quests_list:
+			var qid = q.get("id", "")
+			fc_campaign_graph.add_node({
+				"id": qid,
+				"title": "FC " + str(q.get("label", qid)),
+				"position": q.get("position", Vector2.ZERO),
+				"state": NodeMapGraph.NodeState.LOCKED,
+				"prerequisites": q.get("prerequisites", []),
+				"connections": q.get("unlock_ids", []),
+				"conditions": q.get("conditions", []),
+				"metadata": q
+			})
+
+		# Ensure Quest 5001 starts UNLOCKED
+		if fc_campaign_graph.has_node("5001"):
+			fc_campaign_graph.set_node_state("5001", NodeMapGraph.NodeState.UNLOCKED)
+		fc_campaign_graph.evaluate_unlocks()
 
 
 func complete_campaign_quest(quest_id: String, match_stats: Dictionary) -> Dictionary:
@@ -636,7 +660,8 @@ func complete_campaign_quest(quest_id: String, match_stats: Dictionary) -> Dicti
 	var stars_earned = clampi(maxi(1, raw_stars), 1, 3)
 	var audit_report = StarConditionEvaluator.audit_star_conditions(conditions, match_stats)
 
-	var comp_res = campaign_graph.complete_node(quest_id, stars_earned)
+	var target_graph = fc_campaign_graph if (quest.get("type") == "fc" and fc_campaign_graph != null) else campaign_graph
+	var comp_res = target_graph.complete_node(quest_id, stars_earned)
 
 	# Compute rewards
 	var min_c = int(quest.get("min_coins", 0))
@@ -674,9 +699,12 @@ func complete_campaign_quest(quest_id: String, match_stats: Dictionary) -> Dicti
 
 
 func get_total_campaign_stars() -> int:
-	if campaign_graph == null:
+	if campaign_graph == null or fc_campaign_graph == null:
 		_init_campaign()
-	return campaign_graph.get_total_stars()
+	var total = campaign_graph.get_total_stars()
+	if fc_campaign_graph != null:
+		total += fc_campaign_graph.get_total_stars()
+	return total
 
 
 func can_claim_milestone(star_threshold: int) -> bool:
@@ -719,7 +747,8 @@ func launch_quest_battle(quest_id: String) -> bool:
 	if quest.is_empty():
 		return false
 
-	var node_data = campaign_graph.get_node(quest_id)
+	var target_graph = fc_campaign_graph if (quest.get("type") == "fc" and fc_campaign_graph != null) else campaign_graph
+	var node_data = target_graph.get_node(quest_id)
 	if node_data.is_empty() or int(node_data.get("state", 0)) == NodeMapGraph.NodeState.LOCKED:
 		return false
 

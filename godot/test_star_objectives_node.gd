@@ -177,6 +177,7 @@ func _test_battle_result_modal_ui() -> void:
 func _test_star_milestones_and_claim() -> void:
 	print("\n[Test 5] Campaign Star Milestones & Claim Workflow")
 	GameManager.campaign_graph = null
+	GameManager.fc_campaign_graph = null
 	GameManager._init_campaign()
 	GameManager.claimed_star_milestones.clear()
 

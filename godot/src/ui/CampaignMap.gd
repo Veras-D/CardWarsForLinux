@@ -3,7 +3,12 @@ extends Control
 const NodeMapRenderer = preload("res://src/systems/node_map_system/NodeMapRenderer.gd")
 const NodeMapGraph = preload("res://src/systems/node_map_system/NodeMapGraph.gd")
 
+enum CampaignWorld { LAND_OF_OOO, FIONNA_AND_CAKE }
+var current_world: CampaignWorld = CampaignWorld.LAND_OF_OOO
+
 @onready var map_renderer: NodeMapRenderer = $VBox/MapArea/MapRenderer
+@onready var title_label: Label = $VBox/TopBar/Title
+@onready var world_toggle_btn: Button = $VBox/TopBar/WorldToggleBtn
 @onready var total_stars_label: Label = $VBox/TopBar/RightGroup/TotalStarsLabel
 @onready var back_btn: Button = $VBox/TopBar/BackBtn
 @onready var regions_bar: HBoxContainer = $VBox/RegionsBar
@@ -27,6 +32,8 @@ var _selected_quest_id: String = ""
 func _ready() -> void:
 	if back_btn:
 		back_btn.pressed.connect(_on_back_pressed)
+	if world_toggle_btn:
+		world_toggle_btn.pressed.connect(_toggle_campaign_world)
 	if modal_close_btn:
 		modal_close_btn.pressed.connect(func(): detail_modal.visible = false)
 	if modal_battle_btn:
@@ -34,29 +41,69 @@ func _ready() -> void:
 
 	detail_modal.visible = false
 
-	_setup_regions_bar()
-
-	if GameManager.campaign_graph == null:
+	if GameManager.campaign_graph == null or GameManager.fc_campaign_graph == null:
 		GameManager._init_campaign()
+
+	_setup_regions_bar()
 
 	if map_renderer:
 		map_renderer.graph = GameManager.campaign_graph
 		map_renderer.node_selected.connect(_on_quest_selected)
 
-	GameManager.campaign_graph.node_updated.connect(func(_nid): _refresh_stats())
-	GameManager.campaign_graph.node_completed.connect(func(_nid, _s, _f): _refresh_stats())
+	if GameManager.campaign_graph:
+		GameManager.campaign_graph.node_updated.connect(func(_nid): _refresh_stats())
+		GameManager.campaign_graph.node_completed.connect(func(_nid, _s, _f): _refresh_stats())
+	if GameManager.fc_campaign_graph:
+		GameManager.fc_campaign_graph.node_updated.connect(func(_nid): _refresh_stats())
+		GameManager.fc_campaign_graph.node_completed.connect(func(_nid, _s, _f): _refresh_stats())
 
+	_refresh_stats()
+
+
+func _toggle_campaign_world() -> void:
+	if current_world == CampaignWorld.LAND_OF_OOO:
+		set_campaign_world(CampaignWorld.FIONNA_AND_CAKE)
+	else:
+		set_campaign_world(CampaignWorld.LAND_OF_OOO)
+
+
+func set_campaign_world(world: CampaignWorld) -> void:
+	current_world = world
+	if world == CampaignWorld.FIONNA_AND_CAKE:
+		if title_label:
+			title_label.text = "🍰 FIONNA & CAKE EXPANSION"
+			title_label.modulate = Color(1.0, 0.75, 0.9, 1.0)
+		if world_toggle_btn:
+			world_toggle_btn.text = "🌟 Land of Ooo"
+		if map_renderer:
+			map_renderer.graph = GameManager.fc_campaign_graph
+	else:
+		if title_label:
+			title_label.text = "🗺️ LAND OF OOO CAMPAIGN"
+			title_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		if world_toggle_btn:
+			world_toggle_btn.text = "🍰 Fionna & Cake"
+		if map_renderer:
+			map_renderer.graph = GameManager.campaign_graph
+
+	_setup_regions_bar()
+	if map_renderer:
+		map_renderer._canvas_offset = Vector2(-150.0, 50.0)
+		map_renderer.queue_redraw()
 	_refresh_stats()
 
 
 func _setup_regions_bar() -> void:
 	for child in regions_bar.get_children():
+		regions_bar.remove_child(child)
 		child.queue_free()
 
-	var regions = Database.get_map_regions()
+	var regions = Database.get_fc_map_regions() if (current_world == CampaignWorld.FIONNA_AND_CAKE) else Database.get_map_regions()
 	for i in range(regions.size()):
 		var r = regions[i]
-		var r_name = str(r.get("RegionName", "Region " + str(i + 1)))
+		var r_name = str(r.get("RegionName", ""))
+		if r_name.strip_edges() == "":
+			r_name = "Stage %d" % (i + 1)
 		var btn = Button.new()
 		btn.text = "%d. %s" % [i + 1, r_name.capitalize()]
 		btn.pressed.connect(func(): _jump_to_region(i))
@@ -67,8 +114,8 @@ func _jump_to_region(region_index: int) -> void:
 	if map_renderer == null:
 		return
 	# Target Y coordinate for region
-	var target_y = -(120.0 + (region_index * 200.0) - 200.0)
-	var target_x = -200.0
+	var target_y = -(120.0 + (region_index * 180.0) - 200.0)
+	var target_x = -150.0
 	map_renderer._canvas_offset = Vector2(target_x, target_y)
 	map_renderer._apply_transform()
 
@@ -109,7 +156,8 @@ func _on_quest_selected(quest_id: String) -> void:
 	if quest.is_empty():
 		return
 
-	var node_data = GameManager.campaign_graph.get_node(quest_id)
+	var active_graph = GameManager.fc_campaign_graph if (current_world == CampaignWorld.FIONNA_AND_CAKE and GameManager.fc_campaign_graph != null) else GameManager.campaign_graph
+	var node_data = active_graph.get_node(quest_id)
 	var state = int(node_data.get("state", NodeMapGraph.NodeState.LOCKED))
 	var stars = int(node_data.get("stars", 0))
 

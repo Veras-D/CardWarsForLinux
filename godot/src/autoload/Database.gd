@@ -19,8 +19,10 @@ var gacha_schedules_list: Array[Dictionary] = []
 var chest_defs_db: Dictionary = {}
 var quests_db: Dictionary = {}
 var main_quests_list: Array[Dictionary] = []
+var fc_quests_list: Array[Dictionary] = []
 var quest_conditions_db: Dictionary = {}
 var map_regions_list: Array[Dictionary] = []
+var fc_map_regions_list: Array[Dictionary] = []
 
 func _ready() -> void:
 	load_localizations()
@@ -63,6 +65,7 @@ func load_blueprints() -> void:
 	_load_quest_conditions()
 	_load_quests()
 	_load_map_regions()
+	_load_fc_map()
 	all_cards_list.clear()
 	all_cards_list.append_array(creatures_list)
 	all_cards_list.append_array(spells_list)
@@ -525,6 +528,18 @@ func _load_map_regions() -> void:
 	for item in json.data:
 		map_regions_list.append(item)
 
+func _load_fc_map() -> void:
+	var path = "res://data/db_FCMap.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	fc_map_regions_list.clear()
+	for item in json.data:
+		fc_map_regions_list.append(item)
+
 func _load_quests() -> void:
 	var path = "res://data/db_Quest.json"
 	if not FileAccess.file_exists(path):
@@ -536,6 +551,7 @@ func _load_quests() -> void:
 
 	quests_db.clear()
 	main_quests_list.clear()
+	fc_quests_list.clear()
 
 	for item in json.data:
 		var qid = str(item.get("QuestID", "")).strip_edges()
@@ -558,13 +574,16 @@ func _load_quests() -> void:
 				cond_data["ID"] = c_id
 				conditions.append(cond_data)
 
-		# Build unlock targets
+		# Build unlock targets (supporting comma-separated lists e.g. "5002, 5044")
 		var unlock_ids: Array[String] = []
 		for u_idx in [1, 2, 3]:
 			var u_key = "UnlockQuestIDs" + str(u_idx)
-			var u_id = str(item.get(u_key, "")).strip_edges()
-			if u_id != "":
-				unlock_ids.append(u_id)
+			var raw_u = str(item.get(u_key, "")).strip_edges()
+			if raw_u != "":
+				for part in raw_u.split(","):
+					var clean_id = part.strip_edges()
+					if clean_id != "" and not unlock_ids.has(clean_id):
+						unlock_ids.append(clean_id)
 
 		# Card drops
 		var card_drops: Array[String] = []
@@ -578,11 +597,19 @@ func _load_quests() -> void:
 		var pos = Vector2.ZERO
 		if qid.is_valid_int():
 			var num = int(qid)
-			var region_idx = (num - 1) / 15
-			var local_idx = (num - 1) % 15
-			var pos_x = (100.0 + (local_idx * 95.0)) if (region_idx % 2 == 0) else (100.0 + (14 - local_idx) * 95.0)
-			var pos_y = 120.0 + (region_idx * 200.0) + (sin(float(local_idx) * 0.7) * 40.0)
-			pos = Vector2(pos_x, pos_y)
+			if num >= 5001 and num <= 5061:
+				var fc_idx = num - 5001
+				var region_idx = fc_idx / 8
+				var local_idx = fc_idx % 8
+				var pos_x = (120.0 + (local_idx * 150.0)) if (region_idx % 2 == 0) else (120.0 + (7 - local_idx) * 150.0)
+				var pos_y = 120.0 + (region_idx * 180.0) + (sin(float(local_idx) * 0.9) * 35.0)
+				pos = Vector2(pos_x, pos_y)
+			else:
+				var region_idx = (num - 1) / 15
+				var local_idx = (num - 1) % 15
+				var pos_x = (100.0 + (local_idx * 95.0)) if (region_idx % 2 == 0) else (100.0 + (14 - local_idx) * 95.0)
+				var pos_y = 120.0 + (region_idx * 200.0) + (sin(float(local_idx) * 0.7) * 40.0)
+				pos = Vector2(pos_x, pos_y)
 
 		var quest_entry = {
 			"id": qid,
@@ -612,6 +639,8 @@ func _load_quests() -> void:
 		quests_db[qid] = quest_entry
 		if qtype == "main":
 			main_quests_list.append(quest_entry)
+		elif qtype == "fc":
+			fc_quests_list.append(quest_entry)
 
 	# Precompute prerequisites from unlock_ids
 	for qid in quests_db.keys():
@@ -633,6 +662,18 @@ func get_map_regions() -> Array[Dictionary]:
 	var res: Array[Dictionary] = []
 	for r in map_regions_list:
 		res.append(r.duplicate(true))
+	return res
+
+func get_fc_map_regions() -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for r in fc_map_regions_list:
+		res.append(r.duplicate(true))
+	return res
+
+func get_fc_quests() -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for q in fc_quests_list:
+		res.append(q.duplicate(true))
 	return res
 
 
