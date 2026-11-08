@@ -26,7 +26,7 @@ This document defines the standalone, decoupled game systems in **`godot-systems
 | **SYS-4** | `ability_engine/` | Trigger / Action Event Bus | ✅ Production | Epic 3 (Abilities) | `testbed_abilities.tscn` |
 | **SYS-5** | `save_vault/` | Secure Atomic JSON Serializer | ✅ Production | Save system | `testbed_save.tscn` |
 | **SYS-6** | `audio_jukebox/` | BGM Crossfader & SFX Pool | ✅ Production | Epic 4, Epic 9 | `testbed_audio.tscn` |
-| **SYS-7** | `crafting_fusion/` | Universal Crafting & Quality Engine | 🛠️ In Progress | Epic 6 (Task 6.2) | `testbed_crafting.tscn` |
+| **SYS-7** | `crafting_fusion/` | Universal Crafting & Quality Engine | ✅ Production | Epic 6 (Task 6.2) | `testbed_crafting.tscn` |
 | **SYS-8** | `progression_engine/` | Economy Wallet, XP & Gacha Roller | 📋 Planned | Epic 8 (Tasks 8.1–8.4) | `testbed_progression.tscn` |
 | **SYS-9** | `node_map_system/` | Directed Graph Campaign Map | 📋 Planned | Epic 7 (Tasks 7.1–7.4) | `testbed_nodemap.tscn` |
 | **SYS-10** | `local_multiplayer/` | Hotseat Pass & Play / Dual Gamepad | 📋 Planned | Epic 5 (Task 5.2) | `testbed_local_multiplayer.tscn` |

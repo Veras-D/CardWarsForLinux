@@ -1,10 +1,11 @@
 class_name DeckValidator
 extends RefCounted
 
-## DeckValidator & Persistence Manager (Task 6.1)
-## Enforces official Card Wars deck construction rules (10-25 cards, max 4 copies per card),
-## computes mana cost distribution curves, filters card collections, and saves/loads custom decks
-## to user://decks/*.json.
+## DeckValidator & Persistence Manager (Task 6.1 / SYS-1 Composition)
+## Composes generic DeckRulesValidator (res://src/systems/deck_engine/DeckRulesValidator.gd)
+## with Card Wars Database, user://decks persistence, and Adventure Time landscape rules.
+
+const SystemDeckValidator = preload("res://src/systems/deck_engine/DeckRulesValidator.gd")
 
 const MIN_DECK_SIZE: int = 10
 const MAX_DECK_SIZE: int = 25
@@ -12,6 +13,9 @@ const MAX_COPIES_PER_CARD: int = 4
 const DECKS_DIR: String = "user://decks"
 
 const VALID_LANDSCAPES: Array[String] = ["Corn", "Plains", "Swamp", "Sand", "Cotton"]
+
+static func _get_system_validator() -> SystemDeckValidator:
+	return SystemDeckValidator.new(MIN_DECK_SIZE, MAX_DECK_SIZE, MAX_COPIES_PER_CARD)
 
 
 ## Validates a deck array of card IDs against official rules.
@@ -21,23 +25,18 @@ static func validate_deck(
 	owned_counts: Dictionary = {},
 	enforce_ownership: bool = false
 ) -> Dictionary:
+	var validator = _get_system_validator()
+	var raw_res = validator.validate_deck(cards, owned_counts, enforce_ownership)
+
 	var errors: Array[String] = []
-	var counts_by_id: Dictionary = {}
-
-	for raw_id in cards:
-		var cid = str(raw_id).strip_edges()
-		if cid == "":
-			continue
-		counts_by_id[cid] = counts_by_id.get(cid, 0) + 1
-
 	var total_cards = cards.size()
 	if total_cards < MIN_DECK_SIZE:
 		errors.append("Deck has %d cards (minimum is %d)." % [total_cards, MIN_DECK_SIZE])
 	elif total_cards > MAX_DECK_SIZE:
 		errors.append("Deck has %d cards (maximum is %d)." % [total_cards, MAX_DECK_SIZE])
 
-	for cid in counts_by_id.keys():
-		var count: int = counts_by_id[cid]
+	for cid in raw_res["counts_by_id"].keys():
+		var count: int = raw_res["counts_by_id"][cid]
 		var card_info = Database.get_card(cid)
 		var card_title = card_info.get("name", cid) if not card_info.is_empty() else cid
 		if count > MAX_COPIES_PER_CARD:
@@ -51,7 +50,7 @@ static func validate_deck(
 		"valid": errors.is_empty(),
 		"errors": errors,
 		"card_count": total_cards,
-		"counts_by_id": counts_by_id
+		"counts_by_id": raw_res["counts_by_id"]
 	}
 
 
@@ -63,55 +62,18 @@ static func can_add_card(
 	owned_counts: Dictionary = {},
 	enforce_ownership: bool = false
 ) -> Dictionary:
-	if cards.size() >= MAX_DECK_SIZE:
-		return {
-			"can_add": false,
-			"reason": "Deck is full (%d/%d cards)." % [cards.size(), MAX_DECK_SIZE]
-		}
-
-	var current_copies: int = 0
-	for c in cards:
-		if str(c) == card_id:
-			current_copies += 1
-
-	if current_copies >= MAX_COPIES_PER_CARD:
-		return {
-			"can_add": false,
-			"reason": "Max %d copies per card reached (%d/%d)." % [MAX_COPIES_PER_CARD, current_copies, MAX_COPIES_PER_CARD]
-		}
-
-	if enforce_ownership and not owned_counts.is_empty():
-		var owned = int(owned_counts.get(card_id, 0))
-		if current_copies >= owned:
-			return {
-				"can_add": false,
-				"reason": "All owned copies (%d) are already in deck." % owned
-			}
-
-	return {
-		"can_add": true,
-		"reason": ""
-	}
+	return _get_system_validator().can_add_card(cards, card_id, owned_counts, enforce_ownership)
 
 
 ## Computes the mana cost distribution for a deck array of card IDs.
 ## Bins: 0, 1, 2, 3, 4, 5 (where 5 represents 5+ MP cost).
 static func compute_mana_curve(cards: Array) -> Dictionary:
-	var curve: Dictionary = {
-		0: 0,
-		1: 0,
-		2: 0,
-		3: 0,
-		4: 0,
-		5: 0
-	}
+	var card_objects: Array = []
 	for raw_id in cards:
 		var cid = str(raw_id)
 		var c_data = Database.get_card(cid)
-		var cost = int(c_data.get("cost", 1))
-		var bin = clampi(cost, 0, 5)
-		curve[bin] = curve.get(bin, 0) + 1
-	return curve
+		card_objects.append(c_data)
+	return SystemDeckValidator.compute_cost_curve(card_objects, 5)
 
 
 ## Computes summary counts by card type (CREATURE, SPELL, BUILDING).

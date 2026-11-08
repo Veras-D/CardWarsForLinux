@@ -1,9 +1,11 @@
 class_name FusionEngine
 extends RefCounted
 
-## Card Quality & Fusion Engine (Task 6.2)
-## Implements Card Quality Tiers (Standard, Gold [+10% stats], Obsidian [+25% stats])
-## and parses/executes all 204 recipes from db_Fusion.json.
+## Card Quality & Fusion Engine (Task 6.2 / SYS-7 Composition)
+## Composes the generic CraftingEngine (res://src/systems/crafting_fusion/CraftingEngine.gd)
+## with Card Wars specific blueprints (db_Fusion.json) and Adventure Time card models.
+
+const SystemCraftingEngine = preload("res://src/systems/crafting_fusion/CraftingEngine.gd")
 
 enum QualityTier {
 	STANDARD = 0,
@@ -11,8 +13,8 @@ enum QualityTier {
 	OBSIDIAN = 2
 }
 
-const GOLD_STAT_MULTIPLIER: float = 1.10
-const OBSIDIAN_STAT_MULTIPLIER: float = 1.25
+const GOLD_STAT_MULTIPLIER: float = SystemCraftingEngine.DEFAULT_TIER_1_MULT
+const OBSIDIAN_STAT_MULTIPLIER: float = SystemCraftingEngine.DEFAULT_TIER_2_MULT
 
 
 ## Determines the quality tier of a card from its Dictionary or ID string.
@@ -65,20 +67,15 @@ static func get_stat_multiplier(tier: QualityTier) -> float:
 ## Computes scaled ATK and DEF for a base card dictionary at a target QualityTier.
 ## Ensures upgraded tiers grant at least +1 stat when base stat > 0.
 static func compute_scaled_stats(base_atk: int, base_def: int, tier: QualityTier) -> Dictionary:
-	if tier == QualityTier.STANDARD:
-		return {
-			"atk": base_atk,
-			"def": base_def,
-			"multiplier": 1.0
-		}
-
+	var engine = SystemCraftingEngine.new()
+	var base_dict = { "atk": base_atk, "def": base_def }
+	var sys_tier = int(tier)
+	var scaled = engine.compute_scaled_stats(base_dict, sys_tier)
 	var mult = get_stat_multiplier(tier)
-	var scaled_atk = int(ceil(float(base_atk) * mult)) if base_atk > 0 else 0
-	var scaled_def = int(ceil(float(base_def) * mult)) if base_def > 0 else 0
 
 	return {
-		"atk": scaled_atk,
-		"def": scaled_def,
+		"atk": int(scaled.get("atk", base_atk)),
+		"def": int(scaled.get("def", base_def)),
 		"multiplier": mult
 	}
 
@@ -162,30 +159,26 @@ static func load_fusion_recipes(json_path: String = "res://data/db_Fusion.json")
 
 
 ## Checks if the player can craft the given recipe with their owned_counts and coins.
+## Delegates core verification to SystemCraftingEngine.
 ## Returns { "can_craft": bool, "missing_coins": int, "missing_ingredients": Array[Dictionary], "reason": String }
 static func can_craft_recipe(
 	recipe: Dictionary,
 	owned_counts: Dictionary,
 	player_coins: int
 ) -> Dictionary:
-	var cost: int = int(recipe.get("cost", 0))
-	var missing_coins: int = max(0, cost - player_coins)
+	var check = SystemCraftingEngine.check_can_craft(recipe, owned_counts, player_coins)
+	var can_craft = check.get("can_craft", false)
+	var missing_coins = int(check.get("missing_currency", 0))
 	var missing_ingredients: Array[Dictionary] = []
 
-	var ingredients: Array = recipe.get("ingredients", [])
-	for ing in ingredients:
-		var cid = str(ing.get("card_id", ""))
-		var req = int(ing.get("count", 1))
-		var have = int(owned_counts.get(cid, 0))
-		if have < req:
-			missing_ingredients.append({
-				"card_id": cid,
-				"required": req,
-				"owned": have,
-				"missing": req - have
-			})
+	for item in check.get("missing_ingredients", []):
+		missing_ingredients.append({
+			"card_id": item.get("item_id", ""),
+			"required": item.get("required", 1),
+			"owned": item.get("owned", 0),
+			"missing": item.get("missing", 1)
+		})
 
-	var can_craft = (missing_coins == 0) and missing_ingredients.is_empty()
 	var reason = ""
 	if not missing_ingredients.is_empty():
 		var first = missing_ingredients[0]
@@ -193,6 +186,7 @@ static func can_craft_recipe(
 		var c_title = c_info.get("name", first["card_id"]) if not c_info.is_empty() else first["card_id"]
 		reason = "Missing %dx %s (%d/%d owned)." % [first["missing"], c_title, first["owned"], first["required"]]
 	elif missing_coins > 0:
+		var cost = int(recipe.get("cost", 0))
 		reason = "Need %d more coins (Cost: %d, Have: %d)." % [missing_coins, cost, player_coins]
 
 	return {
@@ -204,7 +198,7 @@ static func can_craft_recipe(
 
 
 ## Executes a fusion recipe against a mutable owned_counts Dictionary and coin balance.
-## Deducts the required ingredient counts and gold cost, and increments the output card count by 1.
+## Delegates ledger update to SystemCraftingEngine.
 ## Returns { "ok": bool, "output_card_id": String, "new_coins": int, "owned_counts": Dictionary, "reason": String }
 static func execute_fusion(
 	recipe: Dictionary,
@@ -221,21 +215,13 @@ static func execute_fusion(
 			"reason": str(check.get("reason", "Requirements not met."))
 		}
 
-	var cost: int = int(recipe.get("cost", 0))
-	var new_coins: int = player_coins - cost
-
-	for ing in recipe.get("ingredients", []):
-		var cid = str(ing.get("card_id", ""))
-		var req = int(ing.get("count", 1))
-		owned_counts[cid] = max(0, int(owned_counts.get(cid, 0)) - req)
-
-	var out_id = str(recipe.get("card_id", ""))
-	owned_counts[out_id] = int(owned_counts.get(out_id, 0)) + 1
+	var res = SystemCraftingEngine.execute_craft(recipe, owned_counts, player_coins)
+	var out_id = str(recipe.get("card_id", res.get("output_id", "")))
 
 	return {
-		"ok": true,
+		"ok": res.get("ok", false),
 		"output_card_id": out_id,
-		"new_coins": new_coins,
+		"new_coins": int(res.get("remaining_currency", player_coins)),
 		"owned_counts": owned_counts,
 		"reason": "Successfully fused %s!" % out_id
 	}
