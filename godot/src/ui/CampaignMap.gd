@@ -76,9 +76,31 @@ func _jump_to_region(region_index: int) -> void:
 func _refresh_stats() -> void:
 	if GameManager.campaign_graph == null:
 		return
-	var total_stars = GameManager.campaign_graph.get_total_stars()
+	var total_stars = GameManager.get_total_campaign_stars()
+
+	# Check Star Milestones (Task 7.2)
+	var next_m: Dictionary = {}
+	var claimable_threshold: int = -1
+	for m in GameManager.STAR_MILESTONES:
+		var st = int(m.get("stars", 0))
+		if GameManager.can_claim_milestone(st):
+			claimable_threshold = st
+			next_m = m
+			break
+		elif not GameManager.claimed_star_milestones.has(st):
+			if next_m.is_empty():
+				next_m = m
+
 	if total_stars_label:
-		total_stars_label.text = "⭐ Stars: %d" % total_stars
+		if claimable_threshold >= 0:
+			total_stars_label.text = "⭐ Stars: %d | 🎁 [CLAIM %s]" % [total_stars, next_m.get("label", "Reward")]
+			total_stars_label.modulate = Color(1.0, 0.9, 0.2)
+		elif not next_m.is_empty():
+			total_stars_label.text = "⭐ Stars: %d / %d (Next: %s)" % [total_stars, next_m.get("stars", 0), next_m.get("label", "Reward")]
+			total_stars_label.modulate = Color(1.0, 1.0, 1.0)
+		else:
+			total_stars_label.text = "⭐ Stars: %d (All Milestones Claimed!)" % total_stars
+			total_stars_label.modulate = Color(0.8, 1.0, 0.8)
 
 
 func _on_quest_selected(quest_id: String) -> void:
@@ -138,29 +160,8 @@ func _format_condition_label(label: Label, cond_ids: Array, index: int, stars: i
 
 
 func _get_friendly_cond_desc(cond_id: String) -> String:
-	match cond_id:
-		"JustWin": return "Win the match"
-		"Forbid_Spells": return "Win without using Spells"
-		"Forbid_Buildings": return "Win without using Buildings"
-		"Only_Creatures": return "Win using only Creatures"
-		"Only_Corn": return "Win using only Corn cards"
-		"Only_Plains": return "Win using only Plains cards"
-		"Only_Cotton": return "Win using only Cotton cards"
-		"Only_Swamp": return "Win using only Swamp cards"
-		"Only_Sand": return "Win using only Sand cards"
-		"Forbid_Corn": return "Win without using Corn cards"
-		"Forbid_Plains": return "Win without using Plains cards"
-		"Landscapes_Four": return "Win using 4 distinct Landscapes"
-		"Landscapes_Three": return "Win using at least 3 Landscapes"
-		"Landscapes_Two": return "Win using at least 2 Landscapes"
-	if cond_id.begins_with("FastWin"):
-		return "Win in %s turns or less" % cond_id.replace("FastWin", "")
-	if cond_id.begins_with("Only") and cond_id.ends_with("HP"):
-		return "Lose at most %s HP" % cond_id.replace("Only", "").replace("HP", "")
-	if cond_id.begins_with("OnlyLose") and cond_id.ends_with("Creatures"):
-		return "Lose at most %s creatures" % cond_id.replace("OnlyLose", "").replace("Creatures", "")
-	if cond_id.begins_with("Defeat"):
-		return "Defeat at least %s enemy creatures" % cond_id.replace("Defeat", "")
+	if Database:
+		return Database.get_condition_description(cond_id)
 	return cond_id
 
 

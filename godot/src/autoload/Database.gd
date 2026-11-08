@@ -428,6 +428,73 @@ func get_chest_def(chest_type: String) -> Dictionary:
 		key = "algebraic_chest"
 	return chest_defs_db.get(key, {})
 
+const QUEST_CONDITION_STRINGS: Dictionary = {
+	"!!QUESTCONDITION_JUSTWIN": "Beat your opponent to win a star!",
+	"!!QUESTCONDITION_FASTWIN3": "Beat the opponent in 3 turns or less.",
+	"!!QUESTCONDITION_FASTWIN5": "Beat the opponent in 5 turns or less.",
+	"!!QUESTCONDITION_FASTWIN7": "Beat the opponent in 7 turns or less.",
+	"!!QUESTCONDITION_FASTWIN10": "Beat the opponent in 10 turns or less.",
+	"!!QUESTCONDITION_ONLY5HP": "Don't lose more than 5 HP on your Hero.",
+	"!!QUESTCONDITION_ONLY10HP": "Don't lose more than 10 HP on your Hero.",
+	"!!QUESTCONDITION_ONLY25HP": "Don't lose more than 25 HP on your Hero.",
+	"!!QUESTCONDITION_ONLY50HP": "Don't lose more than 50 HP on your Hero.",
+	"!!QUESTCONDITION_ONLY100HP": "Don't lose more than 100 HP on your Hero.",
+	"!!QUESTCONDITION_ONLYLOSE2CREATURES": "Don't lose more than 2 creatures.",
+	"!!QUESTCONDITION_ONLYLOSE3CREATURES": "Don't lose more than 3 creatures.",
+	"!!QUESTCONDITION_ONLYLOSE5CREATURES": "Don't lose more than 5 creatures.",
+	"!!QUESTCONDITION_ONLYLOSE10CREATURES": "Don't lose more than 10 creatures.",
+	"!!QUESTCONDITION_DEFEAT2": "Defeat at least 2 Creatures.",
+	"!!QUESTCONDITION_DEFEAT5": "Defeat at least 5 Creatures.",
+	"!!QUESTCONDITION_DEAFEAT10": "Defeat at least 10 Creatures.",
+	"!!QUESTCONDITION_DEFEAT15": "Defeat at least 15 Creatures.",
+	"!!QUESTCONDITION_DEFEAT20": "Defeat at least 20 Creatures.",
+	"!!QUESTCONDITION_DEFEAT25": "Defeat at least 25 Creatures.",
+	"!!QUESTCONDITION_LANDSCAPES_TWO": "Use two different landscapes.",
+	"!!QUESTCONDITION_LANDSCAPES_THREE": "Use three different landscapes.",
+	"!!QUESTCONDITION_LANDSCAPES_FOUR": "Use four different landscapes.",
+	"!!QUESTCONDITION_FORBID_SPELLS": "Beat the opponent without using Spell cards.",
+	"!!QUESTCONDITION_FORBID_CREATURES": "Beat the opponent without using Creature cards.",
+	"!!QUESTCONDITION_FORBID_BUILDINGS": "Beat the opponent without using Building cards.",
+	"!!QUESTCONDITION_ONLY_CREATURES": "Beat the opponent using only Creature cards.",
+	"!!QUESTCONDITION_ONLY_SPELLS": "Beat the opponent using only Spell cards.",
+	"!!QUESTCONDITION_FORBID_CORN": "Beat the opponent without using Corn cards.",
+	"!!QUESTCONDITION_FORBID_PLAINS": "Beat the opponent without using Blue Plains cards.",
+	"!!QUESTCONDITION_FORBID_SWAMP": "Beat the opponent without using Useless Swamp cards.",
+	"!!QUESTCONDITION_FORBID_COTTON": "Beat the opponent without using Nice Lands cards.",
+	"!!QUESTCONDITION_FORBID_SAND": "Beat the opponent without using Sandy Lands cards.",
+	"!!QUESTCONDITION_FORBID_UNIVERSAL": "Beat the opponent without using Rainbow cards.",
+	"!!QUESTCONDITION_ONLY_CORN": "Beat the opponent using only Corn cards.",
+	"!!QUESTCONDITION_ONLY_PLAINS": "Beat the opponent using only Blue Plains cards.",
+	"!!QUESTCONDITION_ONLY_SWAMP": "Beat the opponent using only Useless Swamp cards.",
+	"!!QUESTCONDITION_ONLY_COTTON": "Beat the opponent using only Nice Lands cards.",
+	"!!QUESTCONDITION_ONLY_SAND": "Beat the opponent using only Sandy Lands cards.",
+	"!!QUESTCONDITION_ONLY_UNIVERSAL": "Beat the opponent using only Rainbow cards.",
+	"!!QUESTCONDITION_MAXCOST30": "Don't use a deck that costs more than 30.",
+	"!!QUESTCONDITION_MAXFLOOP0": "Don't use any floops.",
+	"!!QUESTCONDITION_MAXFLOOP1": "Don't use more than one floop.",
+	"!!QUESTCONDITION_MAXFLOOP3": "Don't use more than three floops.",
+	"!!QUESTCONDITION_ONLY0POINTCARDS": "Don't use cards with more than 0 Magic Points.",
+	"!!QUESTCONDITION_ONLY1POINTCARDS": "Don't use cards with more than 1 Magic Points.",
+	"!!QUESTCONDITION_ONLY2POINTCARDS": "Don't use cards with more than 2 Magic Points.",
+	"!!QUESTCONDITION_ONLY3POINTCARDS": "Don't use cards with more than 3 Magic Points.",
+	"!!QUESTCONDITION_ONLY10POINTS": "Don't use more than 10 Magic Points total.",
+	"!!QUESTCONDITION_ONLY15POINTS": "Don't use more than 15 Magic Points total.",
+	"!!QUESTCONDITION_ONLY20POINTS": "Don't use more than 20 Magic Points total.",
+	"!!QUESTCONDITION_ONLY25POINTS": "Don't use more than 25 Magic Points total.",
+	"!!QUESTCONDITION_TREASURECAT": "Defeat the cat, claim the loot."
+}
+
+func get_condition_description(cond_id: String) -> String:
+	var cond = get_quest_condition(cond_id)
+	if cond.is_empty():
+		return cond_id
+	var raw_desc = str(cond.get("Description", ""))
+	if QUEST_CONDITION_STRINGS.has(raw_desc):
+		return QUEST_CONDITION_STRINGS[raw_desc]
+	if raw_desc != "" and not raw_desc.begins_with("!!"):
+		return raw_desc
+	return cond_id
+
 func _load_quest_conditions() -> void:
 	var path = "res://data/db_QuestConditions.json"
 	if not FileAccess.file_exists(path):
@@ -440,6 +507,10 @@ func _load_quest_conditions() -> void:
 	for item in json.data:
 		var cid = str(item.get("ID", "")).strip_edges()
 		if cid != "":
+			var raw_desc = str(item.get("Description", ""))
+			if QUEST_CONDITION_STRINGS.has(raw_desc):
+				item["Description"] = QUEST_CONDITION_STRINGS[raw_desc]
+			item["description"] = item["Description"]
 			quest_conditions_db[cid] = item
 
 func _load_map_regions() -> void:

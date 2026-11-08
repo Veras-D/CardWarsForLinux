@@ -89,6 +89,19 @@ var gacha_roller: GachaRoller
 var campaign_graph: NodeMapGraph
 var active_quest_id: String = ""
 
+# Star Milestones & Rewards (Task 7.2)
+const STAR_MILESTONES: Array[Dictionary] = [
+	{"stars": 5, "type": "coins", "amount": 5000, "label": "5 ⭐ Milestone: 5,000 Coins"},
+	{"stars": 15, "type": "gems", "amount": 5, "label": "15 ⭐ Milestone: 5 Gems"},
+	{"stars": 30, "type": "chest", "chest_type": "cool_chest", "amount": 1, "label": "30 ⭐ Milestone: Free Cool Chest"},
+	{"stars": 50, "type": "gems", "amount": 10, "label": "50 ⭐ Milestone: 10 Gems"},
+	{"stars": 75, "type": "coins", "amount": 25000, "label": "75 ⭐ Milestone: 25,000 Coins"},
+	{"stars": 100, "type": "chest", "chest_type": "algebraic_chest", "amount": 1, "label": "100 ⭐ Milestone: Free Algebraic Chest"},
+	{"stars": 150, "type": "gems", "amount": 25, "label": "150 ⭐ Milestone: 25 Gems"},
+	{"stars": 200, "type": "chest", "chest_type": "algebraic_chest", "amount": 3, "label": "200 ⭐ Milestone: 3x Algebraic Chests"}
+]
+var claimed_star_milestones: Array[int] = []
+
 const DEFAULT_PROFILE_PATH: String = "user://player_profile.json"
 
 
@@ -259,6 +272,7 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"heroes": hero_data,
 		"gacha_pity": gacha_roller.serialize_pity() if gacha_roller != null else {},
 		"campaign": campaign_graph.serialize() if campaign_graph != null else {},
+		"claimed_star_milestones": claimed_star_milestones,
 		"active_deck_name": active_deck_name,
 		"player_hero_name": player_hero_name,
 		"player_inventory_cards": player_inventory_cards,
@@ -314,6 +328,10 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		gacha_roller.deserialize_pity(data["gacha_pity"])
 	if data.has("campaign") and typeof(data["campaign"]) == TYPE_DICTIONARY and campaign_graph != null:
 		campaign_graph.deserialize(data["campaign"])
+	if data.has("claimed_star_milestones") and typeof(data["claimed_star_milestones"]) == TYPE_ARRAY:
+		claimed_star_milestones.clear()
+		for m in data["claimed_star_milestones"]:
+			claimed_star_milestones.append(int(m))
 
 	_update_active_hero_hp()
 	player_currencies_updated.emit(get_coins(), get_gems())
@@ -525,6 +543,7 @@ func complete_campaign_quest(quest_id: String, match_stats: Dictionary) -> Dicti
 	var raw_stars = StarConditionEvaluator.count_stars_earned(conditions, match_stats)
 	# Victory awards at least 1 star
 	var stars_earned = clampi(maxi(1, raw_stars), 1, 3)
+	var audit_report = StarConditionEvaluator.audit_star_conditions(conditions, match_stats)
 
 	var comp_res = campaign_graph.complete_node(quest_id, stars_earned)
 
@@ -558,8 +577,49 @@ func complete_campaign_quest(quest_id: String, match_stats: Dictionary) -> Dicti
 		"stars": stars_earned,
 		"first_clear": comp_res.get("first_clear", false),
 		"unlocked_quests": comp_res.get("unlocked_nodes", []),
-		"rewards": rewards_dict
+		"rewards": rewards_dict,
+		"audit_report": audit_report
 	}
+
+
+func get_total_campaign_stars() -> int:
+	if campaign_graph == null:
+		_init_campaign()
+	return campaign_graph.get_total_stars()
+
+
+func can_claim_milestone(star_threshold: int) -> bool:
+	if claimed_star_milestones.has(star_threshold):
+		return false
+	return get_total_campaign_stars() >= star_threshold
+
+
+func claim_star_milestone(star_threshold: int) -> Dictionary:
+	if not can_claim_milestone(star_threshold):
+		return {"ok": false, "reason": "Milestone not available or already claimed"}
+
+	var milestone: Dictionary = {}
+	for m in STAR_MILESTONES:
+		if int(m.get("stars", 0)) == star_threshold:
+			milestone = m
+			break
+	if milestone.is_empty():
+		return {"ok": false, "reason": "Unknown milestone"}
+
+	claimed_star_milestones.append(star_threshold)
+
+	var mtype = str(milestone.get("type", "coins"))
+	var amt = int(milestone.get("amount", 0))
+	if mtype == "coins":
+		add_coins(amt)
+	elif mtype == "gems":
+		add_gems(amt)
+	elif mtype == "chest":
+		var ctype = str(milestone.get("chest_type", "cool_chest"))
+		open_chest(ctype, amt)
+
+	save_profile()
+	return {"ok": true, "milestone": milestone}
 
 
 func launch_quest_battle(quest_id: String) -> bool:

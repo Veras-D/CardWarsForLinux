@@ -9,6 +9,8 @@ const LootRoller = preload("res://src/battle/LootRoller.gd")
 const Tombstone = preload("res://src/battle/Tombstone.gd")
 const CharacterFaceRig = preload("res://src/battle/CharacterFaceRig.gd")
 const VOManager = preload("res://src/battle/VOManager.gd")
+const BattleResultModal = preload("res://src/ui/BattleResultModal.gd")
+const StarConditionEvaluator = preload("res://src/systems/node_map_system/StarConditionEvaluator.gd")
 
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HpLabel
@@ -36,6 +38,17 @@ const VOManager = preload("res://src/battle/VOManager.gd")
 @onready var match_intro: Control = $MatchIntro
 @onready var rps_modal: Control = $RockPaperScissors
 @onready var wheel_modal: BattleWheelModal = $BattleWheelModal
+@onready var result_modal: BattleResultModal = $BattleResultModal
+
+# Live Match Telemetry for 3-Star Objectives (Task 7.2)
+var match_turn_count: int = 0
+var match_player_hp_lost: int = 0
+var match_player_creatures_lost: int = 0
+var match_enemy_creatures_defeated: int = 0
+var match_card_types_played: Array[String] = []
+var match_factions_played: Array[String] = []
+var match_floops_used: int = 0
+var match_total_mp_spent: int = 0
 
 var player_hp: int = 25
 var player_max_hp: int = 25
@@ -128,6 +141,19 @@ func setup_match() -> void:
 	session_loot_cards.clear()
 	loot_drops_count = 0
 
+	# Reset Match Telemetry
+	match_turn_count = 0
+	match_player_hp_lost = 0
+	match_player_creatures_lost = 0
+	match_enemy_creatures_defeated = 0
+	match_card_types_played.clear()
+	match_factions_played.clear()
+	if GameManager:
+		for l in GameManager.player_landscapes:
+			match_factions_played.append(str(l))
+	match_floops_used = 0
+	match_total_mp_spent = 0
+
 	# Initialize Leaders & Cooldowns
 	var p_leader = Database.get_leader(GameManager.player_hero_name)
 	player_leader_id = p_leader.get("character_id", GameManager.player_hero_name)
@@ -209,6 +235,7 @@ func is_action_allowed() -> bool:
 
 func start_player_turn() -> void:
 	is_player_turn = true
+	match_turn_count += 1
 	if phase_manager != null:
 		if phase_manager.get_current_phase() == BattlePhaseManager.Phase.NONE:
 			phase_manager.start_battle(0)
@@ -343,6 +370,11 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 
 		# Construct building
 		player_mp -= cost
+		match_card_types_played.append("BUILDING")
+		match_total_mp_spent += cost
+		var b_fac = str(card_data.get("faction", "")).strip_edges()
+		if b_fac != "":
+			match_factions_played.append(b_fac)
 		lane.place_building(card_data)
 		log_message("🏰 Constructed %s on Lane %d (%s)!" % [card_data.get("name", "Building"), lane.lane_index + 1, lane.landscape])
 
@@ -377,6 +409,11 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 
 	# Summon creature onto valid lane
 	player_mp -= cost
+	match_card_types_played.append("CREATURE")
+	match_total_mp_spent += cost
+	var c_fac = str(card_data.get("faction", "")).strip_edges()
+	if c_fac != "":
+		match_factions_played.append(c_fac)
 	lane.place_creature(card_data)
 	log_message("✨ Summoned %s onto Lane %d (%s)!" % [card_data.get("name", "Creature"), lane.lane_index + 1, lane.landscape])
 
@@ -418,6 +455,11 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 
 		# Deduct MP
 		player_mp -= cost
+		match_card_types_played.append("SPELL")
+		match_total_mp_spent += cost
+		var s_fac = str(card_data.get("faction", "")).strip_edges()
+		if s_fac != "":
+			match_factions_played.append(s_fac)
 
 		if ResourceLoader.exists("res://assets/audio/sfx/LeaderPower.wav"):
 			Audio.play_sfx(load("res://assets/audio/sfx/LeaderPower.wav"), -6.0)
@@ -426,6 +468,8 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 		log_message("✨ Cast %s! %s" % [card_data.get("name", "Spell"), res.get("message", "")])
 	else:
 		player_mp -= cost
+		match_card_types_played.append("SPELL")
+		match_total_mp_spent += cost
 
 	if player_face_rig:
 		player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
@@ -454,6 +498,8 @@ func _on_floop_requested(lane: LaneSlot) -> void:
 		return
 
 	player_mp -= floop_cost
+	match_floops_used += 1
+	match_total_mp_spent += floop_cost
 	lane.set_flooped(true)
 	log_message("Flooped %s!" % data.get("name", "Creature"))
 
@@ -823,6 +869,7 @@ func execute_opponent_turn() -> void:
 					vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, true)
 		else:
 			player_hp = max(0, player_hp - final_damage)
+			match_player_hp_lost += final_damage
 			if player_face_rig:
 				player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
 			if vo_manager:
@@ -842,6 +889,30 @@ func execute_opponent_turn() -> void:
 	var timer = get_tree().create_timer(1.0)
 	await timer.timeout
 	start_player_turn()
+
+func get_match_stats(victory: bool) -> Dictionary:
+	var distinct_types: Array[String] = []
+	for t in match_card_types_played:
+		if not distinct_types.has(t):
+			distinct_types.append(t)
+	var distinct_factions: Array[String] = []
+	for f in match_factions_played:
+		if not distinct_factions.has(f):
+			distinct_factions.append(f)
+
+	return {
+		"won": victory,
+		"turns": maxi(1, match_turn_count),
+		"player_hp_lost": maxi(0, match_player_hp_lost),
+		"player_creatures_lost": match_player_creatures_lost,
+		"enemy_creatures_defeated": match_enemy_creatures_defeated,
+		"card_types_played": distinct_types,
+		"factions_played": distinct_factions,
+		"landscapes_count": GameManager.player_landscapes.size() if GameManager else 4,
+		"floops_used": match_floops_used,
+		"mp_spent": match_total_mp_spent
+	}
+
 
 func end_match(victory: bool) -> void:
 	if victory:
@@ -869,42 +940,48 @@ func end_match(victory: bool) -> void:
 		phase_manager.end_match(victory)
 	if GameManager:
 		GameManager.add_rewards(session_gold, session_loot_cards)
-	dialog_panel.visible = true
-	var reward_text = ""
-	if session_gold > 0 or not session_loot_cards.is_empty():
-		reward_text = "\n\nRewards:\n💰 Gold: +%d" % session_gold
-		if not session_loot_cards.is_empty():
-			reward_text += "\n🎁 Cards Won: %d" % session_loot_cards.size()
 
-	if victory and GameManager and GameManager.active_quest_id != "":
-		var match_stats = {
-			"won": true,
-			"turns": 3,
-			"player_hp_lost": maxi(0, player_max_hp - player_hp),
-			"player_creatures_lost": 0,
-			"enemy_creatures_defeated": 2,
-			"card_types_played": ["CREATURE"],
-			"factions_played": GameManager.player_landscapes,
-			"landscapes_count": GameManager.player_landscapes.size()
-		}
-		var q_res = GameManager.complete_campaign_quest(GameManager.active_quest_id, match_stats)
-		if q_res.get("ok", false):
-			var stars_count = int(q_res.get("stars", 1))
-			var star_str = ""
-			for i in range(3):
-				star_str += "★" if i < stars_count else "☆"
-			reward_text += "\n\n🗺️ Quest %s Cleared! %s" % [GameManager.active_quest_id, star_str]
-			var q_rew = q_res.get("rewards", {})
-			if q_rew.get("xp", 0) > 0:
-				reward_text += "\n✨ Hero XP: +%d" % q_rew.get("xp", 0)
-	if victory:
-		dialog_label.text = "🏆 VICTORY! 🏆\nYou are crowned a Cool Guy!" + reward_text
+	var match_stats = get_match_stats(victory)
+	var rewards_dict = {
+		"coins": session_gold,
+		"xp": 0,
+		"cards": session_loot_cards.duplicate(),
+		"leveled_up": false
+	}
+	var audit_report: Array = []
+	var qid = GameManager.active_quest_id if GameManager else ""
+
+	if qid != "":
+		var quest = Database.get_quest(qid)
+		var conditions = quest.get("conditions", [])
+		audit_report = StarConditionEvaluator.audit_star_conditions(conditions, match_stats)
+		if victory and GameManager:
+			var prev_lvl = GameManager.get_hero_level(GameManager.player_hero_name)
+			var q_res = GameManager.complete_campaign_quest(qid, match_stats)
+			if q_res.get("ok", false):
+				var q_rew = q_res.get("rewards", {})
+				rewards_dict["coins"] += int(q_rew.get("coins", 0))
+				rewards_dict["xp"] += int(q_rew.get("xp", 0))
+				for c in q_rew.get("cards", []):
+					rewards_dict["cards"].append(c)
+				var new_lvl = GameManager.get_hero_level(GameManager.player_hero_name)
+				if new_lvl > prev_lvl:
+					rewards_dict["leveled_up"] = true
+
+	if result_modal:
+		result_modal.display_result(victory, qid, match_stats, rewards_dict, audit_report)
 	else:
-		dialog_label.text = "💀 DEFEAT! 💀\nYou drank from the Dweeb Cup!" + reward_text
+		dialog_panel.visible = true
+		if victory:
+			dialog_label.text = "🏆 VICTORY! 🏆\nYou are crowned a Cool Guy!\n💰 Gold: +%d" % rewards_dict["coins"]
+		else:
+			dialog_label.text = "💀 DEFEAT! 💀\nYou drank from the Dweeb Cup!"
+
 
 func _on_creature_destroyed(lane: LaneSlot, dead_data: Dictionary) -> void:
 	var creature_name = dead_data.get("name", "Creature")
 	if not lane.is_player:
+		match_enemy_creatures_defeated += 1
 		# Opponent creature died -> roll drop table
 		var candidate_cards = GameManager.opponent_deck
 		var drop = LootRoller.roll_drop(drop_profile_id, loot_drops_count, candidate_cards)
@@ -917,6 +994,7 @@ func _on_creature_destroyed(lane: LaneSlot, dead_data: Dictionary) -> void:
 		else:
 			log_message("🪦 Opponent's %s was destroyed!" % creature_name)
 	else:
+		match_player_creatures_lost += 1
 		lane.spawn_tombstone({
 			"type": "TOMBSTONE",
 			"card_id": "",

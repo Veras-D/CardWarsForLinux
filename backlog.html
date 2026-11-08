@@ -604,10 +604,10 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">28 / 52 Tasks Done (53.8%)</span>
+            <span class="pct">29 / 52 Tasks Done (55.8%)</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 53.8%;"></div>
+            <div class="progress-fill" style="width: 55.8%;"></div>
           </div>
         </div>
       </div>
@@ -635,7 +635,7 @@
             <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (2/2)</option>
             <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (0/2)</option>
             <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (2/2)</option>
-            <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (1/4)</option>
+            <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (2/4)</option>
             <option value="epic8">💰 Epic 8: Economy &amp; Gacha (2/2)</option>
             <option value="epic9">⚙️ Epic 9: UI, Settings &amp; CI/CD (1/3)</option>
             <option value="epic10">🔧 Epic 10: Community Patches (0/13)</option>
@@ -1934,7 +1934,7 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">1 / 4 Done</span>
+            <span class="epic-count-badge">2 / 4 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
@@ -1987,7 +1987,7 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 7.2</span>
@@ -1995,7 +1995,7 @@
                 <span class="task-snippet">— Match condition auditor for 3-star quest ratings (Star 1: Win; Star 2: Condition; Star 3: HP threshold).</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -2004,17 +2004,33 @@
               <div class="task-body-grid">
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
-                  <div class="ref-line"><strong>Reference:</strong> <code>db_QuestConditions.json</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Star totals unlock bonus reward chests on the world map. Post-battle screen audits objectives.</p>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_QuestConditions.json</code>, <code>BattleResultModal.gd</code>, <code>StarConditionEvaluator.gd</code> (SYS-9)</div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Deep telemetry tracking in <code>BattleController.gd</code> (turns, player HP lost, player creatures lost, enemy creatures defeated, card types played, factions, floops, MP). Universal <code>StarConditionEvaluator.audit_star_conditions()</code> auditing condition pass/fail with telemetry descriptions. Interactive animated <code>BattleResultModal</code> popup with sequential star reveal animations, match reward breakdown (coins, XP progress, cards won, level-up banners), and dynamic routing. Cumulative Campaign Star Milestones (5, 15, 30, 50, 75, 100, 150, 200 stars) on the world map awarding coins, gems, and chest pulls with profile persistence.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Post-battle screen audits objectives and awards 1-3 stars accurately.</span>
-        </li>
+                      <span class="icon-done">✓</span>
+                      <span>Post-battle screen audits objectives and awards 1-3 stars accurately with detailed telemetry reasons.</span>
+                    </li>
+                    <li class="criteria-item">
+                      <span class="icon-done">✓</span>
+                      <span>Live in-battle telemetry gathering in BattleController.gd capturing turns, HP damage, creature casualties, and card types.</span>
+                    </li>
+                    <li class="criteria-item">
+                      <span class="icon-done">✓</span>
+                      <span>Interactive BattleResultModal with animated star pops, reward tally, level-up feedback, and continue/retry routing.</span>
+                    </li>
+                    <li class="criteria-item">
+                      <span class="icon-done">✓</span>
+                      <span>Cumulative star totals unlock bonus milestone rewards on the campaign map with player profile persistence.</span>
+                    </li>
+                    <li class="criteria-item">
+                      <span class="icon-done">✓</span>
+                      <span>Automated test suite test_star_objectives.tscn passing 55/55 assertions across 6 test suites.</span>
+                    </li>
                   </ul>
                 </div>
               </div>

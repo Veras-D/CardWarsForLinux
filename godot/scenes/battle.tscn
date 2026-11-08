@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/components/BattleWheelModal.tscn" id="5_wheel"]
 [ext_resource type="PackedScene" path="res://scenes/components/LeaderPowerButton.tscn" id="6_leader"]
 [ext_resource type="PackedScene" path="res://scenes/components/CharacterFaceRig.tscn" id="7_face"]
+[ext_resource type="PackedScene" path="res://scenes/battle_result_modal.tscn" id="8_result_modal"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.0823529, 0.101961, 0.14902, 1)
@@ -332,6 +333,10 @@ visible = false
 layout_mode = 1
 
 [node name="BattleWheelModal" parent="." instance=ExtResource("5_wheel")]
+visible = false
+layout_mode = 1
+
+[node name="BattleResultModal" parent="." instance=ExtResource("8_result_modal")]
 visible = false
 layout_mode = 1
 

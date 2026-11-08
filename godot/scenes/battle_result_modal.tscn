@@ -1,0 +1,145 @@
+[gd_scene load_steps=3 format=3 uid="uid://c7battle_result_modal_001"]
+
+[ext_resource type="Script" path="res://src/ui/BattleResultModal.gd" id="1_modal"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.12, 0.13, 0.16, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.35, 0.55, 0.85, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 16
+
+[node name="BattleResultModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_modal")
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.78)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DialogPanel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(580, 440)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/DialogPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="VBoxContainer" parent="CenterContainer/DialogPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/DialogPanel/VBox/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "🏆 VICTORY! 🏆"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="CenterContainer/DialogPanel/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.82, 0.88, 1)
+theme_override_font_sizes/font_size = 15
+text = "You are crowned a Cool Guy!"
+horizontal_alignment = 1
+
+[node name="ObjectivesSection" type="VBoxContainer" parent="CenterContainer/DialogPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ObjectivesTitle" type="Label" parent="CenterContainer/DialogPanel/VBox/ObjectivesSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+text = "🗺️ QUEST OBJECTIVES (3 / 3 ⭐)"
+
+[node name="ObjectivesList" type="VBoxContainer" parent="CenterContainer/DialogPanel/VBox/ObjectivesSection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RewardsSection" type="VBoxContainer" parent="CenterContainer/DialogPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RewardsTitle" type="Label" parent="CenterContainer/DialogPanel/VBox/RewardsSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "🎁 Match Rewards"
+
+[node name="RewardsGrid" type="GridContainer" parent="CenterContainer/DialogPanel/VBox/RewardsSection"]
+layout_mode = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="CoinsLabel" type="Label" parent="CenterContainer/DialogPanel/VBox/RewardsSection/RewardsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.3, 1)
+theme_override_font_sizes/font_size = 15
+text = "💰 +0 Coins"
+
+[node name="XpLabel" type="Label" parent="CenterContainer/DialogPanel/VBox/RewardsSection/RewardsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.95, 0.5, 1)
+theme_override_font_sizes/font_size = 15
+text = "✨ +0 XP"
+
+[node name="CardsLabel" type="Label" parent="CenterContainer/DialogPanel/VBox/RewardsSection/RewardsGrid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🎁 Cards: None"
+
+[node name="LevelUpBanner" type="Label" parent="CenterContainer/DialogPanel/VBox/RewardsSection"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "⭐ LEVEL UP! Max HP and Deck Capacity Increased!"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CenterContainer/DialogPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonContainer" type="HBoxContainer" parent="CenterContainer/DialogPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="ContinueBtn" type="Button" parent="CenterContainer/DialogPanel/VBox/ButtonContainer"]
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Continue to Map 🗺️"
+
+[node name="RetryBtn" type="Button" parent="CenterContainer/DialogPanel/VBox/ButtonContainer"]
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Retry Battle ⚔️"
