@@ -17,13 +17,17 @@ var lvup_schemes_db: Dictionary = {}
 var gacha_pools_db: Dictionary = {}
 var gacha_schedules_list: Array[Dictionary] = []
 var chest_defs_db: Dictionary = {}
+var quests_db: Dictionary = {}
+var main_quests_list: Array[Dictionary] = []
+var quest_conditions_db: Dictionary = {}
+var map_regions_list: Array[Dictionary] = []
 
 func _ready() -> void:
 	load_localizations()
 	load_textures()
 	load_blueprints()
-	print("[Database] Loaded %d total cards (%d creatures, %d spells, %d buildings, %d leaders, %d drop profiles, %d rank levels, %d gacha pools)" % [
-		cards_db.size(), creatures_list.size(), spells_list.size(), buildings_list.size(), leaders_db.size(), drop_profiles_db.size(), rank_up_db.size(), gacha_pools_db.size()
+	print("[Database] Loaded %d total cards (%d creatures, %d spells, %d buildings, %d leaders, %d drop profiles, %d rank levels, %d gacha pools, %d quests, %d conditions, %d regions)" % [
+		cards_db.size(), creatures_list.size(), spells_list.size(), buildings_list.size(), leaders_db.size(), drop_profiles_db.size(), rank_up_db.size(), gacha_pools_db.size(), quests_db.size(), quest_conditions_db.size(), map_regions_list.size()
 	])
 
 func load_localizations() -> void:
@@ -56,6 +60,9 @@ func load_blueprints() -> void:
 	_load_lvup_schemes()
 	_load_gacha_weights()
 	_load_gacha_schedule()
+	_load_quest_conditions()
+	_load_quests()
+	_load_map_regions()
 	all_cards_list.clear()
 	all_cards_list.append_array(creatures_list)
 	all_cards_list.append_array(spells_list)
@@ -420,6 +427,143 @@ func get_chest_def(chest_type: String) -> Dictionary:
 	elif key == "premium" or key == "algebraic":
 		key = "algebraic_chest"
 	return chest_defs_db.get(key, {})
+
+func _load_quest_conditions() -> void:
+	var path = "res://data/db_QuestConditions.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	quest_conditions_db.clear()
+	for item in json.data:
+		var cid = str(item.get("ID", "")).strip_edges()
+		if cid != "":
+			quest_conditions_db[cid] = item
+
+func _load_map_regions() -> void:
+	var path = "res://data/db_Map.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	map_regions_list.clear()
+	for item in json.data:
+		map_regions_list.append(item)
+
+func _load_quests() -> void:
+	var path = "res://data/db_Quest.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+
+	quests_db.clear()
+	main_quests_list.clear()
+
+	for item in json.data:
+		var qid = str(item.get("QuestID", "")).strip_edges()
+		if qid == "":
+			continue
+
+		var qtype = str(item.get("QuestType", "main")).strip_edges()
+		var qlabel = str(item.get("QuestLabel", qid)).strip_edges()
+
+		# Build conditions list
+		var cond_ids: Array[String] = []
+		var conditions: Array[Dictionary] = []
+		for c_idx in [1, 2, 3]:
+			var c_key = "Condition" + str(c_idx)
+			var c_id = str(item.get(c_key, "")).strip_edges()
+			if c_id != "":
+				cond_ids.append(c_id)
+				var cond_data = quest_conditions_db.get(c_id, {"id": c_id, "ID": c_id}).duplicate(true)
+				cond_data["id"] = c_id
+				cond_data["ID"] = c_id
+				conditions.append(cond_data)
+
+		# Build unlock targets
+		var unlock_ids: Array[String] = []
+		for u_idx in [1, 2, 3]:
+			var u_key = "UnlockQuestIDs" + str(u_idx)
+			var u_id = str(item.get(u_key, "")).strip_edges()
+			if u_id != "":
+				unlock_ids.append(u_id)
+
+		# Card drops
+		var card_drops: Array[String] = []
+		for cd_idx in range(1, 9):
+			var cd_key = "CardDrop" + str(cd_idx)
+			var cd_id = str(item.get(cd_key, "")).strip_edges()
+			if cd_id != "":
+				card_drops.append(cd_id)
+
+		# Calculate map position
+		var pos = Vector2.ZERO
+		if qid.is_valid_int():
+			var num = int(qid)
+			var region_idx = (num - 1) / 15
+			var local_idx = (num - 1) % 15
+			var pos_x = (100.0 + (local_idx * 95.0)) if (region_idx % 2 == 0) else (100.0 + (14 - local_idx) * 95.0)
+			var pos_y = 120.0 + (region_idx * 200.0) + (sin(float(local_idx) * 0.7) * 40.0)
+			pos = Vector2(pos_x, pos_y)
+
+		var quest_entry = {
+			"id": qid,
+			"label": qlabel,
+			"type": qtype,
+			"opponent": str(item.get("Opponent", "")).strip_edges(),
+			"deck_id": str(item.get("Deck", "")).strip_edges(),
+			"leader_id": str(item.get("LeaderID", "")).strip_edges(),
+			"leader_level": int(item.get("LeaderLevel", "1")),
+			"stamina": int(item.get("Stamina", "1")),
+			"min_xp": float(item.get("MinXP", "0")),
+			"max_xp": float(item.get("MaxXP", "0")),
+			"min_coins": int(item.get("MinCoins", "0")),
+			"max_coins": int(item.get("MaxCoins", "0")),
+			"spin_factor": float(item.get("SpinFactor", "1.6")),
+			"condition_ids": cond_ids,
+			"conditions": conditions,
+			"unlock_ids": unlock_ids,
+			"level_prefab": str(item.get("LevelPrefab", "")).strip_edges(),
+			"level_name": str(item.get("LevelName", "")).strip_edges(),
+			"drop_profile_id": str(item.get("DropProfileID", "")).strip_edges(),
+			"card_drops": card_drops,
+			"position": pos,
+			"prerequisites": []
+		}
+
+		quests_db[qid] = quest_entry
+		if qtype == "main":
+			main_quests_list.append(quest_entry)
+
+	# Precompute prerequisites from unlock_ids
+	for qid in quests_db.keys():
+		var q = quests_db[qid]
+		for u_id in q.get("unlock_ids", []):
+			if quests_db.has(u_id):
+				var target_prereqs: Array = quests_db[u_id].get("prerequisites", [])
+				if not target_prereqs.has(qid):
+					target_prereqs.append(qid)
+				quests_db[u_id]["prerequisites"] = target_prereqs
+
+func get_quest(quest_id: String) -> Dictionary:
+	return quests_db.get(quest_id, {}).duplicate(true)
+
+func get_quest_condition(cond_id: String) -> Dictionary:
+	return quest_conditions_db.get(cond_id, {}).duplicate(true)
+
+func get_map_regions() -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for r in map_regions_list:
+		res.append(r.duplicate(true))
+	return res
+
 
 
 

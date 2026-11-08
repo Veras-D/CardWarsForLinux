@@ -1,0 +1,232 @@
+[gd_scene format=3 uid="uid://c9qm1k8vbp5y2"]
+
+[ext_resource type="Script" path="res://src/ui/CampaignMap.gd" id="1_map_script"]
+[ext_resource type="PackedScene" path="res://src/ui/EconomyHeader.tscn" id="2_header"]
+[ext_resource type="Script" path="res://src/systems/node_map_system/NodeMapRenderer.gd" id="3_renderer_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/QuestMap_Ground.png" id="4_ground_tex"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.08, 0.1, 0.14, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_map_panel"]
+bg_color = Color(0.06, 0.08, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.35, 0.5, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.08, 0.1, 0.16, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.9, 0.75, 0.3, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="CampaignMap" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_map_script")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = -16.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TopBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="BackBtn" type="Button" parent="VBox/TopBar"]
+custom_minimum_size = Vector2(100, 34)
+layout_mode = 2
+text = "⬅ Menu"
+
+[node name="Title" type="Label" parent="VBox/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+text = "🗺️ LAND OF OOO CAMPAIGN"
+
+[node name="EconomyHeader" parent="VBox/TopBar" instance=ExtResource("2_header")]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RightGroup" type="HBoxContainer" parent="VBox/TopBar"]
+layout_mode = 2
+
+[node name="TotalStarsLabel" type="Label" parent="VBox/TopBar/RightGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_font_sizes/font_size = 16
+text = "⭐ Stars: 0"
+
+[node name="RegionsBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MapArea" type="PanelContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_map_panel")
+
+[node name="GroundTex" type="TextureRect" parent="VBox/MapArea"]
+modulate = Color(0.7, 0.7, 0.7, 0.25)
+layout_mode = 2
+texture = ExtResource("4_ground_tex")
+stretch_mode = 1
+
+[node name="MapRenderer" type="Control" parent="VBox/MapArea"]
+layout_mode = 2
+script = ExtResource("3_renderer_script")
+
+[node name="QuestDetailModal" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="QuestDetailModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.05, 0.08, 0.75)
+
+[node name="Panel" type="PanelContainer" parent="QuestDetailModal"]
+custom_minimum_size = Vector2(460, 420)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.0
+offset_top = -210.0
+offset_right = 230.0
+offset_bottom = 210.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="VBox" type="VBoxContainer" parent="QuestDetailModal/Panel"]
+layout_mode = 2
+offset_left = 20.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = -16.0
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="QuestDetailModal/Panel/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="QuestDetailModal/Panel/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "Quest 1: The Treehouse"
+
+[node name="CloseBtn" type="Button" parent="QuestDetailModal/Panel/VBox/Header"]
+custom_minimum_size = Vector2(40, 30)
+layout_mode = 2
+text = "✖"
+
+[node name="OpponentLabel" type="Label" parent="QuestDetailModal/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "👤 Opponent: Finn (Lv. 1)"
+
+[node name="DeckLabel" type="Label" parent="QuestDetailModal/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 13
+text = "🃏 Enemy Deck: Quest1_Deck"
+
+[node name="StaminaLabel" type="Label" parent="QuestDetailModal/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "⚡ Stamina Cost: 1"
+
+[node name="RewardsLabel" type="Label" parent="QuestDetailModal/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 12
+text = "💰 Coins: 100-120 | ✨ XP: 45-67"
+autowrap_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="QuestDetailModal/Panel/VBox"]
+layout_mode = 2
+
+[node name="Conditions" type="VBoxContainer" parent="QuestDetailModal/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CondHeader" type="Label" parent="QuestDetailModal/Panel/VBox/Conditions"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 13
+text = "3-Star Objectives:"
+
+[node name="Cond1" type="Label" parent="QuestDetailModal/Panel/VBox/Conditions"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "★ Win the match"
+
+[node name="Cond2" type="Label" parent="QuestDetailModal/Panel/VBox/Conditions"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "☆ Win without using Spells"
+
+[node name="Cond3" type="Label" parent="QuestDetailModal/Panel/VBox/Conditions"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "☆ Lose at most 5 creatures"
+
+[node name="Spacer" type="Control" parent="QuestDetailModal/Panel/VBox"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="BattleBtn" type="Button" parent="QuestDetailModal/Panel/VBox"]
+custom_minimum_size = Vector2(240, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 15
+text = "⚔️ Battle Quest 1!"

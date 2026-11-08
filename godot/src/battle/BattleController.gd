@@ -875,6 +875,28 @@ func end_match(victory: bool) -> void:
 		reward_text = "\n\nRewards:\n💰 Gold: +%d" % session_gold
 		if not session_loot_cards.is_empty():
 			reward_text += "\n🎁 Cards Won: %d" % session_loot_cards.size()
+
+	if victory and GameManager and GameManager.active_quest_id != "":
+		var match_stats = {
+			"won": true,
+			"turns": 3,
+			"player_hp_lost": maxi(0, player_max_hp - player_hp),
+			"player_creatures_lost": 0,
+			"enemy_creatures_defeated": 2,
+			"card_types_played": ["CREATURE"],
+			"factions_played": GameManager.player_landscapes,
+			"landscapes_count": GameManager.player_landscapes.size()
+		}
+		var q_res = GameManager.complete_campaign_quest(GameManager.active_quest_id, match_stats)
+		if q_res.get("ok", false):
+			var stars_count = int(q_res.get("stars", 1))
+			var star_str = ""
+			for i in range(3):
+				star_str += "★" if i < stars_count else "☆"
+			reward_text += "\n\n🗺️ Quest %s Cleared! %s" % [GameManager.active_quest_id, star_str]
+			var q_rew = q_res.get("rewards", {})
+			if q_rew.get("xp", 0) > 0:
+				reward_text += "\n✨ Hero XP: +%d" % q_rew.get("xp", 0)
 	if victory:
 		dialog_label.text = "🏆 VICTORY! 🏆\nYou are crowned a Cool Guy!" + reward_text
 	else:

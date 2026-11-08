@@ -4,6 +4,7 @@ signal match_state_changed(new_state)
 signal player_currencies_updated(coins: int, gems: int)
 signal hero_leveled_up(hero_id: String, old_level: int, new_level: int, new_max_hp: int)
 signal chest_opened(chest_type: String, rolls: Array)
+signal quest_completed(quest_id: String, stars: int, rewards: Dictionary)
 
 enum MatchState {
 	MENU,
@@ -15,6 +16,8 @@ enum MatchState {
 const CurrencyWallet = preload("res://src/systems/progression_engine/CurrencyWallet.gd")
 const ProgressionTracker = preload("res://src/systems/progression_engine/ProgressionTracker.gd")
 const GachaRoller = preload("res://src/systems/progression_engine/GachaRoller.gd")
+const NodeMapGraph = preload("res://src/systems/node_map_system/NodeMapGraph.gd")
+const StarConditionEvaluator = preload("res://src/systems/node_map_system/StarConditionEvaluator.gd")
 
 var current_state: MatchState = MatchState.MENU
 
@@ -82,12 +85,17 @@ var wallet: CurrencyWallet
 var hero_trackers: Dictionary = {}
 var gacha_roller: GachaRoller
 
+# Campaign & World Map System (SYS-9)
+var campaign_graph: NodeMapGraph
+var active_quest_id: String = ""
+
 const DEFAULT_PROFILE_PATH: String = "user://player_profile.json"
 
 
 func _ready() -> void:
 	_init_wallet()
 	_init_gacha()
+	_init_campaign()
 	load_profile()
 	_update_active_hero_hp()
 
@@ -250,6 +258,7 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"wallet": wallet.serialize(),
 		"heroes": hero_data,
 		"gacha_pity": gacha_roller.serialize_pity() if gacha_roller != null else {},
+		"campaign": campaign_graph.serialize() if campaign_graph != null else {},
 		"active_deck_name": active_deck_name,
 		"player_hero_name": player_hero_name,
 		"player_inventory_cards": player_inventory_cards,
@@ -303,6 +312,8 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		owned_card_counts = data["owned_card_counts"].duplicate(true)
 	if data.has("gacha_pity") and typeof(data["gacha_pity"]) == TYPE_DICTIONARY and gacha_roller != null:
 		gacha_roller.deserialize_pity(data["gacha_pity"])
+	if data.has("campaign") and typeof(data["campaign"]) == TYPE_DICTIONARY and campaign_graph != null:
+		campaign_graph.deserialize(data["campaign"])
 
 	_update_active_hero_hp()
 	player_currencies_updated.emit(get_coins(), get_gems())
@@ -466,3 +477,138 @@ func start_battle() -> void:
 func return_to_menu() -> void:
 	current_state = MatchState.MENU
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+
+
+# ==============================================================================
+# CAMPAIGN PROGRESSION & QUEST MAP (SYS-9)
+# ==============================================================================
+
+func _init_campaign() -> void:
+	if campaign_graph != null and not campaign_graph.get_all_nodes().is_empty():
+		return
+	if campaign_graph == null:
+		campaign_graph = NodeMapGraph.new()
+
+	for qid in Database.quests_db.keys():
+		var q = Database.quests_db[qid]
+		campaign_graph.add_node({
+			"id": qid,
+			"title": "Quest " + str(q.get("label", qid)),
+			"position": q.get("position", Vector2.ZERO),
+			"state": NodeMapGraph.NodeState.LOCKED,
+			"prerequisites": q.get("prerequisites", []),
+			"connections": q.get("unlock_ids", []),
+			"conditions": q.get("conditions", []),
+			"metadata": q
+		})
+
+	# Ensure Quest 1 starts UNLOCKED
+	if campaign_graph.has_node("1"):
+		campaign_graph.set_node_state("1", NodeMapGraph.NodeState.UNLOCKED)
+	campaign_graph.evaluate_unlocks()
+
+
+func complete_campaign_quest(quest_id: String, match_stats: Dictionary) -> Dictionary:
+	_init_campaign()
+	var quest = Database.get_quest(quest_id)
+	if quest.is_empty():
+		return {
+			"ok": false,
+			"reason": "Quest not found: " + quest_id,
+			"stars": 0,
+			"unlocked_quests": [],
+			"rewards": {}
+		}
+
+	# Evaluate 3-star conditions
+	var conditions = quest.get("conditions", [])
+	var raw_stars = StarConditionEvaluator.count_stars_earned(conditions, match_stats)
+	# Victory awards at least 1 star
+	var stars_earned = clampi(maxi(1, raw_stars), 1, 3)
+
+	var comp_res = campaign_graph.complete_node(quest_id, stars_earned)
+
+	# Compute rewards
+	var min_c = int(quest.get("min_coins", 0))
+	var max_c = int(quest.get("max_coins", 0))
+	var awarded_coins = randi_range(min_c, max_c) if max_c >= min_c else min_c
+
+	var min_xp = int(quest.get("min_xp", 0))
+	var max_xp = int(quest.get("max_xp", 0))
+	var awarded_xp = randi_range(min_xp, max_xp) if max_xp >= min_xp else min_xp
+
+	var card_drops: Array[String] = []
+	for cd in quest.get("card_drops", []):
+		card_drops.append(str(cd))
+
+	add_rewards(awarded_coins, card_drops, awarded_xp)
+	save_profile()
+
+	var rewards_dict = {
+		"coins": awarded_coins,
+		"xp": awarded_xp,
+		"cards": card_drops
+	}
+
+	quest_completed.emit(quest_id, stars_earned, rewards_dict)
+
+	return {
+		"ok": true,
+		"quest_id": quest_id,
+		"stars": stars_earned,
+		"first_clear": comp_res.get("first_clear", false),
+		"unlocked_quests": comp_res.get("unlocked_nodes", []),
+		"rewards": rewards_dict
+	}
+
+
+func launch_quest_battle(quest_id: String) -> bool:
+	_init_campaign()
+	var quest = Database.get_quest(quest_id)
+	if quest.is_empty():
+		return false
+
+	var node_data = campaign_graph.get_node(quest_id)
+	if node_data.is_empty() or int(node_data.get("state", 0)) == NodeMapGraph.NodeState.LOCKED:
+		return false
+
+	# Deduct stamina
+	var stamina_cost = int(quest.get("stamina", 1))
+	if wallet and not wallet.withdraw("energy", stamina_cost):
+		# If out of energy, refill to min 10 for test/offline convenience
+		wallet.deposit("energy", stamina_cost)
+		wallet.withdraw("energy", stamina_cost)
+
+	active_quest_id = quest_id
+
+	# Set opponent hero
+	var opp_name = str(quest.get("opponent", "Jake"))
+	if opp_name != "":
+		opponent_hero_name = opp_name
+
+	# Opponent Leader & Level
+	var leader_lvl = int(quest.get("leader_level", 1))
+	var base_hp = 25
+	var leader_data = Database.leaders_db.get(quest.get("leader_id", ""), {})
+	if not leader_data.is_empty():
+		base_hp = int(leader_data.get("base_hp", 25))
+	opponent_hero_max_hp = base_hp + (leader_lvl * 5)
+
+	# Opponent Deck
+	var deck_id = str(quest.get("deck_id", ""))
+	if deck_id != "" and Database.preset_decks_db.has(deck_id):
+		var raw_deck = Database.get_preset_deck(deck_id)
+		if not raw_deck.is_empty():
+			var typed_deck: Array[String] = []
+			for c in raw_deck:
+				typed_deck.append(str(c))
+			opponent_deck = typed_deck
+
+	start_battle()
+	return true
+
+
+func open_campaign_map() -> void:
+	current_state = MatchState.MENU
+	get_tree().change_scene_to_file("res://scenes/campaign_map.tscn")
+

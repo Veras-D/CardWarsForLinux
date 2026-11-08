@@ -1,6 +1,7 @@
 extends Control
 
 @onready var play_btn: Button = $CenterContainer/VBox/PlayBtn
+@onready var campaign_btn: Button = $CenterContainer/VBox/CampaignBtn
 @onready var deck_builder_btn: Button = $CenterContainer/VBox/DeckBuilderBtn
 @onready var chests_btn: Button = $CenterContainer/VBox/ChestsBtn
 @onready var compendium_btn: Button = $CenterContainer/VBox/CompendiumBtn
@@ -14,6 +15,8 @@ extends Control
 
 func _ready() -> void:
 	play_btn.pressed.connect(_on_play_pressed)
+	if campaign_btn:
+		campaign_btn.pressed.connect(_on_campaign_pressed)
 	if deck_builder_btn:
 		deck_builder_btn.pressed.connect(_on_deck_builder_pressed)
 	if chests_btn:
@@ -24,10 +27,14 @@ func _ready() -> void:
 	compendium_dialog.visible = false
 	if chest_modal:
 		chest_modal.visible = false
-	play_btn.text = "⚔️ Play Battle (%s vs %s)" % [GameManager.player_hero_name, GameManager.opponent_hero_name]
+	play_btn.text = "⚔️ Quick Battle (%s vs %s)" % [GameManager.player_hero_name, GameManager.opponent_hero_name]
 
 func _on_play_pressed() -> void:
+	GameManager.active_quest_id = ""
 	GameManager.start_battle()
+
+func _on_campaign_pressed() -> void:
+	GameManager.open_campaign_map()
 
 func _on_deck_builder_pressed() -> void:
 	GameManager.open_deck_builder()

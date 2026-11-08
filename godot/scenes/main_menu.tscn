@@ -75,7 +75,14 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "⚔️ Play Battle (Finn vs Jake)"
+text = "⚔️ Quick Battle (Finn vs Jake)"
+
+[node name="CampaignBtn" type="Button" parent="CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "🗺️ Campaign Map (Land of Ooo)"
 
 [node name="DeckBuilderBtn" type="Button" parent="CenterContainer/VBox"]
 custom_minimum_size = Vector2(0, 44)
