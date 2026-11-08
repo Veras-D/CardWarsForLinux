@@ -604,10 +604,10 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">33 / 52 Tasks Done (63.5%)</span>
+            <span class="pct">38 / 53 Tasks Done (71.7%)</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 63.5%;"></div>
+            <div class="progress-fill" style="width: 71.7%;"></div>
           </div>
         </div>
       </div>
@@ -627,17 +627,17 @@
 
         <div class="dropdown-wrap">
           <select id="epic-filter">
-            <option value="all">All Epics &amp; Systems (52 Tasks)</option>
-            <option value="systems">📦 Systems Library (8/12)</option>
+            <option value="all">All Epics &amp; Systems (53 Tasks)</option>
+            <option value="systems">📦 Systems Library (13/13)</option>
             <option value="epic1">⚔️ Epic 1: Match Flow (3/3)</option>
             <option value="epic2">🛡️ Epic 2: Combat Engine (7/7)</option>
             <option value="epic3">🔮 Epic 3: Ability System (2/2)</option>
             <option value="epic4">🎭 Epic 4: Face Rigs &amp; Audio (2/2)</option>
-            <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (0/2)</option>
+            <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (2/2)</option>
             <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (2/2)</option>
             <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (2/4)</option>
             <option value="epic8">💰 Epic 8: Economy &amp; Gacha (2/2)</option>
-            <option value="epic9">⚙️ Epic 9: UI, Settings &amp; CI/CD (1/3)</option>
+            <option value="epic9">⚙️ Epic 9: UI, Settings &amp; CI/CD (3/3)</option>
             <option value="epic10">🔧 Epic 10: Community Patches (0/13)</option>
           </select>
         </div>
@@ -645,8 +645,8 @@
 
       <div class="toolbar-right">
         <button class="btn active" data-status-filter="all">All</button>
-        <button class="btn" data-status-filter="completed">✅ Done (23)</button>
-        <button class="btn" data-status-filter="planned">⏳ Planned (23)</button>
+        <button class="btn" data-status-filter="completed">✅ Done (38)</button>
+        <button class="btn" data-status-filter="planned">⏳ Planned (15)</button>
         <button class="btn" id="btn-toggle-all">↕️ Expand All</button>
       </div>
     </div>
@@ -664,7 +664,7 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">8 / 12 Systems Done</span>
+            <span class="epic-count-badge">13 / 13 Systems Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
@@ -970,7 +970,7 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">SYS-9</span>
@@ -978,7 +978,7 @@
                 <span class="task-snippet">— Directed acyclic graph (DAG) progression, procedural spline road rendering, sequential unlock triggers, and 3-star objective evaluator.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -988,20 +988,20 @@
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
                   <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/node_map_system/</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_nodemap.tscn' and 'test_node_map.gd'. NodeMapGraph, NodeMapRenderer, and StarConditionEvaluator.</p>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes standalone 'testbed_nodemap.tscn' and 'test_node_map_system.gd'. NodeMapGraph, NodeMapRenderer, and StarConditionEvaluator.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-completed">✓</span>
           <span>Graph manages node dependencies, branching paths, and completion states.</span>
         </li><li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-completed">✓</span>
           <span>Renderer draws procedural road connections and unlock reveal animations.</span>
         </li><li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-completed">✓</span>
           <span>Objective evaluator grades battle outcomes against star criteria.</span>
         </li>
                   </ul>
@@ -1010,15 +1010,15 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">SYS-10</span>
-                <span class="task-title">Local 2-Player Multiplayer Engine</span>
-                <span class="task-snippet">— Turn-based hotseat pass-and-play with privacy curtain state machine and dual-gamepad hardware input router.</span>
+                <span class="task-title">Local 2-Player Multiplayer &amp; Gamepad Navigation</span>
+                <span class="task-snippet">— Turn-based hotseat pass-and-play with privacy curtain state machine, dual-gamepad hardware input router, and 2D UI focus graph.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -1028,18 +1028,21 @@
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
                   <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/local_multiplayer/</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_local_multiplayer.tscn' and 'test_local_multiplayer.gd'. HotseatCurtain, PlayerInputRouter, and MatchRulesConfig.</p>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_local_multiplayer.tscn' and 'test_local_multiplayer.gd'. HotseatCurtain, PlayerInputRouter, MatchRulesConfig, and GamepadNavigator.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-completed">✓</span>
           <span>Hotseat privacy curtain masks sensitive card data during device handoff between turns.</span>
         </li><li class="criteria-item">
-          <span class="icon-pending">○</span>
+          <span class="icon-completed">✓</span>
           <span>Dual gamepad input router maps hardware device IDs to distinct player slots with inactive turn lockout.</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>GamepadNavigator provides 2D spatial focus navigation graph with Steam Deck/Xbox/DualShock glyph prompts.</span>
         </li>
                   </ul>
                 </div>
@@ -1047,15 +1050,52 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">SYS-11</span>
-                <span class="task-title">Settings Vault</span>
-                <span class="task-snippet">— Decoupled audio bus volume synchronization, display window mode switcher, VSync, and JSON preference serializer.</span>
+                <span class="task-title">Local LAN Discovery &amp; Turn-Action RPC</span>
+                <span class="task-snippet">— Zero-configuration UDP heartbeat discovery (47777), ENet session lifecycle, and reliable Host-Authoritative action dispatcher.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/network_multiplayer/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_network_multiplayer.tscn' and 'test_network_multiplayer.gd'. LanDiscovery, NetworkSessionManager, and TurnActionProtocol.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>LanDiscovery broadcasts UDP beacon with auto-expiry and direct IP connect fallback.</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>TurnActionProtocol delivers reliable RPC commands with secret hand privacy and synchronized turns.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card completed" data-status="completed">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-12</span>
+                <span class="task-title">Settings Vault</span>
+                <span class="task-snippet">— Decoupled audio bus volume synchronization, display window mode switcher, VSync, input rebinding, and JSON preference persistence.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -1072,11 +1112,14 @@
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Synchronizes UI sliders with Godot Master, BGM, SFX audio buses.</span>
+          <span class="icon-completed">✓</span>
+          <span>Synchronizes UI sliders with Godot Master, BGM, SFX, and VO audio buses via linear-to-dB.</span>
         </li><li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Controls display modes (Fullscreen, Windowed, Borderless) and saves to isolated user://settings.json.</span>
+          <span class="icon-completed">✓</span>
+          <span>Controls display modes (Fullscreen, Windowed, Borderless, Steam Deck 1280x800) and saves atomically to user://settings.json.</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Input remapping serialization and restoration for keyboard and controllers.</span>
         </li>
                   </ul>
                 </div>
@@ -1084,15 +1127,15 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
-                <span class="task-id">SYS-12</span>
-                <span class="task-title">Gamepad Navigator</span>
-                <span class="task-snippet">— UI focus navigation graph, virtual cursor / D-pad snapping, modal focus trapping, and dynamic button prompt decorator.</span>
+                <span class="task-id">SYS-13</span>
+                <span class="task-title">Multilingual Localization Engine</span>
+                <span class="task-snippet">— Universal XML entry parser and native Godot 4 TranslationServer runtime manager with live dynamic switching.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned (Later)</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -1101,19 +1144,22 @@
               <div class="task-body-grid">
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
-                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/gamepad_navigator/</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_gamepad.tscn' and 'test_gamepad_navigator.gd'. FocusGraph and InputGlyphDecorator.</p>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/localization_engine/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_localization.tscn' and 'test_localization.gd'. LocalizationParser, LocalizationManager, and TranslationServer integration.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Automatic focus neighbor discovery and modal dialog focus trapping.</span>
+          <span class="icon-completed">✓</span>
+          <span>LocalizationParser extracts key-value entries from XML strings and disk files with entity unescaping.</span>
         </li><li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Dynamic button glyph swaps between Keyboard/Mouse and Gamepad (Xbox, DualShock, Steam Deck).</span>
+          <span class="icon-completed">✓</span>
+          <span>LocalizationManager registers multiple locales and drives native TranslationServer dynamically.</span>
+        </li><li class="criteria-item">
+          <span class="icon-completed">✓</span>
+          <span>Fallback translation resolution and signal emission on locale change.</span>
         </li>
                   </ul>
                 </div>
