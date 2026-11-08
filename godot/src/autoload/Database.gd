@@ -12,13 +12,15 @@ var all_cards_list: Array = []
 var preset_decks_db: Dictionary = {}
 var fusion_recipes_list: Array[Dictionary] = []
 var fusion_recipes_db: Dictionary = {}
+var rank_up_db: Dictionary = {}
+var lvup_schemes_db: Dictionary = {}
 
 func _ready() -> void:
 	load_localizations()
 	load_textures()
 	load_blueprints()
-	print("[Database] Loaded %d total cards (%d creatures, %d spells, %d buildings, %d leaders, %d drop profiles)" % [
-		cards_db.size(), creatures_list.size(), spells_list.size(), buildings_list.size(), leaders_db.size(), drop_profiles_db.size()
+	print("[Database] Loaded %d total cards (%d creatures, %d spells, %d buildings, %d leaders, %d drop profiles, %d rank levels)" % [
+		cards_db.size(), creatures_list.size(), spells_list.size(), buildings_list.size(), leaders_db.size(), drop_profiles_db.size(), rank_up_db.size()
 	])
 
 func load_localizations() -> void:
@@ -47,6 +49,8 @@ func load_blueprints() -> void:
 	_load_drop_profiles()
 	_load_preset_decks()
 	_load_fusion_recipes()
+	_load_rank_ups()
+	_load_lvup_schemes()
 	all_cards_list.clear()
 	all_cards_list.append_array(creatures_list)
 	all_cards_list.append_array(spells_list)
@@ -278,4 +282,48 @@ func _load_fusion_recipes() -> void:
 
 func get_fusion_recipe(card_id: String) -> Dictionary:
 	return fusion_recipes_db.get(card_id, {})
+
+func _load_rank_ups() -> void:
+	var path = "res://data/db_RankUp.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	for item in json.data:
+		var rank_val = int(item.get("LeaderRank", "1"))
+		rank_up_db[rank_val] = {
+			"rank": rank_val,
+			"deck_max_size": int(item.get("DeckMaxSize", "15")),
+			"pvp_coins": int(item.get("PvP_Search_Coins", "15")),
+			"pvp_gems": int(item.get("PvP_Search_Gems", "1")),
+			"pvp_entry": int(item.get("PvP_Entry", "1"))
+		}
+
+func get_rank_info(rank: int) -> Dictionary:
+	return rank_up_db.get(rank, {
+		"rank": rank,
+		"deck_max_size": 15 if rank <= 1 else 40,
+		"pvp_coins": 15,
+		"pvp_gems": 1,
+		"pvp_entry": 1
+	})
+
+func _load_lvup_schemes() -> void:
+	var path = "res://data/db_LvUpScheme.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	for item in json.data:
+		var sid = str(item.get("LvUpSchemeID", "")).strip_edges()
+		if sid != "":
+			lvup_schemes_db[sid] = float(item.get("LvIndex", "100.0"))
+
+func get_lvup_scheme_index(scheme_id: String) -> float:
+	return lvup_schemes_db.get(scheme_id, 100.0)
+
 

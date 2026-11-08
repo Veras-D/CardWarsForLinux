@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8eh001"]
+
+[ext_resource type="Script" path="res://src/ui/EconomyHeader.gd" id="1_script"]
+
+[node name="EconomyHeader" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 56)
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 56.0
+grow_horizontal = 2
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="HeroGroup" type="HBoxContainer" parent="Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HeroIcon" type="Label" parent="Margin/HBox/HeroGroup"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "👑"
+
+[node name="VBox" type="VBoxContainer" parent="Margin/HBox/HeroGroup"]
+layout_mode = 2
+alignment = 1
+
+[node name="HeroName" type="Label" parent="Margin/HBox/HeroGroup/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "Finn"
+
+[node name="HeroLevel" type="Label" parent="Margin/HBox/HeroGroup/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "Lv. 1 (HP: 25)"
+
+[node name="XPBar" type="ProgressBar" parent="Margin/HBox/HeroGroup/VBox"]
+custom_minimum_size = Vector2(100, 6)
+layout_mode = 2
+show_percentage = false
+
+[node name="Spacer" type="Control" parent="Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Currencies" type="HBoxContainer" parent="Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="CoinsPill" type="PanelContainer" parent="Margin/HBox/Currencies"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Margin/HBox/Currencies/CoinsPill"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "🪙 5,000"
+
+[node name="GemsPill" type="PanelContainer" parent="Margin/HBox/Currencies"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Margin/HBox/Currencies/GemsPill"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "💎 50"
