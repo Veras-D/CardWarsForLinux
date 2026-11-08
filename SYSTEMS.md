@@ -27,7 +27,7 @@ This document defines the standalone, decoupled game systems in **`godot-systems
 | **SYS-5** | `save_vault/` | Secure Atomic JSON Serializer | ✅ Production | Save system | `testbed_save.tscn` |
 | **SYS-6** | `audio_jukebox/` | BGM Crossfader & SFX Pool | ✅ Production | Epic 4, Epic 9 | `testbed_audio.tscn` |
 | **SYS-7** | `crafting_fusion/` | Universal Crafting & Quality Engine | ✅ Production | Epic 6 (Task 6.2) | `testbed_crafting.tscn` |
-| **SYS-8** | `progression_engine/` | Economy Wallet, XP & Gacha Roller | ✅ Production | Epic 8 (Tasks 8.1–8.4) | `testbed_progression.tscn` |
+| **SYS-8** | `progression_engine/` | Economy Wallet, XP & Gacha Roller | ✅ Production | Epic 8 (Tasks 8.1–8.2) | `testbed_progression.tscn` |
 | **SYS-9** | `node_map_system/` | Directed Graph Campaign Map | ✅ Production | Epic 7 (Tasks 7.1–7.4) | `testbed_nodemap.tscn` |
 | **SYS-10** | `local_multiplayer/` | Hotseat Pass & Play / Dual Gamepad | ✅ Production | Epic 5 (Task 5.1) | `testbed_local_multiplayer.tscn` |
 | **SYS-11** | `network_multiplayer/` | Local LAN Discovery & Turn-Action RPC | ✅ Production | Epic 5 (Task 5.2) | `testbed_network_multiplayer.tscn` |
@@ -125,7 +125,7 @@ flowchart TD
 
     subgraph Step2 ["Phase 2: Core Progression"]
         SYS8["SYS-8: progression_engine<br/>(Currency, XP, Gacha)"]
-        CW_EPIC8["Card Wars Epic 8<br/>(Tasks 8.1 - 8.4)"]
+        CW_EPIC8["Card Wars Epic 8<br/>(Tasks 8.1 - 8.2)"]
     end
 
     subgraph Step3 ["Phase 3: Campaign & World Map"]
