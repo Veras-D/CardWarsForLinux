@@ -604,10 +604,10 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">23 / 46 Tasks Done (50.0%)</span>
+            <span class="pct">23 / 52 Tasks Done (44.2%)</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill"></div>
+            <div class="progress-fill" style="width: 44.2%;"></div>
           </div>
         </div>
       </div>
@@ -627,8 +627,8 @@
 
         <div class="dropdown-wrap">
           <select id="epic-filter">
-            <option value="all">All Epics &amp; Systems (46 Tasks)</option>
-            <option value="systems">📦 Systems Library (6/6)</option>
+            <option value="all">All Epics &amp; Systems (52 Tasks)</option>
+            <option value="systems">📦 Systems Library (6/12)</option>
             <option value="epic1">⚔️ Epic 1: Match Flow (3/3)</option>
             <option value="epic2">🛡️ Epic 2: Combat Engine (7/7)</option>
             <option value="epic3">🔮 Epic 3: Ability System (2/2)</option>
@@ -664,7 +664,7 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">6 / 6 Done</span>
+            <span class="epic-count-badge">6 / 12 Systems Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
@@ -886,6 +886,234 @@
         </li><li class="criteria-item">
           <span class="icon-done">✓</span>
           <span>Pitch variation and procedural audio verified.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-7</span>
+                <span class="task-title">Universal Crafting &amp; Quality Engine</span>
+                <span class="task-snippet">— Reusable recipe matching engine, multi-tier quality scaling (Gold, Obsidian), and inventory ledger with isolated testbed.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned (Retrofit)</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/crafting_fusion/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_crafting.tscn' and 'test_crafting_engine.gd'. Extracts generic crafting and quality multipliers out of Card Wars into godot-systems-library.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Zero Card Wars coupling; runs standalone with mock ingredients and recipes.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Card Wars FusionEngine refactored to consume this system.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-8</span>
+                <span class="task-title">Progression &amp; Economy Engine</span>
+                <span class="task-snippet">— Multi-currency wallet (soft/hard/energy), hero XP curves (1-50 rank caps), and weighted drop-table gacha roller with pity counter.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/progression_engine/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_progression.tscn' and 'test_progression_engine.gd'. Universal CurrencyWallet, ProgressionTracker, and GachaRoller.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Wallet supports deposit/spend/balance_changed signals with overflow and overdraft guards.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Configurable polynomial/exponential XP thresholds and level-up milestone rewards.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Drop-table gacha roller with configurable pity counter and duplicate compensation.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-9</span>
+                <span class="task-title">Campaign Node Map System</span>
+                <span class="task-snippet">— Directed acyclic graph (DAG) progression, procedural spline road rendering, sequential unlock triggers, and 3-star objective evaluator.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/node_map_system/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_nodemap.tscn' and 'test_node_map.gd'. NodeMapGraph, NodeMapRenderer, and StarConditionEvaluator.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Graph manages node dependencies, branching paths, and completion states.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Renderer draws procedural road connections and unlock reveal animations.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Objective evaluator grades battle outcomes against star criteria.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-10</span>
+                <span class="task-title">Local 2-Player Multiplayer Engine</span>
+                <span class="task-snippet">— Turn-based hotseat pass-and-play with privacy curtain state machine and dual-gamepad hardware input router.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/local_multiplayer/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_local_multiplayer.tscn' and 'test_local_multiplayer.gd'. HotseatCurtain, PlayerInputRouter, and MatchRulesConfig.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Hotseat privacy curtain masks sensitive card data during device handoff between turns.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Dual gamepad input router maps hardware device IDs to distinct player slots with inactive turn lockout.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-11</span>
+                <span class="task-title">Settings Vault</span>
+                <span class="task-snippet">— Decoupled audio bus volume synchronization, display window mode switcher, VSync, and JSON preference serializer.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/settings_vault/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_settings.tscn' and 'test_settings_vault.gd'. SettingsManager and ConfigSerializer.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Synchronizes UI sliders with Godot Master, BGM, SFX audio buses.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Controls display modes (Fullscreen, Windowed, Borderless) and saves to isolated user://settings.json.</span>
+        </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-card planned" data-status="planned">
+            <div class="task-header" onclick="toggleTask(this.parentElement)">
+              <div class="task-header-left">
+                <span class="task-id">SYS-12</span>
+                <span class="task-title">Gamepad Navigator</span>
+                <span class="task-snippet">— UI focus navigation graph, virtual cursor / D-pad snapping, modal focus trapping, and dynamic button prompt decorator.</span>
+              </div>
+              <div class="task-header-right">
+                <span class="status-badge planned">Planned (Later)</span>
+                <span class="task-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="task-body">
+              <div class="task-body-grid">
+                <div class="body-box">
+                  <div class="box-title">Technical Reference &amp; Scope</div>
+                  <div class="ref-line"><strong>Reference:</strong> <code>res://src/systems/gamepad_navigator/</code></div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Includes 'testbed_gamepad.tscn' and 'test_gamepad_navigator.gd'. FocusGraph and InputGlyphDecorator.</p>
+                </div>
+
+                <div class="body-box">
+                  <div class="box-title">Acceptance Criteria</div>
+                  <ul class="criteria-list">
+                    <li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Automatic focus neighbor discovery and modal dialog focus trapping.</span>
+        </li><li class="criteria-item">
+          <span class="icon-pending">○</span>
+          <span>Dynamic button glyph swaps between Keyboard/Mouse and Gamepad (Xbox, DualShock, Steam Deck).</span>
         </li>
                   </ul>
                 </div>
