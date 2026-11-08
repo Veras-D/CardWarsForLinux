@@ -604,10 +604,10 @@
         <div class="progress-widget">
           <div class="progress-widget-top">
             <span>Overall Progress</span>
-            <span class="pct">26 / 52 Tasks Done (50.0%)</span>
+            <span class="pct">27 / 52 Tasks Done (51.9%)</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="width: 50.0%;"></div>
+            <div class="progress-fill" style="width: 51.9%;"></div>
           </div>
         </div>
       </div>
@@ -636,7 +636,7 @@
             <option value="epic5">🎮 Epic 5: Gamepad &amp; Local 2P (0/2)</option>
             <option value="epic6">🃏 Epic 6: Deck Building &amp; Fusion (2/2)</option>
             <option value="epic7">🗺️ Epic 7: Campaign &amp; Arenas (0/4)</option>
-            <option value="epic8">💰 Epic 8: Economy &amp; Gacha (1/2)</option>
+            <option value="epic8">💰 Epic 8: Economy &amp; Gacha (2/2)</option>
             <option value="epic9">⚙️ Epic 9: UI, Settings &amp; CI/CD (1/3)</option>
             <option value="epic10">🔧 Epic 10: Community Patches (0/13)</option>
           </select>
@@ -2089,7 +2089,7 @@
             </div>
           </div>
           <div class="epic-badge-group">
-            <span class="epic-count-badge">1 / 2 Done</span>
+            <span class="epic-count-badge">2 / 2 Done</span>
             <span class="epic-chevron">▼</span>
           </div>
         </div>
@@ -2136,15 +2136,15 @@
             </div>
           </div>
 
-          <div class="task-card planned" data-status="planned">
+          <div class="task-card completed" data-status="completed">
             <div class="task-header" onclick="toggleTask(this.parentElement)">
               <div class="task-header-left">
                 <span class="task-id">Task 8.2</span>
                 <span class="task-title">Chest Opening Gacha System</span>
-                <span class="task-snippet">— Cool Chest (Coins) and Algebraic Chest (Gems) with 3D/2D burst animation sequence and rarity color bursts.</span>
+                <span class="task-snippet">— Cool Chest (Coins) and Algebraic Chest (Gems) with burst animation sequence, pity counter, and rarity color bursts.</span>
               </div>
               <div class="task-header-right">
-                <span class="status-badge planned">Planned</span>
+                <span class="status-badge completed">Completed &amp; Verified</span>
                 <span class="task-chevron">▼</span>
               </div>
             </div>
@@ -2153,17 +2153,33 @@
               <div class="task-body-grid">
                 <div class="body-box">
                   <div class="box-title">Technical Reference &amp; Scope</div>
-                  <div class="ref-line"><strong>Reference:</strong> <code>db_GachaWeights.json</code></div>
-                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Correctly rolls drop rates from db_GachaWeights.json; adds acquired cards to inventory.</p>
+                  <div class="ref-line"><strong>Reference:</strong> <code>db_GachaWeights.json</code>, <code>db_GachaSchedule.json</code>, <code>GachaRoller.gd</code> (SYS-8)</div>
+                  <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.88rem;">Cool Chest (10,000 Coins) and Algebraic Chest (3 Gems) loot box rollers integrated with SYS-8 Progression Engine. Includes pity threshold (guaranteed Gold rarity after 10 pulls), Tween shake/burst animations, SFX, card reveals with CardView, inventory reward grants, and profile persistence.</p>
                 </div>
 
                 <div class="body-box">
                   <div class="box-title">Acceptance Criteria</div>
                   <ul class="criteria-list">
                     <li class="criteria-item">
-          <span class="icon-pending">○</span>
-          <span>Correctly rolls drop rates from db_GachaWeights.json; adds acquired cards to inventory.</span>
-        </li>
+                      <span class="icon-done">✓</span>
+                      <span>Correctly rolls drop rates from db_GachaWeights.json (121 Cool, 122 Algebraic items); adds acquired cards to inventory.</span>
+                    </li>
+                    <li class="criteria-item">
+                      <span class="icon-done">✓</span>
+                      <span>Authentic chest pricing and currencies: Cool Chest costs 10,000 Coins; Algebraic Chest costs 3 Gems with overdraft protection.</span>
+                    </li>
+                    <li class="criteria-item">
+                      <span class="icon-done">✓</span>
+                      <span>Pity counter system guaranteed Gold rarity trigger after 10 pulls; serialized in user profile JSON.</span>
+                    </li>
+                    <li class="criteria-item">
+                      <span class="icon-done">✓</span>
+                      <span>Interactive ChestOpeningModal UI with shake tween, SFX, flash burst, CardView reveal cards, and 'Collect All' workflow.</span>
+                    </li>
+                    <li class="criteria-item">
+                      <span class="icon-done">✓</span>
+                      <span>Verified via standalone automated test suite test_chest_gacha.tscn (34/34 assertions passed).</span>
+                    </li>
                   </ul>
                 </div>
               </div>

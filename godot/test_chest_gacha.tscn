@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cg8k2vbpyvbp5"]
+
+[ext_resource type="Script" path="res://test_chest_gacha_node.gd" id="1_test_script"]
+
+[node name="TestChestGachaNode" type="Node"]
+script = ExtResource("1_test_script")

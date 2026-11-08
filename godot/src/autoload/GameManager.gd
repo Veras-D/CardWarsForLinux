@@ -3,6 +3,7 @@ extends Node
 signal match_state_changed(new_state)
 signal player_currencies_updated(coins: int, gems: int)
 signal hero_leveled_up(hero_id: String, old_level: int, new_level: int, new_max_hp: int)
+signal chest_opened(chest_type: String, rolls: Array)
 
 enum MatchState {
 	MENU,
@@ -13,6 +14,7 @@ enum MatchState {
 
 const CurrencyWallet = preload("res://src/systems/progression_engine/CurrencyWallet.gd")
 const ProgressionTracker = preload("res://src/systems/progression_engine/ProgressionTracker.gd")
+const GachaRoller = preload("res://src/systems/progression_engine/GachaRoller.gd")
 
 var current_state: MatchState = MatchState.MENU
 
@@ -78,12 +80,14 @@ var active_deck_name: String = "Finn Starter Deck"
 # Core Economy & Progression Systems (SYS-8)
 var wallet: CurrencyWallet
 var hero_trackers: Dictionary = {}
+var gacha_roller: GachaRoller
 
 const DEFAULT_PROFILE_PATH: String = "user://player_profile.json"
 
 
 func _ready() -> void:
 	_init_wallet()
+	_init_gacha()
 	load_profile()
 	_update_active_hero_hp()
 
@@ -245,6 +249,7 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"version": 1,
 		"wallet": wallet.serialize(),
 		"heroes": hero_data,
+		"gacha_pity": gacha_roller.serialize_pity() if gacha_roller != null else {},
 		"active_deck_name": active_deck_name,
 		"player_hero_name": player_hero_name,
 		"player_inventory_cards": player_inventory_cards,
@@ -296,10 +301,94 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 			player_inventory_cards.append(str(c))
 	if data.has("owned_card_counts") and typeof(data["owned_card_counts"]) == TYPE_DICTIONARY:
 		owned_card_counts = data["owned_card_counts"].duplicate(true)
+	if data.has("gacha_pity") and typeof(data["gacha_pity"]) == TYPE_DICTIONARY and gacha_roller != null:
+		gacha_roller.deserialize_pity(data["gacha_pity"])
 
 	_update_active_hero_hp()
 	player_currencies_updated.emit(get_coins(), get_gems())
 	return true
+
+
+# ==============================================================================
+# GACHA & CHEST LOOT BOXES
+# ==============================================================================
+
+func _init_gacha() -> void:
+	if gacha_roller == null:
+		gacha_roller = GachaRoller.new()
+	var cool_items = Database.get_gacha_pool("cool_chest")
+	var algebraic_items = Database.get_gacha_pool("algebraic_chest")
+	if not cool_items.is_empty():
+		gacha_roller.register_pool("cool_chest", cool_items)
+	if not algebraic_items.is_empty():
+		gacha_roller.register_pool("algebraic_chest", algebraic_items)
+		gacha_roller.set_pity_rule("algebraic_chest", 10, "Gold")
+
+
+func open_chest(chest_type: String, count: int = 1, rng: RandomNumberGenerator = null) -> Dictionary:
+	_init_wallet()
+	_init_gacha()
+
+	var chest_def = Database.get_chest_def(chest_type)
+	if chest_def.is_empty():
+		return {
+			"ok": false,
+			"reason": "Unknown chest type: " + chest_type,
+			"rolls": [],
+			"card_ids": []
+		}
+
+	var unit_cost = int(chest_def.get("cost", 0))
+	var total_cost = unit_cost * maxi(1, count)
+	var currency_type = str(chest_def.get("currency", "coins"))
+	var pool_name = str(chest_def.get("pool", ""))
+
+	if not wallet.has_enough(currency_type, total_cost):
+		return {
+			"ok": false,
+			"reason": "Insufficient %s (Need %d, have %d)" % [currency_type.capitalize(), total_cost, wallet.get_balance(currency_type)],
+			"rolls": [],
+			"card_ids": []
+		}
+
+	if not wallet.withdraw(currency_type, total_cost):
+		return {
+			"ok": false,
+			"reason": "Failed to deduct %s" % currency_type,
+			"rolls": [],
+			"card_ids": []
+		}
+
+	var rolls = gacha_roller.roll_multi(pool_name, count, rng)
+	var card_ids: Array[String] = []
+	for r in rolls:
+		var cid = str(r.get("id", ""))
+		if cid != "":
+			card_ids.append(cid)
+			player_inventory_cards.append(cid)
+			if not owned_card_counts.is_empty():
+				owned_card_counts[cid] = int(owned_card_counts.get(cid, 0)) + 1
+
+	save_profile()
+	player_currencies_updated.emit(get_coins(), get_gems())
+	chest_opened.emit(chest_type, rolls)
+
+	return {
+		"ok": true,
+		"chest_type": chest_type,
+		"chest_name": str(chest_def.get("name", chest_type)),
+		"currency_spent": currency_type,
+		"cost": total_cost,
+		"rolls": rolls,
+		"card_ids": card_ids
+	}
+
+
+func get_chest_pity(chest_type: String) -> int:
+	_init_gacha()
+	var chest_def = Database.get_chest_def(chest_type)
+	var pool_name = str(chest_def.get("pool", chest_type))
+	return gacha_roller.get_pity_count(pool_name)
 
 
 # ==============================================================================

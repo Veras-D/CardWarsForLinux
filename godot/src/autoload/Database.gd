@@ -14,13 +14,16 @@ var fusion_recipes_list: Array[Dictionary] = []
 var fusion_recipes_db: Dictionary = {}
 var rank_up_db: Dictionary = {}
 var lvup_schemes_db: Dictionary = {}
+var gacha_pools_db: Dictionary = {}
+var gacha_schedules_list: Array[Dictionary] = []
+var chest_defs_db: Dictionary = {}
 
 func _ready() -> void:
 	load_localizations()
 	load_textures()
 	load_blueprints()
-	print("[Database] Loaded %d total cards (%d creatures, %d spells, %d buildings, %d leaders, %d drop profiles, %d rank levels)" % [
-		cards_db.size(), creatures_list.size(), spells_list.size(), buildings_list.size(), leaders_db.size(), drop_profiles_db.size(), rank_up_db.size()
+	print("[Database] Loaded %d total cards (%d creatures, %d spells, %d buildings, %d leaders, %d drop profiles, %d rank levels, %d gacha pools)" % [
+		cards_db.size(), creatures_list.size(), spells_list.size(), buildings_list.size(), leaders_db.size(), drop_profiles_db.size(), rank_up_db.size(), gacha_pools_db.size()
 	])
 
 func load_localizations() -> void:
@@ -51,6 +54,8 @@ func load_blueprints() -> void:
 	_load_fusion_recipes()
 	_load_rank_ups()
 	_load_lvup_schemes()
+	_load_gacha_weights()
+	_load_gacha_schedule()
 	all_cards_list.clear()
 	all_cards_list.append_array(creatures_list)
 	all_cards_list.append_array(spells_list)
@@ -325,5 +330,96 @@ func _load_lvup_schemes() -> void:
 
 func get_lvup_scheme_index(scheme_id: String) -> float:
 	return lvup_schemes_db.get(scheme_id, 100.0)
+
+func _load_gacha_weights() -> void:
+	var path = "res://data/db_GachaWeights.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	var cool_items: Array[Dictionary] = []
+	var algebraic_items: Array[Dictionary] = []
+	for item in json.data:
+		var card_id = str(item.get("CardID", "")).strip_edges()
+		if card_id == "":
+			continue
+		var rarity = str(item.get("Quality", "Standard")).strip_edges()
+		if rarity == "":
+			rarity = "Standard"
+		var normal_w = int(item.get("NormalChestWeight", "0"))
+		var premium_w = int(item.get("PremiumChestWeight", "0"))
+		if normal_w > 0:
+			cool_items.append({
+				"id": card_id,
+				"weight": normal_w,
+				"rarity": rarity,
+				"metadata": {"card_id": card_id, "quality": rarity}
+			})
+		if premium_w > 0:
+			algebraic_items.append({
+				"id": card_id,
+				"weight": premium_w,
+				"rarity": rarity,
+				"metadata": {"card_id": card_id, "quality": rarity}
+			})
+	gacha_pools_db["cool_chest"] = cool_items
+	gacha_pools_db["algebraic_chest"] = algebraic_items
+
+func _load_gacha_schedule() -> void:
+	chest_defs_db = {
+		"cool_chest": {
+			"id": "cool_chest",
+			"name": "Cool Chest",
+			"currency": "coins",
+			"cost": 10000,
+			"pool": "cool_chest"
+		},
+		"algebraic_chest": {
+			"id": "algebraic_chest",
+			"name": "Algebraic Chest",
+			"currency": "gems",
+			"cost": 3,
+			"pool": "algebraic_chest"
+		}
+	}
+	var path = "res://data/db_GachaSchedule.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	gacha_schedules_list.clear()
+	for item in json.data:
+		gacha_schedules_list.append(item)
+		var ctype = str(item.get("ChestType", "")).to_lower()
+		var start_d = str(item.get("StartDate", "")).to_lower()
+		if start_d == "default":
+			if ctype == "normal":
+				var coins_val = int(item.get("Coins", "10000"))
+				if coins_val > 0:
+					chest_defs_db["cool_chest"]["cost"] = coins_val
+			elif ctype == "premium":
+				var gems_val = int(item.get("Gems", "3"))
+				if gems_val > 0:
+					chest_defs_db["algebraic_chest"]["cost"] = gems_val
+
+func get_gacha_pool(pool_name: String) -> Array[Dictionary]:
+	var p = gacha_pools_db.get(pool_name, [])
+	var res: Array[Dictionary] = []
+	for it in p:
+		res.append(it)
+	return res
+
+func get_chest_def(chest_type: String) -> Dictionary:
+	var key = chest_type.to_lower()
+	if key == "normal" or key == "cool":
+		key = "cool_chest"
+	elif key == "premium" or key == "algebraic":
+		key = "algebraic_chest"
+	return chest_defs_db.get(key, {})
+
 
 
