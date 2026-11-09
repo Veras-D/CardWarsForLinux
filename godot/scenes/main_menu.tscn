@@ -11,14 +11,14 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ui/hud_inventory.png" id="9_inventory"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/trophy.png" id="10_trophy"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/ui_button_blue.png" id="11_btn_blue"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/ui_button_red.png" id="12_btn_red"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_battle.png" id="12_btn_red"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/ui_button_green.png" id="13_btn_green"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/popup_box.png" id="14_popup_box"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/gear_icon.png" id="15_gear"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/DungeonPortal.png" id="16_portal"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/box_icon.png" id="17_box"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/gems_icon.png" id="18_gems_pouch"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/chest_icon.png" id="19_chest"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_settings.png" id="15_gear"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_dungeons.png" id="16_portal"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_deck.png" id="17_box"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_store.png" id="18_gems_pouch"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_chests.png" id="19_chest"]
 
 [ext_resource type="PackedScene" path="res://src/ui/ChestOpeningModal.tscn" id="20_chest_modal"]
 [ext_resource type="PackedScene" path="res://scenes/versus_setup_modal.tscn" id="21_versus"]
@@ -27,16 +27,16 @@
 [ext_resource type="PackedScene" path="res://scenes/dungeon_arena_modal.tscn" id="24_dungeon"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_Banner"]
-bg_color = Color(0.1, 0.16, 0.22, 0.85)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.2, 0.35, 0.45, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+bg_color = Color(0.08, 0.12, 0.16, 0.78)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.28, 0.36, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_DarkModal"]
 bg_color = Color(0.08, 0.1, 0.14, 0.96)
@@ -356,9 +356,9 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -460.0
+offset_left = -440.0
 offset_top = -118.0
-offset_right = 460.0
+offset_right = 440.0
 offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -366,136 +366,46 @@ theme_override_constants/separation = 12
 alignment = 1
 
 [node name="SettingsBtn" type="TextureButton" parent="BottomDock/HBox"]
-custom_minimum_size = Vector2(85, 90)
+custom_minimum_size = Vector2(114, 88)
 layout_mode = 2
-texture_normal = ExtResource("11_btn_blue")
+ignore_texture_size = true
 stretch_mode = 0
-
-[node name="Icon" type="TextureRect" parent="BottomDock/HBox/SettingsBtn"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -26.0
-offset_top = -28.0
-offset_right = 26.0
-offset_bottom = 28.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("15_gear")
-expand_mode = 1
+texture_normal = ExtResource("15_gear")
 
 [node name="DungeonsBtn" type="TextureButton" parent="BottomDock/HBox"]
-custom_minimum_size = Vector2(85, 90)
+custom_minimum_size = Vector2(114, 88)
 layout_mode = 2
-texture_normal = ExtResource("11_btn_blue")
+ignore_texture_size = true
 stretch_mode = 0
-
-[node name="Icon" type="TextureRect" parent="BottomDock/HBox/DungeonsBtn"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -30.0
-offset_top = -32.0
-offset_right = 30.0
-offset_bottom = 32.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("16_portal")
-expand_mode = 1
+texture_normal = ExtResource("16_portal")
 
 [node name="DeckBtn" type="TextureButton" parent="BottomDock/HBox"]
-custom_minimum_size = Vector2(85, 90)
+custom_minimum_size = Vector2(114, 88)
 layout_mode = 2
-texture_normal = ExtResource("11_btn_blue")
+ignore_texture_size = true
 stretch_mode = 0
-
-[node name="Icon" type="TextureRect" parent="BottomDock/HBox/DeckBtn"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -28.0
-offset_top = -30.0
-offset_right = 28.0
-offset_bottom = 30.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("17_box")
-expand_mode = 1
+texture_normal = ExtResource("17_box")
 
 [node name="StoreBtn" type="TextureButton" parent="BottomDock/HBox"]
-custom_minimum_size = Vector2(85, 90)
+custom_minimum_size = Vector2(114, 88)
 layout_mode = 2
-texture_normal = ExtResource("11_btn_blue")
+ignore_texture_size = true
 stretch_mode = 0
-
-[node name="Icon" type="TextureRect" parent="BottomDock/HBox/StoreBtn"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -26.0
-offset_top = -24.0
-offset_right = 26.0
-offset_bottom = 24.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("18_gems_pouch")
-expand_mode = 1
+texture_normal = ExtResource("18_gems_pouch")
 
 [node name="ChestsBtn" type="TextureButton" parent="BottomDock/HBox"]
-custom_minimum_size = Vector2(85, 90)
+custom_minimum_size = Vector2(114, 88)
 layout_mode = 2
-texture_normal = ExtResource("11_btn_blue")
+ignore_texture_size = true
 stretch_mode = 0
-
-[node name="Icon" type="TextureRect" parent="BottomDock/HBox/ChestsBtn"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -30.0
-offset_top = -28.0
-offset_right = 30.0
-offset_bottom = 28.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("19_chest")
-expand_mode = 1
+texture_normal = ExtResource("19_chest")
 
 [node name="BattleBtn" type="TextureButton" parent="BottomDock/HBox"]
-custom_minimum_size = Vector2(235, 90)
+custom_minimum_size = Vector2(242, 88)
 layout_mode = 2
-texture_normal = ExtResource("12_btn_red")
+ignore_texture_size = true
 stretch_mode = 0
-
-[node name="BattleLabel" type="Label" parent="BottomDock/HBox/BattleBtn"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 32
-text = "BATTLE!"
-horizontal_alignment = 1
-vertical_alignment = 1
+texture_normal = ExtResource("12_btn_red")
 
 [node name="ExtraRow" type="HBoxContainer" parent="BottomDock"]
 layout_mode = 1
@@ -562,18 +472,19 @@ theme_override_styles/panel = SubResource("StyleBox_Banner")
 
 [node name="PromptText" type="Label" parent="StartOverlay/PromptPanel"]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
+offset_top = 10.0
+offset_bottom = 44.0
 grow_horizontal = 2
-grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 24
 text = "Tap anywhere to Start"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="GuestText" type="Label" parent="StartOverlay/PromptPanel"]
 layout_mode = 1
@@ -581,17 +492,18 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -32.0
-offset_bottom = -8.0
+offset_top = -34.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 0.9)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "Logged in as Guest"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="QuitConfirmModal" type="Control" parent="."]
 visible = false

@@ -151,26 +151,70 @@ def export_alphas_and_textures(env):
         print(f'[ok] Exported {out_path} ({len(verts)} verts)')
 
 def export_logo_meshes(env):
-    for mesh_name in ['Logo', 'Logo_Shield']:
-        _, verts, uvs, indices = unpack_mesh_data(env, mesh_name)
-        out_path = f'godot/assets/models/{mesh_name}.obj'
-        with open(out_path, 'w') as out:
-            out.write(f'# Exported {mesh_name} (raw vt u v, reversed winding for det=-1)\n')
-            out.write(f'o {mesh_name}\n')
-            for vx, vy, vz in verts:
-                # Map to Godot RH: gx = -vx * 0.05 ("CARD" on left), gy = vz * 0.05, gz = -vy * 0.05 (shield in front of swords)
-                gx = -vx * 0.05
-                gy = vz * 0.05
-                gz = -vy * 0.05
-                out.write(f'v {gx:.6f} {gy:.6f} {gz:.6f}\n')
-            for u, v in uvs:
-                out.write(f'vt {u:.6f} {v:.6f}\n')
-            for i in range(0, len(indices), 3):
-                i1 = indices[i] + 1
-                i2 = indices[i+1] + 1
-                i3 = indices[i+2] + 1
-                out.write(f'f {i1}/{i1} {i3}/{i3} {i2}/{i2}\n')
-        print(f'[ok] Exported {out_path} ({len(verts)} verts)')
+    # 1. Export Logo.obj ("CARD WARS" letters)
+    _, verts, uvs, indices = unpack_mesh_data(env, 'Logo')
+    out_path = 'godot/assets/models/Logo.obj'
+    with open(out_path, 'w') as out:
+        out.write('# Exported Logo (raw vt u v, reversed winding for det=-1)\n')
+        out.write('o Logo\n')
+        for vx, vy, vz in verts:
+            gx = -vx * 0.05
+            gy = vz * 0.05
+            gz = -vy * 0.05
+            out.write(f'v {gx:.6f} {gy:.6f} {gz:.6f}\n')
+        for u, v in uvs:
+            out.write(f'vt {u:.6f} {v:.6f}\n')
+        for i in range(0, len(indices), 3):
+            i1 = indices[i] + 1
+            i2 = indices[i+1] + 1
+            i3 = indices[i+2] + 1
+            out.write(f'f {i1}/{i1} {i3}/{i3} {i2}/{i2}\n')
+    print(f'[ok] Exported {out_path} ({len(verts)} verts)')
+
+    # 2. Export Logo_Shield.obj (Shield body + front Logo_Shield_Objects_0 emblems)
+    _, s_verts, s_uvs, s_indices = unpack_mesh_data(env, 'Logo_Shield')
+    _, o_verts, o_uvs, o_indices = unpack_mesh_data(env, 'Logo_Shield_Objects_0')
+
+    out_path = 'godot/assets/models/Logo_Shield.obj'
+    with open(out_path, 'w') as out:
+        out.write('# Exported Logo_Shield combined with Logo_Shield_Objects_0\n')
+        out.write('o Logo_Shield\n')
+        # Part 1: Shield Body
+        for vx, vy, vz in s_verts:
+            gx = -vx * 0.05
+            gy = vz * 0.05
+            gz = -vy * 0.05
+            out.write(f'v {gx:.6f} {gy:.6f} {gz:.6f}\n')
+        for u, v in s_uvs:
+            out.write(f'vt {u:.6f} {v:.6f}\n')
+        for i in range(0, len(s_indices), 3):
+            i1 = s_indices[i] + 1
+            i2 = s_indices[i+1] + 1
+            i3 = s_indices[i+2] + 1
+            out.write(f'f {i1}/{i1} {i3}/{i3} {i2}/{i2}\n')
+
+        # Part 2: Front Emblems (C, mountains, teardrops, W)
+        v_offset = len(s_verts)
+        front_v_count = 251
+        for i in range(front_v_count):
+            vx, vy, vz = o_verts[i]
+            gx = -vx * 0.25
+            gy = vz * 0.25
+            gz = -vy * 0.05 + 0.088
+            out.write(f'v {gx:.6f} {gy:.6f} {gz:.6f}\n')
+        for i in range(front_v_count):
+            u, v = o_uvs[i]
+            out.write(f'vt {u:.6f} {v:.6f}\n')
+        for i in range(0, len(o_indices), 3):
+            i1 = o_indices[i]
+            i2 = o_indices[i+1]
+            i3 = o_indices[i+2]
+            if i1 < front_v_count and i2 < front_v_count and i3 < front_v_count:
+                f1 = i1 + 1 + v_offset
+                f2 = i2 + 1 + v_offset
+                f3 = i3 + 1 + v_offset
+                out.write(f'f {f1}/{f1} {f3}/{f3} {f2}/{f2}\n')
+    print(f'[ok] Exported {out_path} ({len(s_verts) + front_v_count} verts)')
 
 def parse_anim_curves(anim_path):
     with open(anim_path, 'r') as f:
@@ -397,23 +441,18 @@ def bake_scene_characters(env):
             card_parts.append((m_name, posed_c_verts, c_uvs, c_indices))
         write_combined_obj(out_name, obj_label, card_parts)
 
-def extract_dock_icons():
-    # Find NGUI UIAtlas prefabs in Assets/ and extract the 2D dock icons
-    prefabs = glob.glob('Assets/**/*.prefab', recursive=True)
-    for pf in prefabs:
-        with open(pf, 'r', errors='ignore') as f:
-            txt = f.read()
-        if 'mSprites:' not in txt:
-            continue
-        # Find sprite entries
-        sprites = re.findall(
-            r'-\s*name:\s*([^\n\r]+)\s*\n\s*x:\s*(\d+)\s*\n\s*y:\s*(\d+)\s*\n\s*width:\s*(\d+)\s*\n\s*height:\s*(\d+)',
-            txt
-        )
-        if sprites:
-            matching = [s for s in sprites if any(k in s[0].lower() for k in ('dungeon', 'portal', 'box', 'inventory', 'gem', 'chest', 'gear', 'setting', 'menu', 'icon'))]
-            if matching:
-                print(f'[atlas] {pf}: {matching[:15]}')
+def copy_dock_icons():
+    import shutil
+    icons = {
+        'Assets/Texture2D/low_DungeonPortal.png': 'godot/assets/textures/ui/DungeonPortal.png',
+        'Assets/Texture2D/low_BuildDeck.png': 'godot/assets/textures/ui/box_icon.png',
+        'Assets/Texture2D/low_Gems.png': 'godot/assets/textures/ui/gems_icon.png',
+        'Assets/Texture2D/low_NChest.png': 'godot/assets/textures/ui/chest_icon.png',
+    }
+    for src, dst in icons.items():
+        if os.path.exists(src):
+            shutil.copyfile(src, dst)
+            print(f'[ok] Copied {src} -> {dst}')
 
 if __name__ == '__main__':
     fix_static_objs()
@@ -421,4 +460,4 @@ if __name__ == '__main__':
     export_alphas_and_textures(env)
     export_logo_meshes(env)
     bake_scene_characters(env)
-    extract_dock_icons()
+    copy_dock_icons()
