@@ -15,7 +15,9 @@ const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 @onready var level_label: Label = $TopBar/PlayerBadge/LevelLabel
 @onready var xp_bar: ProgressBar = $TopBar/PlayerBadge/XPBar
 @onready var xp_label: Label = $TopBar/PlayerBadge/XPLabel
-@onready var stamina_label: Label = $TopBar/StaminaBadge/StaminaLabel
+@onready var stamina_label: Label = $TopBar/PlayerBadge/StaminaValue
+@onready var stamina_value_label: Label = $TopBar/PlayerBadge/StaminaValue
+@onready var stamina_status_label: Label = $TopBar/PlayerBadge/StaminaStatus
 @onready var cards_label: Label = $TopBar/Currencies/InventoryBadge/CardsLabel
 @onready var gems_label: Label = $TopBar/Currencies/GemsBadge/GemsLabel
 @onready var coins_label: Label = $TopBar/Currencies/CoinsBadge/CoinsLabel
@@ -193,8 +195,10 @@ func _update_player_stats() -> void:
 		xp_bar.value = xp
 	if xp_label:
 		xp_label.text = "%d/%d" % [xp, max_xp]
-	if stamina_label:
-		stamina_label.text = "%d/%d Full" % [stamina, max_stamina]
+	if stamina_value_label:
+		stamina_value_label.text = "%d/%d" % [stamina, max_stamina]
+	if stamina_status_label:
+		stamina_status_label.text = "Full" if stamina >= max_stamina else "04:30"
 	if cards_label:
 		cards_label.text = "%d/50" % total_cards
 	if gems_label:
