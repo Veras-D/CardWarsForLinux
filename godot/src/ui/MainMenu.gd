@@ -119,8 +119,46 @@ func _ready() -> void:
 	if deck_choice_modal:
 		deck_choice_modal.visible = false
 	
+	# Start with title screen overlay active, hub elements hidden
+	if start_overlay:
+		start_overlay.visible = true
+		start_overlay.modulate.a = 1.0
+		if top_bar:
+			top_bar.visible = false
+		if bottom_dock:
+			bottom_dock.visible = false
+		if quest_banner:
+			quest_banner.visible = false
+		if treehouse_3d and treehouse_3d.has_method("set_start_view"):
+			treehouse_3d.set_start_view()
+	
 	# Update Top Bar Data
 	_update_player_stats()
+
+	# Screenshot helper if requested via environment
+	if OS.has_environment("SCREENSHOT_TEST"):
+		_auto_screenshot()
+
+func _auto_screenshot() -> void:
+	var mode = OS.get_environment("SCREENSHOT_TEST")
+	if mode == "hub":
+		# Auto tap start to transition into hub
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.2).timeout
+	else:
+		await get_tree().create_timer(0.8).timeout
+	
+	var vp = get_viewport()
+	if vp:
+		var img = vp.get_texture().get_image()
+		if img:
+			var out_file = "../captured_godot_menu.png"
+			if mode == "hub":
+				out_file = "../captured_godot_hub.png"
+			img.save_png(out_file)
+			print(">>> SCREENSHOT SAVED TO " + out_file + " <<<")
+	get_tree().quit(0)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -172,10 +210,22 @@ func _on_start_tapped() -> void:
 		var tween = create_tween()
 		tween.tween_property(start_overlay, "modulate:a", 0.0, 0.3)
 		tween.tween_callback(func(): start_overlay.visible = false)
+	
+	if treehouse_3d and treehouse_3d.has_method("transition_to_hub"):
+		treehouse_3d.transition_to_hub(0.8)
+	
 	if top_bar:
 		top_bar.visible = true
+		top_bar.modulate.a = 0.0
+		create_tween().tween_property(top_bar, "modulate:a", 1.0, 0.4)
 	if bottom_dock:
 		bottom_dock.visible = true
+		bottom_dock.modulate.a = 0.0
+		create_tween().tween_property(bottom_dock, "modulate:a", 1.0, 0.4)
+	if quest_banner:
+		quest_banner.visible = true
+		quest_banner.modulate.a = 0.0
+		create_tween().tween_property(quest_banner, "modulate:a", 1.0, 0.4)
 
 func _on_battle_pressed() -> void:
 	_play_sfx()
