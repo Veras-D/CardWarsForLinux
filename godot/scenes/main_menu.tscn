@@ -19,6 +19,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ui/btn_deck.png" id="17_box"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/btn_store.png" id="18_gems_pouch"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/btn_chests.png" id="19_chest"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/ui_button_red.png" id="25_ui_btn_red"]
 
 [ext_resource type="PackedScene" path="res://src/ui/ChestOpeningModal.tscn" id="20_chest_modal"]
 [ext_resource type="PackedScene" path="res://scenes/versus_setup_modal.tscn" id="21_versus"]
@@ -524,10 +525,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -230.0
-offset_top = -80.0
-offset_right = 230.0
-offset_bottom = 80.0
+offset_left = -240.0
+offset_top = -71.0
+offset_right = 240.0
+offset_bottom = 71.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("14_popup_box")
@@ -540,58 +541,24 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -195.0
-offset_top = -42.0
-offset_right = 195.0
-offset_bottom = 42.0
+offset_left = -190.0
+offset_top = -42.5
+offset_right = 190.0
+offset_bottom = 42.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 30
+theme_override_constants/separation = 40
 alignment = 1
 
 [node name="QuitBtn" type="TextureButton" parent="QuitConfirmModal/Panel/Buttons"]
-custom_minimum_size = Vector2(170, 80)
+custom_minimum_size = Vector2(170, 85)
 layout_mode = 2
 texture_normal = ExtResource("13_btn_green")
-stretch_mode = 0
-
-[node name="Label" type="Label" parent="QuitConfirmModal/Panel/Buttons/QuitBtn"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 24
-text = "QUIT"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="DontQuitBtn" type="TextureButton" parent="QuitConfirmModal/Panel/Buttons"]
-custom_minimum_size = Vector2(170, 80)
+custom_minimum_size = Vector2(170, 85)
 layout_mode = 2
-texture_normal = ExtResource("12_btn_red")
-stretch_mode = 0
-
-[node name="Label" type="Label" parent="QuitConfirmModal/Panel/Buttons/DontQuitBtn"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 22
-text = "DON'T QUIT"
-horizontal_alignment = 1
-vertical_alignment = 1
+texture_normal = ExtResource("25_ui_btn_red")
 
 [node name="DeckChoiceModal" type="Control" parent="."]
 visible = false
