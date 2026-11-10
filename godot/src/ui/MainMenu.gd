@@ -23,6 +23,7 @@ const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 @onready var trophy_label: Label = $TopBar/TrophyBadge/TrophyLabel
 
 # Bottom Dock Buttons
+@onready var quit_btn: BaseButton = get_node_or_null("BottomDock/QuitBtn")
 @onready var settings_btn: BaseButton = $BottomDock/HBox/SettingsBtn
 @onready var dungeons_btn: BaseButton = $BottomDock/HBox/DungeonsBtn
 @onready var deck_btn: BaseButton = $BottomDock/HBox/DeckBtn
@@ -61,6 +62,8 @@ func _ready() -> void:
 		Audio.play_bgm(BGM_TREEHOUSE)
 	
 	# Connect Dock Buttons
+	if quit_btn:
+		quit_btn.pressed.connect(_show_quit_modal)
 	if battle_btn:
 		battle_btn.pressed.connect(_on_battle_pressed)
 	if settings_btn:
