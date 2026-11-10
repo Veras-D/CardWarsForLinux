@@ -194,10 +194,24 @@ surface_material_override/0 = SubResource("Mat_Card")
 [node name="LogoGroup" type="Node3D" parent="."]
 transform = Transform3D(0.75, 0, 0, 0, 0.75, 0, 0, 0, 0.75, 0, 1.95, 0.2)
 
-[node name="LogoMesh" type="MeshInstance3D" parent="LogoGroup"]
+[node name="FrontGroup" type="Node3D" parent="LogoGroup"]
+
+[node name="LogoMesh" type="MeshInstance3D" parent="LogoGroup/FrontGroup"]
 mesh = ExtResource("13_logo")
 surface_material_override/0 = SubResource("Mat_Logo")
 
-[node name="ShieldMesh" type="MeshInstance3D" parent="LogoGroup"]
+[node name="ShieldMesh" type="MeshInstance3D" parent="LogoGroup/FrontGroup"]
+mesh = ExtResource("14_shield")
+surface_material_override/0 = SubResource("Mat_Logo")
+
+[node name="BackGroup" type="Node3D" parent="LogoGroup"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+visible = false
+
+[node name="LogoMeshBack" type="MeshInstance3D" parent="LogoGroup/BackGroup"]
+mesh = ExtResource("13_logo")
+surface_material_override/0 = SubResource("Mat_Logo")
+
+[node name="ShieldMeshBack" type="MeshInstance3D" parent="LogoGroup/BackGroup"]
 mesh = ExtResource("14_shield")
 surface_material_override/0 = SubResource("Mat_Logo")
