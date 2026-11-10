@@ -15,8 +15,8 @@ const START_CAM_POS := Vector3(0.0, 2.45, 6.8)
 const START_CAM_TARGET := Vector3(0.0, -0.35, 0.0)
 
 # Hub View: First-person Jake POV, looking across table at Finn
-const HUB_CAM_POS := Vector3(-2.65, 1.15, 0.0)
-const HUB_CAM_TARGET := Vector3(2.2, 0.05, 0.0)
+const HUB_CAM_POS := Vector3(-3.20, 1.15, 0.0)
+const HUB_CAM_TARGET := Vector3(0.60, -0.05, 0.0)
 
 # 3D Logo positions
 # In Start view: High above the table
