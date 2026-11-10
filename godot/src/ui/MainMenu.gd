@@ -8,7 +8,6 @@ const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 @onready var treehouse_3d: Node3D = $ViewportContainer/SubViewport/TreehouseMenu3D
 @onready var top_bar: Control = $TopBar
 @onready var bottom_dock: Control = $BottomDock
-@onready var quest_banner: Control = $QuestBanner
 @onready var start_overlay: Control = $StartOverlay
 
 # Top Bar Data Labels
@@ -129,8 +128,6 @@ func _ready() -> void:
 			top_bar.visible = false
 		if bottom_dock:
 			bottom_dock.visible = false
-		if quest_banner:
-			quest_banner.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_start_view"):
 			treehouse_3d.set_start_view()
 	
@@ -163,6 +160,14 @@ func _auto_screenshot() -> void:
 	get_tree().quit(0)
 
 func _input(event: InputEvent) -> void:
+	if start_overlay and start_overlay.visible:
+		if event is InputEventKey and event.pressed:
+			_on_start_tapped()
+			return
+		elif event is InputEventJoypadButton and event.pressed:
+			_on_start_tapped()
+			return
+	
 	if event.is_action_pressed("ui_cancel"):
 		if quit_modal and not quit_modal.visible:
 			_show_quit_modal()
@@ -226,10 +231,6 @@ func _on_start_tapped() -> void:
 		bottom_dock.visible = true
 		bottom_dock.modulate.a = 0.0
 		create_tween().tween_property(bottom_dock, "modulate:a", 1.0, 0.4)
-	if quest_banner:
-		quest_banner.visible = true
-		quest_banner.modulate.a = 0.0
-		create_tween().tween_property(quest_banner, "modulate:a", 1.0, 0.4)
 
 func _on_battle_pressed() -> void:
 	_play_sfx()
