@@ -62,13 +62,13 @@ texture_filter = 2
 
 [sub_resource type="StandardMaterial3D" id="Mat_BoardBorder"]
 shading_mode = 0
-albedo_texture = ExtResource("30_tborder")
-texture_filter = 2
+albedo_texture = ExtResource("20_tboard")
+texture_filter = 3
 
 [sub_resource type="StandardMaterial3D" id="Mat_Board"]
 shading_mode = 0
 albedo_texture = ExtResource("20_tboard")
-texture_filter = 2
+texture_filter = 3
 
 [sub_resource type="StandardMaterial3D" id="Mat_Chair"]
 shading_mode = 0
