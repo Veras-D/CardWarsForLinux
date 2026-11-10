@@ -23,7 +23,7 @@ const START_LOGO_SCALE := Vector3(0.75, 0.75, 0.75)
 const START_LOGO_ROT := Vector3(0.0, 0.0, 0.0)
 
 # In Hub view: Hovering over the center board facing Jake (-X view)
-const HUB_LOGO_POS := Vector3(0.1, 0.35, -0.35)
+const HUB_LOGO_POS := Vector3(0.08, 0.16, 0.0)
 const HUB_LOGO_SCALE := Vector3(0.26, 0.26, 0.26)
 const HUB_LOGO_ROT := Vector3(0.0, -75.0, 0.0)
 

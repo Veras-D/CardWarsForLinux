@@ -143,16 +143,17 @@ mesh = ExtResource("6_tableobj")
 surface_material_override/0 = SubResource("Mat_TableObj")
 
 [node name="BoardBorder" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.015, -0.168, 0.029)
 mesh = ExtResource("7_boarder")
 surface_material_override/0 = SubResource("Mat_BoardBorder")
 
 [node name="BoardGridRed" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.589, 0.045, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5895, -0.149, 0.031)
 mesh = ExtResource("8_grid_red")
 surface_material_override/0 = SubResource("Mat_Board")
 
 [node name="BoardGridBlue" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.564, 0.045, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.564, -0.149, 0.031)
 mesh = ExtResource("9_grid_blue")
 surface_material_override/0 = SubResource("Mat_Board")
 
