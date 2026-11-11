@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://psyvdnjuw61g"
-path="res://.godot/imported/TreeFort_Table.png-218ee1f9cd08b57aa2542321679e609b.ctex"
+path.s3tc="res://.godot/imported/TreeFort_Table.png-218ee1f9cd08b57aa2542321679e609b.s3tc.ctex"
+path.etc2="res://.godot/imported/TreeFort_Table.png-218ee1f9cd08b57aa2542321679e609b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/environment/TreeFort_Table.png"
-dest_files=["res://.godot/imported/TreeFort_Table.png-218ee1f9cd08b57aa2542321679e609b.ctex"]
+dest_files=["res://.godot/imported/TreeFort_Table.png-218ee1f9cd08b57aa2542321679e609b.s3tc.ctex", "res://.godot/imported/TreeFort_Table.png-218ee1f9cd08b57aa2542321679e609b.etc2.ctex"]
 
 [params]
 

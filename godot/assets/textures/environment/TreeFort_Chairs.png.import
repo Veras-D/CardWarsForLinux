@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c6nqspyroi1m2"
-path="res://.godot/imported/TreeFort_Chairs.png-77913c5e0d88be0a8f0baa3cd31805f0.ctex"
+path.s3tc="res://.godot/imported/TreeFort_Chairs.png-77913c5e0d88be0a8f0baa3cd31805f0.s3tc.ctex"
+path.etc2="res://.godot/imported/TreeFort_Chairs.png-77913c5e0d88be0a8f0baa3cd31805f0.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/environment/TreeFort_Chairs.png"
-dest_files=["res://.godot/imported/TreeFort_Chairs.png-77913c5e0d88be0a8f0baa3cd31805f0.ctex"]
+dest_files=["res://.godot/imported/TreeFort_Chairs.png-77913c5e0d88be0a8f0baa3cd31805f0.s3tc.ctex", "res://.godot/imported/TreeFort_Chairs.png-77913c5e0d88be0a8f0baa3cd31805f0.etc2.ctex"]
 
 [params]
 

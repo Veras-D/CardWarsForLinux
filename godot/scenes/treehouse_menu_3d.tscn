@@ -33,6 +33,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/characters/Jake_Face.png" id="29_tface_jake"]
 [ext_resource type="Texture2D" path="res://assets/textures/environment/GameBoard_Border.png" id="30_tborder"]
 [ext_resource type="Texture2D" path="res://assets/textures/environment/TreeFort_Alphas.png" id="33_talphas"]
+[ext_resource type="Texture2D" path="res://assets/textures/environment/FX_Edge_PSD.png" id="34_tedge"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Floor"]
 shading_mode = 0
@@ -105,6 +106,18 @@ shading_mode = 0
 albedo_texture = ExtResource("25_tcard")
 texture_filter = 2
 
+[sub_resource type="StandardMaterial3D" id="Mat_BoardGlow"]
+render_priority = 2
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 1)
+albedo_texture = ExtResource("34_tedge")
+texture_filter = 3
+
+[sub_resource type="PlaneMesh" id="Mesh_BoardGlow"]
+size = Vector2(2.825, 2.785)
+
 [sub_resource type="Environment" id="Env_Treehouse"]
 background_mode = 1
 background_color = Color(0.85, 0.93, 0.98, 1)
@@ -156,6 +169,11 @@ surface_material_override/0 = SubResource("Mat_Board")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.564, -0.149, 0.031)
 mesh = ExtResource("9_grid_blue")
 surface_material_override/0 = SubResource("Mat_Board")
+
+[node name="BoardGlow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.003, -0.122, 0.059)
+mesh = SubResource("Mesh_BoardGlow")
+surface_material_override/0 = SubResource("Mat_BoardGlow")
 
 [node name="JakeStool" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.525, -2.55, 0)

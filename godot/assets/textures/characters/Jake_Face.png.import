@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bq7b3ng3sg0qg"
-path="res://.godot/imported/Jake_Face.png-04a108d388f4d9ab83772e15bce9d8a3.ctex"
+path.s3tc="res://.godot/imported/Jake_Face.png-04a108d388f4d9ab83772e15bce9d8a3.s3tc.ctex"
+path.etc2="res://.godot/imported/Jake_Face.png-04a108d388f4d9ab83772e15bce9d8a3.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/characters/Jake_Face.png"
-dest_files=["res://.godot/imported/Jake_Face.png-04a108d388f4d9ab83772e15bce9d8a3.ctex"]
+dest_files=["res://.godot/imported/Jake_Face.png-04a108d388f4d9ab83772e15bce9d8a3.s3tc.ctex", "res://.godot/imported/Jake_Face.png-04a108d388f4d9ab83772e15bce9d8a3.etc2.ctex"]
 
 [params]
 

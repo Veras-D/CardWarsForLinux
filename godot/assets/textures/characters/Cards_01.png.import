@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bl1aj5jc1n8xh"
-path="res://.godot/imported/Cards_01.png-4f81302193a4ab99cd56ddb51585e8b1.ctex"
+path.s3tc="res://.godot/imported/Cards_01.png-4f81302193a4ab99cd56ddb51585e8b1.s3tc.ctex"
+path.etc2="res://.godot/imported/Cards_01.png-4f81302193a4ab99cd56ddb51585e8b1.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/characters/Cards_01.png"
-dest_files=["res://.godot/imported/Cards_01.png-4f81302193a4ab99cd56ddb51585e8b1.ctex"]
+dest_files=["res://.godot/imported/Cards_01.png-4f81302193a4ab99cd56ddb51585e8b1.s3tc.ctex", "res://.godot/imported/Cards_01.png-4f81302193a4ab99cd56ddb51585e8b1.etc2.ctex"]
 
 [params]
 

@@ -8,6 +8,7 @@ extends Node3D
 @onready var jake_stool: MeshInstance3D = $JakeStool
 @onready var finn_node: MeshInstance3D = $Finn
 @onready var finn_stool: MeshInstance3D = $FinnStool
+@onready var board_glow: MeshInstance3D = $BoardGlow
 
 # Camera transforms
 # Start View: Front view framing Jake (left), Finn (right), and the Table
@@ -35,8 +36,16 @@ var logo_base_pos: Vector3 = START_LOGO_POS
 var logo_scale: Vector3 = START_LOGO_SCALE
 var logo_rot_y: float = 0.0
 var active_tween: Tween = null
+var board_glow_mat: StandardMaterial3D = null
 
 func _ready() -> void:
+	if board_glow:
+		var mat = board_glow.get_surface_override_material(0)
+		if not mat and board_glow.material_override:
+			mat = board_glow.material_override
+		if mat:
+			board_glow_mat = mat.duplicate()
+			board_glow.material_override = board_glow_mat
 	set_start_view()
 
 func set_start_view() -> void:
@@ -152,6 +161,15 @@ func transition_to_start(duration: float = 0.8) -> void:
 
 func _process(delta: float) -> void:
 	anim_time += delta
+	
+	# Board breathing glow effect: smoothly pulses from 0 to peak warm amber glow and back over 3.0s
+	# Authentic colors derived from original Card Wars FX_Board (startColor 0.40, 0.37, 0.18):
+	# adds subtle +30/255 ambient warmth without washing out the blue/brown tiles.
+	if board_glow_mat:
+		var cycle_pos: float = fmod(anim_time, 3.0) / 3.0
+		var glow_intensity: float = sin(cycle_pos * PI)
+		board_glow_mat.albedo_color = Color(0.90 * glow_intensity, 0.80 * glow_intensity, 0.44 * glow_intensity, 1.0)
+	
 	if is_hub_view:
 		logo_rot_y = fmod(logo_rot_y + LOGO_SPIN_SPEED * delta, 360.0)
 	

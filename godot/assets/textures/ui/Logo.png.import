@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://be73y45w6tstw"
-path="res://.godot/imported/Logo.png-86f90642a739b1278a43630ef720250e.ctex"
+path.s3tc="res://.godot/imported/Logo.png-86f90642a739b1278a43630ef720250e.s3tc.ctex"
+path.etc2="res://.godot/imported/Logo.png-86f90642a739b1278a43630ef720250e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/ui/Logo.png"
-dest_files=["res://.godot/imported/Logo.png-86f90642a739b1278a43630ef720250e.ctex"]
+dest_files=["res://.godot/imported/Logo.png-86f90642a739b1278a43630ef720250e.s3tc.ctex", "res://.godot/imported/Logo.png-86f90642a739b1278a43630ef720250e.etc2.ctex"]
 
 [params]
 

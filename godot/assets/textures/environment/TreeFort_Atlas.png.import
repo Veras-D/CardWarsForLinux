@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bowicto13bb8p"
-path="res://.godot/imported/TreeFort_Atlas.png-3640ae655001edc55e233d39c8722d63.ctex"
+path.s3tc="res://.godot/imported/TreeFort_Atlas.png-3640ae655001edc55e233d39c8722d63.s3tc.ctex"
+path.etc2="res://.godot/imported/TreeFort_Atlas.png-3640ae655001edc55e233d39c8722d63.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/environment/TreeFort_Atlas.png"
-dest_files=["res://.godot/imported/TreeFort_Atlas.png-3640ae655001edc55e233d39c8722d63.ctex"]
+dest_files=["res://.godot/imported/TreeFort_Atlas.png-3640ae655001edc55e233d39c8722d63.s3tc.ctex", "res://.godot/imported/TreeFort_Atlas.png-3640ae655001edc55e233d39c8722d63.etc2.ctex"]
 
 [params]
 
