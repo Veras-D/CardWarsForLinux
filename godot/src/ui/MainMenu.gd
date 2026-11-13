@@ -56,6 +56,13 @@ const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 @onready var choice_compendium_btn: BaseButton = $DeckChoiceModal/Panel/VBox/CompendiumBtn
 @onready var choice_cancel_btn: BaseButton = $DeckChoiceModal/Panel/VBox/CancelBtn
 
+# Quest Mode Selection Overlay
+@onready var quest_overlay: Control = get_node_or_null("QuestModeOverlay")
+@onready var quest_back_btn: BaseButton = get_node_or_null("QuestModeOverlay/BackBtn")
+@onready var quad_deck_wars: BaseButton = get_node_or_null("QuestModeOverlay/QuadDeckWars")
+@onready var quad_fionna: BaseButton = get_node_or_null("QuestModeOverlay/QuadFionna")
+@onready var quad_quests: BaseButton = get_node_or_null("QuestModeOverlay/QuadQuests")
+
 func _ready() -> void:
 	# Autoplay Treehouse BGM
 	if Audio and BGM_TREEHOUSE:
@@ -105,6 +112,16 @@ func _ready() -> void:
 	if choice_cancel_btn:
 		choice_cancel_btn.pressed.connect(func(): deck_choice_modal.visible = false)
 	
+	# Quest Mode Selection Overlay Buttons
+	if quest_back_btn:
+		quest_back_btn.pressed.connect(_on_quest_back_pressed)
+	if quad_deck_wars:
+		quad_deck_wars.pressed.connect(_on_deck_wars_pressed)
+	if quad_fionna:
+		quad_fionna.pressed.connect(_on_fionna_pressed)
+	if quad_quests:
+		quad_quests.pressed.connect(_on_quests_pressed)
+	
 	# Hide all modals initially
 	if quit_modal:
 		quit_modal.visible = false
@@ -122,6 +139,8 @@ func _ready() -> void:
 		compendium_dialog.visible = false
 	if deck_choice_modal:
 		deck_choice_modal.visible = false
+	if quest_overlay:
+		quest_overlay.visible = false
 	
 	# Start with title screen overlay active, hub elements hidden
 	if start_overlay:
@@ -143,7 +162,13 @@ func _ready() -> void:
 
 func _auto_screenshot() -> void:
 	var mode = OS.get_environment("SCREENSHOT_TEST")
-	if mode == "hub":
+	if mode == "battle_select":
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		_on_battle_pressed()
+		await get_tree().create_timer(1.0).timeout
+	elif mode == "hub":
 		# Auto tap start to transition into hub
 		if start_overlay and start_overlay.visible:
 			_on_start_tapped()
@@ -158,6 +183,8 @@ func _auto_screenshot() -> void:
 			var out_file = "../captured_godot_menu.png"
 			if mode == "hub":
 				out_file = "../captured_godot_hub.png"
+			elif mode == "battle_select":
+				out_file = "../captured_godot_battle_select.png"
 			img.save_png(out_file)
 			print(">>> SCREENSHOT SAVED TO " + out_file + " <<<")
 	get_tree().quit(0)
@@ -237,7 +264,54 @@ func _on_start_tapped() -> void:
 
 func _on_battle_pressed() -> void:
 	_play_sfx()
-	GameManager.open_campaign_map()
+	open_quest_mode_select()
+
+func open_quest_mode_select() -> void:
+	if bottom_dock:
+		var tw = create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(func(): bottom_dock.visible = false)
+	
+	if quest_overlay:
+		quest_overlay.visible = true
+		quest_overlay.modulate.a = 0.0
+		var tw_o = create_tween()
+		tw_o.tween_property(quest_overlay, "modulate:a", 1.0, 0.3)
+	
+	if treehouse_3d and treehouse_3d.has_method("show_quest_modes"):
+		treehouse_3d.show_quest_modes()
+
+func _on_quest_back_pressed() -> void:
+	_play_sfx()
+	close_quest_mode_select()
+
+func close_quest_mode_select() -> void:
+	if quest_overlay:
+		var tw_o = create_tween()
+		tw_o.tween_property(quest_overlay, "modulate:a", 0.0, 0.2)
+		tw_o.tween_callback(func(): quest_overlay.visible = false)
+	
+	if bottom_dock:
+		bottom_dock.visible = true
+		bottom_dock.modulate.a = 0.0
+		var tw = create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 1.0, 0.3)
+	
+	if treehouse_3d and treehouse_3d.has_method("hide_quest_modes"):
+		treehouse_3d.hide_quest_modes()
+
+func _on_quests_pressed() -> void:
+	_play_sfx()
+	GameManager.open_campaign_map(0)
+
+func _on_fionna_pressed() -> void:
+	_play_sfx()
+	GameManager.open_campaign_map(1)
+
+func _on_deck_wars_pressed() -> void:
+	_play_sfx()
+	if lan_modal:
+		lan_modal.open_modal()
 
 func _on_dungeons_pressed() -> void:
 	_play_sfx()

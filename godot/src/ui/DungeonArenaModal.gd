@@ -207,7 +207,7 @@ func _refresh_elfisto_tab() -> void:
 			var r_num = int(r.get("round", 1))
 			var r_rew = str(r.get("reward_type", ""))
 			var r_qty = int(r.get("reward_quantity", 1))
-			var qid = str(r.get("quest_id", ""))
+			var _qid = str(r.get("quest_id", ""))
 
 			var hbox = HBoxContainer.new()
 			hbox.custom_minimum_size = Vector2(0, 32)

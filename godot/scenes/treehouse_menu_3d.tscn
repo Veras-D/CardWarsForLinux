@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3]
+[gd_scene load_steps=76 format=3]
 
 [ext_resource type="Script" path="res://src/ui/TreehouseMenu3D.gd" id="1_script"]
 [ext_resource type="ArrayMesh" path="res://assets/models/TreeFort_FloorCeiling.obj" id="2_floor"]
@@ -34,6 +34,15 @@
 [ext_resource type="Texture2D" path="res://assets/textures/environment/GameBoard_Border.png" id="30_tborder"]
 [ext_resource type="Texture2D" path="res://assets/textures/environment/TreeFort_Alphas.png" id="33_talphas"]
 [ext_resource type="Texture2D" path="res://assets/textures/environment/FX_Edge_PSD.png" id="34_tedge"]
+[ext_resource type="ArrayMesh" path="res://assets/models/QuestMap_Scroll.obj" id="35_mscroll"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/QuestMap_Scroll.png" id="36_tscroll"]
+[ext_resource type="ArrayMesh" path="res://assets/models/FionnaCake_Book.obj" id="37_mbook"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/low_FionnaCakeIcon.png" id="38_tbook"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="43_font"]
+[ext_resource type="ArrayMesh" path="res://assets/models/DeckWars_Stadium.obj" id="50_mstadium"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/low_MultiPlayer.png" id="54_tmulti"]
+[ext_resource type="ArrayMesh" path="res://assets/models/Stadium_Lights.obj" id="55_mlights"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/Stadium_Lights.png" id="56_tlights"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Floor"]
 shading_mode = 0
@@ -118,11 +127,40 @@ texture_filter = 3
 [sub_resource type="PlaneMesh" id="Mesh_BoardGlow"]
 size = Vector2(2.825, 2.785)
 
+[sub_resource type="StandardMaterial3D" id="Mat_Scroll"]
+cull_mode = 0
+shading_mode = 0
+albedo_texture = ExtResource("36_tscroll")
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="Mat_Book"]
+cull_mode = 0
+shading_mode = 0
+albedo_texture = ExtResource("38_tbook")
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="Mat_Stadium"]
+cull_mode = 0
+shading_mode = 0
+albedo_texture = ExtResource("54_tmulti")
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="Mat_StadiumLights"]
+transparency = 1
+cull_mode = 0
+shading_mode = 0
+albedo_texture = ExtResource("56_tlights")
+texture_filter = 3
+
 [sub_resource type="Environment" id="Env_Treehouse"]
 background_mode = 1
 background_color = Color(0.85, 0.93, 0.98, 1)
 ambient_light_source = 2
 ambient_light_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_MultiPlayer"]
+shading_mode = 0
+albedo_texture = ExtResource("54_tmulti")
 
 [node name="TreehouseMenu3D" type="Node3D"]
 script = ExtResource("1_script")
@@ -233,3 +271,31 @@ surface_material_override/0 = SubResource("Mat_Logo")
 [node name="ShieldMeshBack" type="MeshInstance3D" parent="LogoGroup/BackGroup"]
 mesh = ExtResource("14_shield")
 surface_material_override/0 = SubResource("Mat_Logo")
+
+[node name="BoardModesGroup" type="Node3D" parent="."]
+visible = false
+
+[node name="QuestsMode" type="Node3D" parent="BoardModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, -0.12, 0.75)
+
+[node name="ScrollMesh" type="MeshInstance3D" parent="BoardModesGroup/QuestsMode"]
+mesh = ExtResource("35_mscroll")
+surface_material_override/0 = SubResource("Mat_Scroll")
+
+[node name="FionnaCakeMode" type="Node3D" parent="BoardModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, -0.12, -0.75)
+
+[node name="BookMesh" type="MeshInstance3D" parent="BoardModesGroup/FionnaCakeMode"]
+mesh = ExtResource("37_mbook")
+surface_material_override/0 = SubResource("Mat_Book")
+
+[node name="DeckWarsMode" type="Node3D" parent="BoardModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, -0.12, -0.75)
+
+[node name="StadiumMesh" type="MeshInstance3D" parent="BoardModesGroup/DeckWarsMode"]
+mesh = ExtResource("50_mstadium")
+surface_material_override/0 = SubResource("Mat_Stadium")
+
+[node name="LightsMesh" type="MeshInstance3D" parent="BoardModesGroup/DeckWarsMode"]
+mesh = ExtResource("55_mlights")
+surface_material_override/0 = SubResource("Mat_StadiumLights")

@@ -305,8 +305,8 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 	_init_wallet()
 	var hero_data: Dictionary = {}
 	for hid in hero_trackers.keys():
-		var tr: ProgressionTracker = hero_trackers[hid]
-		hero_data[hid] = tr.serialize()
+		var tracker: ProgressionTracker = hero_trackers[hid]
+		hero_data[hid] = tracker.serialize()
 
 	var profile_dict = {
 		"version": 1,
@@ -360,8 +360,8 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		for hid in data["heroes"].keys():
 			var h_dict = data["heroes"][hid]
 			if typeof(h_dict) == TYPE_DICTIONARY:
-				var tr = get_hero_tracker(hid)
-				tr.deserialize(h_dict)
+				var tracker = get_hero_tracker(hid)
+				tracker.deserialize(h_dict)
 
 	if data.has("active_deck_name"):
 		active_deck_name = str(data["active_deck_name"])
@@ -816,7 +816,11 @@ func launch_quest_battle(quest_id: String) -> bool:
 	return true
 
 
-func open_campaign_map() -> void:
+var initial_campaign_world: int = 0
+
+
+func open_campaign_map(world: int = 0) -> void:
+	initial_campaign_world = world
 	current_state = MatchState.MENU
 	get_tree().change_scene_to_file("res://scenes/campaign_map.tscn")
 

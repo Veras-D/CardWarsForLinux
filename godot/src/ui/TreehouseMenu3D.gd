@@ -9,6 +9,10 @@ extends Node3D
 @onready var finn_node: MeshInstance3D = $Finn
 @onready var finn_stool: MeshInstance3D = $FinnStool
 @onready var board_glow: MeshInstance3D = $BoardGlow
+@onready var board_modes_group: Node3D = $BoardModesGroup
+@onready var quests_mode: Node3D = $BoardModesGroup/QuestsMode
+@onready var fionna_mode: Node3D = $BoardModesGroup/FionnaCakeMode
+@onready var deckwars_mode: Node3D = $BoardModesGroup/DeckWarsMode
 
 # Camera transforms
 # Start View: Front view framing Jake (left), Finn (right), and the Table
@@ -18,6 +22,10 @@ const START_CAM_TARGET := Vector3(0.0, -0.35, 0.0)
 # Hub View: First-person Jake POV, looking across table at Finn
 const HUB_CAM_POS := Vector3(-3.20, 1.15, 0.0)
 const HUB_CAM_TARGET := Vector3(0.60, -0.05, 0.0)
+
+# Battle Select View: Framing the game board from Jake's side, steep 57deg pitch, Finn completely off-screen
+const BATTLE_SELECT_CAM_POS := Vector3(-1.78, 1.89, 0.0)
+const BATTLE_SELECT_CAM_TARGET := Vector3(-0.38, -0.29, 0.0)
 
 # 3D Logo positions
 # In Start view: High above the table
@@ -31,6 +39,7 @@ const HUB_LOGO_SCALE := Vector3(0.185, 0.185, 0.185)
 const LOGO_SPIN_SPEED := 67.5 # degrees per second (matches Take 001_7.anim 360deg/5.333s)
 
 var is_hub_view: bool = false
+var is_mode_select: bool = false
 var anim_time: float = 0.0
 var logo_base_pos: Vector3 = START_LOGO_POS
 var logo_scale: Vector3 = START_LOGO_SCALE
@@ -50,6 +59,9 @@ func _ready() -> void:
 
 func set_start_view() -> void:
 	is_hub_view = false
+	is_mode_select = false
+	if board_modes_group:
+		board_modes_group.visible = false
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
 	
@@ -159,6 +171,76 @@ func transition_to_start(duration: float = 0.8) -> void:
 			jake_node.visible = true
 	)
 
+func show_quest_modes() -> void:
+	if is_mode_select:
+		return
+	is_mode_select = true
+	
+	if active_tween and active_tween.is_valid():
+		active_tween.kill()
+	
+	# Smoothly fly camera to Battle Select framing (closer, steep overhead view of board)
+	var saved_cam_xf = camera.transform
+	camera.position = BATTLE_SELECT_CAM_POS
+	camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
+	var target_cam_xf = camera.transform
+	camera.transform = saved_cam_xf
+	
+	active_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	active_tween.tween_property(camera, "transform", target_cam_xf, 0.55)
+	
+	# Shrink/hide spinning logo with cartoon spring
+	if logo_group:
+		var tw_logo = create_tween()
+		tw_logo.tween_property(logo_group, "scale", Vector3.ZERO, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		tw_logo.tween_callback(func(): logo_group.visible = false)
+	
+	# Pop-up 3D props from the base of the board with staggered bounce
+	if board_modes_group:
+		board_modes_group.visible = true
+		var modes = [deckwars_mode, fionna_mode, quests_mode]
+		for i in range(modes.size()):
+			var m = modes[i]
+			if m:
+				m.scale = Vector3.ZERO
+				var m_tw = create_tween()
+				m_tw.tween_interval(0.12 + i * 0.07)
+				m_tw.tween_property(m, "scale", Vector3.ONE, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func hide_quest_modes() -> void:
+	if not is_mode_select:
+		return
+	is_mode_select = false
+	
+	if active_tween and active_tween.is_valid():
+		active_tween.kill()
+	
+	# Smoothly return camera to Hub POV (first-person Jake looking at Finn)
+	var saved_cam_xf = camera.transform
+	camera.position = HUB_CAM_POS
+	camera.look_at(HUB_CAM_TARGET, Vector3.UP)
+	var target_cam_xf = camera.transform
+	camera.transform = saved_cam_xf
+	
+	active_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	active_tween.tween_property(camera, "transform", target_cam_xf, 0.50)
+	
+	# Pop-down props into the board
+	var tw = create_tween().set_parallel(true)
+	var modes = [deckwars_mode, fionna_mode, quests_mode]
+	for m in modes:
+		if m:
+			tw.tween_property(m, "scale", Vector3.ZERO, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	
+	tw.chain().tween_callback(func():
+		if board_modes_group:
+			board_modes_group.visible = false
+		if logo_group:
+			logo_group.visible = true
+			var l_tw = create_tween()
+			l_tw.tween_property(logo_group, "scale", HUB_LOGO_SCALE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	)
+
 func _process(delta: float) -> void:
 	anim_time += delta
 	
@@ -170,10 +252,20 @@ func _process(delta: float) -> void:
 		var glow_intensity: float = sin(cycle_pos * PI)
 		board_glow_mat.albedo_color = Color(0.90 * glow_intensity, 0.80 * glow_intensity, 0.44 * glow_intensity, 1.0)
 	
-	if is_hub_view:
+	# Mode select prop animations
+	if is_mode_select:
+		# Gentle breathing hover for board props
+		if fionna_mode:
+			fionna_mode.position.y = -0.12 + sin(anim_time * 2.0) * 0.005
+		if quests_mode:
+			quests_mode.position.y = -0.12 + sin(anim_time * 2.2) * 0.005
+		if deckwars_mode:
+			deckwars_mode.position.y = -0.12 + sin(anim_time * 1.7) * 0.004
+	
+	if is_hub_view and not is_mode_select:
 		logo_rot_y = fmod(logo_rot_y + LOGO_SPIN_SPEED * delta, 360.0)
 	
-	if logo_group:
+	if logo_group and not is_mode_select:
 		if is_hub_view:
 			logo_group.position = logo_base_pos
 			logo_group.rotation_degrees = Vector3(0.0, logo_rot_y, 0.0)

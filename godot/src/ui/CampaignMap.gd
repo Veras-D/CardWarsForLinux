@@ -52,7 +52,9 @@ func _ready() -> void:
 
 	_setup_regions_bar()
 
-	if map_renderer:
+	if GameManager.initial_campaign_world == CampaignWorld.FIONNA_AND_CAKE:
+		set_campaign_world(CampaignWorld.FIONNA_AND_CAKE)
+	elif map_renderer:
 		map_renderer.graph = GameManager.campaign_graph
 		map_renderer.node_selected.connect(_on_quest_selected)
 

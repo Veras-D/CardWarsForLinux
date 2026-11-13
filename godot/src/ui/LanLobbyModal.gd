@@ -209,7 +209,7 @@ func _on_session_created(port: int) -> void:
 	host_status_label.text = "Game created on port %d. Waiting for opponent..." % port
 
 
-func _on_peer_connected(id: int) -> void:
+func _on_peer_connected(_id: int) -> void:
 	host_status_label.text = "Opponent joined! Exchanging deck & hero data..."
 	_send_local_handshake(true)
 
@@ -297,6 +297,6 @@ func _on_host_disconnected() -> void:
 	direct_connect_btn.disabled = false
 
 
-func _on_peer_disconnected(id: int) -> void:
+func _on_peer_disconnected(_id: int) -> void:
 	if _is_hosting:
 		host_status_label.text = "Opponent disconnected."
