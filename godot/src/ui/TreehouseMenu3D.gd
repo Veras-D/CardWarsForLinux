@@ -40,6 +40,8 @@ const LOGO_SPIN_SPEED := 67.5 # degrees per second (matches Take 001_7.anim 360d
 
 var is_hub_view: bool = false
 var is_mode_select: bool = false
+var is_logo_animating: bool = false
+var props_anim_ready: bool = false
 var anim_time: float = 0.0
 var logo_base_pos: Vector3 = START_LOGO_POS
 var logo_scale: Vector3 = START_LOGO_SCALE
@@ -175,6 +177,8 @@ func show_quest_modes() -> void:
 	if is_mode_select:
 		return
 	is_mode_select = true
+	props_anim_ready = false
+	is_logo_animating = true
 	
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
@@ -189,13 +193,17 @@ func show_quest_modes() -> void:
 	active_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	active_tween.tween_property(camera, "transform", target_cam_xf, 0.55)
 	
-	# Shrink/hide spinning logo with cartoon spring
+	# Shrink/hide spinning logo with cartoon spring sinking into table
 	if logo_group:
-		var tw_logo = create_tween()
-		tw_logo.tween_property(logo_group, "scale", Vector3.ZERO, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-		tw_logo.tween_callback(func(): logo_group.visible = false)
+		var tw_logo = create_tween().set_parallel(true)
+		tw_logo.tween_property(logo_group, "scale", Vector3.ZERO, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		tw_logo.tween_property(logo_group, "position:y", HUB_LOGO_POS.y - 0.4, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw_logo.chain().tween_callback(func():
+			logo_group.visible = false
+			is_logo_animating = false
+		)
 	
-	# Pop-up 3D props from the base of the board with staggered bounce
+	# Pop-up 3D props from below the board with staggered bounce
 	if board_modes_group:
 		board_modes_group.visible = true
 		var modes = [deckwars_mode, fionna_mode, quests_mode]
@@ -203,14 +211,22 @@ func show_quest_modes() -> void:
 			var m = modes[i]
 			if m:
 				m.scale = Vector3.ZERO
-				var m_tw = create_tween()
-				m_tw.tween_interval(0.12 + i * 0.07)
-				m_tw.tween_property(m, "scale", Vector3.ONE, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				m.position.y = -0.45
+				var m_tw = create_tween().set_parallel(true)
+				var delay = 0.08 + i * 0.08
+				m_tw.tween_property(m, "scale", Vector3.ONE, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
+				m_tw.tween_property(m, "position:y", -0.12, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
+		
+		var finish_tw = create_tween()
+		finish_tw.tween_interval(0.60)
+		finish_tw.tween_callback(func(): props_anim_ready = true)
 
 func hide_quest_modes() -> void:
 	if not is_mode_select:
 		return
 	is_mode_select = false
+	props_anim_ready = false
+	is_logo_animating = true
 	
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
@@ -223,22 +239,27 @@ func hide_quest_modes() -> void:
 	camera.transform = saved_cam_xf
 	
 	active_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-	active_tween.tween_property(camera, "transform", target_cam_xf, 0.50)
+	active_tween.tween_property(camera, "transform", target_cam_xf, 0.48)
 	
 	# Pop-down props into the board
 	var tw = create_tween().set_parallel(true)
 	var modes = [deckwars_mode, fionna_mode, quests_mode]
 	for m in modes:
 		if m:
-			tw.tween_property(m, "scale", Vector3.ZERO, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tw.tween_property(m, "scale", Vector3.ZERO, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tw.tween_property(m, "position:y", -0.45, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	
 	tw.chain().tween_callback(func():
 		if board_modes_group:
 			board_modes_group.visible = false
 		if logo_group:
+			logo_group.position = Vector3(HUB_LOGO_POS.x, HUB_LOGO_POS.y - 0.35, HUB_LOGO_POS.z)
+			logo_group.scale = Vector3.ZERO
 			logo_group.visible = true
-			var l_tw = create_tween()
-			l_tw.tween_property(logo_group, "scale", HUB_LOGO_SCALE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			var l_tw = create_tween().set_parallel(true)
+			l_tw.tween_property(logo_group, "scale", HUB_LOGO_SCALE, 0.38).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			l_tw.tween_property(logo_group, "position:y", HUB_LOGO_POS.y, 0.38).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			l_tw.chain().tween_callback(func(): is_logo_animating = false)
 	)
 
 func _process(delta: float) -> void:
@@ -253,7 +274,7 @@ func _process(delta: float) -> void:
 		board_glow_mat.albedo_color = Color(0.90 * glow_intensity, 0.80 * glow_intensity, 0.44 * glow_intensity, 1.0)
 	
 	# Mode select prop animations
-	if is_mode_select:
+	if is_mode_select and props_anim_ready:
 		# Gentle breathing hover for board props
 		if fionna_mode:
 			fionna_mode.position.y = -0.12 + sin(anim_time * 2.0) * 0.005
@@ -266,15 +287,17 @@ func _process(delta: float) -> void:
 		logo_rot_y = fmod(logo_rot_y + LOGO_SPIN_SPEED * delta, 360.0)
 	
 	if logo_group and not is_mode_select:
-		if is_hub_view:
-			logo_group.position = logo_base_pos
-			logo_group.rotation_degrees = Vector3(0.0, logo_rot_y, 0.0)
-		else:
-			var bob_y = sin(anim_time * 2.2) * 0.03
-			var rock_z = sin(anim_time * 1.6) * 0.015
-			logo_group.position = logo_base_pos + Vector3(0.0, bob_y, 0.0)
-			logo_group.rotation_degrees = Vector3(0.0, logo_rot_y, rock_z * 57.29)
-		logo_group.scale = logo_scale
+		logo_group.rotation_degrees = Vector3(0.0, logo_rot_y, 0.0)
+		if not is_logo_animating:
+			if is_hub_view:
+				logo_group.position = logo_base_pos
+				logo_group.scale = logo_scale
+			else:
+				var bob_y = sin(anim_time * 2.2) * 0.03
+				var rock_z = sin(anim_time * 1.6) * 0.015
+				logo_group.position = logo_base_pos + Vector3(0.0, bob_y, 0.0)
+				logo_group.rotation_degrees = Vector3(0.0, logo_rot_y, rock_z * 57.29)
+				logo_group.scale = logo_scale
 		
 		# Edge-on visibility toggle: only render the side facing the camera
 		if camera and front_group and back_group:

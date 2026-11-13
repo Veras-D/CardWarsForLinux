@@ -199,6 +199,9 @@ func _input(event: InputEvent) -> void:
 			return
 	
 	if event.is_action_pressed("ui_cancel"):
+		if quest_overlay and quest_overlay.visible:
+			_on_quest_back_pressed()
+			return
 		if quit_modal and not quit_modal.visible:
 			_show_quit_modal()
 		elif quit_modal and quit_modal.visible:

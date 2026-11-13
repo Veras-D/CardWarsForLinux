@@ -42,8 +42,6 @@
 [ext_resource type="ArrayMesh" path="res://assets/models/DeckWars_Stadium.obj" id="50_mstadium"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/low_MultiPlayer.png" id="54_tmulti"]
 [ext_resource type="ArrayMesh" path="res://assets/models/Stadium_Lights.obj" id="55_mlights"]
-[ext_resource type="Texture2D" path="res://assets/textures/fx/FX_Flare3.png" id="57_fxflare"]
-[ext_resource type="Texture2D" path="res://assets/textures/fx/FX_BurstBubble_NoGlow.png" id="58_fxspark"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/Stadium_Lights.png" id="56_tlights"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Floor"]
@@ -154,39 +152,6 @@ cull_mode = 0
 shading_mode = 0
 albedo_texture = ExtResource("56_tlights")
 texture_filter = 3
-
-[sub_resource type="Gradient" id="Grad_FxFade"]
-offsets = PackedFloat32Array(0, 0.3, 1)
-colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
-
-[sub_resource type="StandardMaterial3D" id="Mat_FxRay"]
-transparency = 1
-blend_mode = 1
-shading_mode = 0
-vertex_color_use_as_albedo = true
-albedo_texture = ExtResource("57_fxflare")
-billboard_mode = 2
-no_depth_test = false
-texture_filter = 3
-
-[sub_resource type="QuadMesh" id="Mesh_FxRay"]
-material = SubResource("Mat_FxRay")
-size = Vector2(0.09, 0.9)
-center_offset = Vector3(0, 0.45, 0)
-
-[sub_resource type="StandardMaterial3D" id="Mat_FxSpark"]
-transparency = 1
-blend_mode = 1
-shading_mode = 0
-vertex_color_use_as_albedo = true
-albedo_texture = ExtResource("58_fxspark")
-uv1_scale = Vector3(0.5, 1, 1)
-billboard_mode = 1
-texture_filter = 3
-
-[sub_resource type="QuadMesh" id="Mesh_FxSpark"]
-material = SubResource("Mat_FxSpark")
-size = Vector2(0.3, 0.3)
 
 [sub_resource type="Environment" id="Env_Treehouse"]
 background_mode = 1
@@ -338,71 +303,3 @@ transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 0, 0, 0)
 mesh = ExtResource("55_mlights")
 surface_material_override/0 = SubResource("Mat_StadiumLights")
 
-[node name="FxRayBeam" type="CPUParticles3D" parent="BoardModesGroup/QuestsMode"]
-amount = 4
-lifetime = 0.4
-local_coords = true
-mesh = SubResource("Mesh_FxRay")
-emission_shape = 3
-emission_box_extents = Vector3(0.6, 0.0, 0.6)
-direction = Vector3(0, 1, 0)
-gravity = Vector3(0, 0, 0)
-color_ramp = SubResource("Grad_FxFade")
-
-[node name="FxSparkles" type="CPUParticles3D" parent="BoardModesGroup/QuestsMode"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
-amount = 4
-lifetime = 0.4
-local_coords = true
-mesh = SubResource("Mesh_FxSpark")
-emission_shape = 3
-emission_box_extents = Vector3(0.6, 0.2, 0.6)
-direction = Vector3(0, 1, 0)
-gravity = Vector3(0, 0, 0)
-color_ramp = SubResource("Grad_FxFade")
-
-[node name="FxRayBeam" type="CPUParticles3D" parent="BoardModesGroup/FionnaCakeMode"]
-amount = 4
-lifetime = 0.4
-local_coords = true
-mesh = SubResource("Mesh_FxRay")
-emission_shape = 3
-emission_box_extents = Vector3(0.6, 0.0, 0.6)
-direction = Vector3(0, 1, 0)
-gravity = Vector3(0, 0, 0)
-color_ramp = SubResource("Grad_FxFade")
-
-[node name="FxSparkles" type="CPUParticles3D" parent="BoardModesGroup/FionnaCakeMode"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
-amount = 4
-lifetime = 0.4
-local_coords = true
-mesh = SubResource("Mesh_FxSpark")
-emission_shape = 3
-emission_box_extents = Vector3(0.6, 0.2, 0.6)
-direction = Vector3(0, 1, 0)
-gravity = Vector3(0, 0, 0)
-color_ramp = SubResource("Grad_FxFade")
-
-[node name="FxRayBeam" type="CPUParticles3D" parent="BoardModesGroup/DeckWarsMode"]
-amount = 4
-lifetime = 0.4
-local_coords = true
-mesh = SubResource("Mesh_FxRay")
-emission_shape = 3
-emission_box_extents = Vector3(0.6, 0.0, 0.6)
-direction = Vector3(0, 1, 0)
-gravity = Vector3(0, 0, 0)
-color_ramp = SubResource("Grad_FxFade")
-
-[node name="FxSparkles" type="CPUParticles3D" parent="BoardModesGroup/DeckWarsMode"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
-amount = 4
-lifetime = 0.4
-local_coords = true
-mesh = SubResource("Mesh_FxSpark")
-emission_shape = 3
-emission_box_extents = Vector3(0.6, 0.2, 0.6)
-direction = Vector3(0, 1, 0)
-gravity = Vector3(0, 0, 0)
-color_ramp = SubResource("Grad_FxFade")
