@@ -38,7 +38,6 @@ const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 @onready var modal_star2: TextureRect = $QuestDetailModal/WindowCenter/QuestInfoBox/Star2
 @onready var modal_star3: TextureRect = $QuestDetailModal/WindowCenter/QuestInfoBox/Star3
 @onready var modal_play_btn: TextureButton = $QuestDetailModal/WindowCenter/PlayBtn
-@onready var modal_stamina_cost_label: Label = $QuestDetailModal/WindowCenter/PlayBtn/StaminaCostLabel
 @onready var modal_card_slots: Control = $QuestDetailModal/WindowCenter/RewardDrawer/CardSlots
 
 # Modal Player Side
@@ -963,10 +962,6 @@ func _open_quest_modal(quest_id: String) -> void:
 	if modal_star3:
 		modal_star3.texture = full_star_tex if stars >= 3 else empty_star_tex
 
-	# Stamina cost on PLAY! button
-	if modal_stamina_cost_label:
-		modal_stamina_cost_label.text = str(int(quest.get("stamina", 1)))
-
 	# Player side (Leader + Deck)
 	_load_available_decks()
 	_refresh_modal_player_side()
@@ -1028,35 +1023,44 @@ func _close_quest_modal() -> void:
 
 func _load_available_decks() -> void:
 	_modal_decks.clear()
-	_modal_decks.append({
-		"name": GameManager.active_deck_name if GameManager.active_deck_name != "" else "Deck 1",
-		"label": "Deck 1",
-		"cards": GameManager.player_deck.duplicate(),
-		"landscapes": GameManager.player_landscapes.duplicate()
-	})
+	var saved_decks: Array[Dictionary] = []
 	var dir = DirAccess.open("user://decks")
 	if dir != null:
 		dir.list_dir_begin()
 		var fname = dir.get_next()
-		var idx = 2
 		while fname != "":
 			if not dir.current_is_dir() and fname.ends_with(".json"):
 				var f = FileAccess.open("user://decks/" + fname, FileAccess.READ)
 				if f != null:
 					var j = JSON.new()
 					if j.parse(f.get_as_text()) == OK and typeof(j.data) == TYPE_DICTIONARY:
-						var d: Dictionary = j.data
-						if str(d.get("name", "")) != GameManager.active_deck_name:
-							_modal_decks.append({
-								"name": str(d.get("name", "Deck %d" % idx)),
-								"label": "Deck %d" % idx,
-								"cards": d.get("cards", []),
-								"landscapes": d.get("landscapes", ["Plains", "Plains", "Cotton", "Plains"])
-							})
-							idx += 1
+						saved_decks.append(j.data)
 			fname = dir.get_next()
 		dir.list_dir_end()
-	_modal_deck_index = clampi(_modal_deck_index, 0, maxi(0, _modal_decks.size() - 1))
+
+	if not saved_decks.is_empty():
+		var idx = 1
+		for d in saved_decks:
+			_modal_decks.append({
+				"name": str(d.get("name", "Deck %d" % idx)),
+				"label": "Deck %d" % idx,
+				"cards": d.get("cards", []),
+				"landscapes": d.get("landscapes", ["Plains", "Plains", "Cotton", "Plains"])
+			})
+			idx += 1
+	else:
+		_modal_decks.append({
+			"name": "Jake Starter Deck",
+			"label": "Deck 1",
+			"cards": GameManager.player_deck.duplicate(),
+			"landscapes": ["Corn", "Corn", "Corn", "Swamp"]
+		})
+
+	_modal_deck_index = 0
+	for i in range(_modal_decks.size()):
+		if str(_modal_decks[i].get("name", "")) == GameManager.active_deck_name:
+			_modal_deck_index = i
+			break
 
 
 func _refresh_modal_player_side() -> void:
@@ -1172,10 +1176,10 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 	var count = mini(4, cards.size())
 	for i in range(count):
 		var c = cards[i]
-		var card_w := 106.0
-		var card_h := 148.0
+		var card_w := 94.0
+		var card_h := 132.0
 		var slot := Control.new()
-		slot.position = Vector2(7.0, float(i) * 68.0)
+		slot.position = Vector2(0.0, float(i) * 75.0)
 		slot.size = Vector2(card_w, card_h)
 		slot.z_index = i + 1
 		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1189,13 +1193,21 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 		# Card Art
 		var art_tex = Database.get_card_texture(str(c.get("texture_path", "")))
 		var art := TextureRect.new()
-		art.position = Vector2(5.0, 14.0)
-		art.size = Vector2(card_w - 10.0, 72.0)
+		art.position = Vector2(4.0, 13.0)
+		art.size = Vector2(card_w - 8.0, 64.0)
 		art.texture = art_tex
 		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		slot.add_child(art)
+
+		# Opaque backing for card Type header (Unity BG_Type) so stacked cards don't bleed through
+		var bg_type := ColorRect.new()
+		bg_type.position = Vector2(16.0, 2.0)
+		bg_type.size = Vector2(card_w - 32.0, 11.0)
+		bg_type.color = Color(0.996, 0.96, 0.996, 1.0)
+		bg_type.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(bg_type)
 
 		# Card Frame
 		var frame_file = "Frame_Colorless.png" if faction == "Universal" else "Frame_White.png"
@@ -1271,8 +1283,8 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 			var st := TextureRect.new()
 			var col_idx = s % 3
 			var row_idx = s / 3
-			st.position = Vector2(card_w - 14.0 - float(col_idx) * 10.0, 74.0 - float(row_idx) * 10.0)
-			st.size = Vector2(11.0, 11.0)
+			st.position = Vector2(card_w - 13.0 - float(col_idx) * 9.0, 65.0 - float(row_idx) * 9.0)
+			st.size = Vector2(10.0, 10.0)
 			st.texture = full_star
 			st.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			st.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -1280,8 +1292,8 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 
 		# Name Label
 		var name_lbl := Label.new()
-		name_lbl.position = Vector2(6.0, 88.0)
-		name_lbl.size = Vector2(card_w - 12.0, 14.0)
+		name_lbl.position = Vector2(5.0, 78.0)
+		name_lbl.size = Vector2(card_w - 10.0, 13.0)
 		name_lbl.text = str(c.get("name", ""))
 		name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		name_lbl.clip_text = true

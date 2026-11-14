@@ -74,9 +74,9 @@ var opponent_deck: Array[String] = [
 	"Creature_Cornball"
 ]
 
-var player_hero_name: String = "Finn"
-var player_hero_max_hp: int = 25
-var player_landscapes: Array[String] = ["Plains", "Plains", "Cotton", "Plains"]
+var player_hero_name: String = "Jake"
+var player_hero_max_hp: int = 15
+var player_landscapes: Array[String] = ["Corn", "Corn", "Corn", "Swamp"]
 
 var opponent_hero_name: String = "Jake"
 var opponent_hero_max_hp: int = 25
@@ -103,7 +103,7 @@ var player_coins: int:
 				wallet.withdraw("coins", -diff)
 var player_inventory_cards: Array[String] = []
 var owned_card_counts: Dictionary = {}
-var active_deck_name: String = "Finn Starter Deck"
+var active_deck_name: String = "Jake Starter Deck"
 
 # Core Economy & Progression Systems (SYS-8)
 var wallet: CurrencyWallet
