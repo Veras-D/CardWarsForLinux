@@ -284,7 +284,7 @@ mesh = ExtResource("35_mscroll")
 surface_material_override/0 = SubResource("Mat_Scroll")
 
 [node name="FionnaCakeMode" type="Node3D" parent="BoardModesGroup"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, -0.12, -0.75)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.555, -0.12, -0.495)
 
 [node name="FionnaCakeBook" parent="BoardModesGroup/FionnaCakeMode" instance=ExtResource("37_pbook")]
 

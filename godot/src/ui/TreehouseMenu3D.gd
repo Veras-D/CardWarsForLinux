@@ -211,6 +211,8 @@ func show_quest_modes() -> void:
 	# Pop-up 3D props from below the board with staggered bounce
 	if board_modes_group:
 		board_modes_group.visible = true
+		if fionna_book:
+			fionna_book.reset_anim()
 		var modes = [deckwars_mode, fionna_mode, quests_mode]
 		for i in range(modes.size()):
 			var m = modes[i]
@@ -223,12 +225,7 @@ func show_quest_modes() -> void:
 				m_tw.tween_property(m, "position:y", -0.12, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
 		
 		var finish_tw = create_tween()
-		finish_tw.tween_interval(0.25)
-		finish_tw.tween_callback(func():
-			if fionna_book:
-				fionna_book.open_book(0.55)
-		)
-		finish_tw.tween_interval(0.35)
+		finish_tw.tween_interval(0.60)
 		finish_tw.tween_callback(func(): props_anim_ready = true)
 
 func hide_quest_modes() -> void:
@@ -275,6 +272,14 @@ func hide_quest_modes() -> void:
 			l_tw.chain().tween_callback(func(): is_logo_animating = false)
 	)
 
+func play_fionna_activate(on_finished: Callable) -> void:
+	if fionna_book:
+		if not fionna_book.activate_finished.is_connected(on_finished):
+			fionna_book.activate_finished.connect(on_finished, CONNECT_ONE_SHOT)
+		fionna_book.play_activate()
+	else:
+		on_finished.call()
+
 func _process(delta: float) -> void:
 	anim_time += delta
 	
@@ -285,16 +290,6 @@ func _process(delta: float) -> void:
 		var cycle_pos: float = fmod(anim_time, 3.0) / 3.0
 		var glow_intensity: float = sin(cycle_pos * PI)
 		board_glow_mat.albedo_color = Color(0.90 * glow_intensity, 0.80 * glow_intensity, 0.44 * glow_intensity, 1.0)
-	
-	# Mode select prop animations
-	if is_mode_select and props_anim_ready:
-		# Gentle breathing hover for board props
-		if fionna_mode:
-			fionna_mode.position.y = -0.12 + sin(anim_time * 2.0) * 0.005
-		if quests_mode:
-			quests_mode.position.y = -0.12 + sin(anim_time * 2.2) * 0.005
-		if deckwars_mode:
-			deckwars_mode.position.y = -0.12 + sin(anim_time * 1.7) * 0.004
 	
 	if is_hub_view and not is_mode_select:
 		logo_rot_y = fmod(logo_rot_y + LOGO_SPIN_SPEED * delta, 360.0)

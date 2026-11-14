@@ -18,32 +18,30 @@ texture_filter = 3
 [node name="FionnaCakeBook" type="Node3D"]
 script = ExtResource("1_script")
 
-[node name="BookSpine" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+[node name="FionnaCakeIcon" type="Node3D" parent="."]
+
+[node name="DummyBook" type="Node3D" parent="FionnaCakeIcon"]
+
+[node name="BookSpine" type="MeshInstance3D" parent="FionnaCakeIcon/DummyBook"]
 mesh = ExtResource("3_mspine")
 surface_material_override/0 = SubResource("Mat_FionnaBook")
 
-[node name="BookEnd" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+[node name="BookEnd" type="MeshInstance3D" parent="FionnaCakeIcon/DummyBook"]
 mesh = ExtResource("4_mend")
 surface_material_override/0 = SubResource("Mat_FionnaBook")
 
-[node name="BookPage3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+[node name="BookPage3" type="MeshInstance3D" parent="FionnaCakeIcon/DummyBook"]
 mesh = ExtResource("5_mpage3")
 surface_material_override/0 = SubResource("Mat_FionnaBook")
 
-[node name="BookPage2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+[node name="BookPage2" type="MeshInstance3D" parent="FionnaCakeIcon/DummyBook"]
 mesh = ExtResource("6_mpage2")
 surface_material_override/0 = SubResource("Mat_FionnaBook")
 
-[node name="BookPage1" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+[node name="BookPage1" type="MeshInstance3D" parent="FionnaCakeIcon/DummyBook"]
 mesh = ExtResource("7_mpage1")
 surface_material_override/0 = SubResource("Mat_FionnaBook")
 
-[node name="BookCover" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+[node name="BookCover" type="MeshInstance3D" parent="FionnaCakeIcon/DummyBook"]
 mesh = ExtResource("8_mcover")
 surface_material_override/0 = SubResource("Mat_FionnaBook")

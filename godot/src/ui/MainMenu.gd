@@ -309,7 +309,16 @@ func _on_quests_pressed() -> void:
 
 func _on_fionna_pressed() -> void:
 	_play_sfx()
-	GameManager.open_campaign_map(1)
+	if treehouse_3d and treehouse_3d.has_method("play_fionna_activate"):
+		if quad_fionna:
+			quad_fionna.disabled = true
+		treehouse_3d.play_fionna_activate(func():
+			if quad_fionna:
+				quad_fionna.disabled = false
+			GameManager.open_campaign_map(1)
+		)
+	else:
+		GameManager.open_campaign_map(1)
 
 func _on_deck_wars_pressed() -> void:
 	_play_sfx()
