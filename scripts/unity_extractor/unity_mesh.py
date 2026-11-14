@@ -45,30 +45,36 @@ def parse_unity_mesh(asset_path: str) -> dict:
     # Detect UV0 channel stream & offset from m_Channels[3]
     ch_pos = txt.find("m_Channels:")
     ch_sub = txt[ch_pos : txt.find("m_DataSize:", ch_pos)] if ch_pos >= 0 else ""
-    ch_blocks = ch_sub.split("- serializedVersion:")
+    ch_matches = re.findall(
+        r"stream:\s*(\d+)\s+offset:\s*(\d+)\s+format:\s*(\d+)\s+dimension:\s*(\d+)",
+        ch_sub,
+    )
     uv_stream = 1
     uv_chan_offset = 0
-    if len(ch_blocks) >= 5:
-        uv_blk = ch_blocks[4]  # Channel 3 (UV0)
-        sm = re.search(r"stream:\s*(\d+)", uv_blk)
-        om = re.search(r"offset:\s*(\d+)", uv_blk)
-        if sm and om:
-            uv_stream = int(sm.group(1))
-            uv_chan_offset = int(om.group(1))
+    s0_stride_from_ch = 0
+    if len(ch_matches) >= 4:
+        uv_stream = int(ch_matches[3][0])
+        uv_chan_offset = int(ch_matches[3][1])
+        for st_s, off_s, fmt_s, dim_s in ch_matches:
+            st, off, fmt, dim = int(st_s), int(off_s), int(fmt_s), int(dim_s)
+            if st == 0 and dim > 0:
+                bsize = 4 if fmt == 0 else (2 if fmt == 1 else 1)
+                s0_stride_from_ch = max(s0_stride_from_ch, off + dim * bsize)
 
-    if uv_stream == 0 and uv_chan_offset == 12 and len(td) == vc * 20:
-        layout = "Layout B (Interleaved 20B/vert in Stream 0)"
+    if uv_stream == 0 and s0_stride_from_ch > 0 and len(td) == vc * s0_stride_from_ch:
+        layout = f"Layout B (Interleaved {s0_stride_from_ch}B/vert in Stream 0, uv_offset={uv_chan_offset})"
         verts = []
         uvs = []
         for i in range(vc):
-            x, y, z, u, v = struct.unpack_from("<5f", td, i * 20)
+            base = i * s0_stride_from_ch
+            x, y, z = struct.unpack_from("<3f", td, base)
+            u, v = struct.unpack_from("<2f", td, base + uv_chan_offset)
             verts.append((x, y, z))
             uvs.append((u, v))
     else:
-        uv_off = ((vc * 12) + 15) // 16 * 16
-        stride_s0 = 12
+        stride_s0 = s0_stride_from_ch if s0_stride_from_ch > 0 else 12
+        uv_off = ((vc * stride_s0) + 15) // 16 * 16
         if len(td) != uv_off + vc * 8:
-            # Check if Stream 0 has normals/tangents before Stream 1
             rem = len(td) - vc * 8
             stride_s0 = (rem // vc // 4) * 4
             uv_off = ((vc * stride_s0) + 15) // 16 * 16

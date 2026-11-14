@@ -114,6 +114,7 @@ var gacha_roller: GachaRoller
 var campaign_graph: NodeMapGraph
 var fc_campaign_graph: NodeMapGraph
 var active_quest_id: String = ""
+var active_fc_quest_id: String = "5001"
 
 # Star Milestones & Rewards (Task 7.2)
 const STAR_MILESTONES: Array[Dictionary] = [
@@ -603,8 +604,18 @@ func apply_remote_handshake(data: Dictionary) -> void:
 		remote_landscapes = r_lands
 
 
+func _clear_cached_menu_scenes(except_node: Node = null) -> void:
+	if _cached_main_menu != null and is_instance_valid(_cached_main_menu) and _cached_main_menu != except_node:
+		_cached_main_menu.queue_free()
+	_cached_main_menu = null if _cached_main_menu != except_node else _cached_main_menu
+	if _cached_fc_map != null and is_instance_valid(_cached_fc_map) and _cached_fc_map != except_node:
+		_cached_fc_map.queue_free()
+	_cached_fc_map = null if _cached_fc_map != except_node else _cached_fc_map
+
+
 func start_battle() -> void:
 	current_state = MatchState.BATTLE
+	_clear_cached_menu_scenes(get_tree().current_scene)
 	get_tree().call_deferred("change_scene_to_file", "res://scenes/battle.tscn")
 
 
@@ -617,7 +628,24 @@ func return_to_menu() -> void:
 			network_session.close_session()
 		is_network_match = false
 	current_state = MatchState.MENU
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+
+	var tree = get_tree()
+	var cur = tree.current_scene
+	if _cached_main_menu != null and is_instance_valid(_cached_main_menu):
+		if cur != null and cur != _cached_main_menu:
+			if cur == _cached_fc_map:
+				cur.visible = false
+				cur.process_mode = Node.PROCESS_MODE_DISABLED
+			else:
+				cur.queue_free()
+		_cached_main_menu.visible = true
+		_cached_main_menu.process_mode = Node.PROCESS_MODE_INHERIT
+		tree.current_scene = _cached_main_menu
+		if _cached_main_menu.has_method("restore_return_view"):
+			_cached_main_menu.restore_return_view()
+		return
+
+	tree.change_scene_to_file("res://scenes/main_menu.tscn")
 
 
 # ==============================================================================
@@ -690,6 +718,20 @@ func complete_campaign_quest(quest_id: String, match_stats: Dictionary) -> Dicti
 
 	var target_graph = fc_campaign_graph if (quest.get("type") == "fc" and fc_campaign_graph != null) else campaign_graph
 	var comp_res = target_graph.complete_node(quest_id, stars_earned)
+
+	# Also unlock star-specific UnlockQuestIDs (1..stars_earned) per MapControllerBase.GetQuestListToUnlock
+	var unlocked_list: Array = comp_res.get("unlocked_nodes", []).duplicate()
+	var unlock_by_star: Array = quest.get("unlock_ids_by_star", [])
+	for s_idx in range(mini(stars_earned, unlock_by_star.size())):
+		for u_id in unlock_by_star[s_idx]:
+			var u_str = str(u_id)
+			if target_graph.has_node(u_str):
+				var u_node = target_graph.get_node(u_str)
+				if int(u_node.get("state", 0)) == NodeMapGraph.NodeState.LOCKED:
+					target_graph.set_node_state(u_str, NodeMapGraph.NodeState.UNLOCKED)
+					if not unlocked_list.has(u_str):
+						unlocked_list.append(u_str)
+	comp_res["unlocked_nodes"] = unlocked_list
 
 	# Compute rewards
 	var min_c = int(quest.get("min_coins", 0))
@@ -788,6 +830,11 @@ func launch_quest_battle(quest_id: String) -> bool:
 		wallet.withdraw("energy", stamina_cost)
 
 	active_quest_id = quest_id
+	if quest.get("type") == "fc":
+		active_fc_quest_id = quest_id
+		initial_campaign_world = 1
+	else:
+		initial_campaign_world = 0
 
 	# Set opponent hero
 	var opp_name = str(quest.get("opponent", "Jake"))
@@ -817,12 +864,40 @@ func launch_quest_battle(quest_id: String) -> bool:
 
 
 var initial_campaign_world: int = 0
+var menu_return_view: String = "start"
+var _cached_main_menu: Node = null
+var _cached_fc_map: Node = null
 
 
-func open_campaign_map(world: int = 0) -> void:
+func open_campaign_map(world: int = -1) -> void:
+	if world < 0:
+		world = initial_campaign_world
 	initial_campaign_world = world
+	menu_return_view = "quest_select"
 	current_state = MatchState.MENU
-	get_tree().change_scene_to_file("res://scenes/campaign_map.tscn")
+	if world == 1:
+		var tree = get_tree()
+		var cur = tree.current_scene
+		if cur != null and cur.name == "MainMenu":
+			_cached_main_menu = cur
+			cur.visible = false
+			cur.process_mode = Node.PROCESS_MODE_DISABLED
+		elif cur != null and cur != _cached_fc_map:
+			cur.queue_free()
+
+		if _cached_fc_map == null or not is_instance_valid(_cached_fc_map):
+			var fc_packed = load("res://scenes/fc_campaign_map.tscn")
+			_cached_fc_map = fc_packed.instantiate()
+			tree.root.add_child(_cached_fc_map)
+		else:
+			_cached_fc_map.visible = true
+			_cached_fc_map.process_mode = Node.PROCESS_MODE_INHERIT
+			if _cached_fc_map.has_method("on_map_opened"):
+				_cached_fc_map.on_map_opened()
+		tree.current_scene = _cached_fc_map
+	else:
+		_clear_cached_menu_scenes(get_tree().current_scene)
+		get_tree().change_scene_to_file("res://scenes/campaign_map.tscn")
 
 
 # ==============================================================================

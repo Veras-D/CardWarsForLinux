@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bwbasciqsykbt"
+path="res://.godot/imported/FcQuestMap_Atlas03.obj-2e812582f2a728b1e373faf275b08537.mesh"
+
+[deps]
+
+files=["res://.godot/imported/FcQuestMap_Atlas03.obj-2e812582f2a728b1e373faf275b08537.mesh"]
+
+source_file="res://assets/models/fc_map/FcQuestMap_Atlas03.obj"
+dest_files=["res://.godot/imported/FcQuestMap_Atlas03.obj-2e812582f2a728b1e373faf275b08537.mesh", "res://.godot/imported/FcQuestMap_Atlas03.obj-2e812582f2a728b1e373faf275b08537.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

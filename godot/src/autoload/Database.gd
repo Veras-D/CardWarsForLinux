@@ -4,12 +4,14 @@ var localized_strings: Dictionary = {}
 var texture_map: Dictionary = {}
 var cards_db: Dictionary = {}
 var leaders_db: Dictionary = {}
+var characters_db: Dictionary = {}
 var drop_profiles_db: Dictionary = {}
 var creatures_list: Array = []
 var spells_list: Array = []
 var buildings_list: Array = []
 var all_cards_list: Array = []
 var preset_decks_db: Dictionary = {}
+var preset_deck_landscapes_db: Dictionary = {}
 var fusion_recipes_list: Array[Dictionary] = []
 var fusion_recipes_db: Dictionary = {}
 var rank_up_db: Dictionary = {}
@@ -58,6 +60,7 @@ func load_blueprints() -> void:
 	_load_spells()
 	_load_buildings()
 	_load_leaders()
+	_load_characters()
 	_load_drop_profiles()
 	_load_preset_decks()
 	_load_fusion_recipes()
@@ -66,9 +69,9 @@ func load_blueprints() -> void:
 	_load_gacha_weights()
 	_load_gacha_schedule()
 	_load_quest_conditions()
-	_load_quests()
 	_load_map_regions()
 	_load_fc_map()
+	_load_quests()
 	_load_dungeons()
 	_load_elfisto()
 	all_cards_list.clear()
@@ -100,11 +103,42 @@ func _load_leaders() -> void:
 			"val1": val1,
 			"val2": val2,
 			"for_faction": item.get("forFaction", ""),
-			"sprite_name": item.get("SpriteName", "")
+			"sprite_name": item.get("SpriteName", ""),
+			"sprite_name_hero": item.get("SpriteNameHero", ""),
+			"fc_world": int(item.get("FCWorld", "0")) == 1
 		}
 		leaders_db[id] = leader
 		if char_id != "" and not leaders_db.has(char_id):
 			leaders_db[char_id] = leader
+
+func _load_characters() -> void:
+	var path = "res://data/db_Characters.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	characters_db.clear()
+	for item in json.data:
+		var cid = str(item.get("ID", "")).strip_edges()
+		if cid == "":
+			continue
+		var portrait = str(item.get("Portrait", "")).strip_edges()
+		characters_db[cid] = {
+			"id": cid,
+			"name": localize(str(item.get("Name", cid))),
+			"raw_name": str(item.get("Name", cid)),
+			"prefab": str(item.get("Prefab", "")),
+			"portrait_atlas": str(item.get("PortraitAtlas", "CharacterIconAtlas")),
+			"portrait": portrait,
+			"portrait_round": portrait.replace("Frame", "Round"),
+			"portrait_hero": portrait.replace("Frame", "Hero"),
+			"battle_music": str(item.get("BattleMusic", ""))
+		}
+
+func get_character(character_id: String) -> Dictionary:
+	return characters_db.get(character_id, {})
 
 func _load_creatures() -> void:
 	var path = "res://data/db_Creatures.json"
@@ -175,6 +209,7 @@ func _parse_card(data: Dictionary, card_type: String) -> Dictionary:
 		"base_def": raw_def,
 		"quality": quality_tier,
 		"quality_name": FusionEngine.get_quality_name(quality_tier),
+		"rarity": int(data.get("Rarity", "1")),
 		"floop_cost": int(data.get("FloopCost", "0")),
 		"ability_type": data.get("AbilityType", "NONE"),
 		"script_name": data.get("ScriptName", ""),
@@ -280,8 +315,13 @@ func _load_preset_decks() -> void:
 			current_did = raw_did
 			if not preset_decks_db.has(current_did):
 				preset_decks_db[current_did] = []
+			if not preset_deck_landscapes_db.has(current_did):
+				preset_deck_landscapes_db[current_did] = []
 		if current_did == "":
 			continue
+		var land = str(item.get("Landscapes", "")).strip_edges()
+		if land != "" and preset_deck_landscapes_db[current_did].size() < 4:
+			preset_deck_landscapes_db[current_did].append(land)
 		var cid = str(item.get("Cards", item.get("Card", ""))).strip_edges()
 		if cid == "":
 			continue
@@ -291,6 +331,12 @@ func _load_preset_decks() -> void:
 
 func get_preset_deck(deck_id: String) -> Array:
 	return preset_decks_db.get(deck_id, []).duplicate()
+
+func get_preset_deck_landscapes(deck_id: String) -> Array[String]:
+	var res: Array[String] = []
+	for l in preset_deck_landscapes_db.get(deck_id, []):
+		res.append(str(l))
+	return res
 
 func _load_fusion_recipes() -> void:
 	fusion_recipes_list = FusionEngine.load_fusion_recipes("res://data/db_Fusion.json")
@@ -564,7 +610,10 @@ func _load_quests() -> void:
 			continue
 
 		var qtype = str(item.get("QuestType", "main")).strip_edges()
-		var qlabel = str(item.get("QuestLabel", qid)).strip_edges()
+		var raw_qlabel = str(item.get("QuestLabel", qid)).strip_edges()
+		var qlabel = localize(raw_qlabel)
+		if raw_qlabel == "!!QUESTLABEL_BOSS" and qlabel.begins_with("!!"):
+			qlabel = "BOSS"
 
 		# Build conditions list
 		var cond_ids: Array[String] = []
@@ -579,16 +628,27 @@ func _load_quests() -> void:
 				cond_data["ID"] = c_id
 				conditions.append(cond_data)
 
-		# Build unlock targets (supporting comma-separated lists e.g. "5002, 5044")
+		# Build unlock targets and hidden paths per star (1..3)
 		var unlock_ids: Array[String] = []
+		var unlock_ids_by_star: Array = [[], [], []]
+		var unlock_paths_by_star: Array = [[], [], []]
 		for u_idx in [1, 2, 3]:
 			var u_key = "UnlockQuestIDs" + str(u_idx)
 			var raw_u = str(item.get(u_key, "")).strip_edges()
 			if raw_u != "":
 				for part in raw_u.split(","):
 					var clean_id = part.strip_edges()
-					if clean_id != "" and not unlock_ids.has(clean_id):
-						unlock_ids.append(clean_id)
+					if clean_id != "":
+						unlock_ids_by_star[u_idx - 1].append(clean_id)
+						if not unlock_ids.has(clean_id):
+							unlock_ids.append(clean_id)
+			var p_key = "UnlockPaths" + str(u_idx)
+			var raw_p = str(item.get(p_key, "")).strip_edges()
+			if raw_p != "":
+				for part in raw_p.split(","):
+					var clean_path = part.strip_edges()
+					if clean_path != "":
+						unlock_paths_by_star[u_idx - 1].append(clean_path)
 
 		# Card drops
 		var card_drops: Array[String] = []
@@ -598,7 +658,7 @@ func _load_quests() -> void:
 			if cd_id != "":
 				card_drops.append(cd_id)
 
-		# Calculate map position
+		# Calculate fallback 2D position
 		var pos = Vector2.ZERO
 		if qid.is_valid_int():
 			var num = int(qid)
@@ -619,12 +679,16 @@ func _load_quests() -> void:
 		var quest_entry = {
 			"id": qid,
 			"label": qlabel,
+			"raw_label": raw_qlabel,
 			"type": qtype,
 			"opponent": str(item.get("Opponent", "")).strip_edges(),
 			"deck_id": str(item.get("Deck", "")).strip_edges(),
 			"leader_id": str(item.get("LeaderID", "")).strip_edges(),
 			"leader_level": int(item.get("LeaderLevel", "1")),
 			"stamina": int(item.get("Stamina", "1")),
+			"stamina_awarded": int(item.get("StaminaAwarded", "0")),
+			"leader_awarded": str(item.get("LeaderAwarded", "")).strip_edges(),
+			"node_prefab_path": str(item.get("NodePrefabPath", "")).strip_edges(),
 			"min_xp": float(item.get("MinXP", "0")),
 			"max_xp": float(item.get("MaxXP", "0")),
 			"min_coins": int(item.get("MinCoins", "0")),
@@ -633,11 +697,14 @@ func _load_quests() -> void:
 			"condition_ids": cond_ids,
 			"conditions": conditions,
 			"unlock_ids": unlock_ids,
+			"unlock_ids_by_star": unlock_ids_by_star,
+			"unlock_paths_by_star": unlock_paths_by_star,
 			"level_prefab": str(item.get("LevelPrefab", "")).strip_edges(),
 			"level_name": str(item.get("LevelName", "")).strip_edges(),
 			"drop_profile_id": str(item.get("DropProfileID", "")).strip_edges(),
 			"card_drops": card_drops,
 			"position": pos,
+			"region_id": 1,
 			"prerequisites": []
 		}
 
@@ -646,6 +713,29 @@ func _load_quests() -> void:
 			main_quests_list.append(quest_entry)
 		elif qtype == "fc":
 			fc_quests_list.append(quest_entry)
+
+	# Assign region_id from map_regions_list / fc_map_regions_list (matching MapControllerBase.InitializeMapAndQuestData)
+	var m_idx: int = 0
+	for r in map_regions_list:
+		var r_id = int(r.get("MapID", "1"))
+		var n_quests = int(r.get("NumQuests", "0"))
+		for _i in range(n_quests):
+			if m_idx < main_quests_list.size():
+				main_quests_list[m_idx]["region_id"] = r_id
+				var qid = main_quests_list[m_idx]["id"]
+				quests_db[qid]["region_id"] = r_id
+				m_idx += 1
+
+	var fc_idx_counter: int = 0
+	for r in fc_map_regions_list:
+		var r_id = int(r.get("MapID", "1"))
+		var n_quests = int(r.get("NumQuests", "0"))
+		for _i in range(n_quests):
+			if fc_idx_counter < fc_quests_list.size():
+				fc_quests_list[fc_idx_counter]["region_id"] = r_id
+				var qid = fc_quests_list[fc_idx_counter]["id"]
+				quests_db[qid]["region_id"] = r_id
+				fc_idx_counter += 1
 
 	# Precompute prerequisites from unlock_ids
 	for qid in quests_db.keys():

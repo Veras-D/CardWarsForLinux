@@ -219,6 +219,48 @@ func _ready() -> void:
 
 	map_scene.queue_free()
 
+	# -------------------------------------------------------------
+	# Test 7: 3D Fionna & Cake Adventure Map (FCCampaignMap.gd)
+	# -------------------------------------------------------------
+	print("\n[Test 7] 3D Fionna & Cake Adventure Map Scene (QuestMap_FC.prefab)")
+	var fc_3d_map = load("res://scenes/fc_campaign_map.tscn").instantiate()
+	add_child(fc_3d_map)
+
+	if fc_3d_map._quest_node_views.size() == 61:
+		print("  [PASS] FCCampaignMap built all 61 3D quest nodes at original Unity coordinates")
+		passed += 1
+	else:
+		printerr("  [FAIL] Expected 61 3D quest nodes, got %d" % fc_3d_map._quest_node_views.size())
+		failed += 1
+
+	if fc_3d_map._road_meshes.size() == 7:
+		print("  [PASS] FCCampaignMap loaded all 7 region road meshes")
+		passed += 1
+	else:
+		printerr("  [FAIL] Expected 7 region road meshes, got %d" % fc_3d_map._road_meshes.size())
+		failed += 1
+
+	if fc_3d_map._hidden_paths.size() == 19:
+		print("  [PASS] FCCampaignMap loaded all 19 hidden path meshes")
+		passed += 1
+	else:
+		printerr("  [FAIL] Expected 19 hidden path meshes, got %d" % fc_3d_map._hidden_paths.size())
+		failed += 1
+
+	# Since 5001 was completed with 3 stars in Test 3, verify FcQuestMap_HiddenRoad_Valentine_Start (3-star Valentine bridge path) is visible
+	if fc_3d_map._hidden_paths.has("FcQuestMap_HiddenRoad_Valentine_Start") and fc_3d_map._hidden_paths["FcQuestMap_HiddenRoad_Valentine_Start"].visible:
+		print("  [PASS] 3-star hidden path 'FcQuestMap_HiddenRoad_Valentine_Start' unlocked and visible after 5001 3-star clear")
+		passed += 1
+	else:
+		printerr("  [FAIL] Expected 'FcQuestMap_HiddenRoad_Valentine_Start' to be visible after 5001 3-star clear")
+		failed += 1
+
+	fc_3d_map.queue_free()
+
+	# Clean up default profile written by complete_campaign_quest during test run
+	if FileAccess.file_exists(GameManager.DEFAULT_PROFILE_PATH):
+		DirAccess.remove_absolute(GameManager.DEFAULT_PROFILE_PATH)
+
 	print("\n==================================================")
 	print("  TEST SUMMARY: %d PASSED, %d FAILED" % [passed, failed])
 	print("==================================================")

@@ -1,0 +1,1092 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/ui/FCCampaignMap.gd" id="1_fc_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/hud_player_info.png" id="3_hud_player"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/portrait_jake.png" id="4_portrait_jake"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/hud_coins.png" id="5_coins"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/hud_gems.png" id="6_gems"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/hud_inventory.png" id="7_inventory"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/hud_trophy_badge.png" id="8_trophy"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/nodes/Button_Back_Gold.png" id="9_back_arrow"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/nodes/uiBuildDeck.png" id="10_deck_btn"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/QuestInfo_BG.png" id="11_qi_bg"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/TextBoxBlue.png" id="12_tb_blue"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/TextBoxRed.png" id="13_tb_red"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/QuestTitle.png" id="14_qtitle"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/QuestCondition_Box.png" id="15_qcond"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/UI_Star_Gem.png" id="16_star_gem"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/nodes/UI_Star_Empty.png" id="17_star_empty"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/QuestShield.png" id="18_shield"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/Deck_ArrowLeft.png" id="19_arrow_l"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/Deck_ArrowRight.png" id="20_arrow_r"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/PlayButton.png" id="21_play_btn"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/QuestInfo_Heart.png" id="22_qi_heart"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/PopUpSprite_2.png" id="23_popup2"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/uiCancel.png" id="24_cancel"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/uiBottomTextBox.png" id="25_bottom_box"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/Chance_chest.png" id="26_chest"]
+
+[sub_resource type="Environment" id="Environment_fc_map"]
+background_mode = 1
+background_color = Color(0.282, 0.459, 0.259, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_XPBar_Bg"]
+bg_color = Color(0.06, 0.12, 0.12, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_XPBar_Fill"]
+bg_color = Color(0.18, 0.65, 0.95, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_Modal"]
+bg_color = Color(0.12, 0.14, 0.2, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.95, 0.78, 0.25, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="FCCampaignMap" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_fc_script")
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="ViewportContainer"]
+handle_input_locally = false
+msaa_3d = 2
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="World3D" type="Node3D" parent="ViewportContainer/SubViewport"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="ViewportContainer/SubViewport/World3D"]
+environment = SubResource("Environment_fc_map")
+
+[node name="Camera3D" type="Camera3D" parent="ViewportContainer/SubViewport/World3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -71.57, 50, 33.7)
+projection = 1
+current = true
+size = 44.0
+near = 0.1
+far = 250.0
+
+[node name="MapRoot" type="Node3D" parent="ViewportContainer/SubViewport/World3D"]
+
+[node name="MapArt" type="Node3D" parent="ViewportContainer/SubViewport/World3D/MapRoot"]
+
+[node name="QuestNodes" type="Node3D" parent="ViewportContainer/SubViewport/World3D/MapRoot"]
+
+[node name="TopBar" type="Control" parent="."]
+z_index = 20
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 140.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="PlayerBadge" type="TextureRect" parent="TopBar"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 420.0
+offset_bottom = 86.0
+mouse_filter = 2
+texture = ExtResource("3_hud_player")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="TopBar/PlayerBadge"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = 8.0
+offset_top = 9.0
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+texture = ExtResource("4_portrait_jake")
+expand_mode = 1
+
+[node name="NameLabel" type="Label" parent="TopBar/PlayerBadge"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 8.0
+offset_right = 190.0
+offset_bottom = 34.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "Jake"
+vertical_alignment = 1
+
+[node name="LevelLabel" type="Label" parent="TopBar/PlayerBadge"]
+layout_mode = 0
+offset_left = 196.0
+offset_top = 8.0
+offset_right = 256.0
+offset_bottom = 34.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 15
+text = "Lvl. 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="XPTitle" type="Label" parent="TopBar/PlayerBadge"]
+z_index = 1
+layout_mode = 0
+offset_left = 72.0
+offset_top = 36.0
+offset_right = 96.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+text = "XP"
+vertical_alignment = 1
+
+[node name="XPBar" type="ProgressBar" parent="TopBar/PlayerBadge"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 36.0
+offset_right = 256.0
+offset_bottom = 58.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBox_XPBar_Bg")
+theme_override_styles/fill = SubResource("StyleBox_XPBar_Fill")
+max_value = 106.0
+value = 56.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="TopBar/PlayerBadge"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 36.0
+offset_right = 256.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+text = "56/106"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StaminaValue" type="Label" parent="TopBar/PlayerBadge"]
+layout_mode = 0
+offset_left = 266.0
+offset_top = 10.0
+offset_right = 322.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "5/5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StaminaStatus" type="Label" parent="TopBar/PlayerBadge"]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 12.0
+offset_right = 400.0
+offset_bottom = 54.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "Full"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TrophyBadge" type="TextureRect" parent="TopBar"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 70.0
+offset_right = 120.0
+offset_bottom = 122.0
+mouse_filter = 2
+texture = ExtResource("8_trophy")
+expand_mode = 1
+
+[node name="TrophyLabel" type="Label" parent="TopBar/TrophyBadge"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 8.0
+offset_right = 110.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Currencies" type="HBoxContainer" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -410.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 62.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="InventoryBadge" type="TextureRect" parent="TopBar/Currencies"]
+custom_minimum_size = Vector2(138, 54)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7_inventory")
+expand_mode = 1
+
+[node name="CardsLabel" type="Label" parent="TopBar/Currencies/InventoryBadge"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 12.0
+offset_right = 132.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "14/50"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GemsBadge" type="TextureRect" parent="TopBar/Currencies"]
+custom_minimum_size = Vector2(118, 54)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_gems")
+expand_mode = 1
+
+[node name="GemsLabel" type="Label" parent="TopBar/Currencies/GemsBadge"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 12.0
+offset_right = 110.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CoinsBadge" type="TextureRect" parent="TopBar/Currencies"]
+custom_minimum_size = Vector2(132, 54)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_coins")
+expand_mode = 1
+
+[node name="CoinsLabel" type="Label" parent="TopBar/Currencies/CoinsBadge"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 12.0
+offset_right = 126.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "143"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomHud" type="Control" parent="."]
+z_index = 5
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="BackBtn" type="TextureButton" parent="BottomHud"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = -92.0
+offset_right = 96.0
+offset_bottom = -10.0
+grow_vertical = 0
+texture_normal = ExtResource("9_back_arrow")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="DeckBtn" type="TextureButton" parent="BottomHud"]
+custom_minimum_size = Vector2(92, 92)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -102.0
+offset_top = -100.0
+offset_right = -10.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+texture_normal = ExtResource("10_deck_btn")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="QuestDetailModal" type="ColorRect" parent="."]
+visible = false
+z_index = 10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="WindowCenter" type="Control" parent="QuestDetailModal"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -225.0
+offset_right = 500.0
+offset_bottom = 295.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="RewardDrawer" type="Control" parent="QuestDetailModal/WindowCenter"]
+layout_mode = 0
+offset_left = 752.0
+offset_top = 34.0
+offset_right = 944.0
+offset_bottom = 452.0
+mouse_filter = 2
+
+[node name="RewardInnerBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/RewardDrawer"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 14.0
+offset_right = 178.0
+offset_bottom = 402.0
+texture = ExtResource("23_popup2")
+patch_margin_left = 32
+patch_margin_top = 24
+patch_margin_right = 32
+patch_margin_bottom = 24
+
+[node name="CardSlots" type="Control" parent="QuestDetailModal/WindowCenter/RewardDrawer"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 22.0
+offset_right = 154.0
+offset_bottom = 394.0
+mouse_filter = 2
+
+[node name="RewardOuterBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/RewardDrawer"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 192.0
+offset_bottom = 418.0
+texture = ExtResource("11_qi_bg")
+patch_margin_left = 48
+patch_margin_top = 48
+patch_margin_right = 48
+patch_margin_bottom = 48
+
+[node name="ChestBox" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/RewardDrawer"]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 406.0
+offset_right = 152.0
+offset_bottom = 514.0
+texture = ExtResource("25_bottom_box")
+patch_margin_left = 32
+patch_margin_top = 32
+patch_margin_right = 32
+patch_margin_bottom = 32
+
+[node name="ChestIcon" type="TextureRect" parent="QuestDetailModal/WindowCenter/RewardDrawer/ChestBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("26_chest")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CloseBtn" type="TextureButton" parent="QuestDetailModal/WindowCenter"]
+z_index = 5
+layout_mode = 0
+offset_left = 910.0
+offset_top = 18.0
+offset_right = 964.0
+offset_bottom = 72.0
+texture_normal = ExtResource("24_cancel")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="MainFrame" type="Control" parent="QuestDetailModal/WindowCenter"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 34.0
+offset_right = 780.0
+offset_bottom = 452.0
+
+[node name="MainBlackBG" type="ColorRect" parent="QuestDetailModal/WindowCenter/MainFrame"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 740.0
+offset_bottom = 408.0
+color = Color(0, 0, 0, 1)
+
+[node name="PlayerBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame"]
+modulate = Color(0.74, 0.9, 1, 1)
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 374.0
+offset_bottom = 408.0
+texture = ExtResource("12_tb_blue")
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="OpponentBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame"]
+modulate = Color(1, 0.8, 0.8, 1)
+layout_mode = 0
+offset_left = 376.0
+offset_top = 10.0
+offset_right = 740.0
+offset_bottom = 408.0
+texture = ExtResource("13_tb_red")
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="MainBorder" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame"]
+z_index = 2
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 750.0
+offset_bottom = 418.0
+texture = ExtResource("11_qi_bg")
+patch_margin_left = 48
+patch_margin_top = 48
+patch_margin_right = 48
+patch_margin_bottom = 48
+
+[node name="PlayerSide" type="Control" parent="QuestDetailModal/WindowCenter/MainFrame"]
+z_index = 1
+layout_mode = 0
+offset_left = 14.0
+offset_top = 14.0
+offset_right = 372.0
+offset_bottom = 404.0
+mouse_filter = 2
+
+[node name="PlayerNameBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 32.0
+offset_right = 336.0
+offset_bottom = 74.0
+texture = ExtResource("12_tb_blue")
+patch_margin_left = 18
+patch_margin_top = 18
+patch_margin_right = 18
+patch_margin_bottom = 18
+
+[node name="PlayerNameLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide/PlayerNameBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_right = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 21
+text = "Jake"
+vertical_alignment = 1
+
+[node name="PlayerPortrait" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 82.0
+offset_right = 208.0
+offset_bottom = 198.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeaderLeftBtn" type="TextureButton" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 58.0
+offset_top = 120.0
+offset_right = 86.0
+offset_bottom = 162.0
+texture_normal = ExtResource("19_arrow_l")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="LeaderRightBtn" type="TextureButton" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 214.0
+offset_top = 120.0
+offset_right = 242.0
+offset_bottom = 162.0
+texture_normal = ExtResource("20_arrow_r")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="HeroShield" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 68.0
+offset_right = 112.0
+offset_bottom = 124.0
+mouse_filter = 2
+texture = ExtResource("18_shield")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerHPLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide/HeroShield"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "15"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerLvlBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+modulate = Color(0.58, 0.66, 0.74, 1)
+layout_mode = 0
+offset_left = 100.0
+offset_top = 176.0
+offset_right = 200.0
+offset_bottom = 212.0
+texture = ExtResource("12_tb_blue")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="PlayerLvlLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide/PlayerLvlBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 19
+text = "Lvl 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerAbilityBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 218.0
+offset_right = 336.0
+offset_bottom = 296.0
+texture = ExtResource("12_tb_blue")
+patch_margin_left = 18
+patch_margin_top = 18
+patch_margin_right = 18
+patch_margin_bottom = 18
+
+[node name="PlayerAbilityLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide/PlayerAbilityBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 4.0
+offset_right = -10.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "(3 Turns) All your Corn creatures gain +3 Attack."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="DeckLeftBtn" type="TextureButton" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 296.0
+offset_right = 88.0
+offset_bottom = 336.0
+texture_normal = ExtResource("19_arrow_l")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="LandscapesRow" type="HBoxContainer" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 296.0
+offset_right = 278.0
+offset_bottom = 336.0
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="Land1" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide/LandscapesRow"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Land2" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide/LandscapesRow"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Land3" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide/LandscapesRow"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Land4" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide/LandscapesRow"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DeckRightBtn" type="TextureButton" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+layout_mode = 0
+offset_left = 284.0
+offset_top = 296.0
+offset_right = 312.0
+offset_bottom = 336.0
+texture_normal = ExtResource("20_arrow_r")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="DeckNumberLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/PlayerSide"]
+z_index = 2
+layout_mode = 0
+offset_left = 94.0
+offset_top = 335.0
+offset_right = 278.0
+offset_bottom = 363.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+text = "Deck 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OpponentSide" type="Control" parent="QuestDetailModal/WindowCenter/MainFrame"]
+z_index = 1
+layout_mode = 0
+offset_left = 378.0
+offset_top = 14.0
+offset_right = 736.0
+offset_bottom = 404.0
+mouse_filter = 2
+
+[node name="OpponentNameBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 32.0
+offset_right = 332.0
+offset_bottom = 74.0
+texture = ExtResource("13_tb_red")
+patch_margin_left = 18
+patch_margin_top = 18
+patch_margin_right = 18
+patch_margin_bottom = 18
+
+[node name="OpponentNameLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide/OpponentNameBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_right = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 21
+text = "BerryBones"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="OpponentPortrait" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide"]
+layout_mode = 0
+offset_left = 148.0
+offset_top = 82.0
+offset_right = 264.0
+offset_bottom = 198.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeroShield" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide"]
+layout_mode = 0
+offset_left = 242.0
+offset_top = 68.0
+offset_right = 298.0
+offset_bottom = 124.0
+mouse_filter = 2
+texture = ExtResource("18_shield")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="OpponentHPLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide/HeroShield"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "35"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OpponentLvlBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide"]
+layout_mode = 0
+offset_left = 156.0
+offset_top = 176.0
+offset_right = 256.0
+offset_bottom = 212.0
+texture = ExtResource("13_tb_red")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="OpponentLvlLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide/OpponentLvlBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 19
+text = "Lvl 5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OpponentAbilityBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 218.0
+offset_right = 332.0
+offset_bottom = 296.0
+texture = ExtResource("13_tb_red")
+patch_margin_left = 18
+patch_margin_top = 18
+patch_margin_right = 18
+patch_margin_bottom = 18
+
+[node name="OpponentAbilityLabel" type="Label" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide/OpponentAbilityBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 4.0
+offset_right = -10.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "(4 Turns) Return any card from the Discard Pile back to your hand."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="LandscapesRow" type="HBoxContainer" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide"]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 304.0
+offset_right = 280.0
+offset_bottom = 344.0
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="Land1" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide/LandscapesRow"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Land2" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide/LandscapesRow"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Land3" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide/LandscapesRow"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Land4" type="TextureRect" parent="QuestDetailModal/WindowCenter/MainFrame/OpponentSide/LandscapesRow"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="QuestInfoBox" type="NinePatchRect" parent="QuestDetailModal/WindowCenter"]
+z_index = 4
+layout_mode = 0
+offset_left = 266.0
+offset_top = 110.0
+offset_right = 544.0
+offset_bottom = 264.0
+texture = ExtResource("15_qcond")
+patch_margin_left = 54
+patch_margin_top = 36
+patch_margin_right = 54
+patch_margin_bottom = 78
+
+[node name="ConditionLabel" type="Label" parent="QuestDetailModal/WindowCenter/QuestInfoBox"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = 260.0
+offset_bottom = 84.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "Beat your opponent to win a star!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Star3Gem" type="TextureRect" parent="QuestDetailModal/WindowCenter/QuestInfoBox"]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 92.0
+offset_right = 167.0
+offset_bottom = 148.0
+mouse_filter = 2
+texture = ExtResource("16_star_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star1" type="TextureRect" parent="QuestDetailModal/WindowCenter/QuestInfoBox"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 86.0
+offset_right = 112.0
+offset_bottom = 126.0
+mouse_filter = 2
+texture = ExtResource("17_star_empty")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="QuestDetailModal/WindowCenter/QuestInfoBox"]
+layout_mode = 0
+offset_left = 166.0
+offset_top = 86.0
+offset_right = 206.0
+offset_bottom = 126.0
+mouse_filter = 2
+texture = ExtResource("17_star_empty")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="QuestDetailModal/WindowCenter/QuestInfoBox"]
+layout_mode = 0
+offset_left = 119.0
+offset_top = 100.0
+offset_right = 159.0
+offset_bottom = 140.0
+mouse_filter = 2
+texture = ExtResource("17_star_empty")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="QuestHeader" type="NinePatchRect" parent="QuestDetailModal/WindowCenter"]
+z_index = 4
+layout_mode = 0
+offset_left = 235.0
+offset_top = 0.0
+offset_right = 575.0
+offset_bottom = 70.0
+texture = ExtResource("14_qtitle")
+patch_margin_left = 170
+patch_margin_right = 100
+
+[node name="LevelLabel" type="Label" parent="QuestDetailModal/WindowCenter/QuestHeader"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 54.0
+offset_top = 6.0
+offset_right = -16.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Level 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayBtn" type="TextureButton" parent="QuestDetailModal/WindowCenter"]
+z_index = 4
+layout_mode = 0
+offset_left = 265.0
+offset_top = 420.0
+offset_right = 545.0
+offset_bottom = 512.0
+texture_normal = ExtResource("21_play_btn")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="HeartIcon" type="TextureRect" parent="QuestDetailModal/WindowCenter/PlayBtn"]
+layout_mode = 0
+offset_left = 156.0
+offset_top = 24.0
+offset_right = 204.0
+offset_bottom = 66.0
+mouse_filter = 2
+texture = ExtResource("22_qi_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StaminaCostLabel" type="Label" parent="QuestDetailModal/WindowCenter/PlayBtn"]
+layout_mode = 0
+offset_left = 206.0
+offset_top = 16.0
+offset_right = 256.0
+offset_bottom = 72.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1

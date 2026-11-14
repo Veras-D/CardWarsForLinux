@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://beuynepim68s7"
+path="res://.godot/imported/FCQuestMapH_Road.obj-b2df715547f0b4ee84767ff67b24c985.mesh"
+
+[deps]
+
+files=["res://.godot/imported/FCQuestMapH_Road.obj-b2df715547f0b4ee84767ff67b24c985.mesh"]
+
+source_file="res://assets/models/fc_map/FCQuestMapH_Road.obj"
+dest_files=["res://.godot/imported/FCQuestMapH_Road.obj-b2df715547f0b4ee84767ff67b24c985.mesh", "res://.godot/imported/FCQuestMapH_Road.obj-b2df715547f0b4ee84767ff67b24c985.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

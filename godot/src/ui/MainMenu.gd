@@ -142,16 +142,7 @@ func _ready() -> void:
 	if quest_overlay:
 		quest_overlay.visible = false
 	
-	# Start with title screen overlay active, hub elements hidden
-	if start_overlay:
-		start_overlay.visible = true
-		start_overlay.modulate.a = 1.0
-		if top_bar:
-			top_bar.visible = false
-		if bottom_dock:
-			bottom_dock.visible = false
-		if treehouse_3d and treehouse_3d.has_method("set_start_view"):
-			treehouse_3d.set_start_view()
+	restore_return_view()
 	
 	# Update Top Bar Data
 	_update_player_stats()
@@ -159,6 +150,47 @@ func _ready() -> void:
 	# Screenshot helper if requested via environment
 	if OS.has_environment("SCREENSHOT_TEST"):
 		_auto_screenshot()
+
+func restore_return_view() -> void:
+	# Restore previous view ("quest_select" or "hub") or start at exterior title screen ("start")
+	var return_view = GameManager.menu_return_view if "menu_return_view" in GameManager else "start"
+	if return_view == "quest_select":
+		if start_overlay:
+			start_overlay.visible = false
+		if top_bar:
+			top_bar.visible = true
+			top_bar.modulate.a = 1.0
+		if bottom_dock:
+			bottom_dock.visible = false
+		if quest_overlay:
+			quest_overlay.visible = true
+			quest_overlay.modulate.a = 1.0
+		if treehouse_3d and treehouse_3d.has_method("set_quest_modes_view"):
+			treehouse_3d.set_quest_modes_view()
+	elif return_view == "hub":
+		if start_overlay:
+			start_overlay.visible = false
+		if top_bar:
+			top_bar.visible = true
+			top_bar.modulate.a = 1.0
+		if bottom_dock:
+			bottom_dock.visible = true
+			bottom_dock.modulate.a = 1.0
+		if quest_overlay:
+			quest_overlay.visible = false
+		if treehouse_3d and treehouse_3d.has_method("set_hub_view"):
+			treehouse_3d.set_hub_view()
+	else:
+		if start_overlay:
+			start_overlay.visible = true
+			start_overlay.modulate.a = 1.0
+			if top_bar:
+				top_bar.visible = false
+			if bottom_dock:
+				bottom_dock.visible = false
+			if treehouse_3d and treehouse_3d.has_method("set_start_view"):
+				treehouse_3d.set_start_view()
+	_update_player_stats()
 
 func _auto_screenshot() -> void:
 	var mode = OS.get_environment("SCREENSHOT_TEST")
@@ -248,6 +280,8 @@ func _update_player_stats() -> void:
 
 func _on_start_tapped() -> void:
 	_play_sfx()
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "hub"
 	if start_overlay:
 		var tween = create_tween()
 		tween.tween_property(start_overlay, "modulate:a", 0.0, 0.3)
@@ -270,6 +304,8 @@ func _on_battle_pressed() -> void:
 	open_quest_mode_select()
 
 func open_quest_mode_select() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "quest_select"
 	if bottom_dock:
 		var tw = create_tween()
 		tw.tween_property(bottom_dock, "modulate:a", 0.0, 0.25)
@@ -289,6 +325,8 @@ func _on_quest_back_pressed() -> void:
 	close_quest_mode_select()
 
 func close_quest_mode_select() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "hub"
 	if quest_overlay:
 		var tw_o = create_tween()
 		tw_o.tween_property(quest_overlay, "modulate:a", 0.0, 0.2)

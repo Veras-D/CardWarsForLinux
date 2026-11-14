@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cao48860dkk13"
+path="res://.godot/imported/FCQuestMapA_HiddenPath1.obj-9496f7e11d8bc67abd357546290a96ba.mesh"
+
+[deps]
+
+files=["res://.godot/imported/FCQuestMapA_HiddenPath1.obj-9496f7e11d8bc67abd357546290a96ba.mesh"]
+
+source_file="res://assets/models/fc_map/FCQuestMapA_HiddenPath1.obj"
+dest_files=["res://.godot/imported/FCQuestMapA_HiddenPath1.obj-9496f7e11d8bc67abd357546290a96ba.mesh", "res://.godot/imported/FCQuestMapA_HiddenPath1.obj-9496f7e11d8bc67abd357546290a96ba.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

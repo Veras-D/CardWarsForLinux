@@ -113,6 +113,36 @@ func set_hub_view() -> void:
 	if fionna_book:
 		fionna_book.close_book(0.0)
 
+func set_quest_modes_view() -> void:
+	is_hub_view = true
+	is_mode_select = true
+	props_anim_ready = true
+	is_logo_animating = false
+	if active_tween and active_tween.is_valid():
+		active_tween.kill()
+
+	if camera:
+		camera.position = BATTLE_SELECT_CAM_POS
+		camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
+
+	if logo_group:
+		logo_group.visible = false
+		logo_group.scale = Vector3.ZERO
+
+	if jake_node:
+		jake_node.visible = false
+	if jake_stool:
+		jake_stool.visible = true
+
+	if board_modes_group:
+		board_modes_group.visible = true
+		if fionna_book:
+			fionna_book.reset_anim()
+		for m in [deckwars_mode, fionna_mode, quests_mode]:
+			if m:
+				m.scale = Vector3.ONE
+				m.position.y = -0.12
+
 func transition_to_hub(duration: float = 0.8) -> void:
 	if is_hub_view:
 		return
