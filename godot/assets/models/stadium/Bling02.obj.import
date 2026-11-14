@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cwq7gkekyx5e7"
+path="res://.godot/imported/Bling02.obj-1bb100b1f2f64f3c6d8b6263e7f9d185.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Bling02.obj-1bb100b1f2f64f3c6d8b6263e7f9d185.mesh"]
+
+source_file="res://assets/models/stadium/Bling02.obj"
+dest_files=["res://.godot/imported/Bling02.obj-1bb100b1f2f64f3c6d8b6263e7f9d185.mesh", "res://.godot/imported/Bling02.obj-1bb100b1f2f64f3c6d8b6263e7f9d185.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

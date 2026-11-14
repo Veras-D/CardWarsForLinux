@@ -1,0 +1,115 @@
+[gd_scene load_steps=18 format=3 uid="uid://c3deckwarsstad01"]
+
+[ext_resource type="Script" path="res://src/ui/DeckWarsStadium.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/low_MultiPlayer.png" id="2_tmulti"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/Floodlight.png" id="3_tflood"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/BasePods.obj" id="4_mpods"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/StadiumBowl.obj" id="5_mbowl"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/StadiumFlags.obj" id="6_mflags"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/Bling01.obj" id="7_mbling1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/Bling02.obj" id="8_mbling2"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/Blimp.obj" id="9_mblimp"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/Spot01.obj" id="10_mspot1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/Spot02.obj" id="11_mspot2"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/LightBeam01.obj" id="12_mbeam1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/stadium/LightBeam02.obj" id="13_mbeam2"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Stadium"]
+cull_mode = 0
+shading_mode = 0
+albedo_color = Color(1.18, 1.18, 1.18, 1)
+albedo_texture = ExtResource("2_tmulti")
+texture_filter = 3
+
+[sub_resource type="Shader" id="Shader_Flags"]
+code = "shader_type spatial;
+render_mode unshaded, cull_disabled;
+
+uniform sampler2D albedo_tex : source_color, filter_linear_mipmap;
+uniform float flags01_dx = 0.0;
+uniform float flags02_dx = 0.0;
+
+void vertex() {
+	float uz = -VERTEX.z;
+	if (uz < 4.8) {
+		VERTEX.x += flags02_dx;
+	} else if (uz < 5.9) {
+		VERTEX.x += flags01_dx;
+	}
+}
+
+void fragment() {
+	ALBEDO = texture(albedo_tex, UV).rgb * 1.18;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="Mat_Flags"]
+render_priority = 0
+shader = SubResource("Shader_Flags")
+shader_parameter/albedo_tex = ExtResource("2_tmulti")
+shader_parameter/flags01_dx = 0.0
+shader_parameter/flags02_dx = 0.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_Floodlight"]
+transparency = 1
+cull_mode = 0
+shading_mode = 0
+albedo_texture = ExtResource("3_tflood")
+texture_filter = 3
+
+[node name="DeckWarsStadium" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="PuppetGlobal" type="Node3D" parent="."]
+
+[node name="BasePods" type="MeshInstance3D" parent="PuppetGlobal"]
+mesh = ExtResource("4_mpods")
+surface_material_override/0 = SubResource("Mat_Stadium")
+
+[node name="PuppetStadium" type="Node3D" parent="PuppetGlobal"]
+
+[node name="StadiumBowl" type="MeshInstance3D" parent="PuppetGlobal/PuppetStadium"]
+mesh = ExtResource("5_mbowl")
+surface_material_override/0 = SubResource("Mat_Stadium")
+
+[node name="StadiumFlags" type="MeshInstance3D" parent="PuppetGlobal/PuppetStadium"]
+mesh = ExtResource("6_mflags")
+surface_material_override/0 = SubResource("Mat_Flags")
+
+[node name="PuppetBling01" type="Node3D" parent="PuppetGlobal/PuppetStadium"]
+
+[node name="Mesh" type="MeshInstance3D" parent="PuppetGlobal/PuppetStadium/PuppetBling01"]
+mesh = ExtResource("7_mbling1")
+surface_material_override/0 = SubResource("Mat_Stadium")
+
+[node name="PuppetBling02" type="Node3D" parent="PuppetGlobal/PuppetStadium"]
+
+[node name="Mesh" type="MeshInstance3D" parent="PuppetGlobal/PuppetStadium/PuppetBling02"]
+mesh = ExtResource("8_mbling2")
+surface_material_override/0 = SubResource("Mat_Stadium")
+
+[node name="PuppetSpot01" type="Node3D" parent="PuppetGlobal"]
+
+[node name="Housing" type="MeshInstance3D" parent="PuppetGlobal/PuppetSpot01"]
+mesh = ExtResource("10_mspot1")
+surface_material_override/0 = SubResource("Mat_Stadium")
+
+[node name="LightBeam" type="MeshInstance3D" parent="PuppetGlobal/PuppetSpot01"]
+mesh = ExtResource("12_mbeam1")
+surface_material_override/0 = SubResource("Mat_Floodlight")
+
+[node name="PuppetSpot02" type="Node3D" parent="PuppetGlobal"]
+
+[node name="Housing" type="MeshInstance3D" parent="PuppetGlobal/PuppetSpot02"]
+mesh = ExtResource("11_mspot2")
+surface_material_override/0 = SubResource("Mat_Stadium")
+
+[node name="LightBeam" type="MeshInstance3D" parent="PuppetGlobal/PuppetSpot02"]
+mesh = ExtResource("13_mbeam2")
+surface_material_override/0 = SubResource("Mat_Floodlight")
+
+[node name="PuppetBlimp" type="Node3D" parent="PuppetGlobal"]
+
+[node name="Mesh" type="MeshInstance3D" parent="PuppetGlobal/PuppetBlimp"]
+mesh = ExtResource("9_mblimp")
+surface_material_override/0 = SubResource("Mat_Stadium")

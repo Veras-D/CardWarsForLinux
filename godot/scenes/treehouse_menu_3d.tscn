@@ -36,10 +36,10 @@
 [ext_resource type="Texture2D" path="res://assets/textures/environment/FX_Edge_PSD.png" id="34_tedge"]
 [ext_resource type="ArrayMesh" path="res://assets/models/QuestMap_Scroll.obj" id="35_mscroll"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/QuestMap_Scroll.png" id="36_tscroll"]
-[ext_resource type="ArrayMesh" path="res://assets/models/FionnaCake_Book.obj" id="37_mbook"]
+[ext_resource type="PackedScene" path="res://scenes/fionna_cake_book.tscn" id="37_pbook"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/low_FionnaCakeIcon.png" id="38_tbook"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="43_font"]
-[ext_resource type="ArrayMesh" path="res://assets/models/DeckWars_Stadium.obj" id="50_mstadium"]
+[ext_resource type="PackedScene" path="res://scenes/deck_wars_stadium.tscn" id="50_pstadium"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/low_MultiPlayer.png" id="54_tmulti"]
 [ext_resource type="ArrayMesh" path="res://assets/models/Stadium_Lights.obj" id="55_mlights"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/Stadium_Lights.png" id="56_tlights"]
@@ -286,20 +286,10 @@ surface_material_override/0 = SubResource("Mat_Scroll")
 [node name="FionnaCakeMode" type="Node3D" parent="BoardModesGroup"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, -0.12, -0.75)
 
-[node name="BookMesh" type="MeshInstance3D" parent="BoardModesGroup/FionnaCakeMode"]
-mesh = ExtResource("37_mbook")
-surface_material_override/0 = SubResource("Mat_Book")
+[node name="FionnaCakeBook" parent="BoardModesGroup/FionnaCakeMode" instance=ExtResource("37_pbook")]
 
 [node name="DeckWarsMode" type="Node3D" parent="BoardModesGroup"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.40, -0.12, -0.60)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, -0.12, 0.061)
 
-[node name="StadiumMesh" type="MeshInstance3D" parent="BoardModesGroup/DeckWarsMode"]
-transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 0, 0, 0)
-mesh = ExtResource("50_mstadium")
-surface_material_override/0 = SubResource("Mat_Stadium")
-
-[node name="LightsMesh" type="MeshInstance3D" parent="BoardModesGroup/DeckWarsMode"]
-transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 0, 0, 0)
-mesh = ExtResource("55_mlights")
-surface_material_override/0 = SubResource("Mat_StadiumLights")
+[node name="DeckWarsStadium" parent="BoardModesGroup/DeckWarsMode" instance=ExtResource("50_pstadium")]
 

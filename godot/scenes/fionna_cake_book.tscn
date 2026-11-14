@@ -1,0 +1,49 @@
+[gd_scene load_steps=10 format=3 uid="uid://c3fionnabook01"]
+
+[ext_resource type="Script" path="res://src/ui/FionnaCakeBook.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/low_FionnaCakeIcon.png" id="2_texture"]
+[ext_resource type="ArrayMesh" path="res://assets/models/book/BookSpine.obj" id="3_mspine"]
+[ext_resource type="ArrayMesh" path="res://assets/models/book/BookEnd.obj" id="4_mend"]
+[ext_resource type="ArrayMesh" path="res://assets/models/book/BookPage3.obj" id="5_mpage3"]
+[ext_resource type="ArrayMesh" path="res://assets/models/book/BookPage2.obj" id="6_mpage2"]
+[ext_resource type="ArrayMesh" path="res://assets/models/book/BookPage1.obj" id="7_mpage1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/book/BookCover.obj" id="8_mcover"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_FionnaBook"]
+cull_mode = 0
+shading_mode = 0
+albedo_texture = ExtResource("2_texture")
+texture_filter = 3
+
+[node name="FionnaCakeBook" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="BookSpine" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+mesh = ExtResource("3_mspine")
+surface_material_override/0 = SubResource("Mat_FionnaBook")
+
+[node name="BookEnd" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+mesh = ExtResource("4_mend")
+surface_material_override/0 = SubResource("Mat_FionnaBook")
+
+[node name="BookPage3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+mesh = ExtResource("5_mpage3")
+surface_material_override/0 = SubResource("Mat_FionnaBook")
+
+[node name="BookPage2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+mesh = ExtResource("6_mpage2")
+surface_material_override/0 = SubResource("Mat_FionnaBook")
+
+[node name="BookPage1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+mesh = ExtResource("7_mpage1")
+surface_material_override/0 = SubResource("Mat_FionnaBook")
+
+[node name="BookCover" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.202)
+mesh = ExtResource("8_mcover")
+surface_material_override/0 = SubResource("Mat_FionnaBook")

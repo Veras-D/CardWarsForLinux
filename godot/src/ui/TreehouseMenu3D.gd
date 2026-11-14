@@ -13,6 +13,7 @@ extends Node3D
 @onready var quests_mode: Node3D = $BoardModesGroup/QuestsMode
 @onready var fionna_mode: Node3D = $BoardModesGroup/FionnaCakeMode
 @onready var deckwars_mode: Node3D = $BoardModesGroup/DeckWarsMode
+@onready var fionna_book: FionnaCakeBook = get_node_or_null("BoardModesGroup/FionnaCakeMode/FionnaCakeBook")
 
 # Camera transforms
 # Start View: Front view framing Jake (left), Finn (right), and the Table
@@ -84,6 +85,8 @@ func set_start_view() -> void:
 		jake_node.visible = true
 	if jake_stool:
 		jake_stool.visible = true
+	if fionna_book:
+		fionna_book.close_book(0.0)
 
 func set_hub_view() -> void:
 	is_hub_view = true
@@ -107,6 +110,8 @@ func set_hub_view() -> void:
 		jake_node.visible = false
 	if jake_stool:
 		jake_stool.visible = true
+	if fionna_book:
+		fionna_book.close_book(0.0)
 
 func transition_to_hub(duration: float = 0.8) -> void:
 	if is_hub_view:
@@ -218,7 +223,12 @@ func show_quest_modes() -> void:
 				m_tw.tween_property(m, "position:y", -0.12, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
 		
 		var finish_tw = create_tween()
-		finish_tw.tween_interval(0.60)
+		finish_tw.tween_interval(0.25)
+		finish_tw.tween_callback(func():
+			if fionna_book:
+				fionna_book.open_book(0.55)
+		)
+		finish_tw.tween_interval(0.35)
 		finish_tw.tween_callback(func(): props_anim_ready = true)
 
 func hide_quest_modes() -> void:
@@ -227,6 +237,9 @@ func hide_quest_modes() -> void:
 	is_mode_select = false
 	props_anim_ready = false
 	is_logo_animating = true
+	
+	if fionna_book:
+		fionna_book.close_book(0.20)
 	
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
