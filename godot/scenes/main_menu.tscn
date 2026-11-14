@@ -20,7 +20,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ui/btn_store.png" id="18_gems_pouch"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/btn_chests.png" id="19_chest"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/ui_button_red.png" id="25_ui_btn_red"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_back_arrow.png" id="26_back_arrow"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/nodes/Button_Back_Gold.png" id="26_back_arrow"]
 
 [ext_resource type="PackedScene" path="res://src/ui/ChestOpeningModal.tscn" id="20_chest_modal"]
 [ext_resource type="PackedScene" path="res://scenes/versus_setup_modal.tscn" id="21_versus"]
