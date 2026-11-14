@@ -916,15 +916,22 @@ func _refresh_hud() -> void:
 var _modal_leader_ids: Array[String] = ["Jake", "Finn", "Fiona", "Cake"]
 var _modal_deck_index: int = 0
 var _modal_decks: Array[Dictionary] = []
+var _zoom_overlay: ColorRect = null
+var _zoom_card_holder: Control = null
+var _zoom_tween: Tween = null
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if detail_modal and detail_modal.visible and event.is_action_pressed("ui_cancel"):
-		_close_quest_modal()
+		if _zoom_overlay != null and _zoom_overlay.visible:
+			_close_zoom_card()
+		else:
+			_close_quest_modal()
 		get_viewport().set_input_as_handled()
 
 
 func _open_quest_modal(quest_id: String) -> void:
+	_close_zoom_card(true)
 	_selected_quest_id = quest_id
 	var quest = Database.get_quest(quest_id)
 	if quest.is_empty() or detail_modal == null:
@@ -1013,6 +1020,7 @@ func _open_quest_modal(quest_id: String) -> void:
 
 
 func _close_quest_modal() -> void:
+	_close_zoom_card(true)
 	if Audio and SFX_CLICK:
 		Audio.play_sfx(SFX_CLICK)
 	if detail_modal:
@@ -1218,11 +1226,8 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 	if cards.size() > 1:
 		_unity_qsort_cards_by_rarity(cards, 0, cards.size() - 1)
 
-	var font_res: Font = load(FONT_PATH) if ResourceLoader.exists(FONT_PATH) else null
 	var card_w := 90.0
 	var card_h := 127.0
-	var sx := card_w / 297.0
-	var sy := card_h / 420.0
 	var step_y := 77.0
 	var count = mini(4, cards.size())
 	for i in range(count):
@@ -1231,90 +1236,122 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 		slot.position = Vector2(0.0, float(i) * step_y)
 		slot.size = Vector2(card_w, card_h)
 		slot.z_index = i + 1
-		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.mouse_filter = Control.MOUSE_FILTER_STOP
+		slot.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		slot.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				_open_zoom_card(c, slot)
+		)
 		modal_card_slots.add_child(slot)
+		_build_card_visual(slot, c, card_w, card_h, false)
 
-		var faction = str(c.get("faction", "Universal"))
-		var rarity = int(c.get("rarity", 1))
-		var ctype = str(c.get("type", "CREATURE"))
-		var quality_name = str(c.get("quality_name", "Standard"))
-		var faction_col: Color = FACTION_COLORS.get(faction, Color.WHITE)
-		# Unity PanelManagerBattle.FillCardInfo: BG_Name / BG_Type / Frame_ATK / Frame_DEF use Lerp(factionColor, white, 0.5f)
-		var bg_tint: Color = faction_col.lerp(Color.WHITE, 0.5)
 
-		# Card Art (d=-8 in 297x420: center=(0,65) -> top-left=(11, 7.5), size=(275, 275))
-		var art_tex = Database.get_card_texture(str(c.get("texture_path", "")))
-		var art := TextureRect.new()
+func _build_card_visual(slot: Control, c: Dictionary, card_w: float, card_h: float, is_zoomed: bool) -> void:
+	var font_res: Font = load(FONT_PATH) if ResourceLoader.exists(FONT_PATH) else null
+	var sx := card_w / 297.0
+	var sy := card_h / 420.0
+	var ui_scale := card_w / 90.0
+
+	var faction = str(c.get("faction", "Universal"))
+	var rarity = int(c.get("rarity", 1))
+	var ctype = str(c.get("type", "CREATURE"))
+	var quality_name = str(c.get("quality_name", "Standard"))
+	var faction_col: Color = FACTION_COLORS.get(faction, Color.WHITE)
+	# Unity PanelManagerBattle.FillCardInfo: BG_Name / BG_Type / Frame_ATK / Frame_DEF use Lerp(factionColor, white, 0.5f)
+	var bg_tint: Color = faction_col.lerp(Color.WHITE, 0.5)
+
+	# Card Art (d=-8 in 297x420; zoomed uses slightly wider 285x285 bounds per B_2_ZoomCard)
+	var art_tex = Database.get_card_texture(str(c.get("texture_path", "")))
+	var art := TextureRect.new()
+	if is_zoomed:
+		art.position = Vector2(6.0 * sx, 3.2 * sy)
+		art.size = Vector2(285.0 * sx, 285.0 * sy)
+	else:
 		art.position = Vector2(11.0 * sx, 7.5 * sy)
 		art.size = Vector2(275.0 * sx, 275.0 * sy)
-		art.texture = art_tex
-		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		slot.add_child(art)
+	art.texture = art_tex
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(art)
 
-		# Opaque backing for card Type header (d=-5 BG_Type: center=(0,179), size=(280,24))
-		var bg_type := ColorRect.new()
-		bg_type.position = Vector2(8.5 * sx, 19.0 * sy)
-		bg_type.size = Vector2(280.0 * sx, 24.0 * sy)
-		bg_type.color = bg_tint
-		bg_type.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		slot.add_child(bg_type)
+	# Opaque backing for card Type header (d=-5 BG_Type: center=(0,179), size=(280,24))
+	var bg_type := ColorRect.new()
+	bg_type.position = Vector2(8.5 * sx, 19.0 * sy)
+	bg_type.size = Vector2(280.0 * sx, 24.0 * sy)
+	bg_type.color = bg_tint
+	bg_type.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(bg_type)
 
-		# Opaque backing for card Name strip (d=-5 BG_Name: center=(0,-59), size=(280,30))
-		var bg_name := ColorRect.new()
-		bg_name.position = Vector2(8.5 * sx, 254.0 * sy)
-		bg_name.size = Vector2(280.0 * sx, 30.0 * sy)
-		bg_name.color = bg_tint
-		bg_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		slot.add_child(bg_name)
+	# Opaque backing for card Name strip (d=-5 BG_Name: center=(0,-59), size=(280,30))
+	var bg_name := ColorRect.new()
+	bg_name.position = Vector2(8.5 * sx, 254.0 * sy)
+	bg_name.size = Vector2(280.0 * sx, 30.0 * sy)
+	bg_name.color = bg_tint
+	bg_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(bg_name)
 
-		# Cost Orb (d=-2 behind Card_Frame: center=(-100,165), size=(60,60))
-		var cost_bg := TextureRect.new()
-		cost_bg.position = Vector2(18.5 * sx, 15.0 * sy)
-		cost_bg.size = Vector2(60.0 * sx, 60.0 * sy)
-		cost_bg.texture = load(QUEST_INFO_TEX_DIR + "Frame_Cost.png")
-		cost_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		cost_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		cost_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		slot.add_child(cost_bg)
+	# Cost Orb (d=-2 behind Card_Frame: center=(-100,165), size=(60,60))
+	var cost_bg := TextureRect.new()
+	cost_bg.position = Vector2(18.5 * sx, 15.0 * sy)
+	cost_bg.size = Vector2(60.0 * sx, 60.0 * sy)
+	cost_bg.texture = load(QUEST_INFO_TEX_DIR + "Frame_Cost.png")
+	cost_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	cost_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	cost_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(cost_bg)
 
-		# Card Frame (d=0)
-		var frame_file = "Frame_Colorless.png" if faction == "Universal" else "Frame_White.png"
-		var frame := TextureRect.new()
-		frame.position = Vector2.ZERO
-		frame.size = Vector2(card_w, card_h)
-		frame.texture = load(QUEST_INFO_TEX_DIR + frame_file)
-		frame.modulate = faction_col
-		frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		frame.stretch_mode = TextureRect.STRETCH_SCALE
-		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		slot.add_child(frame)
+	# Card Frame (d=0)
+	var frame_file = "Frame_Colorless.png" if faction == "Universal" else "Frame_White.png"
+	var frame := TextureRect.new()
+	frame.position = Vector2.ZERO
+	frame.size = Vector2(card_w, card_h)
+	frame.texture = load(QUEST_INFO_TEX_DIR + frame_file)
+	frame.modulate = faction_col
+	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	frame.stretch_mode = TextureRect.STRETCH_SCALE
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(frame)
 
-		# Gold Frame overlay ONLY when card Quality is Gold (CardForm.GetCardQualityFrameSprite)
-		if quality_name == "Gold":
-			var gold := TextureRect.new()
-			gold.position = Vector2.ZERO
-			gold.size = Vector2(card_w, card_h)
-			gold.texture = load(QUEST_INFO_TEX_DIR + "Frame_Gold.png")
-			gold.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			gold.stretch_mode = TextureRect.STRETCH_SCALE
-			gold.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			slot.add_child(gold)
+	# Gold Frame overlay ONLY when card Quality is Gold (CardForm.GetCardQualityFrameSprite)
+	if quality_name == "Gold":
+		var gold := TextureRect.new()
+		gold.position = Vector2.ZERO
+		gold.size = Vector2(card_w, card_h)
+		gold.texture = load(QUEST_INFO_TEX_DIR + "Frame_Gold.png")
+		gold.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		gold.stretch_mode = TextureRect.STRETCH_SCALE
+		gold.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(gold)
 
-		# Faction Icon (d=10 top-right circle: center=(118,179), size=(30,30))
-		if LANDSCAPE_ICONS.has(faction):
-			var fact_icon := TextureRect.new()
-			fact_icon.position = Vector2(251.5 * sx, 16.0 * sy)
-			fact_icon.size = Vector2(30.0 * sx, 30.0 * sy)
-			fact_icon.texture = load(QUEST_INFO_TEX_DIR + str(LANDSCAPE_ICONS[faction]))
-			fact_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			fact_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			fact_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			slot.add_child(fact_icon)
+	# Faction Icon (d=10 top-right circle: center=(118,179), size=(30,30))
+	if LANDSCAPE_ICONS.has(faction):
+		var fact_icon := TextureRect.new()
+		fact_icon.position = Vector2(251.5 * sx, 16.0 * sy)
+		fact_icon.size = Vector2(30.0 * sx, 30.0 * sy)
+		fact_icon.texture = load(QUEST_INFO_TEX_DIR + str(LANDSCAPE_ICONS[faction]))
+		fact_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		fact_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		fact_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(fact_icon)
 
-		# Rarity Stars (d=3, Unity Rarity node at (111,-20), scale 36.1)
-		var full_star = load(NODE_TEX_DIR + "UI_Star_Full.png")
+	# Rarity Stars: bottom-right of Card_Art on mini cards (DeckCard), bottom-center on zoomed card (B_2_ZoomCard)
+	var full_star = load(NODE_TEX_DIR + "UI_Star_Full.png")
+	var clamped_rarity := mini(5, rarity)
+	if is_zoomed:
+		var zstar_ngui := 14.0
+		var zstar_px := zstar_ngui * sx
+		for s in range(clamped_rarity):
+			var st := TextureRect.new()
+			var nx := (float(s) - float(clamped_rarity - 1) * 0.5) * zstar_ngui
+			st.position = Vector2((nx - zstar_ngui * 0.5 + 148.5) * sx, (210.0 - (-185.0) - zstar_ngui * 0.5) * sy)
+			st.size = Vector2(zstar_px, zstar_px)
+			st.texture = full_star
+			st.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			st.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			st.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			slot.add_child(st)
+	else:
 		var star_offsets: Array[Vector2] = [
 			Vector2(0.0, 0.0),
 			Vector2(-1.0, 0.0),
@@ -1323,7 +1360,7 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 			Vector2(-1.41, 0.97)
 		]
 		var star_px := 36.1 * sx
-		for s in range(mini(5, rarity)):
+		for s in range(clamped_rarity):
 			var st := TextureRect.new()
 			var npos := Vector2(111.0, -20.0) + star_offsets[s] * 36.1
 			st.position = Vector2((npos.x - 18.05 + 148.5) * sx, (210.0 - npos.y - 18.05) * sy)
@@ -1334,81 +1371,185 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 			st.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			slot.add_child(st)
 
-		# Cost Label (centered in Cost Orb: center=(-102,162))
-		var cost_lbl := _make_card_label(font_res, 10, Vector2(18.5 * sx, 16.0 * sy), Vector2(56.0 * sx, 58.0 * sy), str(int(c.get("cost", 1))), Color(0.976, 0.831, 1.0, 1.0))
-		cost_lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-		cost_lbl.add_theme_constant_override("outline_size", 2)
-		slot.add_child(cost_lbl)
+	# Cost Label (centered in Cost Orb: center=(-102,162))
+	var cost_lbl := _make_card_label(font_res, roundi(10.0 * ui_scale), Vector2(18.5 * sx, 16.0 * sy), Vector2(56.0 * sx, 58.0 * sy), str(int(c.get("cost", 1))), Color(0.976, 0.831, 1.0, 1.0))
+	cost_lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+	cost_lbl.add_theme_constant_override("outline_size", roundi(2.0 * ui_scale))
+	slot.add_child(cost_lbl)
 
-		# Type Label (centered inside BG_Type band: y=19..43 in 297x420)
-		var type_lbl := _make_card_label(font_res, 6, Vector2(72.0 * sx, 19.0 * sy), Vector2(174.0 * sx, 24.0 * sy), ctype.capitalize())
-		slot.add_child(type_lbl)
+	# Type Label (centered inside BG_Type band: y=19..43 in 297x420)
+	var type_lbl := _make_card_label(font_res, roundi(6.0 * ui_scale), Vector2(72.0 * sx, 19.0 * sy), Vector2(174.0 * sx, 24.0 * sy), ctype.capitalize())
+	slot.add_child(type_lbl)
 
-		# Name Label (inside BG_Name strip: y=254..284)
-		var name_lbl := _make_card_label(font_res, 7, Vector2(12.0 * sx, 254.0 * sy), Vector2(273.0 * sx, 30.0 * sy), str(c.get("name", "")))
-		name_lbl.clip_text = true
-		slot.add_child(name_lbl)
+	# Name Label (inside BG_Name strip: y=254..284)
+	var name_lbl := _make_card_label(font_res, roundi(7.0 * ui_scale), Vector2(12.0 * sx, 254.0 * sy), Vector2(273.0 * sx, 30.0 * sy), str(c.get("name", "")))
+	name_lbl.clip_text = true
+	slot.add_child(name_lbl)
 
-		# Ability Text Block (FLOOP cost header + Description combined cleanly so lines never overlap)
-		var ability_type = str(c.get("ability_type", ""))
-		var floop_cost = int(c.get("floop_cost", 0))
-		var full_desc := str(c.get("desc", ""))
-		if ability_type == "FLOOP":
-			full_desc = "FLOOP (%d Magic)\n%s" % [floop_cost, full_desc]
+	# Ability Text Block (FLOOP cost header + Description combined cleanly so lines never overlap)
+	var ability_type = str(c.get("ability_type", ""))
+	var floop_cost = int(c.get("floop_cost", 0))
+	var full_desc := str(c.get("desc", ""))
+	if ability_type == "FLOOP":
+		full_desc = "FLOOP (%d Magic)\n%s" % [floop_cost, full_desc]
 
-		var desc_lbl := _make_card_label(font_res, 5, Vector2(16.0 * sx, 285.0 * sy), Vector2(265.0 * sx, (96.0 if ctype == "CREATURE" else 118.0) * sy), full_desc, Color.BLACK, false)
-		desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		desc_lbl.clip_text = true
-		desc_lbl.add_theme_constant_override("line_spacing", 0)
-		slot.add_child(desc_lbl)
+	var desc_top := 294.0 if is_zoomed else 285.0
+	var desc_lbl := _make_card_label(font_res, roundi(5.0 * ui_scale), Vector2(16.0 * sx, desc_top * sy), Vector2(265.0 * sx, (92.0 if ctype == "CREATURE" else 106.0) * sy), full_desc, Color.BLACK, false)
+	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc_lbl.clip_text = true
+	desc_lbl.add_theme_constant_override("line_spacing", 2 if is_zoomed else 0)
+	slot.add_child(desc_lbl)
 
-		# ATK / DEF badges & values for Creatures (Frame_Combat + Combat_Icon_ATK/DEF)
-		if ctype == "CREATURE":
-			var combat_tex = load(QUEST_INFO_TEX_DIR + "Frame_Combat.png")
-			var atk_bg := TextureRect.new()
-			atk_bg.position = Vector2(11.0 * sx, 359.0 * sy)
-			atk_bg.size = Vector2(75.0 * sx, 50.0 * sy)
-			atk_bg.texture = combat_tex
-			atk_bg.modulate = bg_tint
-			atk_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			atk_bg.stretch_mode = TextureRect.STRETCH_SCALE
-			atk_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			slot.add_child(atk_bg)
+	# ATK / DEF badges & values for Creatures (Frame_Combat + Combat_Icon_ATK/DEF)
+	if ctype == "CREATURE":
+		var combat_tex = load(QUEST_INFO_TEX_DIR + "Frame_Combat.png")
+		var atk_bg := TextureRect.new()
+		atk_bg.position = Vector2(11.0 * sx, 359.0 * sy)
+		atk_bg.size = Vector2(75.0 * sx, 50.0 * sy)
+		atk_bg.texture = combat_tex
+		atk_bg.modulate = bg_tint
+		atk_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		atk_bg.stretch_mode = TextureRect.STRETCH_SCALE
+		atk_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(atk_bg)
 
-			var def_bg := TextureRect.new()
-			def_bg.position = Vector2(210.5 * sx, 359.0 * sy)
-			def_bg.size = Vector2(76.0 * sx, 50.0 * sy)
-			def_bg.texture = combat_tex
-			def_bg.modulate = bg_tint
-			def_bg.flip_h = true
-			def_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			def_bg.stretch_mode = TextureRect.STRETCH_SCALE
-			def_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			slot.add_child(def_bg)
+		var def_bg := TextureRect.new()
+		def_bg.position = Vector2(210.5 * sx, 359.0 * sy)
+		def_bg.size = Vector2(76.0 * sx, 50.0 * sy)
+		def_bg.texture = combat_tex
+		def_bg.modulate = bg_tint
+		def_bg.flip_h = true
+		def_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		def_bg.stretch_mode = TextureRect.STRETCH_SCALE
+		def_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(def_bg)
 
-			var atk_lbl := _make_card_label(font_res, 7, Vector2(16.0 * sx, 362.0 * sy), Vector2(32.0 * sx, 46.0 * sy), str(int(c.get("atk", 0))))
-			slot.add_child(atk_lbl)
+		var atk_lbl := _make_card_label(font_res, roundi(7.0 * ui_scale), Vector2(16.0 * sx, 362.0 * sy), Vector2(32.0 * sx, 46.0 * sy), str(int(c.get("atk", 0))))
+		slot.add_child(atk_lbl)
 
-			var atk_icon := TextureRect.new()
-			atk_icon.position = Vector2(49.0 * sx, 370.0 * sy)
-			atk_icon.size = Vector2(16.6 * sx, 29.7 * sy)
-			atk_icon.texture = load(QUEST_INFO_TEX_DIR + "Combat_Icon_ATK.png")
-			atk_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			atk_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			atk_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			slot.add_child(atk_icon)
+		var atk_icon := TextureRect.new()
+		atk_icon.position = Vector2(49.0 * sx, 370.0 * sy)
+		atk_icon.size = Vector2(16.6 * sx, 29.7 * sy)
+		atk_icon.texture = load(QUEST_INFO_TEX_DIR + "Combat_Icon_ATK.png")
+		atk_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		atk_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		atk_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(atk_icon)
 
-			var def_icon := TextureRect.new()
-			def_icon.position = Vector2(226.0 * sx, 373.5 * sy)
-			def_icon.size = Vector2(19.6 * sx, 22.6 * sy)
-			def_icon.texture = load(QUEST_INFO_TEX_DIR + "Combat_Icon_DEF.png")
-			def_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			def_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			def_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			slot.add_child(def_icon)
+		var def_icon := TextureRect.new()
+		def_icon.position = Vector2(226.0 * sx, 373.5 * sy)
+		def_icon.size = Vector2(19.6 * sx, 22.6 * sy)
+		def_icon.texture = load(QUEST_INFO_TEX_DIR + "Combat_Icon_DEF.png")
+		def_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		def_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		def_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(def_icon)
 
-			var def_lbl := _make_card_label(font_res, 7, Vector2(246.0 * sx, 362.0 * sy), Vector2(32.0 * sx, 46.0 * sy), str(int(c.get("def", 0))))
-			slot.add_child(def_lbl)
+		var def_lbl := _make_card_label(font_res, roundi(7.0 * ui_scale), Vector2(246.0 * sx, 362.0 * sy), Vector2(32.0 * sx, 46.0 * sy), str(int(c.get("def", 0))))
+		slot.add_child(def_lbl)
+
+
+func _ensure_zoom_nodes() -> void:
+	if detail_modal == null:
+		return
+	var window_center: Control = detail_modal.get_node_or_null("WindowCenter")
+	if _zoom_overlay == null:
+		_zoom_overlay = ColorRect.new()
+		_zoom_overlay.name = "ZoomBlackPanel"
+		_zoom_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_zoom_overlay.color = Color(0.0, 0.0, 0.0, 0.503)
+		_zoom_overlay.z_index = 8
+		_zoom_overlay.visible = false
+		_zoom_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+		_zoom_overlay.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				_close_zoom_card()
+		)
+		detail_modal.add_child(_zoom_overlay)
+
+	if _zoom_card_holder == null and window_center != null:
+		_zoom_card_holder = Control.new()
+		_zoom_card_holder.name = "ZoomCard"
+		# Unity B_2_ZoomCard (pos=(875,-50), scl=1.5) mapped to WindowCenter 0.488 scale: center=(834, 259), size=218x308
+		_zoom_card_holder.size = Vector2(218.0, 308.0)
+		_zoom_card_holder.pivot_offset = Vector2(109.0, 154.0)
+		_zoom_card_holder.position = Vector2(725.0, 105.0)
+		_zoom_card_holder.z_index = 9
+		_zoom_card_holder.visible = false
+		_zoom_card_holder.mouse_filter = Control.MOUSE_FILTER_STOP
+		_zoom_card_holder.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		_zoom_card_holder.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				_close_zoom_card()
+		)
+		window_center.add_child(_zoom_card_holder)
+
+
+func _open_zoom_card(card_data: Dictionary, source_slot: Control = null) -> void:
+	_ensure_zoom_nodes()
+	if _zoom_overlay == null or _zoom_card_holder == null:
+		return
+	if _zoom_tween != null and _zoom_tween.is_valid():
+		_zoom_tween.kill()
+	for ch in _zoom_card_holder.get_children():
+		ch.queue_free()
+
+	if Audio and SFX_CLICK:
+		Audio.play_sfx(SFX_CLICK)
+
+	var zoom_w := 218.0
+	var zoom_h := 308.0
+	_build_card_visual(_zoom_card_holder, card_data, zoom_w, zoom_h, true)
+
+	var target_pos := Vector2(725.0, 105.0)
+	_zoom_overlay.visible = true
+	_zoom_overlay.modulate.a = 0.0
+	_zoom_card_holder.visible = true
+
+	if source_slot != null and is_instance_valid(source_slot):
+		var window_center: Control = detail_modal.get_node_or_null("WindowCenter")
+		var src_center := source_slot.global_position + source_slot.size * 0.5
+		var wc_origin := window_center.global_position if window_center else Vector2.ZERO
+		_zoom_card_holder.position = (src_center - wc_origin) - _zoom_card_holder.pivot_offset
+		_zoom_card_holder.scale = Vector2(source_slot.size.x / zoom_w, source_slot.size.y / zoom_h)
+	else:
+		_zoom_card_holder.position = target_pos
+		_zoom_card_holder.scale = Vector2(0.8, 0.8)
+
+	_zoom_tween = create_tween().set_parallel(true)
+	_zoom_tween.tween_property(_zoom_overlay, "modulate:a", 1.0, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_zoom_tween.tween_property(_zoom_card_holder, "position", target_pos, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_zoom_tween.tween_property(_zoom_card_holder, "scale", Vector2.ONE, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+func _close_zoom_card(immediate: bool = false) -> void:
+	if _zoom_tween != null and _zoom_tween.is_valid():
+		_zoom_tween.kill()
+	if _zoom_overlay == null and _zoom_card_holder == null:
+		return
+	if immediate:
+		if _zoom_overlay:
+			_zoom_overlay.visible = false
+		if _zoom_card_holder:
+			_zoom_card_holder.visible = false
+			for ch in _zoom_card_holder.get_children():
+				ch.queue_free()
+		return
+	if Audio and SFX_CLICK:
+		Audio.play_sfx(SFX_CLICK)
+	_zoom_tween = create_tween().set_parallel(true)
+	if _zoom_overlay:
+		_zoom_tween.tween_property(_zoom_overlay, "modulate:a", 0.0, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	if _zoom_card_holder:
+		_zoom_tween.tween_property(_zoom_card_holder, "scale", Vector2(0.85, 0.85), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_zoom_tween.chain().tween_callback(func():
+		if _zoom_overlay:
+			_zoom_overlay.visible = false
+		if _zoom_card_holder:
+			_zoom_card_holder.visible = false
+			for ch in _zoom_card_holder.get_children():
+				ch.queue_free()
+	)
 
 
 func _on_battle_pressed() -> void:
