@@ -228,9 +228,11 @@ func get_hero_tracker(hero_id: String) -> ProgressionTracker:
 
 	# Build authentic Card Wars XP curve from db_LvUpScheme
 	var scheme_id = "A"
+	var start_lvl = 1
 	var leader_info = Database.get_leader(hid)
 	if not leader_info.is_empty():
 		scheme_id = str(leader_info.get("lv_up_scheme", "A"))
+		start_lvl = maxi(1, int(leader_info.get("start_level", 1)))
 
 	var lv_index = Database.get_lvup_scheme_index(scheme_id)
 	var xp_table: Array[int] = []
@@ -240,6 +242,7 @@ func get_hero_tracker(hero_id: String) -> ProgressionTracker:
 
 	var tracker = ProgressionTracker.new(50, 100, 2.5)
 	tracker.set_custom_xp_table(xp_table)
+	tracker.current_level = clampi(start_lvl, 1, tracker.max_level)
 
 	tracker.level_up.connect(func(old_lvl, new_lvl):
 		var new_hp = get_hero_max_hp(hid)
@@ -292,6 +295,8 @@ func _update_active_hero_hp() -> void:
 
 func _normalize_hero_id(hero_id: String) -> String:
 	var hid = hero_id.strip_edges()
+	if Database.leaders_db.has(hid):
+		return str(Database.leaders_db[hid].get("id", hid))
 	if not hid.begins_with("Leader_") and Database.leaders_db.has("Leader_" + hid):
 		return "Leader_" + hid
 	return hid
@@ -363,11 +368,17 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 			if typeof(h_dict) == TYPE_DICTIONARY:
 				var tracker = get_hero_tracker(hid)
 				tracker.deserialize(h_dict)
+				var leader_info = Database.get_leader(_normalize_hero_id(hid))
+				var start_lvl = maxi(1, int(leader_info.get("start_level", 1))) if not leader_info.is_empty() else 1
+				if tracker.current_level < start_lvl:
+					tracker.current_level = start_lvl
 
 	if data.has("active_deck_name"):
 		active_deck_name = str(data["active_deck_name"])
 	if data.has("player_hero_name"):
 		player_hero_name = str(data["player_hero_name"])
+		if player_hero_name == "Fionna":
+			player_hero_name = "Fiona"
 	if data.has("player_inventory_cards") and typeof(data["player_inventory_cards"]) == TYPE_ARRAY:
 		player_inventory_cards.clear()
 		for c in data["player_inventory_cards"]:

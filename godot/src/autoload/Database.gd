@@ -105,6 +105,8 @@ func _load_leaders() -> void:
 			"for_faction": item.get("forFaction", ""),
 			"sprite_name": item.get("SpriteName", ""),
 			"sprite_name_hero": item.get("SpriteNameHero", ""),
+			"lv_up_scheme": item.get("LvUpSchemeID", "A"),
+			"start_level": maxi(1, int(item.get("StartLevel", "1"))),
 			"fc_world": int(item.get("FCWorld", "0")) == 1
 		}
 		leaders_db[id] = leader

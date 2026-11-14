@@ -860,13 +860,13 @@ func _handle_map_tap(screen_pos: Vector2) -> void:
 # ==============================================================================
 
 func _refresh_hud() -> void:
-	var hero_name = GameManager.player_hero_name
-	if hero_name == "" or hero_name == "Finn":
-		hero_name = "Jake"
-	var char_info = Database.get_character(hero_name)
-	var display_name = str(char_info.get("name", hero_name))
+	# Keep the top-left profile badge fixed (matching MainMenu TopBar and Unity CWUpdatePlayerStats);
+	# cycling battle leaders in Quest Info must never mutate the player profile name/portrait HUD.
+	var profile_char_id = "Jake"
+	var char_info = Database.get_character(profile_char_id)
+	var display_name = str(char_info.get("name", profile_char_id))
 	if display_name == "" or display_name.begins_with("!!"):
-		display_name = hero_name
+		display_name = profile_char_id
 
 	var portrait_sprite = str(char_info.get("portrait", "Portrait_Jake_Frame"))
 	var portrait_path = PORTRAIT_TEX_DIR + portrait_sprite + ".png"
@@ -913,7 +913,7 @@ func _refresh_hud() -> void:
 		coins_label.text = "%d" % coins
 
 
-var _modal_leader_ids: Array[String] = ["Jake", "Finn", "Fionna", "Cake"]
+var _modal_leader_ids: Array[String] = ["Jake", "Finn", "Fiona", "Cake"]
 var _modal_deck_index: int = 0
 var _modal_decks: Array[Dictionary] = []
 
@@ -1067,6 +1067,9 @@ func _refresh_modal_player_side() -> void:
 	var hero_id = GameManager.player_hero_name
 	if hero_id == "":
 		hero_id = "Jake"
+	elif hero_id == "Fionna":
+		hero_id = "Fiona"
+		GameManager.player_hero_name = hero_id
 	var leader_info = Database.get_leader(hero_id)
 	var char_info = Database.get_character(hero_id)
 
@@ -1108,6 +1111,8 @@ func _cycle_leader(delta: int) -> void:
 	var cur = GameManager.player_hero_name
 	if cur == "":
 		cur = "Jake"
+	elif cur == "Fionna":
+		cur = "Fiona"
 	var idx = _modal_leader_ids.find(cur)
 	if idx < 0:
 		idx = 0
@@ -1115,7 +1120,6 @@ func _cycle_leader(delta: int) -> void:
 	GameManager.player_hero_name = _modal_leader_ids[idx]
 	GameManager._update_active_hero_hp()
 	_refresh_modal_player_side()
-	_refresh_hud()
 
 
 func _cycle_deck(delta: int) -> void:
