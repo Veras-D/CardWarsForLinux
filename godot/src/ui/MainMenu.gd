@@ -343,7 +343,20 @@ func close_quest_mode_select() -> void:
 
 func _on_quests_pressed() -> void:
 	_play_sfx()
-	GameManager.open_campaign_map(0)
+	if treehouse_3d and treehouse_3d.has_method("play_quests_activate"):
+		if quad_quests:
+			quad_quests.disabled = true
+		if quad_fionna:
+			quad_fionna.disabled = true
+		treehouse_3d.play_quests_activate(func():
+			if quad_quests:
+				quad_quests.disabled = false
+			if quad_fionna:
+				quad_fionna.disabled = false
+			GameManager.open_campaign_map(0)
+		)
+	else:
+		GameManager.open_campaign_map(0)
 
 func _on_fionna_pressed() -> void:
 	_play_sfx()

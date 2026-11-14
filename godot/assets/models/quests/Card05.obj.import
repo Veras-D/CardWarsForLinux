@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://choy63y4vcoa1"
+path="res://.godot/imported/Card05.obj-d1451f66f24c6006f90c586e85adb3df.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Card05.obj-d1451f66f24c6006f90c586e85adb3df.mesh"]
+
+source_file="res://assets/models/quests/Card05.obj"
+dest_files=["res://.godot/imported/Card05.obj-d1451f66f24c6006f90c586e85adb3df.mesh", "res://.godot/imported/Card05.obj-d1451f66f24c6006f90c586e85adb3df.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

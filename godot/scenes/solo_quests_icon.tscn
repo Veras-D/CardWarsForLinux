@@ -1,0 +1,72 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://src/ui/SoloQuestsIcon.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/low_MultiPlayer.png" id="2_tscroll"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/BattleMap.png" id="3_tcards"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/SinglePlayer.obj" id="4_mscroll"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/Deck01.obj" id="5_mdeck01"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/Deck02.obj" id="6_mdeck02"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/Card01.obj" id="7_mcard01"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/Card02.obj" id="8_mcard02"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/Card03.obj" id="9_mcard03"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/Card04.obj" id="10_mcard04"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/Card05.obj" id="11_mcard05"]
+[ext_resource type="ArrayMesh" path="res://assets/models/quests/Knife.obj" id="12_mknife"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Scroll"]
+shading_mode = 0
+albedo_texture = ExtResource("2_tscroll")
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="Mat_Cards"]
+shading_mode = 0
+albedo_texture = ExtResource("3_tcards")
+texture_filter = 3
+
+[node name="SoloQuestsIcon" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="SinglePlayerRoot" type="Node3D" parent="."]
+transform = Transform3D(-0.004341, 0, 0.02462, 0, 0.05, 0, -0.02462, 0, -0.004341, 0, 0.055, 0)
+
+[node name="ScrollMesh" type="MeshInstance3D" parent="SinglePlayerRoot"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.005919, -1.881058, -0.680826)
+mesh = ExtResource("4_mscroll")
+surface_material_override/0 = SubResource("Mat_Scroll")
+
+[node name="PuppetGlobal" type="Node3D" parent="SinglePlayerRoot"]
+transform = Transform3D(0, 0, 1, -1, 0, 0, 0, -1, 0, -0.000006, -0.019056, 0)
+
+[node name="PuppetGlobalAllCards" type="Node3D" parent="SinglePlayerRoot/PuppetGlobal"]
+
+[node name="Deck01" type="MeshInstance3D" parent="SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards"]
+mesh = ExtResource("5_mdeck01")
+surface_material_override/0 = SubResource("Mat_Cards")
+
+[node name="Deck02" type="MeshInstance3D" parent="SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards"]
+mesh = ExtResource("6_mdeck02")
+surface_material_override/0 = SubResource("Mat_Cards")
+
+[node name="Card01" type="MeshInstance3D" parent="SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards"]
+mesh = ExtResource("7_mcard01")
+surface_material_override/0 = SubResource("Mat_Cards")
+
+[node name="Card02" type="MeshInstance3D" parent="SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards"]
+mesh = ExtResource("8_mcard02")
+surface_material_override/0 = SubResource("Mat_Cards")
+
+[node name="Card03" type="MeshInstance3D" parent="SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards"]
+mesh = ExtResource("9_mcard03")
+surface_material_override/0 = SubResource("Mat_Cards")
+
+[node name="Card04" type="MeshInstance3D" parent="SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards"]
+mesh = ExtResource("10_mcard04")
+surface_material_override/0 = SubResource("Mat_Cards")
+
+[node name="Card05" type="MeshInstance3D" parent="SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards"]
+mesh = ExtResource("11_mcard05")
+surface_material_override/0 = SubResource("Mat_Cards")
+
+[node name="PuppetKnife" type="MeshInstance3D" parent="SinglePlayerRoot/PuppetGlobal"]
+mesh = ExtResource("12_mknife")
+surface_material_override/0 = SubResource("Mat_Cards")

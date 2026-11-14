@@ -37,6 +37,7 @@
 [ext_resource type="ArrayMesh" path="res://assets/models/QuestMap_Scroll.obj" id="35_mscroll"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/QuestMap_Scroll.png" id="36_tscroll"]
 [ext_resource type="PackedScene" path="res://scenes/fionna_cake_book.tscn" id="37_pbook"]
+[ext_resource type="PackedScene" path="res://scenes/solo_quests_icon.tscn" id="57_pquests"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/low_FionnaCakeIcon.png" id="38_tbook"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="43_font"]
 [ext_resource type="PackedScene" path="res://scenes/deck_wars_stadium.tscn" id="50_pstadium"]
@@ -277,11 +278,9 @@ surface_material_override/0 = SubResource("Mat_Logo")
 visible = false
 
 [node name="QuestsMode" type="Node3D" parent="BoardModesGroup"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, -0.12, 0.75)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.540886, -0.12, 0.48)
 
-[node name="ScrollMesh" type="MeshInstance3D" parent="BoardModesGroup/QuestsMode"]
-mesh = ExtResource("35_mscroll")
-surface_material_override/0 = SubResource("Mat_Scroll")
+[node name="SoloQuestsIcon" parent="BoardModesGroup/QuestsMode" instance=ExtResource("57_pquests")]
 
 [node name="FionnaCakeMode" type="Node3D" parent="BoardModesGroup"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.555, -0.12, -0.495)

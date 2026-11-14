@@ -14,6 +14,7 @@ extends Node3D
 @onready var fionna_mode: Node3D = $BoardModesGroup/FionnaCakeMode
 @onready var deckwars_mode: Node3D = $BoardModesGroup/DeckWarsMode
 @onready var fionna_book: FionnaCakeBook = get_node_or_null("BoardModesGroup/FionnaCakeMode/FionnaCakeBook")
+@onready var solo_quests: SoloQuestsIcon = get_node_or_null("BoardModesGroup/QuestsMode/SoloQuestsIcon")
 
 # Camera transforms
 # Start View: Front view framing Jake (left), Finn (right), and the Table
@@ -87,6 +88,8 @@ func set_start_view() -> void:
 		jake_stool.visible = true
 	if fionna_book:
 		fionna_book.close_book(0.0)
+	if solo_quests:
+		solo_quests.stop_audio()
 
 func set_hub_view() -> void:
 	is_hub_view = true
@@ -112,6 +115,8 @@ func set_hub_view() -> void:
 		jake_stool.visible = true
 	if fionna_book:
 		fionna_book.close_book(0.0)
+	if solo_quests:
+		solo_quests.stop_audio()
 
 func set_quest_modes_view() -> void:
 	is_hub_view = true
@@ -138,6 +143,8 @@ func set_quest_modes_view() -> void:
 		board_modes_group.visible = true
 		if fionna_book:
 			fionna_book.reset_anim()
+		if solo_quests:
+			solo_quests.reset_anim()
 		for m in [deckwars_mode, fionna_mode, quests_mode]:
 			if m:
 				m.scale = Vector3.ONE
@@ -243,6 +250,8 @@ func show_quest_modes() -> void:
 		board_modes_group.visible = true
 		if fionna_book:
 			fionna_book.reset_anim()
+		if solo_quests:
+			solo_quests.reset_anim()
 		var modes = [deckwars_mode, fionna_mode, quests_mode]
 		for i in range(modes.size()):
 			var m = modes[i]
@@ -267,6 +276,8 @@ func hide_quest_modes() -> void:
 	
 	if fionna_book:
 		fionna_book.close_book(0.20)
+	if solo_quests:
+		solo_quests.stop_audio()
 	
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
@@ -307,6 +318,14 @@ func play_fionna_activate(on_finished: Callable) -> void:
 		if not fionna_book.activate_finished.is_connected(on_finished):
 			fionna_book.activate_finished.connect(on_finished, CONNECT_ONE_SHOT)
 		fionna_book.play_activate()
+	else:
+		on_finished.call()
+
+func play_quests_activate(on_finished: Callable) -> void:
+	if solo_quests:
+		if not solo_quests.activate_finished.is_connected(on_finished):
+			solo_quests.activate_finished.connect(on_finished, CONNECT_ONE_SHOT)
+		solo_quests.play_activate()
 	else:
 		on_finished.call()
 
