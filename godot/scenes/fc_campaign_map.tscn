@@ -456,16 +456,16 @@ patch_margin_right = 98
 patch_margin_bottom = 90
 
 [node name="CardSlots" type="Control" parent="QuestDetailModal/WindowCenter/RewardDrawer"]
-z_index = 1
+z_index = 2
 layout_mode = 0
-offset_left = 82.0
-offset_top = 20.0
-offset_right = 176.0
-offset_bottom = 378.0
+offset_left = 81.0
+offset_top = 24.0
+offset_right = 171.0
+offset_bottom = 382.0
 mouse_filter = 2
 
 [node name="RewardOuterBG" type="NinePatchRect" parent="QuestDetailModal/WindowCenter/RewardDrawer"]
-z_index = 2
+z_index = 1
 layout_mode = 0
 offset_right = 470.0
 offset_bottom = 896.0

@@ -1162,28 +1162,73 @@ func _set_landscape_icons(row: HBoxContainer, landscapes: Array) -> void:
 			icon_rect.visible = false
 
 
+func _make_card_label(font_res: Font, font_sz: int, pos: Vector2, sz: Vector2, txt: String, col: Color = Color.BLACK, center_v: bool = true) -> Label:
+	var lbl := Label.new()
+	if font_res:
+		lbl.add_theme_font_override("font", font_res)
+	lbl.add_theme_font_size_override("font_size", font_sz)
+	lbl.add_theme_color_override("font_color", col)
+	var adj_y := pos.y
+	if center_v and font_res:
+		adj_y = pos.y + (sz.y - font_res.get_height(font_sz)) * 0.5
+	lbl.position = Vector2(pos.x, adj_y)
+	lbl.size = sz
+	lbl.text = txt
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return lbl
+
+
+func _unity_qsort_cards_by_rarity(arr: Array[Dictionary], low: int, high: int) -> void:
+	if low >= high:
+		return
+	var pivot := int(arr[(low + high) / 2].get("rarity", 1))
+	var i := low
+	var j := high
+	while i <= j:
+		while int(arr[i].get("rarity", 1)) > pivot:
+			i += 1
+		while int(arr[j].get("rarity", 1)) < pivot:
+			j -= 1
+		if i <= j:
+			var tmp := arr[i]
+			arr[i] = arr[j]
+			arr[j] = tmp
+			i += 1
+			j -= 1
+	if low < j:
+		_unity_qsort_cards_by_rarity(arr, low, j)
+	if i < high:
+		_unity_qsort_cards_by_rarity(arr, i, high)
+
+
 func _populate_reward_cards(drops_arr: Array) -> void:
 	if modal_card_slots == null:
 		return
 	for ch in modal_card_slots.get_children():
 		ch.queue_free()
 
-	# Gather card dicts and sort by rarity descending (matching CWMapQuestInfoSet)
+	# Gather card dicts and sort by rarity descending using Unity Mono List.Sort order (CWMapQuestInfo.cs)
 	var cards: Array[Dictionary] = []
 	for cid in drops_arr:
 		var cdata = Database.get_card(str(cid))
 		if not cdata.is_empty():
 			cards.append(cdata)
-	cards.sort_custom(func(a, b): return int(a.get("rarity", 1)) > int(b.get("rarity", 1)))
+	if cards.size() > 1:
+		_unity_qsort_cards_by_rarity(cards, 0, cards.size() - 1)
 
 	var font_res: Font = load(FONT_PATH) if ResourceLoader.exists(FONT_PATH) else null
+	var card_w := 90.0
+	var card_h := 127.0
+	var sx := card_w / 297.0
+	var sy := card_h / 420.0
+	var step_y := 77.0
 	var count = mini(4, cards.size())
 	for i in range(count):
 		var c = cards[i]
-		var card_w := 94.0
-		var card_h := 132.0
 		var slot := Control.new()
-		slot.position = Vector2(0.0, float(i) * 75.0)
+		slot.position = Vector2(0.0, float(i) * step_y)
 		slot.size = Vector2(card_w, card_h)
 		slot.z_index = i + 1
 		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1192,28 +1237,49 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 		var faction = str(c.get("faction", "Universal"))
 		var rarity = int(c.get("rarity", 1))
 		var ctype = str(c.get("type", "CREATURE"))
+		var quality_name = str(c.get("quality_name", "Standard"))
 		var faction_col: Color = FACTION_COLORS.get(faction, Color.WHITE)
+		# Unity PanelManagerBattle.FillCardInfo: BG_Name / BG_Type / Frame_ATK / Frame_DEF use Lerp(factionColor, white, 0.5f)
+		var bg_tint: Color = faction_col.lerp(Color.WHITE, 0.5)
 
-		# Card Art
+		# Card Art (d=-8 in 297x420: center=(0,65) -> top-left=(11, 7.5), size=(275, 275))
 		var art_tex = Database.get_card_texture(str(c.get("texture_path", "")))
 		var art := TextureRect.new()
-		art.position = Vector2(4.0, 13.0)
-		art.size = Vector2(card_w - 8.0, 64.0)
+		art.position = Vector2(11.0 * sx, 7.5 * sy)
+		art.size = Vector2(275.0 * sx, 275.0 * sy)
 		art.texture = art_tex
 		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		slot.add_child(art)
 
-		# Opaque backing for card Type header (Unity BG_Type) so stacked cards don't bleed through
+		# Opaque backing for card Type header (d=-5 BG_Type: center=(0,179), size=(280,24))
 		var bg_type := ColorRect.new()
-		bg_type.position = Vector2(16.0, 2.0)
-		bg_type.size = Vector2(card_w - 32.0, 11.0)
-		bg_type.color = Color(0.996, 0.96, 0.996, 1.0)
+		bg_type.position = Vector2(8.5 * sx, 19.0 * sy)
+		bg_type.size = Vector2(280.0 * sx, 24.0 * sy)
+		bg_type.color = bg_tint
 		bg_type.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		slot.add_child(bg_type)
 
-		# Card Frame
+		# Opaque backing for card Name strip (d=-5 BG_Name: center=(0,-59), size=(280,30))
+		var bg_name := ColorRect.new()
+		bg_name.position = Vector2(8.5 * sx, 254.0 * sy)
+		bg_name.size = Vector2(280.0 * sx, 30.0 * sy)
+		bg_name.color = bg_tint
+		bg_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(bg_name)
+
+		# Cost Orb (d=-2 behind Card_Frame: center=(-100,165), size=(60,60))
+		var cost_bg := TextureRect.new()
+		cost_bg.position = Vector2(18.5 * sx, 15.0 * sy)
+		cost_bg.size = Vector2(60.0 * sx, 60.0 * sy)
+		cost_bg.texture = load(QUEST_INFO_TEX_DIR + "Frame_Cost.png")
+		cost_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		cost_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cost_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(cost_bg)
+
+		# Card Frame (d=0)
 		var frame_file = "Frame_Colorless.png" if faction == "Universal" else "Frame_White.png"
 		var frame := TextureRect.new()
 		frame.position = Vector2.ZERO
@@ -1225,8 +1291,8 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		slot.add_child(frame)
 
-		# Gold Frame overlay for rarity >= 3
-		if rarity >= 3:
+		# Gold Frame overlay ONLY when card Quality is Gold (CardForm.GetCardQualityFrameSprite)
+		if quality_name == "Gold":
 			var gold := TextureRect.new()
 			gold.position = Vector2.ZERO
 			gold.size = Vector2(card_w, card_h)
@@ -1236,99 +1302,112 @@ func _populate_reward_cards(drops_arr: Array) -> void:
 			gold.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			slot.add_child(gold)
 
-		# Type Label
-		var type_lbl := Label.new()
-		type_lbl.position = Vector2(18.0, 3.0)
-		type_lbl.size = Vector2(card_w - 36.0, 12.0)
-		type_lbl.text = ctype.capitalize()
-		type_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		type_lbl.add_theme_color_override("font_color", Color.BLACK)
-		type_lbl.add_theme_font_size_override("font_size", 8)
-		if font_res:
-			type_lbl.add_theme_font_override("font", font_res)
-		slot.add_child(type_lbl)
-
-		# Cost Badge
-		var cost_bg := TextureRect.new()
-		cost_bg.position = Vector2(2.0, 2.0)
-		cost_bg.size = Vector2(20.0, 20.0)
-		cost_bg.texture = load(QUEST_INFO_TEX_DIR + "Frame_Cost.png")
-		cost_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		cost_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		slot.add_child(cost_bg)
-
-		var cost_lbl := Label.new()
-		cost_lbl.position = Vector2(2.0, 2.0)
-		cost_lbl.size = Vector2(20.0, 20.0)
-		cost_lbl.text = str(int(c.get("cost", 1)))
-		cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		cost_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		cost_lbl.add_theme_color_override("font_color", Color(0.98, 0.88, 1.0, 1.0))
-		cost_lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-		cost_lbl.add_theme_constant_override("outline_size", 2)
-		cost_lbl.add_theme_font_size_override("font_size", 11)
-		if font_res:
-			cost_lbl.add_theme_font_override("font", font_res)
-		slot.add_child(cost_lbl)
-
-		# Faction Icon (top-right)
+		# Faction Icon (d=10 top-right circle: center=(118,179), size=(30,30))
 		if LANDSCAPE_ICONS.has(faction):
 			var fact_icon := TextureRect.new()
-			fact_icon.position = Vector2(card_w - 17.0, 2.0)
-			fact_icon.size = Vector2(14.0, 14.0)
+			fact_icon.position = Vector2(251.5 * sx, 16.0 * sy)
+			fact_icon.size = Vector2(30.0 * sx, 30.0 * sy)
 			fact_icon.texture = load(QUEST_INFO_TEX_DIR + str(LANDSCAPE_ICONS[faction]))
 			fact_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			fact_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			fact_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			slot.add_child(fact_icon)
 
-		# Rarity Stars (up to 5) on right side of card
+		# Rarity Stars (d=3, Unity Rarity node at (111,-20), scale 36.1)
 		var full_star = load(NODE_TEX_DIR + "UI_Star_Full.png")
+		var star_offsets: Array[Vector2] = [
+			Vector2(0.0, 0.0),
+			Vector2(-1.0, 0.0),
+			Vector2(-2.0, 0.0),
+			Vector2(-0.35, 0.97),
+			Vector2(-1.41, 0.97)
+		]
+		var star_px := 36.1 * sx
 		for s in range(mini(5, rarity)):
 			var st := TextureRect.new()
-			var col_idx = s % 3
-			var row_idx = s / 3
-			st.position = Vector2(card_w - 13.0 - float(col_idx) * 9.0, 65.0 - float(row_idx) * 9.0)
-			st.size = Vector2(10.0, 10.0)
+			var npos := Vector2(111.0, -20.0) + star_offsets[s] * 36.1
+			st.position = Vector2((npos.x - 18.05 + 148.5) * sx, (210.0 - npos.y - 18.05) * sy)
+			st.size = Vector2(star_px, star_px)
 			st.texture = full_star
 			st.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			st.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			st.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			slot.add_child(st)
 
-		# Name Label
-		var name_lbl := Label.new()
-		name_lbl.position = Vector2(5.0, 78.0)
-		name_lbl.size = Vector2(card_w - 10.0, 13.0)
-		name_lbl.text = str(c.get("name", ""))
-		name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# Cost Label (centered in Cost Orb: center=(-102,162))
+		var cost_lbl := _make_card_label(font_res, 10, Vector2(18.5 * sx, 16.0 * sy), Vector2(56.0 * sx, 58.0 * sy), str(int(c.get("cost", 1))), Color(0.976, 0.831, 1.0, 1.0))
+		cost_lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+		cost_lbl.add_theme_constant_override("outline_size", 2)
+		slot.add_child(cost_lbl)
+
+		# Type Label (centered inside BG_Type band: y=19..43 in 297x420)
+		var type_lbl := _make_card_label(font_res, 6, Vector2(72.0 * sx, 19.0 * sy), Vector2(174.0 * sx, 24.0 * sy), ctype.capitalize())
+		slot.add_child(type_lbl)
+
+		# Name Label (inside BG_Name strip: y=254..284)
+		var name_lbl := _make_card_label(font_res, 7, Vector2(12.0 * sx, 254.0 * sy), Vector2(273.0 * sx, 30.0 * sy), str(c.get("name", "")))
 		name_lbl.clip_text = true
-		name_lbl.add_theme_color_override("font_color", Color.BLACK)
-		name_lbl.add_theme_font_size_override("font_size", 8)
-		if font_res:
-			name_lbl.add_theme_font_override("font", font_res)
 		slot.add_child(name_lbl)
 
-		# ATK / DEF for Creatures
+		# Ability Text Block (FLOOP cost header + Description combined cleanly so lines never overlap)
+		var ability_type = str(c.get("ability_type", ""))
+		var floop_cost = int(c.get("floop_cost", 0))
+		var full_desc := str(c.get("desc", ""))
+		if ability_type == "FLOOP":
+			full_desc = "FLOOP (%d Magic)\n%s" % [floop_cost, full_desc]
+
+		var desc_lbl := _make_card_label(font_res, 5, Vector2(16.0 * sx, 285.0 * sy), Vector2(265.0 * sx, (96.0 if ctype == "CREATURE" else 118.0) * sy), full_desc, Color.BLACK, false)
+		desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		desc_lbl.clip_text = true
+		desc_lbl.add_theme_constant_override("line_spacing", 0)
+		slot.add_child(desc_lbl)
+
+		# ATK / DEF badges & values for Creatures (Frame_Combat + Combat_Icon_ATK/DEF)
 		if ctype == "CREATURE":
-			var atk_lbl := Label.new()
-			atk_lbl.position = Vector2(6.0, card_h - 18.0)
-			atk_lbl.size = Vector2(26.0, 14.0)
-			atk_lbl.text = str(int(c.get("atk", 0)))
-			atk_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			atk_lbl.add_theme_color_override("font_color", Color.BLACK)
-			atk_lbl.add_theme_font_size_override("font_size", 9)
-			if font_res:
-				atk_lbl.add_theme_font_override("font", font_res)
+			var combat_tex = load(QUEST_INFO_TEX_DIR + "Frame_Combat.png")
+			var atk_bg := TextureRect.new()
+			atk_bg.position = Vector2(11.0 * sx, 359.0 * sy)
+			atk_bg.size = Vector2(75.0 * sx, 50.0 * sy)
+			atk_bg.texture = combat_tex
+			atk_bg.modulate = bg_tint
+			atk_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			atk_bg.stretch_mode = TextureRect.STRETCH_SCALE
+			atk_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			slot.add_child(atk_bg)
+
+			var def_bg := TextureRect.new()
+			def_bg.position = Vector2(210.5 * sx, 359.0 * sy)
+			def_bg.size = Vector2(76.0 * sx, 50.0 * sy)
+			def_bg.texture = combat_tex
+			def_bg.modulate = bg_tint
+			def_bg.flip_h = true
+			def_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			def_bg.stretch_mode = TextureRect.STRETCH_SCALE
+			def_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			slot.add_child(def_bg)
+
+			var atk_lbl := _make_card_label(font_res, 7, Vector2(16.0 * sx, 362.0 * sy), Vector2(32.0 * sx, 46.0 * sy), str(int(c.get("atk", 0))))
 			slot.add_child(atk_lbl)
 
-			var def_lbl := Label.new()
-			def_lbl.position = Vector2(card_w - 32.0, card_h - 18.0)
-			def_lbl.size = Vector2(26.0, 14.0)
-			def_lbl.text = str(int(c.get("def", 0)))
-			def_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			def_lbl.add_theme_color_override("font_color", Color.BLACK)
-			def_lbl.add_theme_font_size_override("font_size", 9)
-			if font_res:
-				def_lbl.add_theme_font_override("font", font_res)
+			var atk_icon := TextureRect.new()
+			atk_icon.position = Vector2(49.0 * sx, 370.0 * sy)
+			atk_icon.size = Vector2(16.6 * sx, 29.7 * sy)
+			atk_icon.texture = load(QUEST_INFO_TEX_DIR + "Combat_Icon_ATK.png")
+			atk_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			atk_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			atk_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			slot.add_child(atk_icon)
+
+			var def_icon := TextureRect.new()
+			def_icon.position = Vector2(226.0 * sx, 373.5 * sy)
+			def_icon.size = Vector2(19.6 * sx, 22.6 * sy)
+			def_icon.texture = load(QUEST_INFO_TEX_DIR + "Combat_Icon_DEF.png")
+			def_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			def_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			def_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			slot.add_child(def_icon)
+
+			var def_lbl := _make_card_label(font_res, 7, Vector2(246.0 * sx, 362.0 * sy), Vector2(32.0 * sx, 46.0 * sy), str(int(c.get("def", 0))))
 			slot.add_child(def_lbl)
 
 
