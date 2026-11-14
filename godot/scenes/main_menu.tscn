@@ -247,75 +247,88 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -480.0
-offset_top = 12.0
-offset_right = -16.0
-offset_bottom = 74.0
+offset_left = -384.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = 72.0
 grow_horizontal = 0
-theme_override_constants/separation = 14
+theme_override_constants/separation = 3
 alignment = 2
 
-[node name="InventoryBadge" type="TextureRect" parent="TopBar/Currencies"]
-custom_minimum_size = Vector2(145, 62)
+[node name="InventoryBadge" type="Control" parent="TopBar/Currencies"]
+custom_minimum_size = Vector2(146, 66)
 layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Bg" type="NinePatchRect" parent="TopBar/Currencies/InventoryBadge"]
+layout_mode = 0
+offset_right = 210.0
+offset_bottom = 95.0
+scale = Vector2(0.6952, 0.6947)
+mouse_filter = 2
 texture = ExtResource("9_inventory")
-expand_mode = 1
+patch_margin_left = 118
+patch_margin_right = 55
 
 [node name="CardsLabel" type="Label" parent="TopBar/Currencies/InventoryBadge"]
 layout_mode = 0
 offset_left = 68.0
-offset_top = 16.0
-offset_right = 138.0
-offset_bottom = 44.0
+offset_top = 17.0
+offset_right = 132.0
+offset_bottom = 45.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
 text = "14/50"
-horizontal_alignment = 1
+horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="GemsBadge" type="TextureRect" parent="TopBar/Currencies"]
-custom_minimum_size = Vector2(130, 62)
+custom_minimum_size = Vector2(102, 61)
 layout_mode = 2
+size_flags_vertical = 4
 texture = ExtResource("8_gems")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="GemsLabel" type="Label" parent="TopBar/Currencies/GemsBadge"]
 layout_mode = 0
-offset_left = 58.0
-offset_top = 16.0
-offset_right = 122.0
-offset_bottom = 44.0
+offset_left = 44.0
+offset_top = 15.0
+offset_right = 90.0
+offset_bottom = 43.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
 text = "5"
-horizontal_alignment = 1
+horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="CoinsBadge" type="TextureRect" parent="TopBar/Currencies"]
-custom_minimum_size = Vector2(145, 62)
+custom_minimum_size = Vector2(118, 54)
 layout_mode = 2
+size_flags_vertical = 4
 texture = ExtResource("7_coins")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="CoinsLabel" type="Label" parent="TopBar/Currencies/CoinsBadge"]
 layout_mode = 0
-offset_left = 62.0
-offset_top = 16.0
-offset_right = 138.0
-offset_bottom = 44.0
+offset_left = 46.0
+offset_top = 12.0
+offset_right = 108.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
 text = "143"
-horizontal_alignment = 1
+horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="BottomDock" type="Control" parent="."]
