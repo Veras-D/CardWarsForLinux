@@ -3,7 +3,7 @@ extends Control
 signal closed
 signal inventory_upgraded(new_max: int)
 
-const SFX_CLICK: AudioStream = preload("res://assets/audio/sfx/Click.wav")
+const SFX_CLICK: AudioStream = preload("res://assets/audio/sfx/UI_Select.wav")
 
 @onready var dimmer: ColorRect = $Dimmer
 @onready var frame: Control = $Center/Frame

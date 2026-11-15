@@ -1,13 +1,20 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://src/ui/StoreInventoryModal.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/popup_box.png" id="3_popup"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/QuestInfo_BG2_Small.png" id="3_frame"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="4_cancel"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="5_btngreen"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonBlue.png" id="6_btnblue"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/UI_Coin_Icon.png" id="7_coin"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/GsGems.png" id="8_gem"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bodyfill"]
+bg_color = Color(0.188, 0.314, 0.376, 0.96)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 
 [node name="StoreInventoryModal" type="Control"]
 layout_mode = 3
@@ -36,43 +43,58 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Frame" type="Control" parent="Center"]
-custom_minimum_size = Vector2(560, 410)
+custom_minimum_size = Vector2(556, 486)
 layout_mode = 2
 
 [node name="TitleBar" type="Control" parent="Center/Frame"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 86.0
+offset_bottom = 128.0
 grow_horizontal = 2
 
-[node name="Bg" type="NinePatchRect" parent="Center/Frame/TitleBar"]
+[node name="FillBg" type="Panel" parent="Center/Frame/TitleBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -16.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("3_popup")
-patch_margin_left = 28
-patch_margin_top = 28
-patch_margin_right = 28
-patch_margin_bottom = 28
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bodyfill")
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/TitleBar"]
+layout_mode = 0
+offset_right = 794.0
+offset_bottom = 183.0
+scale = Vector2(0.7, 0.7)
+mouse_filter = 2
+texture = ExtResource("3_frame")
+patch_margin_left = 58
+patch_margin_top = 52
+patch_margin_right = 65
+patch_margin_bottom = 58
 
 [node name="TitleLabel" type="Label" parent="Center/Frame/TitleBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 68.0
-offset_right = -68.0
+offset_left = 20.0
+offset_top = 8.0
+offset_right = -24.0
+offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 38
 text = "MORE CARDS"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -84,12 +106,13 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -74.0
-offset_top = -31.0
-offset_right = -12.0
-offset_bottom = 31.0
+offset_left = -98.0
+offset_top = -38.0
+offset_right = -24.0
+offset_bottom = 36.0
 grow_horizontal = 0
 grow_vertical = 2
+focus_mode = 0
 texture_normal = ExtResource("4_cancel")
 ignore_texture_size = true
 stretch_mode = 5
@@ -99,22 +122,35 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 82.0
+offset_top = 122.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body"]
+[node name="FillBg" type="Panel" parent="Center/Frame/Body"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -16.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("3_popup")
-patch_margin_left = 28
-patch_margin_top = 28
-patch_margin_right = 28
-patch_margin_bottom = 28
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bodyfill")
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body"]
+layout_mode = 0
+offset_right = 794.0
+offset_bottom = 520.0
+scale = Vector2(0.7, 0.7)
+mouse_filter = 2
+texture = ExtResource("3_frame")
+patch_margin_left = 58
+patch_margin_top = 52
+patch_margin_right = 65
+patch_margin_bottom = 58
 
 [node name="PurchasePanel" type="Control" parent="Center/Frame/Body"]
 layout_mode = 1
@@ -129,15 +165,15 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 28.0
-offset_top = 26.0
+offset_top = 34.0
 offset_right = -28.0
-offset_bottom = 86.0
+offset_bottom = 92.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_constants/outline_size = 6
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 26
 text = "Increase box Space by 5"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -148,15 +184,15 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 28.0
-offset_top = 92.0
+offset_top = 112.0
 offset_right = -28.0
-offset_bottom = 128.0
+offset_bottom = 156.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
+theme_override_constants/outline_size = 7
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 32
 text = "Current Space is:"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -166,13 +202,13 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 28.0
-offset_top = 128.0
+offset_top = 154.0
 offset_right = -28.0
-offset_bottom = 176.0
+offset_bottom = 204.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0.92, 0.25, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_constants/outline_size = 7
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 34
 text = "50"
@@ -186,55 +222,57 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 36.0
-offset_top = -114.0
+offset_top = -132.0
 offset_right = -36.0
-offset_bottom = -26.0
+offset_bottom = -30.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_constants/separation = 36
+theme_override_constants/separation = 42
 alignment = 1
 
 [node name="CoinsBtn" type="TextureButton" parent="Center/Frame/Body/PurchasePanel/Buttons"]
-custom_minimum_size = Vector2(200, 88)
+custom_minimum_size = Vector2(204, 102)
 layout_mode = 2
 focus_mode = 0
 
 [node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/PurchasePanel/Buttons/CoinsBtn"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+offset_right = 408.0
+offset_bottom = 204.0
+scale = Vector2(0.5, 0.5)
 mouse_filter = 2
 texture = ExtResource("5_btngreen")
-patch_margin_left = 24
-patch_margin_top = 24
-patch_margin_right = 24
-patch_margin_bottom = 24
+patch_margin_left = 36
+patch_margin_top = 30
+patch_margin_right = 36
+patch_margin_bottom = 40
 
 [node name="HBox" type="HBoxContainer" parent="Center/Frame/Body/PurchasePanel/Buttons/CoinsBtn"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 8.0
+offset_right = -14.0
+offset_bottom = -6.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 22
 alignment = 1
 
 [node name="PriceLabel" type="Label" parent="Center/Frame/Body/PurchasePanel/Buttons/CoinsBtn/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_override_constants/outline_size = 7
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 34
 text = "500"
 
 [node name="Icon" type="TextureRect" parent="Center/Frame/Body/PurchasePanel/Buttons/CoinsBtn/HBox"]
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(48, 44)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -243,46 +281,48 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="GemsBtn" type="TextureButton" parent="Center/Frame/Body/PurchasePanel/Buttons"]
-custom_minimum_size = Vector2(200, 88)
+custom_minimum_size = Vector2(204, 102)
 layout_mode = 2
 focus_mode = 0
 
 [node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/PurchasePanel/Buttons/GemsBtn"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+offset_right = 408.0
+offset_bottom = 204.0
+scale = Vector2(0.5, 0.5)
 mouse_filter = 2
 texture = ExtResource("5_btngreen")
-patch_margin_left = 24
-patch_margin_top = 24
-patch_margin_right = 24
-patch_margin_bottom = 24
+patch_margin_left = 36
+patch_margin_top = 30
+patch_margin_right = 36
+patch_margin_bottom = 40
 
 [node name="HBox" type="HBoxContainer" parent="Center/Frame/Body/PurchasePanel/Buttons/GemsBtn"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 8.0
+offset_right = -14.0
+offset_bottom = -6.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 32
 alignment = 1
 
 [node name="PriceLabel" type="Label" parent="Center/Frame/Body/PurchasePanel/Buttons/GemsBtn/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_override_constants/outline_size = 7
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 34
 text = "1"
 
 [node name="Icon" type="TextureRect" parent="Center/Frame/Body/PurchasePanel/Buttons/GemsBtn/HBox"]
-custom_minimum_size = Vector2(46, 38)
+custom_minimum_size = Vector2(48, 42)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -304,15 +344,15 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 36.0
-offset_top = 36.0
+offset_top = 42.0
 offset_right = -36.0
-offset_bottom = 160.0
+offset_bottom = 180.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_constants/outline_size = 6
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 24
 text = "Your card box space has reached its maximum size. You can craft or sell cards to get rid of some cards."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -325,39 +365,39 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -100.0
-offset_top = -114.0
-offset_right = 100.0
-offset_bottom = -26.0
+offset_left = -102.0
+offset_top = -132.0
+offset_right = 102.0
+offset_bottom = -30.0
 grow_horizontal = 2
 grow_vertical = 0
 
 [node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/MaxReachedPanel/OkBtn"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+offset_right = 408.0
+offset_bottom = 204.0
+scale = Vector2(0.5, 0.5)
 mouse_filter = 2
 texture = ExtResource("5_btngreen")
-patch_margin_left = 24
-patch_margin_top = 24
-patch_margin_right = 24
-patch_margin_bottom = 24
+patch_margin_left = 36
+patch_margin_top = 30
+patch_margin_right = 36
+patch_margin_bottom = 40
 
 [node name="Label" type="Label" parent="Center/Frame/Body/MaxReachedPanel/OkBtn"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 4.0
+offset_bottom = -6.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_constants/outline_size = 6
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 34
 text = "OK"
 horizontal_alignment = 1
 vertical_alignment = 1
