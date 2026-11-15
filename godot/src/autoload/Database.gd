@@ -236,6 +236,12 @@ func get_card(id: String) -> Dictionary:
 func get_leader(character_or_leader_id: String) -> Dictionary:
 	return leaders_db.get(character_or_leader_id, {})
 
+func is_leader_fc(character_or_leader_id: String) -> bool:
+	var leader = get_leader(character_or_leader_id)
+	if leader.is_empty() and not character_or_leader_id.begins_with("Leader_"):
+		leader = get_leader("Leader_" + character_or_leader_id)
+	return bool(leader.get("fc_world", false))
+
 func get_card_texture(texture_path: String) -> Texture2D:
 	if ResourceLoader.exists(texture_path):
 		return load(texture_path)
@@ -678,6 +684,14 @@ func _load_quests() -> void:
 				var pos_y = 120.0 + (region_idx * 200.0) + (sin(float(local_idx) * 0.7) * 40.0)
 				pos = Vector2(pos_x, pos_y)
 
+		var restricted_raw = str(item.get("RestrictedLeaders", "")).strip_edges()
+		var restricted_leaders: Array[String] = []
+		if restricted_raw != "":
+			for part in restricted_raw.split(","):
+				var rl = part.strip_edges()
+				if rl != "":
+					restricted_leaders.append(rl)
+
 		var quest_entry = {
 			"id": qid,
 			"label": qlabel,
@@ -690,6 +704,8 @@ func _load_quests() -> void:
 			"stamina": int(item.get("Stamina", "1")),
 			"stamina_awarded": int(item.get("StaminaAwarded", "0")),
 			"leader_awarded": str(item.get("LeaderAwarded", "")).strip_edges(),
+			"leader_rules": str(item.get("LeaderRules", "")).strip_edges().to_lower(),
+			"restricted_leaders": restricted_leaders,
 			"node_prefab_path": str(item.get("NodePrefabPath", "")).strip_edges(),
 			"min_xp": float(item.get("MinXP", "0")),
 			"max_xp": float(item.get("MaxXP", "0")),

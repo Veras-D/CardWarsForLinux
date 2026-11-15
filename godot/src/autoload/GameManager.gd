@@ -5,6 +5,7 @@ signal player_currencies_updated(coins: int, gems: int)
 signal hero_leveled_up(hero_id: String, old_level: int, new_level: int, new_max_hp: int)
 signal chest_opened(chest_type: String, rolls: Array)
 signal quest_completed(quest_id: String, stars: int, rewards: Dictionary)
+signal leader_unlocked(leader_id: String)
 signal elfisto_round_cleared(round_num: int, reward: Dictionary)
 signal elfisto_run_ended(cleared_all: bool, final_round: int)
 
@@ -77,6 +78,7 @@ var opponent_deck: Array[String] = [
 var player_hero_name: String = "Jake"
 var player_hero_max_hp: int = 15
 var player_landscapes: Array[String] = ["Corn", "Corn", "Corn", "Swamp"]
+var unlocked_leaders: Array[String] = ["Leader_Jake"]
 
 var opponent_hero_name: String = "Jake"
 var opponent_hero_max_hp: int = 25
@@ -295,11 +297,124 @@ func _update_active_hero_hp() -> void:
 
 func _normalize_hero_id(hero_id: String) -> String:
 	var hid = hero_id.strip_edges()
+	if hid == "Fionna":
+		return "Leader_Fionna"
 	if Database.leaders_db.has(hid):
 		return str(Database.leaders_db[hid].get("id", hid))
 	if not hid.begins_with("Leader_") and Database.leaders_db.has("Leader_" + hid):
 		return "Leader_" + hid
 	return hid
+
+
+func get_leader_character_id(hero_id: String) -> String:
+	var hid = _normalize_hero_id(hero_id)
+	var leader_info = Database.get_leader(hid)
+	if not leader_info.is_empty():
+		return str(leader_info.get("character_id", hero_id))
+	return hero_id
+
+
+func is_leader_unlocked(hero_id: String) -> bool:
+	var hid = _normalize_hero_id(hero_id)
+	return unlocked_leaders.has(hid)
+
+
+func unlock_leader(hero_id: String) -> bool:
+	var hid = _normalize_hero_id(hero_id)
+	if hid == "" or Database.get_leader(hid).is_empty():
+		return false
+	if unlocked_leaders.has(hid):
+		return false
+	unlocked_leaders.append(hid)
+	get_hero_tracker(hid)
+	leader_unlocked.emit(hid)
+	return true
+
+
+func ensure_fc_leaders_unlocked() -> void:
+	# Matches Unity FCMapController.ValidateFCLeaders(): entering Fionna & Cake grants Fionna and Cake
+	var changed = false
+	if unlock_leader("Leader_Fionna"):
+		changed = true
+	if unlock_leader("Leader_Cake"):
+		changed = true
+	if changed:
+		save_profile()
+
+
+func can_use_leader_for_quest(hero_id: String, quest_id: String) -> bool:
+	var hid = _normalize_hero_id(hero_id)
+	if not is_leader_unlocked(hid):
+		return false
+	var leader_info = Database.get_leader(hid)
+	if leader_info.is_empty():
+		return false
+
+	var quest = Database.get_quest(quest_id)
+	if quest.is_empty():
+		return true
+
+	# 1. Fionna & Cake vs Main Campaign world lock (CWQuestLoad.CanStartQuest FCWorld check)
+	var quest_is_fc: bool = (str(quest.get("type", "")) == "fc") or Database.is_leader_fc(str(quest.get("leader_id", "")))
+	var leader_is_fc: bool = bool(leader_info.get("fc_world", false))
+	if leader_is_fc != quest_is_fc:
+		return false
+
+	# 2. Cannot play against yourself or Jake vs BMO (CWQuestLoad.CanStartQuest)
+	var char_id = str(leader_info.get("character_id", ""))
+	var opp_id = str(quest.get("opponent", ""))
+	if char_id != "" and opp_id != "":
+		if char_id == opp_id:
+			return false
+		if (char_id == "BMO" and opp_id == "Jake") or (char_id == "Jake" and opp_id == "BMO"):
+			return false
+
+	# 3. Quest-specific LeaderRules (Allow / NotAllow, e.g. FC quests 5059/5060)
+	var rules = str(quest.get("leader_rules", "")).to_lower()
+	var restricted: Array = quest.get("restricted_leaders", [])
+	if rules == "allow" and not restricted.is_empty():
+		var matched = false
+		for r_id in restricted:
+			if _normalize_hero_id(str(r_id)) == hid:
+				matched = true
+				break
+		if not matched:
+			return false
+	elif rules == "notallow" and not restricted.is_empty():
+		for r_id in restricted:
+			if _normalize_hero_id(str(r_id)) == hid:
+				return false
+
+	return true
+
+
+func get_valid_leaders_for_quest(quest_id: String) -> Array[String]:
+	var result: Array[String] = []
+	for hid in unlocked_leaders:
+		if can_use_leader_for_quest(hid, quest_id):
+			var char_id = get_leader_character_id(hid)
+			if char_id != "" and not result.has(char_id):
+				result.append(char_id)
+	return result
+
+
+func _sync_legacy_unlocked_leaders() -> void:
+	if not unlocked_leaders.has("Leader_Jake"):
+		unlocked_leaders.append("Leader_Jake")
+	for graph_ref in [campaign_graph, fc_campaign_graph]:
+		if graph_ref == null:
+			continue
+		var nodes_dict = graph_ref.nodes
+		for qid in nodes_dict.keys():
+			var nd: Dictionary = nodes_dict[qid]
+			if int(nd.get("stars", 0)) > 0:
+				var q = Database.get_quest(str(qid))
+				var la = str(q.get("leader_awarded", "")).strip_edges()
+				if la != "":
+					unlock_leader(la)
+				if graph_ref == fc_campaign_graph:
+					unlock_leader("Leader_Fionna")
+					unlock_leader("Leader_Cake")
 
 
 # ==============================================================================
@@ -330,6 +445,7 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		},
 		"active_deck_name": active_deck_name,
 		"player_hero_name": player_hero_name,
+		"unlocked_leaders": unlocked_leaders,
 		"player_inventory_cards": player_inventory_cards,
 		"owned_card_counts": owned_card_counts
 	}
@@ -345,8 +461,9 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 	_init_wallet()
 	if not FileAccess.file_exists(save_path):
-		# Default initial hero: Finn
-		get_hero_tracker("Finn")
+		# Default initial hero: Jake
+		unlocked_leaders = ["Leader_Jake"]
+		get_hero_tracker("Jake")
 		return false
 
 	var file = FileAccess.open(save_path, FileAccess.READ)
@@ -391,6 +508,18 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		campaign_graph.deserialize(data["campaign"])
 	if data.has("fc_campaign") and typeof(data["fc_campaign"]) == TYPE_DICTIONARY and fc_campaign_graph != null:
 		fc_campaign_graph.deserialize(data["fc_campaign"])
+
+	if data.has("unlocked_leaders") and typeof(data["unlocked_leaders"]) == TYPE_ARRAY:
+		unlocked_leaders.clear()
+		for lid in data["unlocked_leaders"]:
+			var norm = _normalize_hero_id(str(lid))
+			if norm != "" and not Database.get_leader(norm).is_empty() and not unlocked_leaders.has(norm):
+				unlocked_leaders.append(norm)
+		if not unlocked_leaders.has("Leader_Jake"):
+			unlocked_leaders.insert(0, "Leader_Jake")
+	else:
+		unlocked_leaders = ["Leader_Jake"]
+		_sync_legacy_unlocked_leaders()
 	if data.has("claimed_star_milestones") and typeof(data["claimed_star_milestones"]) == TYPE_ARRAY:
 		claimed_star_milestones.clear()
 		for m in data["claimed_star_milestones"]:
@@ -559,6 +688,7 @@ func apply_custom_deck(deck_data: Dictionary) -> void:
 
 func open_deck_builder() -> void:
 	current_state = MatchState.MENU
+	_clear_cached_menu_scenes(get_tree().current_scene)
 	get_tree().change_scene_to_file("res://scenes/deck_builder.tscn")
 
 
@@ -619,6 +749,9 @@ func _clear_cached_menu_scenes(except_node: Node = null) -> void:
 	if _cached_main_menu != null and is_instance_valid(_cached_main_menu) and _cached_main_menu != except_node:
 		_cached_main_menu.queue_free()
 	_cached_main_menu = null if _cached_main_menu != except_node else _cached_main_menu
+	if _cached_main_map != null and is_instance_valid(_cached_main_map) and _cached_main_map != except_node:
+		_cached_main_map.queue_free()
+	_cached_main_map = null if _cached_main_map != except_node else _cached_main_map
 	if _cached_fc_map != null and is_instance_valid(_cached_fc_map) and _cached_fc_map != except_node:
 		_cached_fc_map.queue_free()
 	_cached_fc_map = null if _cached_fc_map != except_node else _cached_fc_map
@@ -644,7 +777,7 @@ func return_to_menu() -> void:
 	var cur = tree.current_scene
 	if _cached_main_menu != null and is_instance_valid(_cached_main_menu):
 		if cur != null and cur != _cached_main_menu:
-			if cur == _cached_fc_map:
+			if cur == _cached_fc_map or cur == _cached_main_map:
 				cur.visible = false
 				cur.process_mode = Node.PROCESS_MODE_DISABLED
 			else:
@@ -757,13 +890,19 @@ func complete_campaign_quest(quest_id: String, match_stats: Dictionary) -> Dicti
 	for cd in quest.get("card_drops", []):
 		card_drops.append(str(cd))
 
+	var leader_awarded = str(quest.get("leader_awarded", "")).strip_edges()
+	var newly_unlocked_leader = ""
+	if leader_awarded != "" and unlock_leader(leader_awarded):
+		newly_unlocked_leader = leader_awarded
+
 	add_rewards(awarded_coins, card_drops, awarded_xp)
 	save_profile()
 
 	var rewards_dict = {
 		"coins": awarded_coins,
 		"xp": awarded_xp,
-		"cards": card_drops
+		"cards": card_drops,
+		"leader_awarded": newly_unlocked_leader
 	}
 
 	quest_completed.emit(quest_id, stars_earned, rewards_dict)
@@ -842,10 +981,18 @@ func launch_quest_battle(quest_id: String) -> bool:
 
 	active_quest_id = quest_id
 	if quest.get("type") == "fc":
+		ensure_fc_leaders_unlocked()
 		active_fc_quest_id = quest_id
 		initial_campaign_world = 1
 	else:
 		initial_campaign_world = 0
+
+	if not can_use_leader_for_quest(player_hero_name, quest_id):
+		var valid_leaders = get_valid_leaders_for_quest(quest_id)
+		if valid_leaders.is_empty():
+			return false
+		player_hero_name = valid_leaders[0]
+		_update_active_hero_hp()
 
 	# Set opponent hero
 	var opp_name = str(quest.get("opponent", "Jake"))
@@ -877,7 +1024,35 @@ func launch_quest_battle(quest_id: String) -> bool:
 var initial_campaign_world: int = 0
 var menu_return_view: String = "start"
 var _cached_main_menu: Node = null
+var _cached_main_map: Node = null
 var _cached_fc_map: Node = null
+
+
+func _open_cached_map(scene_path: String, cached_node: Node) -> Node:
+	var tree = get_tree()
+	var cur = tree.current_scene
+	if cur != null and cur.name == "MainMenu":
+		_cached_main_menu = cur
+		cur.visible = false
+		cur.process_mode = Node.PROCESS_MODE_DISABLED
+	elif cur != null and cur != cached_node:
+		if cur == _cached_fc_map or cur == _cached_main_map:
+			cur.visible = false
+			cur.process_mode = Node.PROCESS_MODE_DISABLED
+		else:
+			cur.queue_free()
+
+	if cached_node == null or not is_instance_valid(cached_node):
+		var packed = load(scene_path)
+		cached_node = packed.instantiate()
+		tree.root.add_child(cached_node)
+	else:
+		cached_node.visible = true
+		cached_node.process_mode = Node.PROCESS_MODE_INHERIT
+		if cached_node.has_method("on_map_opened"):
+			cached_node.on_map_opened()
+	tree.current_scene = cached_node
+	return cached_node
 
 
 func open_campaign_map(world: int = -1) -> void:
@@ -887,28 +1062,10 @@ func open_campaign_map(world: int = -1) -> void:
 	menu_return_view = "quest_select"
 	current_state = MatchState.MENU
 	if world == 1:
-		var tree = get_tree()
-		var cur = tree.current_scene
-		if cur != null and cur.name == "MainMenu":
-			_cached_main_menu = cur
-			cur.visible = false
-			cur.process_mode = Node.PROCESS_MODE_DISABLED
-		elif cur != null and cur != _cached_fc_map:
-			cur.queue_free()
-
-		if _cached_fc_map == null or not is_instance_valid(_cached_fc_map):
-			var fc_packed = load("res://scenes/fc_campaign_map.tscn")
-			_cached_fc_map = fc_packed.instantiate()
-			tree.root.add_child(_cached_fc_map)
-		else:
-			_cached_fc_map.visible = true
-			_cached_fc_map.process_mode = Node.PROCESS_MODE_INHERIT
-			if _cached_fc_map.has_method("on_map_opened"):
-				_cached_fc_map.on_map_opened()
-		tree.current_scene = _cached_fc_map
+		ensure_fc_leaders_unlocked()
+		_cached_fc_map = _open_cached_map("res://scenes/fc_campaign_map.tscn", _cached_fc_map)
 	else:
-		_clear_cached_menu_scenes(get_tree().current_scene)
-		get_tree().change_scene_to_file("res://scenes/campaign_map.tscn")
+		_cached_main_map = _open_cached_map("res://scenes/campaign_map.tscn", _cached_main_map)
 
 
 # ==============================================================================
