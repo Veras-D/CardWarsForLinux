@@ -6,6 +6,7 @@ signal hero_leveled_up(hero_id: String, old_level: int, new_level: int, new_max_
 signal chest_opened(chest_type: String, rolls: Array)
 signal quest_completed(quest_id: String, stars: int, rewards: Dictionary)
 signal leader_unlocked(leader_id: String)
+signal inventory_capacity_changed(new_max_inventory: int)
 signal elfisto_round_cleared(round_num: int, reward: Dictionary)
 signal elfisto_run_ended(cleared_all: bool, final_round: int)
 
@@ -105,6 +106,8 @@ var player_coins: int:
 				wallet.withdraw("coins", -diff)
 var player_inventory_cards: Array[String] = []
 var owned_card_counts: Dictionary = {}
+const DEFAULT_MAX_INVENTORY: int = 50
+var max_inventory: int = DEFAULT_MAX_INVENTORY
 var active_deck_name: String = "Jake Starter Deck"
 
 # Core Economy & Progression Systems (SYS-8)
@@ -447,7 +450,8 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"player_hero_name": player_hero_name,
 		"unlocked_leaders": unlocked_leaders,
 		"player_inventory_cards": player_inventory_cards,
-		"owned_card_counts": owned_card_counts
+		"owned_card_counts": owned_card_counts,
+		"max_inventory": max_inventory
 	}
 
 	var file = FileAccess.open(save_path, FileAccess.WRITE)
@@ -502,6 +506,8 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 			player_inventory_cards.append(str(c))
 	if data.has("owned_card_counts") and typeof(data["owned_card_counts"]) == TYPE_DICTIONARY:
 		owned_card_counts = data["owned_card_counts"].duplicate(true)
+	if data.has("max_inventory"):
+		max_inventory = maxi(DEFAULT_MAX_INVENTORY, int(data["max_inventory"]))
 	if data.has("gacha_pity") and typeof(data["gacha_pity"]) == TYPE_DICTIONARY and gacha_roller != null:
 		gacha_roller.deserialize_pity(data["gacha_pity"])
 	if data.has("campaign") and typeof(data["campaign"]) == TYPE_DICTIONARY and campaign_graph != null:
@@ -1152,4 +1158,55 @@ func record_elfisto_battle_result(won: bool, remaining_hp: int) -> Dictionary:
 			"round": ended_round,
 			"reset": true
 		}
+
+
+# ==============================================================================
+# STORE (INVENTORY CAPACITY & GEM BUNDLES)
+# ==============================================================================
+
+func get_max_inventory() -> int:
+	return maxi(DEFAULT_MAX_INVENTORY, max_inventory)
+
+
+func get_total_card_count() -> int:
+	return player_deck.size() + player_inventory_cards.size()
+
+
+func purchase_inventory_increase(use_gems: bool) -> Dictionary:
+	_init_wallet()
+	var tier: Dictionary = Database.get_card_box_tier(max_inventory)
+	var gain: int = int(tier.get("gain", 0))
+	if tier.is_empty() or gain <= 0 or max_inventory + gain > Database.card_box_max_capacity:
+		return {"ok": false, "reason": "Your card box space has reached its maximum size."}
+
+	if use_gems:
+		var gem_price: int = int(tier.get("gem_price", 0))
+		if gem_price <= 0 or not spend_gems(gem_price):
+			return {"ok": false, "reason": "Not enough gems!", "not_enough_gems": true}
+	else:
+		var coin_price: int = int(tier.get("coin_price", 0))
+		if coin_price <= 0 or not spend_coins(coin_price):
+			return {"ok": false, "reason": "Not enough coins!", "not_enough_coins": true}
+
+	max_inventory += gain
+	inventory_capacity_changed.emit(max_inventory)
+	player_currencies_updated.emit(get_coins(), get_gems())
+	save_profile()
+	return {"ok": true, "new_max": max_inventory, "gain": gain}
+
+
+func purchase_gem_pack(product_id: String) -> Dictionary:
+	_init_wallet()
+	for pack in Database.get_gem_shop_products():
+		if str(pack.get("product_id", "")) == product_id:
+			var coin_price: int = int(pack.get("coin_price", 0))
+			var gem_gain: int = int(pack.get("gems", 0))
+			if gem_gain <= 0:
+				return {"ok": false, "reason": "Invalid gem bundle."}
+			if not spend_coins(coin_price):
+				return {"ok": false, "reason": "Not enough coins!"}
+			add_gems(gem_gain)
+			save_profile()
+			return {"ok": true, "gems_added": gem_gain, "coin_price": coin_price}
+	return {"ok": false, "reason": "Product not found."}
 

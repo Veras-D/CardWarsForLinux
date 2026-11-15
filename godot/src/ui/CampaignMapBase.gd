@@ -710,14 +710,11 @@ func _refresh_hud() -> void:
 	var max_xp = GameManager.xp_to_next_level if "xp_to_next_level" in GameManager else 106
 	var stamina = GameManager.stamina if "stamina" in GameManager else 5
 	var max_stamina = GameManager.max_stamina if "max_stamina" in GameManager else 5
-	var gems = GameManager.gems if "gems" in GameManager else 5
-	var coins = GameManager.coins if "coins" in GameManager else 143
+	var gems = GameManager.get_gems() if GameManager.has_method("get_gems") else 50
+	var coins = GameManager.get_coins() if GameManager.has_method("get_coins") else 5000
 
-	var total_cards = 14
-	if "player_deck" in GameManager and GameManager.player_deck != null:
-		total_cards = GameManager.player_deck.size()
-	if "player_inventory" in GameManager and GameManager.player_inventory != null:
-		total_cards += GameManager.player_inventory.size()
+	var total_cards = GameManager.get_total_card_count() if GameManager.has_method("get_total_card_count") else 10
+	var max_inventory = GameManager.get_max_inventory() if GameManager.has_method("get_max_inventory") else 50
 
 	if player_name_label:
 		player_name_label.text = display_name
@@ -735,7 +732,7 @@ func _refresh_hud() -> void:
 	if trophy_label:
 		trophy_label.text = "0"
 	if cards_label:
-		cards_label.text = "%d/50" % total_cards
+		cards_label.text = "%d/%d" % [total_cards, max_inventory]
 	if gems_label:
 		gems_label.text = "%d" % gems
 	if coins_label:

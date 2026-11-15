@@ -45,6 +45,8 @@ const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 @onready var lan_modal: Control = $LanLobbyModal
 @onready var settings_modal: Control = $SettingsModal
 @onready var dungeon_modal: Control = $DungeonArenaModal
+@onready var store_inventory_modal: Control = get_node_or_null("StoreInventoryModal")
+@onready var store_gems_modal: Control = get_node_or_null("StoreGemsModal")
 @onready var compendium_dialog: Control = $CompendiumDialog
 @onready var cards_grid: GridContainer = $CompendiumDialog/VBox/Scroll/Grid
 @onready var compendium_count_label: Label = $CompendiumDialog/VBox/CountLabel
@@ -62,6 +64,12 @@ const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 @onready var quad_deck_wars: BaseButton = get_node_or_null("QuestModeOverlay/QuadDeckWars")
 @onready var quad_fionna: BaseButton = get_node_or_null("QuestModeOverlay/QuadFionna")
 @onready var quad_quests: BaseButton = get_node_or_null("QuestModeOverlay/QuadQuests")
+
+# Store Overlay
+@onready var store_overlay: Control = get_node_or_null("StoreOverlay")
+@onready var store_back_btn: BaseButton = get_node_or_null("StoreOverlay/BackBtn")
+@onready var quad_inventory: BaseButton = get_node_or_null("StoreOverlay/QuadInventory")
+@onready var quad_gems: BaseButton = get_node_or_null("StoreOverlay/QuadGems")
 
 func _ready() -> void:
 	# Autoplay Treehouse BGM
@@ -122,6 +130,23 @@ func _ready() -> void:
 	if quad_quests:
 		quad_quests.pressed.connect(_on_quests_pressed)
 	
+	# Store Overlay Buttons & Modals
+	if store_back_btn:
+		store_back_btn.pressed.connect(_on_store_back_pressed)
+	if quad_inventory:
+		quad_inventory.pressed.connect(_on_quad_inventory_pressed)
+	if quad_gems:
+		quad_gems.pressed.connect(_on_quad_gems_pressed)
+	if store_inventory_modal and store_inventory_modal.has_signal("inventory_upgraded"):
+		store_inventory_modal.inventory_upgraded.connect(func(_new_max: int): _update_player_stats())
+	if store_gems_modal and store_gems_modal.has_signal("gems_purchased"):
+		store_gems_modal.gems_purchased.connect(func(_added: int): _update_player_stats())
+	if GameManager:
+		if GameManager.has_signal("player_currencies_updated"):
+			GameManager.player_currencies_updated.connect(_update_player_stats)
+		if GameManager.has_signal("inventory_capacity_changed"):
+			GameManager.inventory_capacity_changed.connect(func(_new_max: int): _update_player_stats())
+	
 	# Hide all modals initially
 	if quit_modal:
 		quit_modal.visible = false
@@ -135,12 +160,18 @@ func _ready() -> void:
 		settings_modal.visible = false
 	if dungeon_modal:
 		dungeon_modal.visible = false
+	if store_inventory_modal:
+		store_inventory_modal.visible = false
+	if store_gems_modal:
+		store_gems_modal.visible = false
 	if compendium_dialog:
 		compendium_dialog.visible = false
 	if deck_choice_modal:
 		deck_choice_modal.visible = false
 	if quest_overlay:
 		quest_overlay.visible = false
+	if store_overlay:
+		store_overlay.visible = false
 	
 	restore_return_view()
 	
@@ -152,7 +183,7 @@ func _ready() -> void:
 		_auto_screenshot()
 
 func restore_return_view() -> void:
-	# Restore previous view ("quest_select" or "hub") or start at exterior title screen ("start")
+	# Restore previous view ("quest_select", "store", or "hub") or start at exterior title screen ("start")
 	var return_view = GameManager.menu_return_view if "menu_return_view" in GameManager else "start"
 	if return_view == "quest_select":
 		if start_overlay:
@@ -165,8 +196,25 @@ func restore_return_view() -> void:
 		if quest_overlay:
 			quest_overlay.visible = true
 			quest_overlay.modulate.a = 1.0
+		if store_overlay:
+			store_overlay.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_quest_modes_view"):
 			treehouse_3d.set_quest_modes_view()
+	elif return_view == "store":
+		if start_overlay:
+			start_overlay.visible = false
+		if top_bar:
+			top_bar.visible = true
+			top_bar.modulate.a = 1.0
+		if bottom_dock:
+			bottom_dock.visible = false
+		if quest_overlay:
+			quest_overlay.visible = false
+		if store_overlay:
+			store_overlay.visible = true
+			store_overlay.modulate.a = 1.0
+		if treehouse_3d and treehouse_3d.has_method("set_store_modes_view"):
+			treehouse_3d.set_store_modes_view()
 	elif return_view == "hub":
 		if start_overlay:
 			start_overlay.visible = false
@@ -178,6 +226,8 @@ func restore_return_view() -> void:
 			bottom_dock.modulate.a = 1.0
 		if quest_overlay:
 			quest_overlay.visible = false
+		if store_overlay:
+			store_overlay.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_hub_view"):
 			treehouse_3d.set_hub_view()
 	else:
@@ -188,6 +238,10 @@ func restore_return_view() -> void:
 				top_bar.visible = false
 			if bottom_dock:
 				bottom_dock.visible = false
+			if quest_overlay:
+				quest_overlay.visible = false
+			if store_overlay:
+				store_overlay.visible = false
 			if treehouse_3d and treehouse_3d.has_method("set_start_view"):
 				treehouse_3d.set_start_view()
 	_update_player_stats()
@@ -200,6 +254,18 @@ func _auto_screenshot() -> void:
 		await get_tree().create_timer(1.0).timeout
 		_on_battle_pressed()
 		await get_tree().create_timer(1.0).timeout
+	elif mode in ["store", "store_inventory", "store_gems"]:
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		open_store()
+		await get_tree().create_timer(1.2).timeout
+		if mode == "store_inventory":
+			_on_quad_inventory_pressed()
+			await get_tree().create_timer(0.3).timeout
+		elif mode == "store_gems":
+			_on_quad_gems_pressed()
+			await get_tree().create_timer(0.3).timeout
 	elif mode == "hub":
 		# Auto tap start to transition into hub
 		if start_overlay and start_overlay.visible:
@@ -217,6 +283,12 @@ func _auto_screenshot() -> void:
 				out_file = "../captured_godot_hub.png"
 			elif mode == "battle_select":
 				out_file = "../captured_godot_battle_select.png"
+			elif mode == "store":
+				out_file = "../captured_godot_store.png"
+			elif mode == "store_inventory":
+				out_file = "../captured_godot_store_inventory.png"
+			elif mode == "store_gems":
+				out_file = "../captured_godot_store_gems.png"
 			img.save_png(out_file)
 			print(">>> SCREENSHOT SAVED TO " + out_file + " <<<")
 	get_tree().quit(0)
@@ -231,6 +303,15 @@ func _input(event: InputEvent) -> void:
 			return
 	
 	if event.is_action_pressed("ui_cancel"):
+		if store_inventory_modal and store_inventory_modal.visible:
+			store_inventory_modal.visible = false
+			return
+		if store_gems_modal and store_gems_modal.visible:
+			store_gems_modal.visible = false
+			return
+		if store_overlay and store_overlay.visible:
+			_on_store_back_pressed()
+			return
 		if quest_overlay and quest_overlay.visible:
 			_on_quest_back_pressed()
 			return
@@ -249,14 +330,10 @@ func _update_player_stats() -> void:
 	var max_xp = GameManager.xp_to_next_level if "xp_to_next_level" in GameManager else 106
 	var stamina = GameManager.stamina if "stamina" in GameManager else 5
 	var max_stamina = GameManager.max_stamina if "max_stamina" in GameManager else 5
-	var gems = GameManager.gems if "gems" in GameManager else 5
-	var coins = GameManager.coins if "coins" in GameManager else 143
-	
-	var total_cards = 14
-	if "player_deck" in GameManager and GameManager.player_deck != null:
-		total_cards = GameManager.player_deck.size()
-	if "player_inventory" in GameManager and GameManager.player_inventory != null:
-		total_cards += GameManager.player_inventory.size()
+	var gems: int = GameManager.get_gems() if GameManager.has_method("get_gems") else 5
+	var coins: int = GameManager.get_coins() if GameManager.has_method("get_coins") else 143
+	var total_cards: int = GameManager.get_total_card_count() if GameManager.has_method("get_total_card_count") else 14
+	var max_inv: int = GameManager.get_max_inventory() if GameManager.has_method("get_max_inventory") else 50
 
 	if level_label:
 		level_label.text = "Lvl. %d" % level
@@ -270,7 +347,7 @@ func _update_player_stats() -> void:
 	if stamina_status_label:
 		stamina_status_label.text = "Full" if stamina >= max_stamina else "04:30"
 	if cards_label:
-		cards_label.text = "%d/50" % total_cards
+		cards_label.text = "%d/%d" % [total_cards, max_inv]
 	if gems_label:
 		gems_label.text = "%d" % gems
 	if coins_label:
@@ -402,10 +479,66 @@ func _on_open_compendium() -> void:
 
 func _on_store_pressed() -> void:
 	_play_sfx()
-	# Open Chests/Gems modal
-	if chest_modal:
-		chest_modal.refresh_display()
-		chest_modal.visible = true
+	open_store()
+
+
+func open_store() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "store"
+	if bottom_dock:
+		var tw = create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(func(): bottom_dock.visible = false)
+
+	if store_overlay:
+		store_overlay.visible = true
+		store_overlay.modulate.a = 0.0
+		var tw_o = create_tween()
+		tw_o.tween_property(store_overlay, "modulate:a", 1.0, 0.3)
+
+	if treehouse_3d and treehouse_3d.has_method("show_store_modes"):
+		treehouse_3d.show_store_modes()
+
+
+func _on_store_back_pressed() -> void:
+	_play_sfx()
+	close_store()
+
+
+func close_store() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "hub"
+	if store_overlay:
+		var tw_o = create_tween()
+		tw_o.tween_property(store_overlay, "modulate:a", 0.0, 0.2)
+		tw_o.tween_callback(func(): store_overlay.visible = false)
+
+	if bottom_dock:
+		bottom_dock.visible = true
+		bottom_dock.modulate.a = 0.0
+		var tw = create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 1.0, 0.3)
+
+	if treehouse_3d and treehouse_3d.has_method("hide_store_modes"):
+		treehouse_3d.hide_store_modes()
+
+
+func _on_quad_inventory_pressed() -> void:
+	_play_sfx()
+	if store_inventory_modal:
+		if store_inventory_modal.has_method("open_modal"):
+			store_inventory_modal.open_modal()
+		else:
+			store_inventory_modal.visible = true
+
+
+func _on_quad_gems_pressed() -> void:
+	_play_sfx()
+	if store_gems_modal:
+		if store_gems_modal.has_method("open_modal"):
+			store_gems_modal.open_modal()
+		else:
+			store_gems_modal.visible = true
 
 func _on_chests_pressed() -> void:
 	_play_sfx()

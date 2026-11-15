@@ -1,0 +1,69 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/ui/StoreInventoryIcon.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/low_CardSlots.png" id="2_tex"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/inventory/Puppet_Box.obj" id="3_mbox"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/inventory/Puppet_BoxLid.obj" id="4_mlid"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/inventory/Puppet_CornBall.obj" id="5_mcorn"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/inventory/Puppet_CoolDog.obj" id="6_mdog"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/inventory/Puppet_Pieclops.obj" id="7_mpie"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/inventory/Outline_CornBall.obj" id="8_ocorn"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/inventory/Outline_CoolDog.obj" id="9_odog"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/inventory/Outline_Pieclops.obj" id="10_opie"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_CardSlots"]
+shading_mode = 0
+albedo_texture = ExtResource("2_tex")
+texture_filter = 3
+
+[node name="StoreInventoryIcon" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="CardSlotsRoot" type="Node3D" parent="."]
+transform = Transform3D(0, 0, 0.075, 0, 0.075, 0, -0.075, 0, 0, 0, 0.005, 0)
+
+[node name="PuppetGlobal" type="Node3D" parent="CardSlotsRoot"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.008869, 0, 5.855719)
+
+[node name="PuppetBox" type="MeshInstance3D" parent="CardSlotsRoot/PuppetGlobal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.126739, -3.537752, 0)
+mesh = ExtResource("3_mbox")
+surface_material_override/0 = SubResource("Mat_CardSlots")
+
+[node name="PuppetBoxLid" type="MeshInstance3D" parent="CardSlotsRoot/PuppetGlobal"]
+transform = Transform3D(0.819152, -0.573576, 0, 0.573576, 0.819152, 0, 0, 0, 1, 3.405406, -6.156662, 0)
+mesh = ExtResource("4_mlid")
+surface_material_override/0 = SubResource("Mat_CardSlots")
+
+[node name="PuppetCoolDog" type="Node3D" parent="CardSlotsRoot/PuppetGlobal"]
+transform = Transform3D(0.011161, -0.001879, 0.000067, 0.001879, 0.011161, 0.000006, -0.000067, 0.000006, 0.011318, -1.041293, 0.88653, 0.596136)
+
+[node name="Mesh" type="MeshInstance3D" parent="CardSlotsRoot/PuppetGlobal/PuppetCoolDog"]
+mesh = ExtResource("6_mdog")
+surface_material_override/0 = SubResource("Mat_CardSlots")
+
+[node name="Outline" type="MeshInstance3D" parent="CardSlotsRoot/PuppetGlobal/PuppetCoolDog"]
+mesh = ExtResource("9_odog")
+surface_material_override/0 = SubResource("Mat_CardSlots")
+
+[node name="PuppetCornBall" type="Node3D" parent="CardSlotsRoot/PuppetGlobal"]
+transform = Transform3D(0.013326, -0.003005, 0, 0.003005, 0.013326, 0, 0, 0, 0.01366, 0.298499, 1.702628, 0.596136)
+
+[node name="Mesh" type="MeshInstance3D" parent="CardSlotsRoot/PuppetGlobal/PuppetCornBall"]
+mesh = ExtResource("5_mcorn")
+surface_material_override/0 = SubResource("Mat_CardSlots")
+
+[node name="Outline" type="MeshInstance3D" parent="CardSlotsRoot/PuppetGlobal/PuppetCornBall"]
+mesh = ExtResource("8_ocorn")
+surface_material_override/0 = SubResource("Mat_CardSlots")
+
+[node name="PuppetPieclops" type="Node3D" parent="CardSlotsRoot/PuppetGlobal"]
+transform = Transform3D(0.879987, 0, 0, 0, 0.879987, 0, 0, 0, 1.259647, 0.499856, 1.885074, -1.674897)
+
+[node name="Mesh" type="MeshInstance3D" parent="CardSlotsRoot/PuppetGlobal/PuppetPieclops"]
+mesh = ExtResource("7_mpie")
+surface_material_override/0 = SubResource("Mat_CardSlots")
+
+[node name="Outline" type="MeshInstance3D" parent="CardSlotsRoot/PuppetGlobal/PuppetPieclops"]
+mesh = ExtResource("10_opie")
+surface_material_override/0 = SubResource("Mat_CardSlots")

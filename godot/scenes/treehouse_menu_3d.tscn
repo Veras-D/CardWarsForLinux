@@ -38,6 +38,8 @@
 [ext_resource type="Texture2D" path="res://assets/textures/hub/QuestMap_Scroll.png" id="36_tscroll"]
 [ext_resource type="PackedScene" path="res://scenes/fionna_cake_book.tscn" id="37_pbook"]
 [ext_resource type="PackedScene" path="res://scenes/solo_quests_icon.tscn" id="57_pquests"]
+[ext_resource type="PackedScene" path="res://scenes/store_inventory_icon.tscn" id="58_pstoreinv"]
+[ext_resource type="PackedScene" path="res://scenes/store_gems_icon.tscn" id="59_pstoregems"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/low_FionnaCakeIcon.png" id="38_tbook"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="43_font"]
 [ext_resource type="PackedScene" path="res://scenes/deck_wars_stadium.tscn" id="50_pstadium"]
@@ -291,4 +293,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.555, -0.12, -0.495)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, -0.12, 0.061)
 
 [node name="DeckWarsStadium" parent="BoardModesGroup/DeckWarsMode" instance=ExtResource("50_pstadium")]
+
+[node name="StoreModesGroup" type="Node3D" parent="."]
+visible = false
+
+[node name="StoreInventoryMode" type="Node3D" parent="StoreModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.575, -0.12, -0.525)
+
+[node name="StoreInventoryIcon" parent="StoreModesGroup/StoreInventoryMode" instance=ExtResource("58_pstoreinv")]
+
+[node name="StoreGemsMode" type="Node3D" parent="StoreModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.37, -0.12, 0.5615)
+
+[node name="StoreGemsIcon" parent="StoreModesGroup/StoreGemsMode" instance=ExtResource("59_pstoregems")]
 

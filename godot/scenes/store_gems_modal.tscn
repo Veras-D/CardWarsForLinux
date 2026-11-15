@@ -1,0 +1,264 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/ui/StoreGemsModal.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/GsFrame.png" id="3_frame"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/GsTitle.png" id="4_title"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/GsSlot.png" id="5_slot"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="6_cancel"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="7_btngreen"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/UI_Coin_Icon.png" id="8_coin"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/GsGems.png" id="9_gems"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/popup_box.png" id="10_popup"]
+
+[node name="StoreGemsModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Frame" type="Control" parent="Center"]
+custom_minimum_size = Vector2(780, 560)
+layout_mode = 2
+
+[node name="BgFrame" type="NinePatchRect" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_frame")
+patch_margin_left = 48
+patch_margin_top = 48
+patch_margin_right = 48
+patch_margin_bottom = 48
+
+[node name="TitleBanner" type="TextureRect" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -210.0
+offset_top = -12.0
+offset_right = 210.0
+offset_bottom = 66.0
+grow_horizontal = 2
+texture = ExtResource("4_title")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="Center/Frame/TitleBanner"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "STORE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseBtn" type="TextureButton" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -48.0
+offset_top = 2.0
+offset_right = 18.0
+offset_bottom = 68.0
+grow_horizontal = 0
+texture_normal = ExtResource("6_cancel")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="SlotsGrid" type="GridContainer" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 46.0
+offset_top = 74.0
+offset_right = -46.0
+offset_bottom = -70.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 14
+columns = 3
+
+[node name="Slot1" type="Control" parent="Center/Frame/SlotsGrid"]
+custom_minimum_size = Vector2(210, 198)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CardBg" type="NinePatchRect" parent="Center/Frame/SlotsGrid/Slot1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_slot")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="AmountLabel" type="Label" parent="Center/Frame/SlotsGrid/Slot1"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 8.0
+offset_bottom = 38.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.1, 0.1, 0.1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+text = "1 Gem"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IconCenter" type="CenterContainer" parent="Center/Frame/SlotsGrid/Slot1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 34.0
+offset_bottom = -56.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Icon" type="TextureRect" parent="Center/Frame/SlotsGrid/Slot1/IconCenter"]
+custom_minimum_size = Vector2(62, 52)
+layout_mode = 2
+texture = ExtResource("9_gems")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BuyBtn" type="TextureButton" parent="Center/Frame/SlotsGrid/Slot1"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -56.0
+offset_right = -8.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 0
+focus_mode = 0
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/SlotsGrid/Slot1/BuyBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_btngreen")
+patch_margin_left = 20
+patch_margin_top = 18
+patch_margin_right = 20
+patch_margin_bottom = 18
+
+[node name="HBox" type="HBoxContainer" parent="Center/Frame/SlotsGrid/Slot1/BuyBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="CoinIcon" type="TextureRect" parent="Center/Frame/SlotsGrid/Slot1/BuyBtn/HBox"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("8_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PriceLabel" type="Label" parent="Center/Frame/SlotsGrid/Slot1/BuyBtn/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "50,000"
+
+[node name="Footer" type="Control" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 54.0
+offset_top = -62.0
+offset_right = -54.0
+offset_bottom = -22.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Footer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_popup")
+patch_margin_left = 24
+patch_margin_top = 18
+patch_margin_right = 24
+patch_margin_bottom = 18
+
+[node name="StatusLabel" type="Label" parent="Center/Frame/Footer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "Exchange Coins for Magic Gems!"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -15,6 +15,11 @@ extends Node3D
 @onready var deckwars_mode: Node3D = $BoardModesGroup/DeckWarsMode
 @onready var fionna_book: FionnaCakeBook = get_node_or_null("BoardModesGroup/FionnaCakeMode/FionnaCakeBook")
 @onready var solo_quests: SoloQuestsIcon = get_node_or_null("BoardModesGroup/QuestsMode/SoloQuestsIcon")
+@onready var store_modes_group: Node3D = get_node_or_null("StoreModesGroup")
+@onready var store_inventory_mode: Node3D = get_node_or_null("StoreModesGroup/StoreInventoryMode")
+@onready var store_gems_mode: Node3D = get_node_or_null("StoreModesGroup/StoreGemsMode")
+@onready var store_inventory_icon: StoreInventoryIcon = get_node_or_null("StoreModesGroup/StoreInventoryMode/StoreInventoryIcon")
+@onready var store_gems_icon: StoreGemsIcon = get_node_or_null("StoreModesGroup/StoreGemsMode/StoreGemsIcon")
 
 # Camera transforms
 # Start View: Front view framing Jake (left), Finn (right), and the Table
@@ -66,6 +71,8 @@ func set_start_view() -> void:
 	is_mode_select = false
 	if board_modes_group:
 		board_modes_group.visible = false
+	if store_modes_group:
+		store_modes_group.visible = false
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
 	
@@ -90,6 +97,8 @@ func set_start_view() -> void:
 		fionna_book.close_book(0.0)
 	if solo_quests:
 		solo_quests.stop_audio()
+	if store_modes_group:
+		store_modes_group.visible = false
 
 func set_hub_view() -> void:
 	is_hub_view = true
@@ -117,6 +126,8 @@ func set_hub_view() -> void:
 		fionna_book.close_book(0.0)
 	if solo_quests:
 		solo_quests.stop_audio()
+	if store_modes_group:
+		store_modes_group.visible = false
 
 func set_quest_modes_view() -> void:
 	is_hub_view = true
@@ -146,6 +157,43 @@ func set_quest_modes_view() -> void:
 		if solo_quests:
 			solo_quests.reset_anim()
 		for m in [deckwars_mode, fionna_mode, quests_mode]:
+			if m:
+				m.scale = Vector3.ONE
+				m.position.y = -0.12
+	if store_modes_group:
+		store_modes_group.visible = false
+
+
+func set_store_modes_view() -> void:
+	is_hub_view = true
+	is_mode_select = true
+	props_anim_ready = true
+	is_logo_animating = false
+	if active_tween and active_tween.is_valid():
+		active_tween.kill()
+
+	if camera:
+		camera.position = BATTLE_SELECT_CAM_POS
+		camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
+
+	if logo_group:
+		logo_group.visible = false
+		logo_group.scale = Vector3.ZERO
+
+	if jake_node:
+		jake_node.visible = false
+	if jake_stool:
+		jake_stool.visible = true
+
+	if board_modes_group:
+		board_modes_group.visible = false
+	if store_modes_group:
+		store_modes_group.visible = true
+		if store_inventory_icon:
+			store_inventory_icon.reset_anim()
+		if store_gems_icon:
+			store_gems_icon.reset_anim()
+		for m in [store_inventory_mode, store_gems_mode]:
 			if m:
 				m.scale = Vector3.ONE
 				m.position.y = -0.12
@@ -215,27 +263,23 @@ func transition_to_start(duration: float = 0.8) -> void:
 			jake_node.visible = true
 	)
 
-func show_quest_modes() -> void:
-	if is_mode_select:
-		return
+func _begin_board_mode_transition() -> void:
 	is_mode_select = true
 	props_anim_ready = false
 	is_logo_animating = true
-	
+
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
-	
-	# Smoothly fly camera to Battle Select framing (closer, steep overhead view of board)
+
 	var saved_cam_xf = camera.transform
 	camera.position = BATTLE_SELECT_CAM_POS
 	camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
 	var target_cam_xf = camera.transform
 	camera.transform = saved_cam_xf
-	
+
 	active_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	active_tween.tween_property(camera, "transform", target_cam_xf, 0.55)
-	
-	# Shrink/hide spinning logo with cartoon spring sinking into table
+
 	if logo_group:
 		var tw_logo = create_tween().set_parallel(true)
 		tw_logo.tween_property(logo_group, "scale", Vector3.ZERO, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
@@ -244,65 +288,49 @@ func show_quest_modes() -> void:
 			logo_group.visible = false
 			is_logo_animating = false
 		)
-	
-	# Pop-up 3D props from below the board with staggered bounce
-	if board_modes_group:
-		board_modes_group.visible = true
-		if fionna_book:
-			fionna_book.reset_anim()
-		if solo_quests:
-			solo_quests.reset_anim()
-		var modes = [deckwars_mode, fionna_mode, quests_mode]
-		for i in range(modes.size()):
-			var m = modes[i]
-			if m:
-				m.scale = Vector3.ZERO
-				m.position.y = -0.45
-				var m_tw = create_tween().set_parallel(true)
-				var delay = 0.08 + i * 0.08
-				m_tw.tween_property(m, "scale", Vector3.ONE, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
-				m_tw.tween_property(m, "position:y", -0.12, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
-		
-		var finish_tw = create_tween()
-		finish_tw.tween_interval(0.60)
-		finish_tw.tween_callback(func(): props_anim_ready = true)
 
-func hide_quest_modes() -> void:
-	if not is_mode_select:
-		return
+
+func _pop_up_board_modes(modes: Array) -> void:
+	for i in range(modes.size()):
+		var m = modes[i]
+		if m:
+			m.scale = Vector3.ZERO
+			m.position.y = -0.45
+			var m_tw = create_tween().set_parallel(true)
+			var delay = 0.08 + i * 0.08
+			m_tw.tween_property(m, "scale", Vector3.ONE, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
+			m_tw.tween_property(m, "position:y", -0.12, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
+	var finish_tw = create_tween()
+	finish_tw.tween_interval(0.60)
+	finish_tw.tween_callback(func(): props_anim_ready = true)
+
+
+func _end_board_mode_transition(group: Node3D, modes: Array) -> void:
 	is_mode_select = false
 	props_anim_ready = false
 	is_logo_animating = true
-	
-	if fionna_book:
-		fionna_book.close_book(0.20)
-	if solo_quests:
-		solo_quests.stop_audio()
-	
+
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
-	
-	# Smoothly return camera to Hub POV (first-person Jake looking at Finn)
+
 	var saved_cam_xf = camera.transform
 	camera.position = HUB_CAM_POS
 	camera.look_at(HUB_CAM_TARGET, Vector3.UP)
 	var target_cam_xf = camera.transform
 	camera.transform = saved_cam_xf
-	
+
 	active_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	active_tween.tween_property(camera, "transform", target_cam_xf, 0.48)
-	
-	# Pop-down props into the board
+
 	var tw = create_tween().set_parallel(true)
-	var modes = [deckwars_mode, fionna_mode, quests_mode]
 	for m in modes:
 		if m:
 			tw.tween_property(m, "scale", Vector3.ZERO, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 			tw.tween_property(m, "position:y", -0.45, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	
+
 	tw.chain().tween_callback(func():
-		if board_modes_group:
-			board_modes_group.visible = false
+		if group:
+			group.visible = false
 		if logo_group:
 			logo_group.position = Vector3(HUB_LOGO_POS.x, HUB_LOGO_POS.y - 0.35, HUB_LOGO_POS.z)
 			logo_group.scale = Vector3.ZERO
@@ -312,6 +340,52 @@ func hide_quest_modes() -> void:
 			l_tw.tween_property(logo_group, "position:y", HUB_LOGO_POS.y, 0.38).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 			l_tw.chain().tween_callback(func(): is_logo_animating = false)
 	)
+
+
+func show_quest_modes() -> void:
+	if is_mode_select:
+		return
+	_begin_board_mode_transition()
+	if store_modes_group:
+		store_modes_group.visible = false
+	if board_modes_group:
+		board_modes_group.visible = true
+		if fionna_book:
+			fionna_book.reset_anim()
+		if solo_quests:
+			solo_quests.reset_anim()
+		_pop_up_board_modes([deckwars_mode, fionna_mode, quests_mode])
+
+
+func hide_quest_modes() -> void:
+	if not is_mode_select:
+		return
+	if fionna_book:
+		fionna_book.close_book(0.20)
+	if solo_quests:
+		solo_quests.stop_audio()
+	_end_board_mode_transition(board_modes_group, [deckwars_mode, fionna_mode, quests_mode])
+
+
+func show_store_modes() -> void:
+	if is_mode_select:
+		return
+	_begin_board_mode_transition()
+	if board_modes_group:
+		board_modes_group.visible = false
+	if store_modes_group:
+		store_modes_group.visible = true
+		if store_inventory_icon:
+			store_inventory_icon.reset_anim()
+		if store_gems_icon:
+			store_gems_icon.reset_anim()
+		_pop_up_board_modes([store_inventory_mode, store_gems_mode])
+
+
+func hide_store_modes() -> void:
+	if not is_mode_select:
+		return
+	_end_board_mode_transition(store_modes_group, [store_inventory_mode, store_gems_mode])
 
 func play_fionna_activate(on_finished: Callable) -> void:
 	if fionna_book:

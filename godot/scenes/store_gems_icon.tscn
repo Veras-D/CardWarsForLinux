@@ -1,0 +1,79 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://src/ui/StoreGemsIcon.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/hub/low_Gems.png" id="2_tex"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Puppet_Base.obj" id="3_mbase"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Outline_Base.obj" id="4_obase"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Puppet_Gem01.obj" id="5_mgem1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Outline_Gem01.obj" id="6_ogem1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Puppet_Gem02.obj" id="7_mgem2"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Outline_Gem02.obj" id="8_ogem2"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Puppet_Gem03.obj" id="9_mgem3"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Outline_Gem03.obj" id="10_ogem3"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Puppet_Twinkle01.obj" id="11_mtw1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/store/gems/Puppet_Twinkle02.obj" id="12_mtw2"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Gems"]
+shading_mode = 0
+albedo_texture = ExtResource("2_tex")
+texture_filter = 3
+
+[node name="StoreGemsIcon" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="GemsRoot" type="Node3D" parent="."]
+transform = Transform3D(0, 0, 0.06, 0, 0.06, 0, -0.06, 0, 0, 0, 0.005, 0)
+
+[node name="PuppetBase" type="Node3D" parent="GemsRoot"]
+transform = Transform3D(0, 0, 1, -1, 0, 0, 0, -1, 0, 0, 3.170834, 0.000002)
+
+[node name="Mesh" type="MeshInstance3D" parent="GemsRoot/PuppetBase"]
+mesh = ExtResource("3_mbase")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="Outline" type="MeshInstance3D" parent="GemsRoot/PuppetBase"]
+mesh = ExtResource("4_obase")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="PuppetGem01" type="Node3D" parent="GemsRoot/PuppetBase"]
+transform = Transform3D(0.629119, -0.549866, -0.549415, -0.363222, 0.416946, -0.833202, 0.687226, 0.723743, 0.062585, -1.544848, 1.048755, 3.633351)
+
+[node name="Mesh" type="MeshInstance3D" parent="GemsRoot/PuppetBase/PuppetGem01"]
+mesh = ExtResource("5_mgem1")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="Outline" type="MeshInstance3D" parent="GemsRoot/PuppetBase/PuppetGem01"]
+mesh = ExtResource("6_ogem1")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="PuppetGem02" type="Node3D" parent="GemsRoot/PuppetBase"]
+transform = Transform3D(0.224143, -0.836517, -0.5, -0.12941, 0.482963, -0.866026, 0.965926, 0.258819, -0.000001, -1.700085, 2.572285, 1.122556)
+
+[node name="Mesh" type="MeshInstance3D" parent="GemsRoot/PuppetBase/PuppetGem02"]
+mesh = ExtResource("7_mgem2")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="Outline" type="MeshInstance3D" parent="GemsRoot/PuppetBase/PuppetGem02"]
+mesh = ExtResource("8_ogem2")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="PuppetGem03" type="Node3D" parent="GemsRoot/PuppetBase"]
+transform = Transform3D(0, -1, -0.000001, 0, 0.000001, -1, 1, 0, 0, 2.569223, 4.822648, 4.325638)
+
+[node name="Mesh" type="MeshInstance3D" parent="GemsRoot/PuppetBase/PuppetGem03"]
+mesh = ExtResource("9_mgem3")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="Outline" type="MeshInstance3D" parent="GemsRoot/PuppetBase/PuppetGem03"]
+mesh = ExtResource("10_ogem3")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="PuppetTwinkle01" type="MeshInstance3D" parent="GemsRoot/PuppetBase"]
+transform = Transform3D(0, 0, 1, 0, -1, 0, 1, 0, 0, -2.286924, 3.937872, 1.384306)
+mesh = ExtResource("11_mtw1")
+surface_material_override/0 = SubResource("Mat_Gems")
+
+[node name="PuppetTwinkle02" type="MeshInstance3D" parent="GemsRoot/PuppetBase"]
+transform = Transform3D(0, 0, 1, 0, -1, 0, 1, 0, 0, -3.753144, 0.791067, 3.050816)
+mesh = ExtResource("12_mtw2")
+surface_material_override/0 = SubResource("Mat_Gems")

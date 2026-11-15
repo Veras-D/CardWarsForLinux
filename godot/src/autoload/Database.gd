@@ -28,6 +28,9 @@ var fc_map_regions_list: Array[Dictionary] = []
 var daily_dungeons_list: Array[Dictionary] = []
 var dungeon_stages_db: Dictionary = {}
 var elfisto_rounds_list: Array[Dictionary] = []
+var card_box_tiers: Array[Dictionary] = []
+var card_box_max_capacity: int = 500
+var gem_shop_products: Array[Dictionary] = []
 
 func _ready() -> void:
 	load_localizations()
@@ -74,6 +77,8 @@ func load_blueprints() -> void:
 	_load_quests()
 	_load_dungeons()
 	_load_elfisto()
+	_load_card_box()
+	_load_iap()
 	all_cards_list.clear()
 	all_cards_list.append_array(creatures_list)
 	all_cards_list.append_array(spells_list)
@@ -868,6 +873,63 @@ func get_elfisto_round(round_number: int) -> Dictionary:
 		if r.get("round", 0) == round_number:
 			return r.duplicate(true)
 	return {}
+
+
+func _load_card_box() -> void:
+	var path = "res://data/db_CardBox.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	card_box_tiers.clear()
+	card_box_max_capacity = 0
+	for item in json.data:
+		var tier_max = int(item.get("TierMax", "0"))
+		card_box_tiers.append({
+			"tier_max": tier_max,
+			"coin_price": int(item.get("CoinPrice", "0")),
+			"gem_price": int(item.get("GemPrice", "0")),
+			"gain": int(item.get("Gain", "0"))
+		})
+		card_box_max_capacity = maxi(card_box_max_capacity, tier_max)
+	card_box_tiers.sort_custom(func(a, b): return a["tier_max"] < b["tier_max"])
+
+
+func get_card_box_tier(cur_box_capacity: int) -> Dictionary:
+	for i in range(card_box_tiers.size() - 1, -1, -1):
+		var tier: Dictionary = card_box_tiers[i]
+		if cur_box_capacity >= tier.get("tier_max", 0):
+			if tier.get("coin_price", 0) > 0 or tier.get("gem_price", 0) > 0:
+				return tier.duplicate(true)
+			return {}
+	return {}
+
+
+func _load_iap() -> void:
+	var path = "res://data/db_IAP.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	gem_shop_products.clear()
+	for item in json.data:
+		if str(item.get("Product", "")).strip_edges().to_lower() == "gem":
+			gem_shop_products.append({
+				"product_id": str(item.get("ProductID_Android", item.get("ProductID", ""))).strip_edges(),
+				"gems": int(item.get("CurrencyCount", "0")),
+				"coin_price": int(float(item.get("Price", "0")))
+			})
+
+
+func get_gem_shop_products() -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for p in gem_shop_products:
+		res.append(p.duplicate(true))
+	return res
 
 
 

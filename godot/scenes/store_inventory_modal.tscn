@@ -1,0 +1,405 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/ui/StoreInventoryModal.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/popup_box.png" id="3_popup"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="4_cancel"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="5_btngreen"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonBlue.png" id="6_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/UI_Coin_Icon.png" id="7_coin"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/GsGems.png" id="8_gem"]
+
+[node name="StoreInventoryModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Frame" type="Control" parent="Center"]
+custom_minimum_size = Vector2(560, 410)
+layout_mode = 2
+
+[node name="TitleBar" type="Control" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 86.0
+grow_horizontal = 2
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/TitleBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_popup")
+patch_margin_left = 28
+patch_margin_top = 28
+patch_margin_right = 28
+patch_margin_bottom = 28
+
+[node name="TitleLabel" type="Label" parent="Center/Frame/TitleBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 68.0
+offset_right = -68.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+text = "MORE CARDS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseBtn" type="TextureButton" parent="Center/Frame/TitleBar"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -74.0
+offset_top = -31.0
+offset_right = -12.0
+offset_bottom = 31.0
+grow_horizontal = 0
+grow_vertical = 2
+texture_normal = ExtResource("4_cancel")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Body" type="Control" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 82.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_popup")
+patch_margin_left = 28
+patch_margin_top = 28
+patch_margin_right = 28
+patch_margin_bottom = 28
+
+[node name="PurchasePanel" type="Control" parent="Center/Frame/Body"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PromptLabel" type="Label" parent="Center/Frame/Body/PurchasePanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 28.0
+offset_top = 26.0
+offset_right = -28.0
+offset_bottom = 86.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "Increase box Space by 5"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="CurrentMaxLabel" type="Label" parent="Center/Frame/Body/PurchasePanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 28.0
+offset_top = 92.0
+offset_right = -28.0
+offset_bottom = 128.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "Current Space is:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CurrentValLabel" type="Label" parent="Center/Frame/Body/PurchasePanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 28.0
+offset_top = 128.0
+offset_right = -28.0
+offset_bottom = 176.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "50"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Frame/Body/PurchasePanel"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -114.0
+offset_right = -36.0
+offset_bottom = -26.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 36
+alignment = 1
+
+[node name="CoinsBtn" type="TextureButton" parent="Center/Frame/Body/PurchasePanel/Buttons"]
+custom_minimum_size = Vector2(200, 88)
+layout_mode = 2
+focus_mode = 0
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/PurchasePanel/Buttons/CoinsBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_btngreen")
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="HBox" type="HBoxContainer" parent="Center/Frame/Body/PurchasePanel/Buttons/CoinsBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PriceLabel" type="Label" parent="Center/Frame/Body/PurchasePanel/Buttons/CoinsBtn/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+text = "500"
+
+[node name="Icon" type="TextureRect" parent="Center/Frame/Body/PurchasePanel/Buttons/CoinsBtn/HBox"]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("7_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GemsBtn" type="TextureButton" parent="Center/Frame/Body/PurchasePanel/Buttons"]
+custom_minimum_size = Vector2(200, 88)
+layout_mode = 2
+focus_mode = 0
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/PurchasePanel/Buttons/GemsBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_btngreen")
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="HBox" type="HBoxContainer" parent="Center/Frame/Body/PurchasePanel/Buttons/GemsBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PriceLabel" type="Label" parent="Center/Frame/Body/PurchasePanel/Buttons/GemsBtn/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+text = "1"
+
+[node name="Icon" type="TextureRect" parent="Center/Frame/Body/PurchasePanel/Buttons/GemsBtn/HBox"]
+custom_minimum_size = Vector2(46, 38)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("8_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MaxReachedPanel" type="Control" parent="Center/Frame/Body"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Center/Frame/Body/MaxReachedPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 36.0
+offset_top = 36.0
+offset_right = -36.0
+offset_bottom = 160.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "Your card box space has reached its maximum size. You can craft or sell cards to get rid of some cards."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="OkBtn" type="TextureButton" parent="Center/Frame/Body/MaxReachedPanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -114.0
+offset_right = 100.0
+offset_bottom = -26.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/MaxReachedPanel/OkBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_btngreen")
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="Label" type="Label" parent="Center/Frame/Body/MaxReachedPanel/OkBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+text = "OK"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusBanner" type="Control" parent="Center/Frame/Body"]
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = -10.0
+offset_right = -24.0
+offset_bottom = 52.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/StatusBanner"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_btnblue")
+patch_margin_left = 24
+patch_margin_top = 18
+patch_margin_right = 24
+patch_margin_bottom = 18
+
+[node name="StatusLabel" type="Label" parent="Center/Frame/Body/StatusBanner"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "Inventory is now 55!"
+horizontal_alignment = 1
+vertical_alignment = 1
