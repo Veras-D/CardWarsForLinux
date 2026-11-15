@@ -5,6 +5,8 @@ signal inventory_upgraded(new_max: int)
 
 const SFX_CLICK: AudioStream = preload("res://assets/audio/sfx/Click.wav")
 
+@onready var dimmer: ColorRect = $Dimmer
+@onready var frame: Control = $Center/Frame
 @onready var close_btn: BaseButton = $Center/Frame/TitleBar/CloseBtn
 @onready var purchase_panel: Control = $Center/Frame/Body/PurchasePanel
 @onready var prompt_label: Label = $Center/Frame/Body/PurchasePanel/PromptLabel
@@ -18,26 +20,44 @@ const SFX_CLICK: AudioStream = preload("res://assets/audio/sfx/Click.wav")
 @onready var status_banner: Control = $Center/Frame/Body/StatusBanner
 @onready var status_label: Label = $Center/Frame/Body/StatusBanner/StatusLabel
 
+var _anim_tween: Tween = null
+var _is_closing: bool = false
+
 
 func _ready() -> void:
 	if close_btn:
 		close_btn.pressed.connect(_on_close_pressed)
+		StoreModalAnimator.attach_button_reaction(close_btn)
 	if max_ok_btn:
 		max_ok_btn.pressed.connect(_on_close_pressed)
+		StoreModalAnimator.attach_button_reaction(max_ok_btn)
 	if coins_btn:
 		coins_btn.pressed.connect(_on_buy_with_coins)
+		StoreModalAnimator.attach_button_reaction(coins_btn)
 	if gems_btn:
 		gems_btn.pressed.connect(_on_buy_with_gems)
+		StoreModalAnimator.attach_button_reaction(gems_btn)
 	if status_banner:
 		status_banner.visible = false
 	refresh_display()
 
 
 func open_modal() -> void:
+	_is_closing = false
 	if status_banner:
 		status_banner.visible = false
 	refresh_display()
-	visible = true
+	_anim_tween = StoreModalAnimator.play_open(self, dimmer, frame, _anim_tween)
+
+
+func close_modal() -> void:
+	if _is_closing or not visible:
+		return
+	_is_closing = true
+	_anim_tween = StoreModalAnimator.play_close(self, dimmer, frame, _anim_tween, func():
+		_is_closing = false
+		closed.emit()
+	)
 
 
 func refresh_display() -> void:
@@ -97,5 +117,4 @@ func _attempt_purchase(use_gems: bool) -> void:
 
 func _on_close_pressed() -> void:
 	_play_sfx()
-	visible = false
-	closed.emit()
+	close_modal()

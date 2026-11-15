@@ -3,6 +3,9 @@ extends Control
 # Audio
 const BGM_TREEHOUSE = preload("res://assets/audio/bgm/MainMenu.wav")
 const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
+const SFX_UI_SELECT = preload("res://assets/audio/sfx/UI_Select.wav")
+
+var _press_select_sfx_played: bool = false
 
 # 3D Treehouse & UI Nodes
 @onready var treehouse_3d: Node3D = $ViewportContainer/SubViewport/TreehouseMenu3D
@@ -123,8 +126,7 @@ func _ready() -> void:
 	# Quest Mode Selection Overlay Buttons
 	if quest_back_btn:
 		quest_back_btn.pressed.connect(_on_quest_back_pressed)
-	if quad_deck_wars:
-		quad_deck_wars.pressed.connect(_on_deck_wars_pressed)
+	_connect_board_button(quad_deck_wars, "set_deckwars_pressed", _on_deck_wars_pressed)
 	if quad_fionna:
 		quad_fionna.pressed.connect(_on_fionna_pressed)
 	if quad_quests:
@@ -133,10 +135,8 @@ func _ready() -> void:
 	# Store Overlay Buttons & Modals
 	if store_back_btn:
 		store_back_btn.pressed.connect(_on_store_back_pressed)
-	if quad_inventory:
-		quad_inventory.pressed.connect(_on_quad_inventory_pressed)
-	if quad_gems:
-		quad_gems.pressed.connect(_on_quad_gems_pressed)
+	_connect_board_button(quad_inventory, "set_store_inventory_pressed", _on_quad_inventory_pressed)
+	_connect_board_button(quad_gems, "set_store_gems_pressed", _on_quad_gems_pressed)
 	if store_inventory_modal and store_inventory_modal.has_signal("inventory_upgraded"):
 		store_inventory_modal.inventory_upgraded.connect(func(_new_max: int): _update_player_stats())
 	if store_gems_modal and store_gems_modal.has_signal("gems_purchased"):
@@ -254,7 +254,35 @@ func _auto_screenshot() -> void:
 		await get_tree().create_timer(1.0).timeout
 		_on_battle_pressed()
 		await get_tree().create_timer(1.0).timeout
-	elif mode in ["store", "store_inventory", "store_gems"]:
+	elif mode == "quest_fx_in":
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		_on_battle_pressed()
+		await get_tree().create_timer(0.25).timeout
+	elif mode == "quest_fx_out":
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		_on_battle_pressed()
+		await get_tree().create_timer(1.0).timeout
+		close_quest_mode_select()
+		await get_tree().create_timer(0.22).timeout
+	elif mode == "store_fx_in":
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		open_store()
+		await get_tree().create_timer(0.25).timeout
+	elif mode == "store_fx_out":
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		open_store()
+		await get_tree().create_timer(1.0).timeout
+		close_store()
+		await get_tree().create_timer(0.22).timeout
+	elif mode in ["store", "store_inventory", "store_gems", "store_gems_anim", "store_click_inv", "store_click_gems"]:
 		if start_overlay and start_overlay.visible:
 			_on_start_tapped()
 		await get_tree().create_timer(1.0).timeout
@@ -262,10 +290,19 @@ func _auto_screenshot() -> void:
 		await get_tree().create_timer(1.2).timeout
 		if mode == "store_inventory":
 			_on_quad_inventory_pressed()
-			await get_tree().create_timer(0.3).timeout
+			await get_tree().create_timer(1.1).timeout
 		elif mode == "store_gems":
 			_on_quad_gems_pressed()
-			await get_tree().create_timer(0.3).timeout
+			await get_tree().create_timer(1.1).timeout
+		elif mode == "store_gems_anim":
+			_on_quad_gems_pressed()
+			await get_tree().create_timer(0.35).timeout
+		elif mode == "store_click_inv":
+			_on_quad_inventory_pressed()
+			await get_tree().create_timer(0.05).timeout
+		elif mode == "store_click_gems":
+			_on_quad_gems_pressed()
+			await get_tree().create_timer(0.05).timeout
 	elif mode == "hub":
 		# Auto tap start to transition into hub
 		if start_overlay and start_overlay.visible:
@@ -283,12 +320,26 @@ func _auto_screenshot() -> void:
 				out_file = "../captured_godot_hub.png"
 			elif mode == "battle_select":
 				out_file = "../captured_godot_battle_select.png"
+			elif mode == "quest_fx_in":
+				out_file = "../captured_godot_quest_fx_in.png"
+			elif mode == "quest_fx_out":
+				out_file = "../captured_godot_quest_fx_out.png"
 			elif mode == "store":
 				out_file = "../captured_godot_store.png"
+			elif mode == "store_fx_in":
+				out_file = "../captured_godot_store_fx_in.png"
+			elif mode == "store_fx_out":
+				out_file = "../captured_godot_store_fx_out.png"
 			elif mode == "store_inventory":
 				out_file = "../captured_godot_store_inventory.png"
 			elif mode == "store_gems":
 				out_file = "../captured_godot_store_gems.png"
+			elif mode == "store_gems_anim":
+				out_file = "../captured_godot_store_gems_anim.png"
+			elif mode == "store_click_inv":
+				out_file = "../captured_godot_store_click_inv.png"
+			elif mode == "store_click_gems":
+				out_file = "../captured_godot_store_click_gems.png"
 			img.save_png(out_file)
 			print(">>> SCREENSHOT SAVED TO " + out_file + " <<<")
 	get_tree().quit(0)
@@ -304,10 +355,16 @@ func _input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed("ui_cancel"):
 		if store_inventory_modal and store_inventory_modal.visible:
-			store_inventory_modal.visible = false
+			if store_inventory_modal.has_method("close_modal"):
+				store_inventory_modal.close_modal()
+			else:
+				store_inventory_modal.visible = false
 			return
 		if store_gems_modal and store_gems_modal.visible:
-			store_gems_modal.visible = false
+			if store_gems_modal.has_method("close_modal"):
+				store_gems_modal.close_modal()
+			else:
+				store_gems_modal.visible = false
 			return
 		if store_overlay and store_overlay.visible:
 			_on_store_back_pressed()
@@ -323,6 +380,47 @@ func _input(event: InputEvent) -> void:
 func _play_sfx() -> void:
 	if Audio and SFX_CLICK:
 		Audio.play_sfx(SFX_CLICK)
+
+func _play_select_sfx() -> void:
+	if Audio and SFX_UI_SELECT:
+		Audio.play_sfx(SFX_UI_SELECT)
+	elif Audio and SFX_CLICK:
+		Audio.play_sfx(SFX_CLICK)
+
+func _connect_board_button(btn: BaseButton, press_method: String, pressed_handler: Callable) -> void:
+	if not btn:
+		return
+	btn.button_down.connect(func():
+		_press_select_sfx_played = true
+		_play_select_sfx()
+		if treehouse_3d and treehouse_3d.has_method(press_method):
+			treehouse_3d.call(press_method, true)
+	)
+	btn.button_up.connect(func():
+		if not btn.is_hovered():
+			_press_select_sfx_played = false
+			if treehouse_3d and treehouse_3d.has_method(press_method):
+				treehouse_3d.call(press_method, false)
+	)
+	btn.pressed.connect(pressed_handler)
+
+func _set_buttons_disabled(buttons: Array, disabled: bool) -> void:
+	for btn in buttons:
+		if btn:
+			btn.disabled = disabled
+
+func _trigger_board_icon_activate(buttons: Array, activate_method: String, on_done: Callable) -> void:
+	if not _press_select_sfx_played:
+		_play_select_sfx()
+	_press_select_sfx_played = false
+	if treehouse_3d and treehouse_3d.has_method(activate_method):
+		_set_buttons_disabled(buttons, true)
+		treehouse_3d.call(activate_method, func():
+			_set_buttons_disabled(buttons, false)
+			on_done.call()
+		)
+	else:
+		on_done.call()
 
 func _update_player_stats() -> void:
 	var level = GameManager.player_level if "player_level" in GameManager else 1
@@ -419,39 +517,32 @@ func close_quest_mode_select() -> void:
 		treehouse_3d.hide_quest_modes()
 
 func _on_quests_pressed() -> void:
-	_play_sfx()
+	_play_select_sfx()
 	if treehouse_3d and treehouse_3d.has_method("play_quests_activate"):
-		if quad_quests:
-			quad_quests.disabled = true
-		if quad_fionna:
-			quad_fionna.disabled = true
+		_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars], true)
 		treehouse_3d.play_quests_activate(func():
-			if quad_quests:
-				quad_quests.disabled = false
-			if quad_fionna:
-				quad_fionna.disabled = false
+			_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars], false)
 			GameManager.open_campaign_map(0)
 		)
 	else:
 		GameManager.open_campaign_map(0)
 
 func _on_fionna_pressed() -> void:
-	_play_sfx()
+	_play_select_sfx()
 	if treehouse_3d and treehouse_3d.has_method("play_fionna_activate"):
-		if quad_fionna:
-			quad_fionna.disabled = true
+		_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars], true)
 		treehouse_3d.play_fionna_activate(func():
-			if quad_fionna:
-				quad_fionna.disabled = false
+			_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars], false)
 			GameManager.open_campaign_map(1)
 		)
 	else:
 		GameManager.open_campaign_map(1)
 
 func _on_deck_wars_pressed() -> void:
-	_play_sfx()
-	if lan_modal:
-		lan_modal.open_modal()
+	_trigger_board_icon_activate([quad_quests, quad_fionna, quad_deck_wars], "play_deckwars_activate", func():
+		if lan_modal:
+			lan_modal.open_modal()
+	)
 
 func _on_dungeons_pressed() -> void:
 	_play_sfx()
@@ -523,22 +614,24 @@ func close_store() -> void:
 		treehouse_3d.hide_store_modes()
 
 
-func _on_quad_inventory_pressed() -> void:
-	_play_sfx()
-	if store_inventory_modal:
-		if store_inventory_modal.has_method("open_modal"):
-			store_inventory_modal.open_modal()
+func _open_store_modal(modal: Control) -> void:
+	if modal:
+		if modal.has_method("open_modal"):
+			modal.open_modal()
 		else:
-			store_inventory_modal.visible = true
+			modal.visible = true
+
+
+func _on_quad_inventory_pressed() -> void:
+	_trigger_board_icon_activate([quad_inventory, quad_gems], "play_store_inventory_activate", func():
+		_open_store_modal(store_inventory_modal)
+	)
 
 
 func _on_quad_gems_pressed() -> void:
-	_play_sfx()
-	if store_gems_modal:
-		if store_gems_modal.has_method("open_modal"):
-			store_gems_modal.open_modal()
-		else:
-			store_gems_modal.visible = true
+	_trigger_board_icon_activate([quad_inventory, quad_gems], "play_store_gems_activate", func():
+		_open_store_modal(store_gems_modal)
+	)
 
 func _on_chests_pressed() -> void:
 	_play_sfx()

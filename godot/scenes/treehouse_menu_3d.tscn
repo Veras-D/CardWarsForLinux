@@ -294,6 +294,43 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, -0.12, 0.061)
 
 [node name="DeckWarsStadium" parent="BoardModesGroup/DeckWarsMode" instance=ExtResource("50_pstadium")]
 
+[node name="QuestsLabel" type="Label3D" parent="BoardModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.95, -0.118, 0.5)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Quests"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="FionnaLabel" type="Label3D" parent="BoardModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.97, -0.118, -0.495)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.002
+text = "Fionna & Cake
+Adventure"
+font = ExtResource("43_font")
+font_size = 56
+outline_size = 16
+line_spacing = -8.0
+
+[node name="DeckWarsLabel" type="Label3D" parent="BoardModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, 0.14, -0.118, 0.061)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.002
+text = "Deck Wars"
+font = ExtResource("43_font")
+font_size = 58
+outline_size = 16
+line_spacing = -8.0
+
 [node name="StoreModesGroup" type="Node3D" parent="."]
 visible = false
 
@@ -306,4 +343,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.575, -0.12, -0.525)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.37, -0.12, 0.5615)
 
 [node name="StoreGemsIcon" parent="StoreModesGroup/StoreGemsMode" instance=ExtResource("59_pstoregems")]
+
+[node name="InventoryLabel" type="Label3D" parent="StoreModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.88, -0.118, -0.525)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Increase
+Inventory"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="GemsLabel" type="Label3D" parent="StoreModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.88, -0.118, 0.525)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Gems"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
 

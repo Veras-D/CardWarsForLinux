@@ -15,6 +15,7 @@ extends Node3D
 @onready var deckwars_mode: Node3D = $BoardModesGroup/DeckWarsMode
 @onready var fionna_book: FionnaCakeBook = get_node_or_null("BoardModesGroup/FionnaCakeMode/FionnaCakeBook")
 @onready var solo_quests: SoloQuestsIcon = get_node_or_null("BoardModesGroup/QuestsMode/SoloQuestsIcon")
+@onready var deckwars_stadium: DeckWarsStadium = get_node_or_null("BoardModesGroup/DeckWarsMode/DeckWarsStadium")
 @onready var store_modes_group: Node3D = get_node_or_null("StoreModesGroup")
 @onready var store_inventory_mode: Node3D = get_node_or_null("StoreModesGroup/StoreInventoryMode")
 @onready var store_gems_mode: Node3D = get_node_or_null("StoreModesGroup/StoreGemsMode")
@@ -45,6 +46,12 @@ const HUB_LOGO_POS := Vector3(-0.01, 0.09, 0.03)
 const HUB_LOGO_SCALE := Vector3(0.185, 0.185, 0.185)
 const LOGO_SPIN_SPEED := 67.5 # degrees per second (matches Take 001_7.anim 360deg/5.333s)
 
+const MENU_REZ_FX_SCENE: PackedScene = preload("res://scenes/fx/menu_object_rez_fx.tscn")
+const SFX_REZ_IN: AudioStream = preload("res://assets/audio/sfx/FX_RezInParticle.wav")
+const BOARD_SURFACE_Y := -0.121
+const MODE_REST_Y := -0.12
+const MODE_REZ_DURATION := 0.46
+
 var is_hub_view: bool = false
 var is_mode_select: bool = false
 var is_logo_animating: bool = false
@@ -54,7 +61,17 @@ var logo_base_pos: Vector3 = START_LOGO_POS
 var logo_scale: Vector3 = START_LOGO_SCALE
 var logo_rot_y: float = 0.0
 var active_tween: Tween = null
+var _mode_tweens: Array[Tween] = []
+var _icon_reaction_tweens: Dictionary = {}
+var _icon_mat_cache: Dictionary = {}
+var _icon_is_down: Dictionary = {}
 var board_glow_mat: StandardMaterial3D = null
+
+const ICON_REACTION_SCALE := Vector3(0.8, 0.8, 0.8)
+const STADIUM_REACTION_SCALE := Vector3(1.1, 1.1, 1.1)
+const ICON_PRESS_TIME := 0.05
+const ICON_RELEASE_TIME := 0.09
+const ICON_DIM_FACTOR := 0.5
 
 func _ready() -> void:
 	if board_glow:
@@ -69,6 +86,7 @@ func _ready() -> void:
 func set_start_view() -> void:
 	is_hub_view = false
 	is_mode_select = false
+	_clear_mode_tweens()
 	if board_modes_group:
 		board_modes_group.visible = false
 	if store_modes_group:
@@ -102,6 +120,7 @@ func set_start_view() -> void:
 
 func set_hub_view() -> void:
 	is_hub_view = true
+	_clear_mode_tweens()
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
 	
@@ -134,6 +153,7 @@ func set_quest_modes_view() -> void:
 	is_mode_select = true
 	props_anim_ready = true
 	is_logo_animating = false
+	_clear_mode_tweens()
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
 
@@ -152,6 +172,7 @@ func set_quest_modes_view() -> void:
 
 	if board_modes_group:
 		board_modes_group.visible = true
+		_set_group_labels_alpha(board_modes_group, 1.0)
 		if fionna_book:
 			fionna_book.reset_anim()
 		if solo_quests:
@@ -169,6 +190,7 @@ func set_store_modes_view() -> void:
 	is_mode_select = true
 	props_anim_ready = true
 	is_logo_animating = false
+	_clear_mode_tweens()
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
 
@@ -189,6 +211,7 @@ func set_store_modes_view() -> void:
 		board_modes_group.visible = false
 	if store_modes_group:
 		store_modes_group.visible = true
+		_set_group_labels_alpha(store_modes_group, 1.0)
 		if store_inventory_icon:
 			store_inventory_icon.reset_anim()
 		if store_gems_icon:
@@ -290,25 +313,81 @@ func _begin_board_mode_transition() -> void:
 		)
 
 
-func _pop_up_board_modes(modes: Array) -> void:
-	for i in range(modes.size()):
-		var m = modes[i]
+func _clear_mode_tweens() -> void:
+	for tw in _mode_tweens:
+		if tw and tw.is_valid():
+			tw.kill()
+	_mode_tweens.clear()
+	for icon in [store_inventory_icon, store_gems_icon, deckwars_stadium]:
+		if icon:
+			_reset_icon_reaction(icon)
+
+
+func spawn_rez_fx(board_pos: Vector3, fx_scale: float = 1.0) -> void:
+	if not MENU_REZ_FX_SCENE:
+		return
+	var fx := MENU_REZ_FX_SCENE.instantiate() as MenuObjectRezFX
+	if fx:
+		fx.fx_scale = fx_scale
+		fx.position = Vector3(board_pos.x, BOARD_SURFACE_Y, board_pos.z)
+		add_child(fx)
+
+
+func _play_rez_sfx() -> void:
+	if Audio and SFX_REZ_IN:
+		Audio.play_sfx(SFX_REZ_IN)
+
+
+func _set_group_labels_alpha(group: Node3D, alpha: float) -> void:
+	if not group:
+		return
+	for child in group.get_children():
+		if child is Label3D:
+			var lbl := child as Label3D
+			lbl.modulate.a = alpha
+			lbl.outline_modulate.a = alpha
+
+
+func _fade_group_labels(group: Node3D, from_alpha: float, to_alpha: float, duration: float) -> void:
+	if not group:
+		return
+	for child in group.get_children():
+		if child is Label3D:
+			var lbl := child as Label3D
+			lbl.modulate.a = from_alpha
+			lbl.outline_modulate.a = from_alpha
+			var l_tw := create_tween().set_parallel(true)
+			l_tw.tween_property(lbl, "modulate:a", to_alpha, duration)
+			l_tw.tween_property(lbl, "outline_modulate:a", to_alpha, duration)
+			_mode_tweens.append(l_tw)
+
+
+func _pop_up_board_modes(group: Node3D, modes: Array) -> void:
+	_clear_mode_tweens()
+	_fade_group_labels(group, 0.0, 1.0, 0.28)
+	var spawned_any := false
+	for m in modes:
 		if m:
-			m.scale = Vector3.ZERO
-			m.position.y = -0.45
-			var m_tw = create_tween().set_parallel(true)
-			var delay = 0.08 + i * 0.08
-			m_tw.tween_property(m, "scale", Vector3.ONE, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
-			m_tw.tween_property(m, "position:y", -0.12, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
+			m.position.y = MODE_REST_Y
+			m.scale = Vector3(1.0, 0.001, 1.0)
+			spawn_rez_fx(m.position)
+			spawned_any = true
+			var m_tw = create_tween()
+			m_tw.tween_property(m, "scale:y", 1.0, MODE_REZ_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			_mode_tweens.append(m_tw)
+	if spawned_any:
+		_play_rez_sfx()
 	var finish_tw = create_tween()
-	finish_tw.tween_interval(0.60)
+	finish_tw.tween_interval(MODE_REZ_DURATION)
 	finish_tw.tween_callback(func(): props_anim_ready = true)
+	_mode_tweens.append(finish_tw)
 
 
 func _end_board_mode_transition(group: Node3D, modes: Array) -> void:
 	is_mode_select = false
 	props_anim_ready = false
 	is_logo_animating = true
+	_clear_mode_tweens()
 
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
@@ -322,15 +401,27 @@ func _end_board_mode_transition(group: Node3D, modes: Array) -> void:
 	active_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	active_tween.tween_property(camera, "transform", target_cam_xf, 0.48)
 
+	_fade_group_labels(group, 1.0, 0.0, 0.22)
+
 	var tw = create_tween().set_parallel(true)
+	_mode_tweens.append(tw)
+	var spawned_any := false
 	for m in modes:
 		if m:
-			tw.tween_property(m, "scale", Vector3.ZERO, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-			tw.tween_property(m, "position:y", -0.45, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			spawn_rez_fx(m.position)
+			spawned_any = true
+			tw.tween_property(m, "scale:y", 0.001, MODE_REZ_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	if spawned_any:
+		_play_rez_sfx()
 
 	tw.chain().tween_callback(func():
 		if group:
 			group.visible = false
+			_set_group_labels_alpha(group, 1.0)
+		for m in modes:
+			if m:
+				m.scale = Vector3.ONE
+				m.position.y = MODE_REST_Y
 		if logo_group:
 			logo_group.position = Vector3(HUB_LOGO_POS.x, HUB_LOGO_POS.y - 0.35, HUB_LOGO_POS.z)
 			logo_group.scale = Vector3.ZERO
@@ -339,6 +430,9 @@ func _end_board_mode_transition(group: Node3D, modes: Array) -> void:
 			l_tw.tween_property(logo_group, "scale", HUB_LOGO_SCALE, 0.38).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 			l_tw.tween_property(logo_group, "position:y", HUB_LOGO_POS.y, 0.38).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 			l_tw.chain().tween_callback(func(): is_logo_animating = false)
+			_mode_tweens.append(l_tw)
+		else:
+			is_logo_animating = false
 	)
 
 
@@ -354,7 +448,7 @@ func show_quest_modes() -> void:
 			fionna_book.reset_anim()
 		if solo_quests:
 			solo_quests.reset_anim()
-		_pop_up_board_modes([deckwars_mode, fionna_mode, quests_mode])
+		_pop_up_board_modes(board_modes_group, [deckwars_mode, fionna_mode, quests_mode])
 
 
 func hide_quest_modes() -> void:
@@ -379,7 +473,7 @@ func show_store_modes() -> void:
 			store_inventory_icon.reset_anim()
 		if store_gems_icon:
 			store_gems_icon.reset_anim()
-		_pop_up_board_modes([store_inventory_mode, store_gems_mode])
+		_pop_up_board_modes(store_modes_group, [store_inventory_mode, store_gems_mode])
 
 
 func hide_store_modes() -> void:
@@ -402,6 +496,129 @@ func play_quests_activate(on_finished: Callable) -> void:
 		solo_quests.play_activate()
 	else:
 		on_finished.call()
+
+
+func set_store_inventory_pressed(is_down: bool) -> void:
+	_set_icon_pressed(store_inventory_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func set_store_gems_pressed(is_down: bool) -> void:
+	_set_icon_pressed(store_gems_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func set_deckwars_pressed(is_down: bool) -> void:
+	_set_icon_pressed(deckwars_stadium, is_down, STADIUM_REACTION_SCALE, false)
+
+
+func play_store_inventory_activate(on_finished: Callable) -> void:
+	_play_icon_activate(store_inventory_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func play_store_gems_activate(on_finished: Callable) -> void:
+	_play_icon_activate(store_gems_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func play_deckwars_activate(on_finished: Callable) -> void:
+	_play_icon_activate(deckwars_stadium, STADIUM_REACTION_SCALE, false, on_finished)
+
+
+func _ensure_icon_mats(icon: Node3D) -> Array:
+	var id := icon.get_instance_id()
+	if _icon_mat_cache.has(id):
+		return _icon_mat_cache[id]
+	var entries: Array = []
+	var seen_mats: Dictionary = {}
+	var stack: Array[Node] = [icon]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		for child in node.get_children():
+			stack.append(child)
+		if node is MeshInstance3D:
+			var mi := node as MeshInstance3D
+			var surf_count := mi.get_surface_override_material_count()
+			for idx in range(surf_count):
+				var mat := mi.get_surface_override_material(idx)
+				if mat is StandardMaterial3D:
+					var orig_id := mat.get_instance_id()
+					var unique_mat: StandardMaterial3D
+					if seen_mats.has(orig_id):
+						unique_mat = seen_mats[orig_id]
+					else:
+						unique_mat = mat.duplicate() as StandardMaterial3D
+						seen_mats[orig_id] = unique_mat
+						entries.append({"mat": unique_mat, "base": unique_mat.albedo_color})
+					mi.set_surface_override_material(idx, unique_mat)
+	_icon_mat_cache[id] = entries
+	return entries
+
+
+func _apply_icon_dim(icon: Node3D, dim_amount: float) -> void:
+	for entry in _ensure_icon_mats(icon):
+		var mat: StandardMaterial3D = entry["mat"]
+		var base: Color = entry["base"]
+		var dimmed := Color(base.r * ICON_DIM_FACTOR, base.g * ICON_DIM_FACTOR, base.b * ICON_DIM_FACTOR, base.a)
+		mat.albedo_color = base.lerp(dimmed, clampf(dim_amount, 0.0, 1.0))
+
+
+func _reset_icon_reaction(icon: Node3D) -> void:
+	if not icon:
+		return
+	var id := icon.get_instance_id()
+	var prev: Tween = _icon_reaction_tweens.get(id, null)
+	if prev and prev.is_valid():
+		prev.kill()
+	_icon_reaction_tweens.erase(id)
+	_icon_is_down[id] = false
+	icon.scale = Vector3.ONE
+	if _icon_mat_cache.has(id):
+		_apply_icon_dim(icon, 0.0)
+
+
+func _set_icon_pressed(icon: Node3D, is_down: bool, target_scale: Vector3, dim_materials: bool) -> void:
+	if not icon:
+		return
+	var id := icon.get_instance_id()
+	var prev: Tween = _icon_reaction_tweens.get(id, null)
+	if prev and prev.is_valid():
+		prev.kill()
+	_icon_is_down[id] = is_down
+	var dest_scale := target_scale if is_down else Vector3.ONE
+	var tw := create_tween()
+	tw.tween_property(icon, "scale", dest_scale, ICON_PRESS_TIME).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	if dim_materials:
+		var from_dim := 0.0 if is_down else 1.0
+		var to_dim := 1.0 if is_down else 0.0
+		tw.parallel().tween_method(func(v: float): _apply_icon_dim(icon, v), from_dim, to_dim, ICON_PRESS_TIME)
+	_icon_reaction_tweens[id] = tw
+
+
+func _play_icon_activate(icon: Node3D, target_scale: Vector3, dim_materials: bool, on_finished: Callable) -> void:
+	if not icon:
+		on_finished.call()
+		return
+	var id := icon.get_instance_id()
+	var already_down: bool = bool(_icon_is_down.get(id, false))
+	var prev: Tween = _icon_reaction_tweens.get(id, null)
+	if prev and prev.is_valid():
+		prev.kill()
+	_icon_is_down[id] = false
+	var tw := create_tween()
+	if not already_down:
+		tw.tween_property(icon, "scale", target_scale, ICON_PRESS_TIME).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		if dim_materials:
+			tw.parallel().tween_method(func(v: float): _apply_icon_dim(icon, v), 0.0, 1.0, ICON_PRESS_TIME)
+	else:
+		icon.scale = target_scale
+		if dim_materials:
+			_apply_icon_dim(icon, 1.0)
+	tw.tween_property(icon, "scale", Vector3.ONE, ICON_RELEASE_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if dim_materials:
+		tw.parallel().tween_method(func(v: float): _apply_icon_dim(icon, v), 1.0, 0.0, ICON_RELEASE_TIME)
+	tw.tween_callback(func():
+		_icon_reaction_tweens.erase(id)
+		on_finished.call()
+	)
+	_icon_reaction_tweens[id] = tw
 
 func _process(delta: float) -> void:
 	anim_time += delta

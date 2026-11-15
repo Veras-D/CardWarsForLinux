@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://src/ui/StoreGemsModal.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/UI_Coin_Icon.png" id="8_coin"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/GsGems.png" id="9_gems"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/popup_box.png" id="10_popup"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/Battle_Flash.png" id="11_flash"]
 
 [node name="StoreGemsModal" type="Control"]
 layout_mode = 3
@@ -38,7 +39,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Frame" type="Control" parent="Center"]
-custom_minimum_size = Vector2(780, 560)
+custom_minimum_size = Vector2(740, 560)
 layout_mode = 2
 
 [node name="BgFrame" type="NinePatchRect" parent="Center/Frame"]
@@ -46,54 +47,60 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 24.0
+offset_top = 34.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_frame")
-patch_margin_left = 48
-patch_margin_top = 48
-patch_margin_right = 48
-patch_margin_bottom = 48
+patch_margin_left = 170
+patch_margin_top = 150
+patch_margin_right = 170
+patch_margin_bottom = 150
 
-[node name="TitleBanner" type="TextureRect" parent="Center/Frame"]
+[node name="TitleBanner" type="NinePatchRect" parent="Center/Frame"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -210.0
-offset_top = -12.0
-offset_right = 210.0
-offset_bottom = 66.0
+offset_left = -255.0
+offset_top = -6.0
+offset_right = 255.0
+offset_bottom = 86.0
 grow_horizontal = 2
 texture = ExtResource("4_title")
-expand_mode = 1
+patch_margin_left = 70
+patch_margin_right = 70
 
 [node name="Label" type="Label" parent="Center/Frame/TitleBanner"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 74.0
+offset_top = 4.0
+offset_right = -134.0
+offset_bottom = -6.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 7
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 38
 text = "STORE"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CloseBtn" type="TextureButton" parent="Center/Frame"]
+[node name="CloseBtn" type="TextureButton" parent="Center/Frame/TitleBanner"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -48.0
-offset_top = 2.0
-offset_right = 18.0
-offset_bottom = 68.0
+offset_left = -134.0
+offset_top = 16.0
+offset_right = -76.0
+offset_bottom = 74.0
 grow_horizontal = 0
+focus_mode = 0
 texture_normal = ExtResource("6_cancel")
 ignore_texture_size = true
 stretch_mode = 5
@@ -103,18 +110,18 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 46.0
-offset_top = 74.0
-offset_right = -46.0
-offset_bottom = -70.0
+offset_left = 50.0
+offset_top = 86.0
+offset_right = -50.0
+offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/h_separation = 24
-theme_override_constants/v_separation = 14
+theme_override_constants/h_separation = 26
+theme_override_constants/v_separation = 16
 columns = 3
 
 [node name="Slot1" type="Control" parent="Center/Frame/SlotsGrid"]
-custom_minimum_size = Vector2(210, 198)
+custom_minimum_size = Vector2(194, 214)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -128,21 +135,21 @@ offset_bottom = -18.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("5_slot")
-patch_margin_left = 16
-patch_margin_top = 16
-patch_margin_right = 16
-patch_margin_bottom = 16
+patch_margin_left = 35
+patch_margin_top = 35
+patch_margin_right = 35
+patch_margin_bottom = 35
 
 [node name="AmountLabel" type="Label" parent="Center/Frame/SlotsGrid/Slot1"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 8.0
-offset_bottom = 38.0
+offset_top = 10.0
+offset_bottom = 42.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0.1, 0.1, 0.1, 1)
+theme_override_colors/font_color = Color(0.08, 0.08, 0.08, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "1 Gem"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -152,33 +159,20 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 34.0
-offset_bottom = -56.0
+offset_top = 38.0
+offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Icon" type="TextureRect" parent="Center/Frame/SlotsGrid/Slot1/IconCenter"]
-custom_minimum_size = Vector2(62, 52)
+custom_minimum_size = Vector2(56, 46)
 layout_mode = 2
 texture = ExtResource("9_gems")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BuyBtn" type="TextureButton" parent="Center/Frame/SlotsGrid/Slot1"]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = -56.0
-offset_right = -8.0
-offset_bottom = -2.0
-grow_horizontal = 2
-grow_vertical = 0
-focus_mode = 0
-
-[node name="Bg" type="NinePatchRect" parent="Center/Frame/SlotsGrid/Slot1/BuyBtn"]
+[node name="Sparkles" type="Control" parent="Center/Frame/SlotsGrid/Slot1"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -186,17 +180,78 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="Center/Frame/SlotsGrid/Slot1/Sparkles"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -54.0
+offset_right = 56.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("11_flash")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="Center/Frame/SlotsGrid/Slot1/Sparkles"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -52.0
+offset_top = -2.0
+offset_right = -24.0
+offset_bottom = 26.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("11_flash")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BuyBtn" type="TextureButton" parent="Center/Frame/SlotsGrid/Slot1"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -76.0
+offset_top = -62.0
+offset_right = 76.0
+grow_horizontal = 2
+grow_vertical = 0
+focus_mode = 0
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/SlotsGrid/Slot1/BuyBtn"]
+layout_mode = 0
+offset_right = 338.0
+offset_bottom = 138.0
+scale = Vector2(0.45, 0.45)
+mouse_filter = 2
 texture = ExtResource("7_btngreen")
-patch_margin_left = 20
-patch_margin_top = 18
-patch_margin_right = 20
-patch_margin_bottom = 18
+patch_margin_left = 36
+patch_margin_top = 30
+patch_margin_right = 36
+patch_margin_bottom = 40
 
 [node name="HBox" type="HBoxContainer" parent="Center/Frame/SlotsGrid/Slot1/BuyBtn"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 4.0
+offset_right = -14.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -218,23 +273,26 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
-text = "50,000"
+theme_override_font_sizes/font_size = 18
+text = "500"
 
-[node name="Footer" type="Control" parent="Center/Frame"]
+[node name="Footer" type="Control" parent="."]
+visible = false
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = 7
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 54.0
-offset_top = -62.0
-offset_right = -54.0
-offset_bottom = -22.0
+offset_left = -280.0
+offset_top = -54.0
+offset_right = 280.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 0
+mouse_filter = 2
 
-[node name="Bg" type="NinePatchRect" parent="Center/Frame/Footer"]
+[node name="Bg" type="NinePatchRect" parent="Footer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -247,7 +305,7 @@ patch_margin_top = 18
 patch_margin_right = 24
 patch_margin_bottom = 18
 
-[node name="StatusLabel" type="Label" parent="Center/Frame/Footer"]
+[node name="StatusLabel" type="Label" parent="Footer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -258,7 +316,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
-text = "Exchange Coins for Magic Gems!"
+theme_override_font_sizes/font_size = 18
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1

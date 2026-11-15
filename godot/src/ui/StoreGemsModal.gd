@@ -4,6 +4,7 @@ signal closed
 signal gems_purchased(gems_added: int)
 
 const SFX_CLICK: AudioStream = preload("res://assets/audio/sfx/Click.wav")
+const SFX_SELECT: AudioStream = preload("res://assets/audio/sfx/UI_Select.wav")
 
 const PACK_ICONS: Array[Texture2D] = [
 	preload("res://assets/textures/ui/store/GsGems.png"),
@@ -15,31 +16,59 @@ const PACK_ICONS: Array[Texture2D] = [
 ]
 
 const ICON_SIZES: Array[Vector2] = [
-	Vector2(62, 52),
-	Vector2(90, 84),
-	Vector2(56, 92),
-	Vector2(78, 76),
-	Vector2(82, 96),
-	Vector2(106, 98),
+	Vector2(56, 46),
+	Vector2(98, 92),
+	Vector2(66, 98),
+	Vector2(86, 84),
+	Vector2(90, 102),
+	Vector2(114, 104),
 ]
 
-@onready var close_btn: BaseButton = $Center/Frame/CloseBtn
+@onready var dimmer: ColorRect = $Dimmer
+@onready var frame: Control = $Center/Frame
+@onready var close_btn: BaseButton = $Center/Frame/TitleBanner/CloseBtn
 @onready var slots_grid: GridContainer = $Center/Frame/SlotsGrid
-@onready var status_label: Label = $Center/Frame/Footer/StatusLabel
+@onready var footer: Control = $Footer
+@onready var status_label: Label = $Footer/StatusLabel
 
 var _slot_nodes: Array[Control] = []
+var _sparkle_nodes: Array[Control] = []
 var _products: Array[Dictionary] = []
+var _anim_tween: Tween = null
+var _is_closing: bool = false
+var _sparkle_time: float = 0.0
 
 
 func _ready() -> void:
 	if close_btn:
 		close_btn.pressed.connect(_on_close_pressed)
+		StoreModalAnimator.attach_button_reaction(close_btn)
 	_collect_slots()
 	refresh_display()
 
 
+func _process(delta: float) -> void:
+	if not visible or _sparkle_nodes.is_empty():
+		return
+	_sparkle_time += delta * 3.2
+	for i in range(_sparkle_nodes.size()):
+		var sp := _sparkle_nodes[i]
+		if not sp or not sp.visible:
+			continue
+		var children := sp.get_children()
+		for j in range(children.size()):
+			var star := children[j] as Control
+			if star:
+				var phase := _sparkle_time + float(i) * 1.1 + float(j) * 1.7
+				var s := 0.65 + 0.45 * absf(sin(phase))
+				star.pivot_offset = star.size * 0.5
+				star.scale = Vector2(s, s)
+				star.modulate.a = 0.45 + 0.55 * absf(sin(phase))
+
+
 func _collect_slots() -> void:
 	_slot_nodes.clear()
+	_sparkle_nodes.clear()
 	if not slots_grid or slots_grid.get_child_count() == 0:
 		return
 	var template: Control = slots_grid.get_child(0)
@@ -50,18 +79,33 @@ func _collect_slots() -> void:
 	for i in range(slots_grid.get_child_count()):
 		var slot: Control = slots_grid.get_child(i)
 		_slot_nodes.append(slot)
+		var sp: Control = slot.get_node_or_null("Sparkles")
+		if sp:
+			sp.visible = (i >= 3)
+			_sparkle_nodes.append(sp)
 		var buy_btn: BaseButton = slot.get_node_or_null("BuyBtn")
 		if buy_btn:
 			var idx: int = i
 			buy_btn.pressed.connect(func(): _on_buy_pack(idx))
+			StoreModalAnimator.attach_button_reaction(buy_btn)
 
 
 func open_modal() -> void:
+	_is_closing = false
 	refresh_display()
-	if status_label:
-		status_label.text = "Exchange Coins for Magic Gems! (Coins: %s)" % _format_int(GameManager.get_coins())
-		status_label.modulate = Color(1, 1, 1, 1)
-	visible = true
+	if footer:
+		footer.visible = false
+	_anim_tween = StoreModalAnimator.play_open(self, dimmer, frame, _anim_tween)
+
+
+func close_modal() -> void:
+	if _is_closing or not visible:
+		return
+	_is_closing = true
+	_anim_tween = StoreModalAnimator.play_close(self, dimmer, frame, _anim_tween, func():
+		_is_closing = false
+		closed.emit()
+	)
 
 
 func refresh_display() -> void:
@@ -91,8 +135,9 @@ func refresh_display() -> void:
 
 
 func _play_sfx() -> void:
-	if Audio and SFX_CLICK:
-		Audio.play_sfx(SFX_CLICK)
+	var clip := SFX_SELECT if SFX_SELECT else SFX_CLICK
+	if Audio and clip:
+		Audio.play_sfx(clip)
 
 
 func _on_buy_pack(idx: int) -> void:
@@ -102,6 +147,8 @@ func _on_buy_pack(idx: int) -> void:
 	var prod: Dictionary = _products[idx]
 	var product_id: String = str(prod.get("product_id", ""))
 	var res: Dictionary = GameManager.purchase_gem_pack(product_id)
+	if footer:
+		footer.visible = true
 	if res.get("ok", false):
 		var added: int = int(res.get("gems_added", 0))
 		if status_label:
@@ -120,8 +167,7 @@ func _on_buy_pack(idx: int) -> void:
 
 func _on_close_pressed() -> void:
 	_play_sfx()
-	visible = false
-	closed.emit()
+	close_modal()
 
 
 static func _format_int(val: int) -> String:
