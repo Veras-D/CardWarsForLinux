@@ -336,3 +336,4 @@ theme_override_font_sizes/font_size = 15
 text = "✨ Collect All ✨"
 
 [node name="SFXPlayer" type="AudioStreamPlayer" parent="."]
+bus = &"SFX"

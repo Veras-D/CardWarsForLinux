@@ -64,12 +64,21 @@ func _test_audio_bus_controls() -> void:
 
 	sm.set_bus_volume("BGM", 0.70)
 	_assert_test(is_equal_approx(sm.get_bus_volume("BGM"), 0.70), "Music (BGM) set to 70%")
+	var music_idx = AudioServer.get_bus_index("Music")
+	_assert_test(music_idx >= 0 and not AudioServer.is_bus_mute(music_idx), "AudioServer 'Music' bus unmuted at 70%")
+	_assert_test(music_idx >= 0 and abs(AudioServer.get_bus_volume_db(music_idx) - linear_to_db(0.70)) < 0.05, "AudioServer 'Music' bus dB matches 70%")
+	sm.set_bus_volume("BGM", 0.0)
+	_assert_test(music_idx >= 0 and AudioServer.is_bus_mute(music_idx), "AudioServer 'Music' bus mutes at 0%")
+	sm.set_bus_volume("BGM", 0.70)
+	_assert_test(music_idx >= 0 and not AudioServer.is_bus_mute(music_idx), "AudioServer 'Music' bus unmutes when raised back to 70%")
 
 	sm.set_bus_volume("SFX", 0.85)
 	_assert_test(is_equal_approx(sm.get_bus_volume("SFX"), 0.85), "SFX set to 85%")
 
 	sm.set_bus_volume("VO", 0.90)
 	_assert_test(is_equal_approx(sm.get_bus_volume("VO"), 0.90), "VO set to 90%")
+	var vo_idx = AudioServer.get_bus_index("Voice")
+	_assert_test(vo_idx >= 0 and not AudioServer.is_bus_mute(vo_idx) and abs(AudioServer.get_bus_volume_db(vo_idx) - linear_to_db(0.90)) < 0.05, "AudioServer 'Voice' bus dB matches 90%")
 
 
 func _test_display_and_steamdeck_resolutions() -> void:

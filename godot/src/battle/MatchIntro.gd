@@ -26,8 +26,11 @@ func _ready() -> void:
 	start_btn.pressed.connect(_on_start_pressed)
 	audio_vo.volume_db = vo_volume_db
 	audio_sfx.volume_db = sfx_volume_db
-	if AudioServer.get_bus_index("SFX") != -1:
+	if AudioServer.get_bus_index("Voice") != -1:
+		audio_vo.bus = "Voice"
+	elif AudioServer.get_bus_index("SFX") != -1:
 		audio_vo.bus = "SFX"
+	if AudioServer.get_bus_index("SFX") != -1:
 		audio_sfx.bus = "SFX"
 
 func play_intro(player_name: String, opponent_name: String, p1_max_hp: int, p2_max_hp: int) -> void:

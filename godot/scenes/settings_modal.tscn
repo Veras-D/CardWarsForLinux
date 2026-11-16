@@ -1,22 +1,54 @@
-[gd_scene load_steps=3 format=3 uid="uid://settings_modal_001"]
+[gd_scene load_steps=16 format=3 uid="uid://settings_modal_001"]
 
 [ext_resource type="Script" path="res://src/ui/SettingsModal.gd" id="1_modal"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/PopUpSprite_1.png" id="3_popup1"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/GoldPlaque.png" id="4_plaque"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Frame_Indent.png" id="5_indent"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonGrey.png" id="6_btngrey"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonFrame.png" id="7_btnframe"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/uiButtonBlue.png" id="8_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="9_btngreen"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonRed.png" id="10_btnred"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="11_cancel"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/UI_Gear.png" id="12_gear"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.1, 0.12, 0.17, 0.97)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.85, 0.65, 0.2, 0.9)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.6)
-shadow_size = 18
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_blue"]
+texture = ExtResource("8_btnblue")
+texture_margin_left = 70.0
+texture_margin_top = 50.0
+texture_margin_right = 60.0
+texture_margin_bottom = 70.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_red"]
+texture = ExtResource("10_btnred")
+texture_margin_left = 70.0
+texture_margin_top = 50.0
+texture_margin_right = 60.0
+texture_margin_bottom = 70.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_green"]
+texture = ExtResource("9_btngreen")
+texture_margin_left = 70.0
+texture_margin_top = 50.0
+texture_margin_right = 60.0
+texture_margin_bottom = 70.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 14.0
 
 [node name="SettingsModal" type="Control"]
+visible = false
+z_index = 20
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,305 +64,846 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.8)
+color = Color(0, 0, 0, 0.58)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="OptionsCanvas" type="Control" parent="."]
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+scale = Vector2(0.625, 0.625)
+
+[node name="PanelRoot" type="Control" parent="OptionsCanvas"]
+layout_mode = 0
+offset_left = 274.0
+offset_top = 74.0
+offset_right = 1774.0
+offset_bottom = 1078.0
+pivot_offset = Vector2(750, 502)
+
+[node name="BG" type="NinePatchRect" parent="OptionsCanvas/PanelRoot"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("3_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
 
-[node name="Panel" type="PanelContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(720, 540)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+[node name="TitleRoot" type="Control" parent="OptionsCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 415.0
+offset_top = 24.0
+offset_right = 1085.0
+offset_bottom = 170.0
 
-[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel"]
-layout_mode = 2
-theme_override_constants/separation = 14
+[node name="BG" type="NinePatchRect" parent="OptionsCanvas/PanelRoot/TitleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_plaque")
+patch_margin_left = 180
+patch_margin_right = 180
 
-[node name="Header" type="VBoxContainer" parent="CenterContainer/Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 4
+[node name="GearIcon" type="TextureRect" parent="OptionsCanvas/PanelRoot/TitleRoot"]
+layout_mode = 0
+offset_left = 148.0
+offset_top = 34.0
+offset_right = 222.0
+offset_bottom = 112.0
+texture = ExtResource("12_gear")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Title" type="Label" parent="CenterContainer/Panel/VBox/Header"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "⚙️ Game Options & Preferences"
+[node name="Title" type="Label" parent="OptionsCanvas/PanelRoot/TitleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 54.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 11
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 58
+text = "OPTIONS"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="TabContainer" type="TabContainer" parent="CenterContainer/Panel/VBox"]
+[node name="CloseBtn" type="TextureButton" parent="OptionsCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 1344.0
+offset_top = 28.0
+offset_right = 1452.0
+offset_bottom = 142.0
+pivot_offset = Vector2(54, 57)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("11_cancel")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TabsBar" type="Control" parent="OptionsCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 245.0
+offset_top = 180.0
+offset_right = 1255.0
+offset_bottom = 280.0
+
+[node name="AudioTabBtn" type="TextureButton" parent="OptionsCanvas/PanelRoot/TabsBar"]
+layout_mode = 0
+offset_right = 310.0
+offset_bottom = 98.0
+pivot_offset = Vector2(155, 49)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="OptionsCanvas/PanelRoot/TabsBar/AudioTabBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(155, 49)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="OptionsCanvas/PanelRoot/TabsBar/AudioTabBtn/ScaleRoot"]
+modulate = Color(0.105882, 0.45098, 0.72549, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Frame" type="NinePatchRect" parent="OptionsCanvas/PanelRoot/TabsBar/AudioTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Label" type="Label" parent="OptionsCanvas/PanelRoot/TabsBar/AudioTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "Audio"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DisplayTabBtn" type="TextureButton" parent="OptionsCanvas/PanelRoot/TabsBar"]
+layout_mode = 0
+offset_left = 350.0
+offset_right = 660.0
+offset_bottom = 98.0
+pivot_offset = Vector2(155, 49)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="OptionsCanvas/PanelRoot/TabsBar/DisplayTabBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(155, 49)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="OptionsCanvas/PanelRoot/TabsBar/DisplayTabBtn/ScaleRoot"]
+modulate = Color(0.071529, 0.463235, 0.411695, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Frame" type="NinePatchRect" parent="OptionsCanvas/PanelRoot/TabsBar/DisplayTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Label" type="Label" parent="OptionsCanvas/PanelRoot/TabsBar/DisplayTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "Display"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ControlsTabBtn" type="TextureButton" parent="OptionsCanvas/PanelRoot/TabsBar"]
+layout_mode = 0
+offset_left = 700.0
+offset_right = 1010.0
+offset_bottom = 98.0
+pivot_offset = Vector2(155, 49)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="OptionsCanvas/PanelRoot/TabsBar/ControlsTabBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(155, 49)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="OptionsCanvas/PanelRoot/TabsBar/ControlsTabBtn/ScaleRoot"]
+modulate = Color(0.647059, 0.359088, 0.099914, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Frame" type="NinePatchRect" parent="OptionsCanvas/PanelRoot/TabsBar/ControlsTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Label" type="Label" parent="OptionsCanvas/PanelRoot/TabsBar/ControlsTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "Controls"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ContentFrame" type="NinePatchRect" parent="OptionsCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 278.0
+offset_right = 1432.0
+offset_bottom = 824.0
+texture = ExtResource("5_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="AudioPage" type="Control" parent="OptionsCanvas/PanelRoot/ContentFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 38.0
+offset_right = -48.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AudioVBox" type="VBoxContainer" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 26
+
+[node name="AudioGrid" type="GridContainer" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox"]
 layout_mode = 2
 size_flags_vertical = 3
-
-[node name="Audio" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
-layout_mode = 2
-
-[node name="AudioVBox" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Audio"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 14
-
-[node name="AudioGrid" type="GridContainer" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox"]
-layout_mode = 2
-theme_override_constants/h_separation = 18
-theme_override_constants/v_separation = 14
+theme_override_constants/h_separation = 26
+theme_override_constants/v_separation = 24
 columns = 4
 
-[node name="MasterName" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="MasterName" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
+custom_minimum_size = Vector2(310, 0)
 layout_mode = 2
-text = "Master Volume:"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+text = "Master Volume"
+vertical_alignment = 1
 
-[node name="MasterSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="MasterSlider" type="HSlider" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(540, 62)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 max_value = 1.0
 step = 0.05
 value = 0.8
 
-[node name="MasterLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="MasterLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(45, 0)
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
 text = "80%"
+horizontal_alignment = 2
+vertical_alignment = 1
 
-[node name="MasterMute" type="CheckBox" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="MasterMute" type="CheckBox" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(165, 58)
 layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9, 0.9, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
 text = "Mute"
 
-[node name="BgmName" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="BgmName" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
+custom_minimum_size = Vector2(310, 0)
 layout_mode = 2
-text = "Music (BGM):"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+text = "Music"
+vertical_alignment = 1
 
-[node name="BgmSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="BgmSlider" type="HSlider" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(540, 62)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 max_value = 1.0
 step = 0.05
 value = 0.8
 
-[node name="BgmLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="BgmLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(45, 0)
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
 text = "80%"
+horizontal_alignment = 2
+vertical_alignment = 1
 
-[node name="BgmMute" type="CheckBox" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="BgmMute" type="CheckBox" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(165, 58)
 layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9, 0.9, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
 text = "Mute"
 
-[node name="SfxName" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="SfxName" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
+custom_minimum_size = Vector2(310, 0)
 layout_mode = 2
-text = "Sound Effects (SFX):"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+text = "Sound Effects"
+vertical_alignment = 1
 
-[node name="SfxSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="SfxSlider" type="HSlider" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(540, 62)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 max_value = 1.0
 step = 0.05
 value = 0.85
 
-[node name="SfxLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="SfxLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(45, 0)
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
 text = "85%"
+horizontal_alignment = 2
+vertical_alignment = 1
 
-[node name="SfxMute" type="CheckBox" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="SfxMute" type="CheckBox" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(165, 58)
 layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9, 0.9, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
 text = "Mute"
 
-[node name="VoName" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="VoName" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
+custom_minimum_size = Vector2(310, 0)
 layout_mode = 2
-text = "Voice Over (VO):"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+text = "Voice Over"
+vertical_alignment = 1
 
-[node name="VoSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="VoSlider" type="HSlider" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(540, 62)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 max_value = 1.0
 step = 0.05
 value = 0.9
 
-[node name="VoLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="VoLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(45, 0)
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
 text = "90%"
+horizontal_alignment = 2
+vertical_alignment = 1
 
-[node name="VoMute" type="CheckBox" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox/AudioGrid"]
+[node name="VoMute" type="CheckBox" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/AudioGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(165, 58)
 layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9, 0.9, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
 text = "Mute"
 
-[node name="TestSfxBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Audio/AudioVBox"]
+[node name="TestRow" type="HBoxContainer" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox"]
+layout_mode = 2
+theme_override_constants/separation = 34
+alignment = 1
+
+[node name="TestSfxBtn" type="Button" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/TestRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 32)
+custom_minimum_size = Vector2(350, 92)
 layout_mode = 2
-size_flags_horizontal = 0
-text = "🔊 Test Sound Effect"
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxTexture_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_blue")
+theme_override_styles/focus = SubResource("StyleBoxTexture_blue")
+text = "Test Sound"
 
-[node name="Display" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
+[node name="TestVoBtn" type="Button" parent="OptionsCanvas/PanelRoot/ContentFrame/AudioPage/AudioVBox/TestRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(350, 92)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxTexture_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_blue")
+theme_override_styles/focus = SubResource("StyleBoxTexture_blue")
+text = "Test Voice"
+
+[node name="DisplayPage" type="Control" parent="OptionsCanvas/PanelRoot/ContentFrame"]
 visible = false
-layout_mode = 2
-
-[node name="DisplayGrid" type="GridContainer" parent="CenterContainer/Panel/VBox/TabContainer/Display"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
+offset_left = 48.0
+offset_top = 34.0
+offset_right = -48.0
+offset_bottom = -30.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/h_separation = 18
-theme_override_constants/v_separation = 14
+
+[node name="DisplayGrid" type="GridContainer" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 34
+theme_override_constants/v_separation = 16
 columns = 2
 
-[node name="LangLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="LangLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
-text = "Language / Idioma:"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Language"
+vertical_alignment = 1
 
-[node name="LangOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="LangOption" type="OptionButton" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 58)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 26
 
-[node name="ModeLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="ModeLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 layout_mode = 2
-text = "Window Mode:"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Window Mode"
+vertical_alignment = 1
 
-[node name="ModeOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="ModeOption" type="OptionButton" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 58)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 26
 
-[node name="ResLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="ResLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 layout_mode = 2
-text = "Screen Resolution:"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Resolution"
+vertical_alignment = 1
 
-[node name="ResOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="ResOption" type="OptionButton" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 58)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 26
 
-[node name="VsyncLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="VsyncLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 layout_mode = 2
-text = "V-Sync:"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "V-Sync"
+vertical_alignment = 1
 
-[node name="VsyncOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="VsyncOption" type="OptionButton" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 58)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 26
 
-[node name="FpsLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="FpsLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 layout_mode = 2
-text = "Max Framerate (FPS):"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Max Framerate"
+vertical_alignment = 1
 
-[node name="FpsOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="FpsOption" type="OptionButton" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 58)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 26
 
-[node name="ScaleNameLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="ScaleNameLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 layout_mode = 2
-text = "Interface Scale:"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Interface Scale"
+vertical_alignment = 1
 
-[node name="ScaleBox" type="HBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid"]
+[node name="ScaleBox" type="HBoxContainer" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 20
 
-[node name="ScaleSlider" type="HSlider" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid/ScaleBox"]
+[node name="ScaleSlider" type="HSlider" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid/ScaleBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 min_value = 0.75
-max_value = 2.0
-step = 0.25
+max_value = 1.5
+step = 0.05
 value = 1.0
 
-[node name="ScaleLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Display/DisplayGrid/ScaleBox"]
+[node name="ScaleLabel" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/DisplayPage/DisplayGrid/ScaleBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 0)
+custom_minimum_size = Vector2(115, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
 text = "1.00x"
+horizontal_alignment = 2
+vertical_alignment = 1
 
-[node name="Controls" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
+[node name="ControlsPage" type="Control" parent="OptionsCanvas/PanelRoot/ContentFrame"]
 visible = false
-layout_mode = 2
-
-[node name="ControlsVBox" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Controls"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
+offset_left = 48.0
+offset_top = 28.0
+offset_right = -48.0
+offset_bottom = -26.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
 
-[node name="RebindHeader" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Controls/ControlsVBox"]
+[node name="ControlsVBox" type="VBoxContainer" parent="OptionsCanvas/PanelRoot/ContentFrame/ControlsPage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="RebindHeader" type="Label" parent="OptionsCanvas/PanelRoot/ContentFrame/ControlsPage/ControlsVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
+theme_override_colors/font_color = Color(1, 0.94902, 0.768627, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
 text = "Click a key to rebind, then press any Keyboard key or Gamepad button:"
 
-[node name="RebindScroll" type="ScrollContainer" parent="CenterContainer/Panel/VBox/TabContainer/Controls/ControlsVBox"]
+[node name="RebindScroll" type="ScrollContainer" parent="OptionsCanvas/PanelRoot/ContentFrame/ControlsPage/ControlsVBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="RebindList" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Controls/ControlsVBox/RebindScroll"]
+[node name="RebindList" type="VBoxContainer" parent="OptionsCanvas/PanelRoot/ContentFrame/ControlsPage/ControlsVBox/RebindScroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="ResetControlsBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Controls/ControlsVBox"]
+[node name="ResetControlsBtn" type="Button" parent="OptionsCanvas/PanelRoot/ContentFrame/ControlsPage/ControlsVBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 32)
+custom_minimum_size = Vector2(340, 86)
 layout_mode = 2
 size_flags_horizontal = 0
-text = "🔄 Reset Controls to Default"
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxTexture_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_blue")
+theme_override_styles/focus = SubResource("StyleBoxTexture_blue")
+text = "Reset Controls"
 
-[node name="FooterBar" type="HBoxContainer" parent="CenterContainer/Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 2
+[node name="FooterBar" type="Control" parent="OptionsCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 836.0
+offset_right = 1432.0
+offset_bottom = 972.0
 
-[node name="ResetAllBtn" type="Button" parent="CenterContainer/Panel/VBox/FooterBar"]
+[node name="ResetAllBtn" type="Button" parent="OptionsCanvas/PanelRoot/FooterBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 34)
-layout_mode = 2
-text = "Reset All Defaults"
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 124.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxTexture_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_blue")
+theme_override_styles/focus = SubResource("StyleBoxTexture_blue")
+text = "Reset All"
 
-[node name="CancelBtn" type="Button" parent="CenterContainer/Panel/VBox/FooterBar"]
+[node name="CancelBtn" type="Button" parent="OptionsCanvas/PanelRoot/FooterBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(90, 34)
-layout_mode = 2
+layout_mode = 0
+offset_left = 696.0
+offset_right = 1016.0
+offset_bottom = 124.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxTexture_red")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_red")
+theme_override_styles/hover = SubResource("StyleBoxTexture_red")
+theme_override_styles/focus = SubResource("StyleBoxTexture_red")
 text = "Cancel"
 
-[node name="SaveCloseBtn" type="Button" parent="CenterContainer/Panel/VBox/FooterBar"]
+[node name="SaveCloseBtn" type="Button" parent="OptionsCanvas/PanelRoot/FooterBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 34)
-layout_mode = 2
-text = "💾 Apply & Close"
+layout_mode = 0
+offset_left = 1044.0
+offset_right = 1364.0
+offset_bottom = 124.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxTexture_green")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_green")
+theme_override_styles/hover = SubResource("StyleBoxTexture_green")
+theme_override_styles/focus = SubResource("StyleBoxTexture_green")
+text = "Apply"

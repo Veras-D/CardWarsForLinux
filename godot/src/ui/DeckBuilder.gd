@@ -1116,7 +1116,7 @@ func _refresh_b4_grid() -> void:
 		call_deferred("_sync_scrollbar", b4_scroll, b4_sb_bg, b4_sb_thumb)
 
 
-func _create_hero_tile(leader_id: String, is_selected: bool) -> Control:
+func _create_hero_tile(leader_id: String, is_selected: bool, target_size: Vector2 = Vector2(176.0, 250.0)) -> Control:
 	var ldata := Database.get_leader(leader_id)
 	var char_id := str(ldata.get("character_id", leader_id.replace("Leader_", ""))) if not ldata.is_empty() else leader_id.replace("Leader_", "")
 	var is_fc_blocked := bool(ldata.get("fc_world", false)) and (GameManager.battle_deck_index == current_deck_index)
@@ -1125,16 +1125,20 @@ func _create_hero_tile(leader_id: String, is_selected: bool) -> Control:
 	var tracker := GameManager.get_hero_tracker(leader_id)
 	var to_next := maxi(0, tracker.get_xp_for_next_level() - tracker.current_xp) if not tracker.is_max_level() else 0
 
+	var sx := target_size.x / 267.0
+	var sy := target_size.y / 378.0
+	var fs := minf(sx, sy)
+
 	var tile := Control.new()
-	tile.custom_minimum_size = Vector2(176, 250)
+	tile.custom_minimum_size = target_size
+	tile.size = target_size
 	tile.clip_contents = true
 	tile.mouse_filter = Control.MOUSE_FILTER_STOP
 	tile.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	var inner := Control.new()
 	inner.pivot_offset = Vector2.ZERO
-	inner.size = Vector2(267, 378)
-	inner.scale = Vector2(176.0 / 267.0, 250.0 / 378.0)
+	inner.size = target_size
 	inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if is_fc_blocked:
 		inner.modulate = Color(0.25, 0.25, 0.25, 1.0)
@@ -1143,8 +1147,8 @@ func _create_hero_tile(leader_id: String, is_selected: bool) -> Control:
 	var art := TextureRect.new()
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	art.position = Vector2(14, 11)
-	art.size = Vector2(239, 239)
+	art.position = Vector2(14.0 * sx, 11.0 * sy)
+	art.size = Vector2(239.0 * sx, 239.0 * sy)
 	art.texture = _load_hero_portrait(ldata, char_id)
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	inner.add_child(art)
@@ -1153,8 +1157,8 @@ func _create_hero_tile(leader_id: String, is_selected: bool) -> Control:
 	xp_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	xp_bg.texture = TEX_CW_GREY
 	xp_bg.modulate = Color(0.996, 0.996, 0.796, 1.0)
-	xp_bg.position = Vector2(56.5, 342)
-	xp_bg.size = Vector2(200, 25)
+	xp_bg.position = Vector2(56.5 * sx, 343.0 * sy)
+	xp_bg.size = Vector2(200.0 * sx, 23.0 * sy)
 	xp_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	inner.add_child(xp_bg)
 
@@ -1162,8 +1166,8 @@ func _create_hero_tile(leader_id: String, is_selected: bool) -> Control:
 	xp_fg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	xp_fg.texture = TEX_CW_GREY
 	xp_fg.modulate = Color(0.0, 0.616, 0.929, 1.0)
-	xp_fg.position = Vector2(56.5, 342)
-	xp_fg.size = Vector2(195.0 * tracker.get_progress_ratio(), 25)
+	xp_fg.position = Vector2(56.5 * sx, 343.0 * sy)
+	xp_fg.size = Vector2(195.0 * tracker.get_progress_ratio() * sx, 23.0 * sy)
 	xp_fg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	inner.add_child(xp_fg)
 
@@ -1171,43 +1175,44 @@ func _create_hero_tile(leader_id: String, is_selected: bool) -> Control:
 	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	frame.stretch_mode = TextureRect.STRETCH_SCALE
 	frame.texture = TEX_HERO_FRAME
-	frame.size = Vector2(267, 378)
+	frame.size = target_size
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	inner.add_child(frame)
 
-	var lvl_lbl := _make_kb_label("Level: %d" % lvl, 18, Color.BLACK, Color.TRANSPARENT, 0)
-	lvl_lbl.position = Vector2(10, 13)
-	lvl_lbl.size = Vector2(82, 32)
+	var lvl_lbl := _make_kb_label("Level: %d" % lvl, maxi(1, roundi(17.5 * fs)), Color.BLACK, Color.TRANSPARENT, 0)
+	lvl_lbl.position = Vector2(10.0 * sx, 13.0 * sy)
+	lvl_lbl.size = Vector2(82.0 * sx, 32.0 * sy)
 	lvl_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lvl_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	inner.add_child(lvl_lbl)
 
-	var hp_lbl := _make_kb_label(str(hp), 32, Color.WHITE, Color.BLACK, 6)
-	hp_lbl.position = Vector2(194, 10)
-	hp_lbl.size = Vector2(60, 52)
+	var hp_lbl := _make_kb_label(str(hp), maxi(1, roundi(32.0 * fs)), Color.WHITE, Color.BLACK, maxi(1, roundi(6.0 * fs)))
+	hp_lbl.position = Vector2(194.0 * sx, 10.0 * sy)
+	hp_lbl.size = Vector2(60.0 * sx, 52.0 * sy)
 	hp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hp_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	inner.add_child(hp_lbl)
 
-	var name_lbl := _make_kb_label(str(ldata.get("name", char_id)), 18, Color.BLACK, Color.TRANSPARENT, 0)
-	name_lbl.position = Vector2(18, 236)
-	name_lbl.size = Vector2(231, 28)
+	var name_lbl := _make_kb_label(str(ldata.get("name", char_id)), maxi(1, roundi(17.5 * fs)), Color.BLACK, Color.TRANSPARENT, 0)
+	name_lbl.position = Vector2(18.0 * sx, 240.0 * sy)
+	name_lbl.size = Vector2(231.0 * sx, 22.0 * sy)
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	inner.add_child(name_lbl)
 
-	var desc_lbl := _make_kb_label(str(ldata.get("desc", "")), 16, Color.BLACK, Color.TRANSPARENT, 0)
-	desc_lbl.offset_left = 16.0
-	desc_lbl.offset_top = 266.0
-	desc_lbl.offset_right = 251.0
-	desc_lbl.offset_bottom = 334.0
+	var desc_lbl := _make_kb_label(str(ldata.get("desc", "")), maxi(1, roundi(16.0 * fs)), Color.BLACK, Color.TRANSPARENT, 0)
+	desc_lbl.offset_left = 18.0 * sx
+	desc_lbl.offset_top = 271.5 * sy
+	desc_lbl.offset_right = 249.0 * sx
+	desc_lbl.offset_bottom = 335.5 * sy
 	desc_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	desc_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	inner.add_child(desc_lbl)
 
-	var next_lbl := _make_kb_label("To Next:%d" % to_next, 15, Color.BLACK, Color.TRANSPARENT, 0)
-	next_lbl.position = Vector2(60, 342)
-	next_lbl.size = Vector2(192, 25)
+	var next_lbl := _make_kb_label("To Next:%d" % to_next, maxi(1, roundi(14.5 * fs)), Color.BLACK, Color.TRANSPARENT, 0)
+	next_lbl.position = Vector2(60.0 * sx, 343.0 * sy)
+	next_lbl.size = Vector2(192.0 * sx, 23.0 * sy)
 	next_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	next_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	inner.add_child(next_lbl)
@@ -1218,12 +1223,12 @@ func _create_hero_tile(leader_id: String, is_selected: bool) -> Control:
 		in_use.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		in_use.texture = TEX_IN_DECK_HERO
 		in_use.modulate = Color(0.85, 0.95, 0.88, 0.94)
-		in_use.position = Vector2(38, 45)
-		in_use.size = Vector2(190, 190)
+		in_use.position = Vector2(38.0 * sx, 45.0 * sy)
+		in_use.size = Vector2(190.0 * sx, 190.0 * sy)
 		in_use.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		inner.add_child(in_use)
 
-		var in_use_lbl := _make_kb_label("In Deck", 42, Color.WHITE, Color.BLACK, 8)
+		var in_use_lbl := _make_kb_label("In Deck", maxi(1, roundi(42.0 * fs)), Color.WHITE, Color.BLACK, maxi(1, roundi(8.0 * fs)))
 		in_use_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
 		in_use_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		in_use_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -1516,9 +1521,10 @@ func _open_zoom_leader(leader_id: String) -> void:
 	_play_sfx(SFX_ZOOM)
 	for ch in zoom_holder.get_children():
 		ch.queue_free()
-	var tile := _create_hero_tile(leader_id, false)
-	tile.scale = Vector2(2.4, 2.4)
-	tile.position = Vector2(-188.0 * 1.2, -266.0 * 1.2)
+	var zoom_size := Vector2(460.0, 651.0)
+	var tile := _create_hero_tile(leader_id, false, zoom_size)
+	tile.scale = Vector2.ONE
+	tile.position = -zoom_size * 0.5
 	tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	zoom_holder.add_child(tile)
 	zoom_holder.position = Vector2(1024.0, 576.0) - zoom_overlay.position

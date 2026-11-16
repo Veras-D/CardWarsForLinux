@@ -179,7 +179,10 @@ func _init_settings() -> void:
 	if settings_manager == null:
 		settings_manager = SettingsManager.new()
 		add_child(settings_manager)
-		settings_manager.load_settings()
+		if not settings_manager.load_settings():
+			settings_manager.apply_audio_settings()
+		elif Localization and settings_manager.display_settings.has("language"):
+			Localization.set_language(str(settings_manager.display_settings["language"]))
 
 
 # ==============================================================================

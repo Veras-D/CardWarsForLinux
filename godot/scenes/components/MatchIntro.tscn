@@ -198,4 +198,4 @@ bus = &"SFX"
 
 [node name="AudioVO" type="AudioStreamPlayer" parent="."]
 volume_db = -12.0
-bus = &"SFX"
+bus = &"Voice"

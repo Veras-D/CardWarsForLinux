@@ -488,7 +488,16 @@ func _auto_screenshot() -> void:
 				daily_gift_modal.open_modal(9)
 				daily_gift_modal.show_reward_preview({"type": "Card gold", "quantity": 1, "card_id": "Creature_GL_HuskerKnight"})
 				await get_tree().create_timer(0.45).timeout
-	elif mode in ["deck", "deck_fx_in", "card_box", "sell_cards", "sell_confirm", "sell_sort", "sell_error", "craft_cards", "craft_cards_unlocked", "build_deck", "edit_deck", "select_hero", "landscapes", "sort_deck", "zoom_card"]:
+	elif mode in ["settings", "settings_display", "settings_controls"]:
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		_on_settings_pressed()
+		await get_tree().create_timer(0.35).timeout
+		if settings_modal and settings_modal.has_method("show_panel_preview"):
+			settings_modal.show_panel_preview(mode)
+			await get_tree().create_timer(0.15).timeout
+	elif mode in ["deck", "deck_fx_in", "card_box", "card_box_heroes", "card_box_hero_zoom", "card_box_sort", "card_box_zoom", "sell_cards", "sell_confirm", "sell_sort", "sell_error", "craft_cards", "craft_cards_unlocked", "build_deck", "edit_deck", "select_hero", "landscapes", "sort_deck", "zoom_card"]:
 		if start_overlay and start_overlay.visible:
 			_on_start_tapped()
 		await get_tree().create_timer(1.0).timeout
@@ -497,8 +506,12 @@ func _auto_screenshot() -> void:
 			await get_tree().create_timer(0.25).timeout
 		else:
 			await get_tree().create_timer(1.2).timeout
-			if mode == "card_box" and card_box_modal:
+			if mode in ["card_box", "card_box_heroes", "card_box_hero_zoom", "card_box_sort", "card_box_zoom"] and card_box_modal:
 				_open_deck_modal(card_box_modal)
+				await get_tree().create_timer(0.35).timeout
+				if mode != "card_box" and card_box_modal.has_method("show_panel_preview"):
+					card_box_modal.show_panel_preview(mode)
+					await get_tree().create_timer(0.15).timeout
 				await get_tree().create_timer(0.45).timeout
 			elif mode in ["sell_cards", "sell_confirm", "sell_sort", "sell_error"] and sell_cards_modal:
 				_open_deck_modal(sell_cards_modal)
@@ -905,7 +918,7 @@ func close_deck() -> void:
 func _open_deck_modal(modal: Control) -> void:
 	if treehouse_3d and treehouse_3d.has_method("set_deck_idle_audio_enabled"):
 		treehouse_3d.set_deck_idle_audio_enabled(false)
-	if modal == craft_cards_modal or modal == build_deck_modal or modal == sell_cards_modal:
+	if modal == craft_cards_modal or modal == build_deck_modal or modal == sell_cards_modal or modal == card_box_modal:
 		if deck_overlay:
 			deck_overlay.visible = false
 		if top_bar:

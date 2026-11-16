@@ -1,73 +1,23 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://src/ui/CardBoxModal.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/store/QuestInfo_BG2_Small.png" id="3_frame"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="4_cancel"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="5_btngreen"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonBlue.png" id="6_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/PopUpSprite_1.png" id="3_popup1"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/GoldPlaque.png" id="4_plaque"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Frame_Indent.png" id="5_indent"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonGrey.png" id="6_btngrey"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonFrame.png" id="7_btnframe"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/uiButtonBlue.png" id="8_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/nodes/Button_Back_Gold.png" id="9_back"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconCreatures.png" id="10_icreat"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconSpells.png" id="11_ispell"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconBuildings.png" id="12_ibldg"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconLeaders.png" id="13_ihero"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/ScrollBar_BG2.png" id="14_sbbg"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/ScrollBar4.png" id="15_sb"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="16_cancel"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bodyfill"]
-bg_color = Color(0.188, 0.314, 0.376, 0.96)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_innerbg"]
-bg_color = Color(0.08, 0.14, 0.19, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.65, 0.78, 0.88, 0.8)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill_green"]
-bg_color = Color(0.16, 0.62, 0.25, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 3
-border_color = Color(0.05, 0.16, 0.08, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-content_margin_left = 12.0
-content_margin_top = 4.0
-content_margin_right = 12.0
-content_margin_bottom = 4.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill_blue"]
-bg_color = Color(0.15, 0.48, 0.68, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 3
-border_color = Color(0.06, 0.14, 0.22, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-content_margin_left = 12.0
-content_margin_top = 4.0
-content_margin_right = 12.0
-content_margin_bottom = 4.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_blue"]
-texture = ExtResource("6_btnblue")
-texture_margin_left = 18
-texture_margin_top = 14
-texture_margin_right = 18
-texture_margin_bottom = 14
-content_margin_left = 14.0
-content_margin_top = 6.0
-content_margin_right = 14.0
-content_margin_bottom = 6.0
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_scroll"]
 
 [node name="CardBoxModal" type="Control"]
 visible = false
@@ -77,7 +27,18 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(640, 360)
 script = ExtResource("1_script")
+
+[node name="StandaloneBackdrop" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.11, 0.16, 0.19, 1)
 
 [node name="Dimmer" type="ColorRect" parent="."]
 layout_mode = 1
@@ -86,54 +47,56 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.58)
+color = Color(0, 0, 0, 0.12)
 
-[node name="Center" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Frame" type="Control" parent="Center"]
-custom_minimum_size = Vector2(860, 560)
-layout_mode = 2
-
-[node name="TitleBar" type="Control" parent="Center/Frame"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 96.0
-grow_horizontal = 2
-
-[node name="FillBg" type="Panel" parent="Center/Frame/TitleBar"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 8.0
-offset_right = -12.0
-offset_bottom = -10.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bodyfill")
-
-[node name="Bg" type="NinePatchRect" parent="Center/Frame/TitleBar"]
+[node name="BoxCanvas" type="Control" parent="."]
 layout_mode = 0
-offset_right = 1228.0
-offset_bottom = 138.0
-scale = Vector2(0.7, 0.7)
-mouse_filter = 2
-texture = ExtResource("3_frame")
-patch_margin_left = 58
-patch_margin_top = 42
-patch_margin_right = 65
-patch_margin_bottom = 44
+offset_right = 2048.0
+offset_bottom = 1152.0
+scale = Vector2(0.625, 0.625)
 
-[node name="TitleLabel" type="Label" parent="Center/Frame/TitleBar"]
+[node name="D_0_Inventory" type="Control" parent="BoxCanvas"]
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="BG_Frame" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory"]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 114.0
+offset_right = 2006.0
+offset_bottom = 1134.0
+texture = ExtResource("3_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="LeftPane" type="Control" parent="BoxCanvas/D_0_Inventory"]
+layout_mode = 0
+offset_right = 568.0
+offset_bottom = 1152.0
+
+[node name="CardBoxTitle" type="Control" parent="BoxCanvas/D_0_Inventory/LeftPane"]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 158.0
+offset_right = 548.0
+offset_bottom = 311.0
+
+[node name="BG_Header" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/LeftPane/CardBoxTitle"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_plaque")
+patch_margin_left = 180
+patch_margin_right = 180
+
+[node name="Header" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardBoxTitle"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -142,184 +105,545 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_constants/outline_size = 11
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 34
-text = "CARD BOX"
+theme_override_font_sizes/font_size = 64
+text = "Card Box"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CloseBtn" type="TextureButton" parent="Center/Frame/TitleBar"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -64.0
-offset_top = 8.0
-offset_right = 4.0
-offset_bottom = 76.0
-grow_horizontal = 0
-texture_normal = ExtResource("4_cancel")
-ignore_texture_size = true
-stretch_mode = 5
+[node name="CardCounts" type="Control" parent="BoxCanvas/D_0_Inventory/LeftPane"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 330.0
+offset_right = 542.0
+offset_bottom = 745.0
 
-[node name="Body" type="Control" parent="Center/Frame"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 92.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="FillBg" type="Panel" parent="Center/Frame/Body"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Card_Label" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 8.0
-offset_right = -12.0
-offset_bottom = -12.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bodyfill")
-
-[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body"]
-layout_mode = 0
-offset_right = 1228.0
-offset_bottom = 668.0
-scale = Vector2(0.7, 0.7)
-mouse_filter = 2
-texture = ExtResource("3_frame")
-patch_margin_left = 58
-patch_margin_top = 52
-patch_margin_right = 65
-patch_margin_bottom = 58
-
-[node name="TopInfoRow" type="HBoxContainer" parent="Center/Frame/Body"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 34.0
-offset_top = 24.0
-offset_right = -34.0
-offset_bottom = 66.0
-grow_horizontal = 2
-theme_override_constants/separation = 12
-
-[node name="CapacityLabel" type="Label" parent="Center/Frame/Body/TopInfoRow"]
-size_flags_horizontal = 3
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.94, 0.65, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+offset_right = 315.0
+offset_bottom = 122.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/line_spacing = -4
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
-text = "Card Box: 10 / 50 Cards"
+theme_override_font_sizes/font_size = 44
+text = "Cards
+Collected"
 vertical_alignment = 1
 
-[node name="ExpandBtn" type="Button" parent="Center/Frame/Body/TopInfoRow"]
-custom_minimum_size = Vector2(170, 38)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+[node name="Card_Count" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 56.0
+offset_right = 436.0
+offset_bottom = 120.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill_green")
-theme_override_styles/hover = SubResource("StyleBoxFlat_pill_green")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pill_green")
-text = "+ Increase Box"
-
-[node name="ViewModeBtn" type="Button" parent="Center/Frame/Body/TopInfoRow"]
-custom_minimum_size = Vector2(240, 38)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill_blue")
-theme_override_styles/hover = SubResource("StyleBoxFlat_pill_blue")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pill_blue")
-text = "Showing: My Card Box"
-
-[node name="FilterRow" type="HBoxContainer" parent="Center/Frame/Body"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 34.0
-offset_top = 72.0
-offset_right = -34.0
-offset_bottom = 106.0
-grow_horizontal = 2
-theme_override_constants/separation = 10
-
-[node name="TypeSelect" type="OptionButton" parent="Center/Frame/Body/FilterRow"]
-custom_minimum_size = Vector2(150, 32)
-layout_mode = 2
-
-[node name="FactionSelect" type="OptionButton" parent="Center/Frame/Body/FilterRow"]
-custom_minimum_size = Vector2(155, 32)
-layout_mode = 2
-
-[node name="SearchEdit" type="LineEdit" parent="Center/Frame/Body/FilterRow"]
-size_flags_horizontal = 3
-layout_mode = 2
-placeholder_text = "Search card name..."
-
-[node name="CountLabel" type="Label" parent="Center/Frame/Body/FilterRow"]
-custom_minimum_size = Vector2(130, 0)
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 15
-text = "10 Unique"
+theme_override_font_sizes/font_size = 44
+text = "0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="Scroll" type="ScrollContainer" parent="Center/Frame/Body"]
+[node name="Hero_Label" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 128.0
+offset_right = 310.0
+offset_bottom = 188.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Heroes"
+vertical_alignment = 1
+
+[node name="Hero_Count" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 128.0
+offset_right = 436.0
+offset_bottom = 188.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "1"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Creature_Label" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 200.0
+offset_right = 310.0
+offset_bottom = 260.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Creatures"
+vertical_alignment = 1
+
+[node name="Creature_Count" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 200.0
+offset_right = 436.0
+offset_bottom = 260.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Spell_Label" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 270.0
+offset_right = 310.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Spells"
+vertical_alignment = 1
+
+[node name="Spell_Count" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 270.0
+offset_right = 436.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Building_Label" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 340.0
+offset_right = 310.0
+offset_bottom = 400.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Buildings"
+vertical_alignment = 1
+
+[node name="Building_Count" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 340.0
+offset_right = 436.0
+offset_bottom = 400.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.22)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="BackBtn" type="TextureButton" parent="BoxCanvas/D_0_Inventory/LeftPane"]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 955.0
+offset_right = 241.0
+offset_bottom = 1098.0
+pivot_offset = Vector2(72, 71)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("9_back")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="SortButton" type="TextureButton" parent="BoxCanvas/D_0_Inventory/LeftPane"]
+layout_mode = 0
+offset_left = 278.0
+offset_top = 951.0
+offset_right = 528.0
+offset_bottom = 1101.0
+pivot_offset = Vector2(125, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/LeftPane/SortButton"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 32.0
-offset_top = 114.0
-offset_right = -32.0
-offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_btnblue")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
 
-[node name="CardsGrid" type="GridContainer" parent="Center/Frame/Body/Scroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 10
-columns = 5
-
-[node name="EmptyLabel" type="Label" parent="Center/Frame/Body"]
-visible = false
+[node name="Label" type="Label" parent="BoxCanvas/D_0_Inventory/LeftPane/SortButton"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = 20.0
-offset_right = 220.0
-offset_bottom = 70.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0.85, 0.92, 0.98, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
-text = "No cards match your filter."
+theme_override_font_sizes/font_size = 42
+text = "Sort"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DetailOverlay" type="Control" parent="."]
+[node name="TopTabs" type="Control" parent="BoxCanvas/D_0_Inventory"]
+layout_mode = 0
+offset_left = 700.0
+offset_top = 152.0
+offset_right = 1720.0
+offset_bottom = 314.0
+
+[node name="CreaturesButton" type="TextureButton" parent="BoxCanvas/D_0_Inventory/TopTabs"]
+layout_mode = 0
+offset_right = 210.0
+offset_bottom = 160.0
+pivot_offset = Vector2(105, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="BoxCanvas/D_0_Inventory/TopTabs/CreaturesButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(105, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/TopTabs/CreaturesButton/ScaleRoot"]
+modulate = Color(0.301991, 0.177336, 0.588235, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Frame" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/TopTabs/CreaturesButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Icon" type="TextureRect" parent="BoxCanvas/D_0_Inventory/TopTabs/CreaturesButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 20.0
+offset_right = 142.0
+offset_bottom = 93.0
+texture = ExtResource("10_icreat")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="BoxCanvas/D_0_Inventory/TopTabs/CreaturesButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 88.0
+offset_right = 204.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "Creatures"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpellsButton" type="TextureButton" parent="BoxCanvas/D_0_Inventory/TopTabs"]
+layout_mode = 0
+offset_left = 270.0
+offset_right = 480.0
+offset_bottom = 160.0
+pivot_offset = Vector2(105, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="BoxCanvas/D_0_Inventory/TopTabs/SpellsButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(105, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/TopTabs/SpellsButton/ScaleRoot"]
+modulate = Color(0.071529, 0.463235, 0.411695, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Frame" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/TopTabs/SpellsButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Icon" type="TextureRect" parent="BoxCanvas/D_0_Inventory/TopTabs/SpellsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 18.0
+offset_right = 146.0
+offset_bottom = 93.0
+texture = ExtResource("11_ispell")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="BoxCanvas/D_0_Inventory/TopTabs/SpellsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 88.0
+offset_right = 204.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "Spells"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BuildingsButton" type="TextureButton" parent="BoxCanvas/D_0_Inventory/TopTabs"]
+layout_mode = 0
+offset_left = 540.0
+offset_right = 750.0
+offset_bottom = 160.0
+pivot_offset = Vector2(105, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="BoxCanvas/D_0_Inventory/TopTabs/BuildingsButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(105, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/TopTabs/BuildingsButton/ScaleRoot"]
+modulate = Color(0.10824, 0.34375, 0.566176, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Frame" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/TopTabs/BuildingsButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Icon" type="TextureRect" parent="BoxCanvas/D_0_Inventory/TopTabs/BuildingsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 66.0
+offset_top = 20.0
+offset_right = 135.0
+offset_bottom = 95.0
+texture = ExtResource("12_ibldg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="BoxCanvas/D_0_Inventory/TopTabs/BuildingsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 88.0
+offset_right = 204.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "Buildings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HeroesButton" type="TextureButton" parent="BoxCanvas/D_0_Inventory/TopTabs"]
+layout_mode = 0
+offset_left = 810.0
+offset_right = 1020.0
+offset_bottom = 160.0
+pivot_offset = Vector2(105, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="BoxCanvas/D_0_Inventory/TopTabs/HeroesButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(105, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/TopTabs/HeroesButton/ScaleRoot"]
+modulate = Color(0.647059, 0.359088, 0.099914, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Frame" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/TopTabs/HeroesButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Icon" type="TextureRect" parent="BoxCanvas/D_0_Inventory/TopTabs/HeroesButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 58.0
+offset_top = 20.0
+offset_right = 151.0
+offset_bottom = 92.0
+texture = ExtResource("13_ihero")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="BoxCanvas/D_0_Inventory/TopTabs/HeroesButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 88.0
+offset_right = 204.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "Heroes"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardGridFrame" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory"]
+layout_mode = 0
+offset_left = 563.0
+offset_top = 314.0
+offset_right = 1933.0
+offset_bottom = 1044.0
+texture = ExtResource("5_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="CardScroll" type="ScrollContainer" parent="BoxCanvas/D_0_Inventory/CardGridFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 24.0
+offset_right = -20.0
+offset_bottom = -38.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_scroll")
+vertical_scroll_mode = 0
+
+[node name="CardColumns" type="HBoxContainer" parent="BoxCanvas/D_0_Inventory/CardGridFrame/CardScroll"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="EmptyLabel" type="Label" parent="BoxCanvas/D_0_Inventory/CardGridFrame"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -327,79 +651,141 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Dim" type="ColorRect" parent="DetailOverlay"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.65)
-
-[node name="Center" type="CenterContainer" parent="DetailOverlay"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Panel" type="PanelContainer" parent="DetailOverlay/Center"]
-custom_minimum_size = Vector2(560, 310)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_innerbg")
-
-[node name="VBox" type="VBoxContainer" parent="DetailOverlay/Center/Panel"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="HBox" type="HBoxContainer" parent="DetailOverlay/Center/Panel/VBox"]
-size_flags_vertical = 3
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="CardHolder" type="Control" parent="DetailOverlay/Center/Panel/VBox/HBox"]
-custom_minimum_size = Vector2(165, 230)
-layout_mode = 2
-
-[node name="InfoVBox" type="VBoxContainer" parent="DetailOverlay/Center/Panel/VBox/HBox"]
-size_flags_horizontal = 3
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="CardTitle" type="Label" parent="DetailOverlay/Center/Panel/VBox/HBox/InfoVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.92, 0.45, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 24
-text = "Card Name"
-autowrap_mode = 2
+theme_override_font_sizes/font_size = 42
+text = "No cards in this category."
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="StatsLabel" type="Label" parent="DetailOverlay/Center/Panel/VBox/HBox/InfoVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.92, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "Details"
-autowrap_mode = 2
+[node name="ScrollBarBG" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory"]
+layout_mode = 0
+offset_left = 585.0
+offset_top = 1012.0
+offset_right = 1911.0
+offset_bottom = 1032.0
+texture = ExtResource("14_sbbg")
+patch_margin_left = 16
+patch_margin_top = 4
+patch_margin_right = 16
+patch_margin_bottom = 4
 
-[node name="DescLabel" type="Label" parent="DetailOverlay/Center/Panel/VBox/HBox/InfoVBox"]
-size_flags_vertical = 3
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "Description"
-autowrap_mode = 2
+[node name="Thumb" type="NinePatchRect" parent="BoxCanvas/D_0_Inventory/ScrollBarBG"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 1.0
+offset_right = 320.0
+offset_bottom = 19.0
+texture = ExtResource("15_sb")
+patch_margin_left = 16
+patch_margin_top = 4
+patch_margin_right = 16
+patch_margin_bottom = 4
 
-[node name="CloseDetailBtn" type="Button" parent="DetailOverlay/Center/Panel/VBox"]
-custom_minimum_size = Vector2(140, 42)
-size_flags_horizontal = 4
-layout_mode = 2
+[node name="D_5_SortPanel" type="Control" parent="BoxCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="Dimmer" type="ColorRect" parent="BoxCanvas/D_5_SortPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="BG" type="NinePatchRect" parent="BoxCanvas/D_5_SortPanel"]
+layout_mode = 0
+offset_left = 491.0
+offset_top = 114.0
+offset_right = 1557.0
+offset_bottom = 1129.0
+texture = ExtResource("3_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="TitleRoot" type="Control" parent="BoxCanvas/D_5_SortPanel"]
+layout_mode = 0
+offset_left = 761.0
+offset_top = 148.0
+offset_right = 1511.0
+offset_bottom = 301.0
+scale = Vector2(0.7, 0.7)
+
+[node name="BG" type="NinePatchRect" parent="BoxCanvas/D_5_SortPanel/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
+texture = ExtResource("4_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="Label" type="Label" parent="BoxCanvas/D_5_SortPanel/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 10
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_blue")
-theme_override_styles/hover = SubResource("StyleBoxTexture_blue")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_blue")
-text = "OK"
+theme_override_font_sizes/font_size = 62
+text = "SORT OPTIONS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="TextureButton" parent="BoxCanvas/D_5_SortPanel"]
+layout_mode = 0
+offset_left = 1394.0
+offset_top = 148.0
+offset_right = 1499.0
+offset_bottom = 259.0
+pivot_offset = Vector2(52.5, 55.5)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("16_cancel")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="ButtonsGrid" type="GridContainer" parent="BoxCanvas/D_5_SortPanel"]
+layout_mode = 0
+offset_left = 605.0
+offset_top = 275.0
+offset_right = 1445.0
+offset_bottom = 860.0
+theme_override_constants/h_separation = 140
+theme_override_constants/v_separation = 20
+columns = 2
+
+[node name="ZoomOverlay" type="Control" parent="BoxCanvas"]
+visible = false
+layout_mode = 0
+offset_left = -1200.0
+offset_top = -1200.0
+offset_right = 3248.0
+offset_bottom = 2352.0
+mouse_default_cursor_shape = 2
+
+[node name="Dimmer" type="ColorRect" parent="BoxCanvas/ZoomOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="CardHolder" type="Control" parent="BoxCanvas/ZoomOverlay"]
+layout_mode = 0
+offset_left = 2224.0
+offset_top = 1776.0
+offset_right = 2224.0
+offset_bottom = 1776.0
+mouse_filter = 2
