@@ -90,6 +90,17 @@ var _press_select_sfx_played: bool = false
 @onready var quad_dungeon_portal: BaseButton = get_node_or_null("DungeonsOverlay/QuadDungeonPortal")
 @onready var quad_daily_gift: BaseButton = get_node_or_null("DungeonsOverlay/QuadDailyGift")
 
+# Deck Menu Overlay & Modals
+@onready var deck_overlay: Control = get_node_or_null("DeckOverlay")
+@onready var deck_back_btn: BaseButton = get_node_or_null("DeckOverlay/BackBtn")
+@onready var quad_card_box: BaseButton = get_node_or_null("DeckOverlay/QuadCardBox")
+@onready var quad_sell_cards: BaseButton = get_node_or_null("DeckOverlay/QuadSellCards")
+@onready var quad_build_deck: BaseButton = get_node_or_null("DeckOverlay/QuadBuildDeck")
+@onready var quad_craft_cards: BaseButton = get_node_or_null("DeckOverlay/QuadCraftCards")
+@onready var card_box_modal: CardBoxModal = get_node_or_null("CardBoxModal")
+@onready var sell_cards_modal: SellCardsModal = get_node_or_null("SellCardsModal")
+@onready var craft_cards_modal: CraftCardsModal = get_node_or_null("CraftCardsModal")
+
 func _ready() -> void:
 	# Autoplay Treehouse BGM
 	if Audio and BGM_TREEHOUSE:
@@ -182,6 +193,23 @@ func _ready() -> void:
 			daily_gift_modal.open_store_gems_requested.connect(_on_daily_gift_request_store_gems)
 	if dungeon_modal and dungeon_modal.has_signal("closed"):
 		dungeon_modal.closed.connect(_update_player_stats)
+
+	# Deck Menu Overlay Buttons & Modals
+	if deck_back_btn:
+		deck_back_btn.pressed.connect(_on_deck_back_pressed)
+	_connect_board_button(quad_card_box, "set_deck_card_box_pressed", _on_quad_card_box_pressed)
+	_connect_board_button(quad_sell_cards, "set_deck_sell_pressed", _on_quad_sell_cards_pressed)
+	_connect_board_button(quad_build_deck, "set_deck_build_pressed", _on_quad_build_deck_pressed)
+	_connect_board_button(quad_craft_cards, "set_deck_craft_pressed", _on_quad_craft_cards_pressed)
+	if card_box_modal:
+		card_box_modal.closed.connect(_on_deck_modal_closed)
+		card_box_modal.open_store_inventory_requested.connect(_on_card_box_request_store_inventory)
+	if sell_cards_modal:
+		sell_cards_modal.closed.connect(_on_deck_modal_closed)
+		sell_cards_modal.cards_sold.connect(func(_n: int, _c: int): _update_player_stats())
+	if craft_cards_modal:
+		craft_cards_modal.closed.connect(_on_deck_modal_closed)
+		craft_cards_modal.card_crafted.connect(func(_id: String): _update_player_stats())
 	if GameManager:
 		if GameManager.has_signal("player_currencies_updated"):
 			GameManager.player_currencies_updated.connect(func(_coins: int, _gems: int): _update_player_stats())
@@ -217,8 +245,16 @@ func _ready() -> void:
 		chests_overlay.visible = false
 	if dungeons_overlay:
 		dungeons_overlay.visible = false
+	if deck_overlay:
+		deck_overlay.visible = false
 	if daily_gift_modal:
 		daily_gift_modal.visible = false
+	if card_box_modal:
+		card_box_modal.visible = false
+	if sell_cards_modal:
+		sell_cards_modal.visible = false
+	if craft_cards_modal:
+		craft_cards_modal.visible = false
 	if chest_flow_overlay:
 		chest_flow_overlay.reset_immediately()
 	
@@ -234,7 +270,7 @@ func _ready() -> void:
 func restore_return_view() -> void:
 	# Restore previous view ("quest_select", "store", or "hub") or start at exterior title screen ("start")
 	var return_view = GameManager.menu_return_view if "menu_return_view" in GameManager else "start"
-	for ov in [quest_overlay, store_overlay, chests_overlay, dungeons_overlay]:
+	for ov in [quest_overlay, store_overlay, chests_overlay, dungeons_overlay, deck_overlay]:
 		if ov:
 			ov.visible = false
 	if return_view == "quest_select":
@@ -291,6 +327,19 @@ func restore_return_view() -> void:
 			treehouse_3d.set_dungeons_modes_view()
 		if return_view == "dungeon_list" and dungeon_modal and dungeon_modal.has_method("open_modal"):
 			dungeon_modal.open_modal()
+	elif return_view == "deck":
+		if start_overlay:
+			start_overlay.visible = false
+		if top_bar:
+			top_bar.visible = true
+			top_bar.modulate.a = 1.0
+		if bottom_dock:
+			bottom_dock.visible = false
+		if deck_overlay:
+			deck_overlay.visible = true
+			deck_overlay.modulate.a = 1.0
+		if treehouse_3d and treehouse_3d.has_method("set_deck_modes_view"):
+			treehouse_3d.set_deck_modes_view()
 	elif return_view == "hub":
 		if start_overlay:
 			start_overlay.visible = false
@@ -435,6 +484,36 @@ func _auto_screenshot() -> void:
 				daily_gift_modal.open_modal(9)
 				daily_gift_modal.show_reward_preview({"type": "Card gold", "quantity": 1, "card_id": "Creature_GL_HuskerKnight"})
 				await get_tree().create_timer(0.45).timeout
+	elif mode in ["deck", "deck_fx_in", "card_box", "sell_cards", "craft_cards", "craft_cards_unlocked"]:
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		open_deck()
+		if mode == "deck_fx_in":
+			await get_tree().create_timer(0.25).timeout
+		else:
+			await get_tree().create_timer(1.2).timeout
+			if mode == "card_box" and card_box_modal:
+				_open_deck_modal(card_box_modal)
+				await get_tree().create_timer(0.45).timeout
+			elif mode == "sell_cards" and sell_cards_modal:
+				_open_deck_modal(sell_cards_modal)
+				await get_tree().create_timer(0.45).timeout
+			elif mode == "craft_cards" and craft_cards_modal:
+				_open_deck_modal(craft_cards_modal)
+				await get_tree().create_timer(0.65).timeout
+				if craft_cards_modal.has_method("finish_lock_typewriter"):
+					craft_cards_modal.finish_lock_typewriter()
+				await get_tree().process_frame
+			elif mode == "craft_cards_unlocked" and craft_cards_modal:
+				if treehouse_3d and treehouse_3d.has_method("set_deck_idle_audio_enabled"):
+					treehouse_3d.set_deck_idle_audio_enabled(false)
+				if deck_overlay:
+					deck_overlay.visible = false
+				if top_bar:
+					top_bar.z_index = 5
+				craft_cards_modal.open_modal(true)
+				await get_tree().create_timer(0.65).timeout
 	elif mode == "hub":
 		# Auto tap start to transition into hub
 		if start_overlay and start_overlay.visible:
@@ -488,17 +567,15 @@ func _input(event: InputEvent) -> void:
 			return
 	
 	if event.is_action_pressed("ui_cancel"):
-		if store_inventory_modal and store_inventory_modal.visible:
-			if store_inventory_modal.has_method("close_modal"):
-				store_inventory_modal.close_modal()
-			else:
-				store_inventory_modal.visible = false
-			return
-		if store_gems_modal and store_gems_modal.visible:
-			if store_gems_modal.has_method("close_modal"):
-				store_gems_modal.close_modal()
-			else:
-				store_gems_modal.visible = false
+		for m in [store_inventory_modal, store_gems_modal, card_box_modal, sell_cards_modal, craft_cards_modal]:
+			if m and m.visible:
+				if m.has_method("close_modal"):
+					m.close_modal()
+				else:
+					m.visible = false
+				return
+		if deck_overlay and deck_overlay.visible:
+			_on_deck_back_pressed()
 			return
 		if store_overlay and store_overlay.visible:
 			_on_store_back_pressed()
@@ -759,11 +836,119 @@ func _on_daily_gift_request_store_gems() -> void:
 	_open_store_modal(store_gems_modal)
 
 func _on_deck_pressed() -> void:
-	_play_sfx()
-	if deck_choice_modal:
-		deck_choice_modal.visible = true
+	_play_select_sfx()
+	open_deck()
+
+
+func open_deck() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "deck"
+	if bottom_dock:
+		var tw := create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(func(): bottom_dock.visible = false)
+
+	if deck_overlay:
+		deck_overlay.visible = true
+		deck_overlay.modulate.a = 0.0
+		var tw_o := create_tween()
+		tw_o.tween_property(deck_overlay, "modulate:a", 1.0, 0.3)
+
+	if treehouse_3d and treehouse_3d.has_method("show_deck_modes"):
+		treehouse_3d.show_deck_modes()
+
+
+func _on_deck_back_pressed() -> void:
+	if Audio and SFX_UI_BACK:
+		Audio.play_sfx(SFX_UI_BACK)
 	else:
+		_play_sfx()
+	close_deck()
+
+
+func close_deck() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "hub"
+	if deck_overlay:
+		var tw_o := create_tween()
+		tw_o.tween_property(deck_overlay, "modulate:a", 0.0, 0.2)
+		tw_o.tween_callback(func(): deck_overlay.visible = false)
+
+	if bottom_dock:
+		bottom_dock.visible = true
+		bottom_dock.modulate.a = 0.0
+		var tw := create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 1.0, 0.3)
+
+	if treehouse_3d and treehouse_3d.has_method("hide_deck_modes"):
+		treehouse_3d.hide_deck_modes()
+
+
+func _open_deck_modal(modal: Control) -> void:
+	if treehouse_3d and treehouse_3d.has_method("set_deck_idle_audio_enabled"):
+		treehouse_3d.set_deck_idle_audio_enabled(false)
+	if modal == craft_cards_modal:
+		if deck_overlay:
+			deck_overlay.visible = false
+		if top_bar:
+			top_bar.z_index = 5
+	if modal:
+		if modal.has_method("open_modal"):
+			modal.open_modal()
+		else:
+			modal.visible = true
+
+
+func _on_deck_modal_closed() -> void:
+	_update_player_stats()
+	if top_bar:
+		top_bar.z_index = 0
+	if "menu_return_view" in GameManager and GameManager.menu_return_view == "deck" and deck_overlay:
+		deck_overlay.visible = true
+		deck_overlay.modulate.a = 1.0
+	if deck_overlay and deck_overlay.visible and treehouse_3d and treehouse_3d.has_method("set_deck_idle_audio_enabled"):
+		treehouse_3d.set_deck_idle_audio_enabled(true)
+
+
+func _on_card_box_request_store_inventory() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "store"
+	if deck_overlay:
+		deck_overlay.visible = false
+	if store_overlay:
+		store_overlay.visible = true
+		store_overlay.modulate.a = 1.0
+	if treehouse_3d and treehouse_3d.has_method("set_store_modes_view"):
+		treehouse_3d.set_store_modes_view()
+	_open_store_modal(store_inventory_modal)
+
+
+func _on_quad_card_box_pressed() -> void:
+	_trigger_board_icon_activate([quad_card_box, quad_sell_cards, quad_build_deck, quad_craft_cards], "play_deck_card_box_activate", func():
+		_open_deck_modal(card_box_modal)
+	)
+
+
+func _on_quad_sell_cards_pressed() -> void:
+	_trigger_board_icon_activate([quad_card_box, quad_sell_cards, quad_build_deck, quad_craft_cards], "play_deck_sell_activate", func():
+		_open_deck_modal(sell_cards_modal)
+	)
+
+
+func _on_quad_build_deck_pressed() -> void:
+	_trigger_board_icon_activate([quad_card_box, quad_sell_cards, quad_build_deck, quad_craft_cards], "play_deck_build_activate", func():
+		if "menu_return_view" in GameManager:
+			GameManager.menu_return_view = "deck"
+		if treehouse_3d and treehouse_3d.has_method("set_deck_idle_audio_enabled"):
+			treehouse_3d.set_deck_idle_audio_enabled(false)
 		GameManager.open_deck_builder()
+	)
+
+
+func _on_quad_craft_cards_pressed() -> void:
+	_trigger_board_icon_activate([quad_card_box, quad_sell_cards, quad_build_deck, quad_craft_cards], "play_deck_craft_activate", func():
+		_open_deck_modal(craft_cards_modal)
+	)
 
 func _on_open_deck_builder() -> void:
 	_play_sfx()

@@ -33,6 +33,15 @@ extends Node3D
 @onready var daily_gift_mode: Node3D = get_node_or_null("DungeonsModesGroup/DailyGiftMode")
 @onready var dungeon_portal_icon: DungeonPortalIcon = get_node_or_null("DungeonsModesGroup/DungeonPortalMode/DungeonPortalIcon")
 @onready var daily_gift_icon: DailyGiftIcon = get_node_or_null("DungeonsModesGroup/DailyGiftMode/DailyGiftIcon")
+@onready var deck_modes_group: Node3D = get_node_or_null("DeckModesGroup")
+@onready var card_box_mode: Node3D = get_node_or_null("DeckModesGroup/CardBoxMode")
+@onready var sell_cards_mode: Node3D = get_node_or_null("DeckModesGroup/SellCardsMode")
+@onready var build_deck_mode: Node3D = get_node_or_null("DeckModesGroup/BuildDeckMode")
+@onready var craft_cards_mode: Node3D = get_node_or_null("DeckModesGroup/CraftCardsMode")
+@onready var deck_card_box_icon: DeckBoardIcon = get_node_or_null("DeckModesGroup/CardBoxMode/DeckCardBoxIcon")
+@onready var deck_sell_icon: DeckBoardIcon = get_node_or_null("DeckModesGroup/SellCardsMode/DeckSellIcon")
+@onready var deck_build_icon: DeckBoardIcon = get_node_or_null("DeckModesGroup/BuildDeckMode/DeckBuildIcon")
+@onready var deck_craft_icon: DeckBoardIcon = get_node_or_null("DeckModesGroup/CraftCardsMode/DeckCraftIcon")
 
 # Camera transforms
 # Start View: Front view framing Jake (left), Finn (right), and the Table
@@ -99,15 +108,7 @@ func set_start_view() -> void:
 	is_hub_view = false
 	is_mode_select = false
 	_clear_mode_tweens()
-	if board_modes_group:
-		board_modes_group.visible = false
-	if store_modes_group:
-		store_modes_group.visible = false
-	if chests_modes_group:
-		chests_modes_group.visible = false
-	if dungeons_modes_group:
-		dungeons_modes_group.visible = false
-	set_chests_idle_audio_enabled(false)
+	_hide_all_mode_groups()
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
 	
@@ -160,13 +161,7 @@ func set_hub_view() -> void:
 		fionna_book.close_book(0.0)
 	if solo_quests:
 		solo_quests.stop_audio()
-	if store_modes_group:
-		store_modes_group.visible = false
-	if chests_modes_group:
-		chests_modes_group.visible = false
-	if dungeons_modes_group:
-		dungeons_modes_group.visible = false
-	set_chests_idle_audio_enabled(false)
+	_hide_all_mode_groups()
 
 func set_quest_modes_view() -> void:
 	_prepare_instant_board_view(board_modes_group)
@@ -197,10 +192,11 @@ func set_chests_modes_view() -> void:
 	_reset_mode_anchors([cool_chest_mode, algebraic_chest_mode])
 
 func _hide_all_mode_groups() -> void:
-	for grp in [board_modes_group, store_modes_group, chests_modes_group, dungeons_modes_group]:
+	for grp in [board_modes_group, store_modes_group, chests_modes_group, dungeons_modes_group, deck_modes_group]:
 		if grp:
 			grp.visible = false
 	set_chests_idle_audio_enabled(false)
+	set_deck_idle_audio_enabled(false)
 
 
 func _reset_mode_anchors(anchors: Array) -> void:
@@ -241,6 +237,15 @@ func set_dungeons_modes_view() -> void:
 	if daily_gift_icon:
 		daily_gift_icon.reset_anim()
 	_reset_mode_anchors([dungeon_portal_mode, daily_gift_mode])
+
+
+func set_deck_modes_view() -> void:
+	_prepare_instant_board_view(deck_modes_group)
+	for icon in [deck_card_box_icon, deck_sell_icon, deck_build_icon, deck_craft_icon]:
+		if icon:
+			icon.reset_anim()
+	set_deck_idle_audio_enabled(true)
+	_reset_mode_anchors([card_box_mode, sell_cards_mode, build_deck_mode, craft_cards_mode])
 
 
 func transition_to_hub(duration: float = 0.8) -> void:
@@ -340,7 +345,7 @@ func _clear_mode_tweens() -> void:
 		if tw and tw.is_valid():
 			tw.kill()
 	_mode_tweens.clear()
-	for icon in [store_inventory_icon, store_gems_icon, deckwars_stadium, cool_chest_icon, algebraic_chest_icon, dungeon_portal_icon, daily_gift_icon]:
+	for icon in [store_inventory_icon, store_gems_icon, deckwars_stadium, cool_chest_icon, algebraic_chest_icon, dungeon_portal_icon, daily_gift_icon, deck_card_box_icon, deck_sell_icon, deck_build_icon, deck_craft_icon]:
 		if icon:
 			_reset_icon_reaction(icon)
 
@@ -557,6 +562,34 @@ func hide_dungeons_modes() -> void:
 	_end_board_mode_transition(dungeons_modes_group, [dungeon_portal_mode, daily_gift_mode])
 
 
+func show_deck_modes() -> void:
+	if is_mode_select:
+		return
+	_begin_board_mode_transition()
+	_hide_all_mode_groups()
+	if deck_modes_group:
+		deck_modes_group.visible = true
+		for icon in [deck_card_box_icon, deck_sell_icon, deck_build_icon, deck_craft_icon]:
+			if icon:
+				icon.reset_anim()
+		set_deck_idle_audio_enabled(true)
+		_pop_up_board_modes(deck_modes_group, [card_box_mode, sell_cards_mode, build_deck_mode, craft_cards_mode])
+
+
+func hide_deck_modes() -> void:
+	if not is_mode_select:
+		return
+	set_deck_idle_audio_enabled(false)
+	_end_board_mode_transition(deck_modes_group, [card_box_mode, sell_cards_mode, build_deck_mode, craft_cards_mode])
+
+
+func set_deck_idle_audio_enabled(enabled: bool) -> void:
+	if deck_craft_icon:
+		deck_craft_icon.set_idle_audio_enabled(enabled)
+		if not enabled:
+			deck_craft_icon.stop_audio()
+
+
 func set_chests_idle_audio_enabled(enabled: bool) -> void:
 	if cool_chest_icon:
 		cool_chest_icon.set_idle_audio_enabled(enabled)
@@ -709,6 +742,38 @@ func play_dungeon_portal_activate(on_finished: Callable) -> void:
 
 func play_daily_gift_activate(on_finished: Callable) -> void:
 	_play_icon_activate(daily_gift_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func set_deck_card_box_pressed(is_down: bool) -> void:
+	_set_icon_pressed(deck_card_box_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func set_deck_sell_pressed(is_down: bool) -> void:
+	_set_icon_pressed(deck_sell_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func set_deck_build_pressed(is_down: bool) -> void:
+	_set_icon_pressed(deck_build_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func set_deck_craft_pressed(is_down: bool) -> void:
+	_set_icon_pressed(deck_craft_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func play_deck_card_box_activate(on_finished: Callable) -> void:
+	_play_icon_activate(deck_card_box_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func play_deck_sell_activate(on_finished: Callable) -> void:
+	_play_icon_activate(deck_sell_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func play_deck_build_activate(on_finished: Callable) -> void:
+	_play_icon_activate(deck_build_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func play_deck_craft_activate(on_finished: Callable) -> void:
+	_play_icon_activate(deck_craft_icon, ICON_REACTION_SCALE, true, on_finished)
 
 
 func _ensure_icon_mats(icon: Node3D) -> Array:

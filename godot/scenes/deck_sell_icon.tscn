@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/ui/DeckBoardIcon.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/deck/low_Sell.png" id="2_tex"]
+[ext_resource type="PackedScene" path="res://assets/models/deck/sell_cards/Sell.glb" id="3_glb"]
+
+[node name="DeckSellIcon" type="Node3D"]
+script = ExtResource("1_script")
+icon_texture = ExtResource("2_tex")
+
+[node name="SellRoot" type="Node3D" parent="."]
+transform = Transform3D(-0.022274, 0, -0.022274, 0, 0.0315, 0, 0.022274, 0, -0.022274, 0, 0, 0)
+
+[node name="Sell" parent="SellRoot" instance=ExtResource("3_glb")]

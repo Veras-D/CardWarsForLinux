@@ -225,6 +225,8 @@ func _parse_card(data: Dictionary, card_type: String) -> Dictionary:
 		"script_name": data.get("ScriptName", ""),
 		"val1": val1,
 		"val2": val2,
+		"sale_price": int(data.get("BaseSalePrice", "0")),
+		"can_fuse": str(data.get("CanFuse", "True")).to_lower() == "true",
 		"texture_path": tex_path
 	}
 

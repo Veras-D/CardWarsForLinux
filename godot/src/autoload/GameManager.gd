@@ -107,6 +107,10 @@ var player_coins: int:
 var player_inventory_cards: Array[String] = []
 var owned_card_counts: Dictionary = {}
 const DEFAULT_MAX_INVENTORY: int = 50
+const MIN_CARDS_IN_INVENTORY: int = 10
+const MIN_CREATURES_IN_INVENTORY: int = 10
+const CARD_FORGE_UNLOCK_QUEST: String = "4"
+var viewed_fusion_recipes: Array[String] = []
 var max_inventory: int = DEFAULT_MAX_INVENTORY
 var active_deck_name: String = "Jake Starter Deck"
 
@@ -462,7 +466,8 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"unlocked_leaders": unlocked_leaders,
 		"player_inventory_cards": player_inventory_cards,
 		"owned_card_counts": owned_card_counts,
-		"max_inventory": max_inventory
+		"max_inventory": max_inventory,
+		"viewed_fusion_recipes": viewed_fusion_recipes
 	}
 
 	var file = FileAccess.open(save_path, FileAccess.WRITE)
@@ -519,6 +524,12 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		owned_card_counts = data["owned_card_counts"].duplicate(true)
 	if data.has("max_inventory"):
 		max_inventory = maxi(DEFAULT_MAX_INVENTORY, int(data["max_inventory"]))
+	if data.has("viewed_fusion_recipes") and typeof(data["viewed_fusion_recipes"]) == TYPE_ARRAY:
+		viewed_fusion_recipes.clear()
+		for cid in data["viewed_fusion_recipes"]:
+			var s := str(cid)
+			if s != "" and not viewed_fusion_recipes.has(s):
+				viewed_fusion_recipes.append(s)
 	if data.has("gacha_pity") and typeof(data["gacha_pity"]) == TYPE_DICTIONARY and gacha_roller != null:
 		gacha_roller.deserialize_pity(data["gacha_pity"])
 	if data.has("campaign") and typeof(data["campaign"]) == TYPE_DICTIONARY and campaign_graph != null:
@@ -660,6 +671,35 @@ func add_card_to_inventory(card_id: String) -> void:
 			owned_card_counts[card_id] = int(owned_card_counts.get(card_id, 0)) + 1
 
 
+func is_quest_completed(quest_id: String) -> bool:
+	if campaign_graph == null or not campaign_graph.has_node(quest_id):
+		return false
+	return int(campaign_graph.get_node(quest_id).get("state", NodeMapGraph.NodeState.LOCKED)) == NodeMapGraph.NodeState.COMPLETED
+
+
+func is_card_forge_unlocked() -> bool:
+	return is_quest_completed(CARD_FORGE_UNLOCK_QUEST)
+
+
+func is_fusion_recipe_unlocked(recipe: Dictionary) -> bool:
+	var q_unlock := int(recipe.get("quest_unlock", 0))
+	if q_unlock <= 0:
+		return true
+	return is_quest_completed(str(q_unlock))
+
+
+func has_viewed_fusion_recipe(card_id: String) -> bool:
+	return viewed_fusion_recipes.has(card_id)
+
+
+func mark_fusion_recipe_viewed(card_id: String) -> bool:
+	if card_id == "" or viewed_fusion_recipes.has(card_id):
+		return false
+	viewed_fusion_recipes.append(card_id)
+	save_profile()
+	return true
+
+
 func get_owned_card_counts() -> Dictionary:
 	if owned_card_counts.is_empty():
 		for c in Database.all_cards_list:
@@ -671,15 +711,152 @@ func get_owned_card_counts() -> Dictionary:
 	return owned_card_counts
 
 
-func craft_fusion_recipe(recipe: Dictionary) -> Dictionary:
-	var counts = get_owned_card_counts()
+func get_deck_card_counts() -> Dictionary:
+	var counts: Dictionary = {}
+	for cid in player_deck:
+		var k := str(cid)
+		if k != "":
+			counts[k] = int(counts.get(k, 0)) + 1
+	return counts
+
+
+func get_inventory_only_counts() -> Dictionary:
+	var counts: Dictionary = {}
+	for cid in player_inventory_cards:
+		var k := str(cid)
+		if k != "":
+			counts[k] = int(counts.get(k, 0)) + 1
+	return counts
+
+
+func get_real_owned_card_counts(include_deck: bool = true) -> Dictionary:
+	var counts := get_inventory_only_counts()
+	if include_deck:
+		for cid in player_deck:
+			var k := str(cid)
+			if k != "":
+				counts[k] = int(counts.get(k, 0)) + 1
+	return counts
+
+
+func get_total_creature_count() -> int:
+	var total := 0
+	for cid in player_deck:
+		var card := Database.get_card(str(cid))
+		if str(card.get("type", "")) == "CREATURE":
+			total += 1
+	for cid in player_inventory_cards:
+		var card := Database.get_card(str(cid))
+		if str(card.get("type", "")) == "CREATURE":
+			total += 1
+	return total
+
+
+func _consume_inventory_card(card_id: String, count: int = 1) -> void:
+	var rem := count
+	while rem > 0:
+		var idx := player_inventory_cards.find(card_id)
+		if idx == -1:
+			break
+		player_inventory_cards.remove_at(idx)
+		rem -= 1
+
+
+func sell_cards(card_ids: Array[String]) -> Dictionary:
+	_init_wallet()
+	if card_ids.is_empty():
+		return {"ok": false, "reason": "Select one or more cards to sell!"}
+
+	var inv_counts := get_inventory_only_counts()
+	var req_counts: Dictionary = {}
+	var sold_creatures := 0
+	var total_coins := 0
+
+	for cid in card_ids:
+		var k := str(cid)
+		req_counts[k] = int(req_counts.get(k, 0)) + 1
+		if int(req_counts[k]) > int(inv_counts.get(k, 0)):
+			return {"ok": false, "reason": "Cannot sell more copies than you own in your Card Box."}
+		var card := Database.get_card(k)
+		if str(card.get("type", "")) == "CREATURE":
+			sold_creatures += 1
+		total_coins += maxi(0, int(card.get("sale_price", 0)))
+
+	if get_total_card_count() - card_ids.size() < MIN_CARDS_IN_INVENTORY:
+		return {
+			"ok": false,
+			"reason": "You must keep at least %d cards in your Card Box!" % MIN_CARDS_IN_INVENTORY
+		}
+
+	if sold_creatures > 0 and (get_total_creature_count() - sold_creatures) < MIN_CREATURES_IN_INVENTORY:
+		return {
+			"ok": false,
+			"reason": "You must keep at least %d creatures in your Card Box!" % MIN_CREATURES_IN_INVENTORY
+		}
+
+	for cid in req_counts.keys():
+		var q := int(req_counts[cid])
+		_consume_inventory_card(str(cid), q)
+		if not owned_card_counts.is_empty():
+			owned_card_counts[cid] = maxi(0, int(owned_card_counts.get(cid, 0)) - q)
+
+	if total_coins > 0:
+		wallet.deposit("coins", total_coins)
+	player_currencies_updated.emit(get_coins(), get_gems())
+	save_profile()
+	return {"ok": true, "sold_count": card_ids.size(), "coins_gained": total_coins}
+
+
+func craft_fusion_recipe(recipe: Dictionary, use_real_inventory: bool = false) -> Dictionary:
+	_init_wallet()
 	var FusionEngine = preload("res://src/cards/FusionEngine.gd")
+	var counts: Dictionary = get_inventory_only_counts() if use_real_inventory else get_owned_card_counts()
+
+	if use_real_inventory:
+		var precheck: Dictionary = FusionEngine.can_craft_recipe(recipe, counts, get_coins())
+		if not precheck.get("can_craft", false):
+			return {
+				"ok": false,
+				"output_card_id": "",
+				"new_coins": get_coins(),
+				"owned_counts": counts,
+				"reason": str(precheck.get("reason", "Requirements not met."))
+			}
+		var creatures_consumed := 0
+		for ing in recipe.get("ingredients", []):
+			var icard := Database.get_card(str(ing.get("card_id", "")))
+			if str(icard.get("type", "")) == "CREATURE":
+				creatures_consumed += int(ing.get("count", 1))
+		var out_card := Database.get_card(str(recipe.get("card_id", "")))
+		var out_is_creature := 1 if str(out_card.get("type", "")) == "CREATURE" else 0
+		var net_creature_loss := creatures_consumed - out_is_creature
+		if net_creature_loss > 0 and (get_total_creature_count() - net_creature_loss) < MIN_CREATURES_IN_INVENTORY:
+			return {
+				"ok": false,
+				"output_card_id": "",
+				"new_coins": get_coins(),
+				"owned_counts": counts,
+				"reason": "Crafting this would leave you with fewer than %d creatures!" % MIN_CREATURES_IN_INVENTORY
+			}
+
 	var res = FusionEngine.execute_fusion(recipe, counts, get_coins())
 	if res.get("ok", false):
-		wallet.withdraw("coins", int(recipe.get("cost", 0)))
+		var cost := int(recipe.get("cost", 0))
+		if cost > 0:
+			wallet.withdraw("coins", cost)
+		for ing in recipe.get("ingredients", []):
+			var icid := str(ing.get("card_id", ""))
+			var icnt := int(ing.get("count", 1))
+			_consume_inventory_card(icid, icnt)
+			if use_real_inventory and not owned_card_counts.is_empty():
+				owned_card_counts[icid] = maxi(0, int(owned_card_counts.get(icid, 0)) - icnt)
 		var out_id = str(res.get("output_card_id", ""))
 		if out_id != "":
 			player_inventory_cards.append(out_id)
+			if use_real_inventory and not owned_card_counts.is_empty():
+				owned_card_counts[out_id] = int(owned_card_counts.get(out_id, 0)) + 1
+		player_currencies_updated.emit(get_coins(), get_gems())
+		save_profile()
 	return res
 
 

@@ -5,6 +5,7 @@ extends Node
 const FusionEngine = preload("res://src/cards/FusionEngine.gd")
 const DeckBuilder = preload("res://src/ui/DeckBuilder.gd")
 const CardViewScene = preload("res://scenes/components/CardView.tscn")
+const NodeMapGraph = preload("res://src/systems/node_map_system/NodeMapGraph.gd")
 
 var passed_count: int = 0
 var failed_count: int = 0
@@ -15,12 +16,27 @@ func _ready() -> void:
 	print("  RUNNING CARD QUALITY & FUSION ENGINE TEST SUITE (Task 6.2)")
 	print("==================================================")
 
+	var pre_test_inv := GameManager.player_inventory_cards.duplicate()
+	var pre_test_counts := GameManager.owned_card_counts.duplicate(true)
+	var pre_test_coins := GameManager.get_coins()
+	var pre_test_campaign := GameManager.campaign_graph.serialize() if GameManager.campaign_graph != null else {}
+	var pre_test_viewed := GameManager.viewed_fusion_recipes.duplicate()
+
 	test_quality_tiers_and_stat_scaling()
 	test_card_view_quality_shaders()
 	test_fusion_recipes_loading_204()
 	test_can_craft_and_execute_fusion()
 	test_gold_card_fusion_recipes()
 	test_deck_builder_fusion_lab_integration()
+	test_real_inventory_sell_and_craft_guards()
+
+	GameManager.player_inventory_cards = pre_test_inv
+	GameManager.owned_card_counts = pre_test_counts
+	GameManager.player_coins = pre_test_coins
+	if GameManager.campaign_graph != null and not pre_test_campaign.is_empty():
+		GameManager.campaign_graph.deserialize(pre_test_campaign)
+	GameManager.viewed_fusion_recipes = pre_test_viewed
+	GameManager.save_profile()
 
 	print("\n==================================================")
 	print("  TEST SUMMARY: %d PASSED, %d FAILED" % [passed_count, failed_count])
@@ -172,3 +188,78 @@ func test_deck_builder_fusion_lab_integration() -> void:
 	builder.close_fusion_modal()
 	assert_true(builder.fusion_modal.visible == false, "Fusion Lab modal closes cleanly")
 	builder.queue_free()
+
+
+func test_real_inventory_sell_and_craft_guards() -> void:
+	print("\n[Test 7] Card Box BaseSalePrice, Sell Cards & Real Inventory Craft Guards")
+	var orig_inv := GameManager.player_inventory_cards.duplicate()
+	var orig_counts := GameManager.owned_card_counts.duplicate(true)
+	var orig_coins := GameManager.get_coins()
+
+	# Verify BaseSalePrice parsing in Database
+	var scholar = Database.get_card("Creature_AncientScholar")
+	assert_true(int(scholar.get("sale_price", 0)) == 100, "Database parsed Creature_AncientScholar BaseSalePrice == 100")
+
+	# Seed controlled box inventory: 3 extra creatures (total with starter 8 deck creatures = 11 creatures, 13 total cards)
+	GameManager.player_inventory_cards = [
+		"Creature_Cornball",
+		"Creature_WanderingBaldMan",
+		"Creature_Pig"
+	]
+	GameManager.player_coins = 500
+
+	# Selling 1 creature leaves 10 creatures (12 total >= 10) -> allowed!
+	var sell_ok := GameManager.sell_cards(["Creature_Pig"])
+	assert_true(sell_ok.get("ok", false) == true, "Selling 1 extra Creature_Pig succeeds when remaining creatures == 10")
+	assert_true(int(sell_ok.get("coins_gained", 0)) == 10, "Selling Creature_Pig awards 10 Coins (BaseSalePrice)")
+	assert_true(GameManager.get_coins() == 510, "Coins updated to 510 after sale")
+	assert_true(GameManager.player_inventory_cards.size() == 2, "Creature_Pig removed from player_inventory_cards")
+
+	# Selling another creature now drops remaining creatures to 9 (< 10 Min_Creatures_In_Inventory) -> blocked!
+	var sell_blocked := GameManager.sell_cards(["Creature_Cornball"])
+	assert_true(sell_blocked.get("ok", false) == false, "Selling below Min_Creatures_In_Inventory (10) is blocked")
+
+	# Crafting Care Crow with only 10 creatures total would drop creatures to 9 (< 10) -> blocked!
+	var care_crow_rec = Database.get_fusion_recipe("Creature_CareCrow")
+	var craft_min_blocked := GameManager.craft_fusion_recipe(care_crow_rec, true)
+	assert_true(craft_min_blocked.get("ok", false) == false, "Real-inventory craft blocks dropping below Min_Creatures_In_Inventory (10)")
+
+	# Add 1 extra creature so remaining creatures after consuming 2 and gaining 1 stays >= 10 (11 -> 10)
+	GameManager.player_inventory_cards.append("Creature_AngelEye")
+	var craft_ok := GameManager.craft_fusion_recipe(care_crow_rec, true)
+	assert_true(craft_ok.get("ok", false) == true, "Real-inventory craft of Care Crow succeeds with exact box ingredients and >= 10 creatures")
+	assert_true(not ("Creature_Cornball" in GameManager.player_inventory_cards), "Craft consumed Creature_Cornball from box")
+	assert_true(not ("Creature_WanderingBaldMan" in GameManager.player_inventory_cards), "Craft consumed Creature_WanderingBaldMan from box")
+	assert_true("Creature_CareCrow" in GameManager.player_inventory_cards, "Craft added Creature_CareCrow to box")
+	assert_true(GameManager.get_coins() == 460, "Craft deducted 50 coins (510 -> 460)")
+
+	# Trying again without ingredients in box fails even though sandbox owned_card_counts had 4
+	var craft_missing := GameManager.craft_fusion_recipe(care_crow_rec, true)
+	assert_true(craft_missing.get("ok", false) == false, "Real-inventory craft rejects missing ingredients")
+
+	# Card Forge Quest 4 lock/unlock & per-recipe quest_unlock + NEW! viewed state
+	var q4_prev := GameManager.is_card_forge_unlocked()
+	GameManager.campaign_graph.set_node_state("4", NodeMapGraph.NodeState.UNLOCKED)
+	assert_true(GameManager.is_card_forge_unlocked() == false, "Card Forge is locked until Quest 4 is COMPLETED")
+	GameManager.campaign_graph.set_node_state("4", NodeMapGraph.NodeState.COMPLETED)
+	assert_true(GameManager.is_card_forge_unlocked() == true, "Card Forge unlocks once Quest 4 is COMPLETED")
+	if not q4_prev:
+		GameManager.campaign_graph.set_node_state("4", NodeMapGraph.NodeState.LOCKED)
+
+	assert_true(GameManager.is_fusion_recipe_unlocked({"quest_unlock": 0}) == true, "Recipe with quest_unlock=0 is always unlocked")
+	GameManager.campaign_graph.set_node_state("11", NodeMapGraph.NodeState.LOCKED)
+	assert_true(GameManager.is_fusion_recipe_unlocked({"quest_unlock": 11}) == false, "Recipe with quest_unlock=11 is locked while quest 11 incomplete")
+	GameManager.campaign_graph.set_node_state("11", NodeMapGraph.NodeState.COMPLETED)
+	assert_true(GameManager.is_fusion_recipe_unlocked({"quest_unlock": 11}) == true, "Recipe with quest_unlock=11 unlocks once quest 11 completed")
+
+	GameManager.viewed_fusion_recipes.erase("Test_Viewed_Recipe")
+	assert_true(GameManager.has_viewed_fusion_recipe("Test_Viewed_Recipe") == false, "Unviewed recipe reports NEW!")
+	assert_true(GameManager.mark_fusion_recipe_viewed("Test_Viewed_Recipe") == true, "First mark_fusion_recipe_viewed marks NEW! as seen")
+	assert_true(GameManager.has_viewed_fusion_recipe("Test_Viewed_Recipe") == true, "Viewed recipe no longer reports NEW!")
+	assert_true(GameManager.mark_fusion_recipe_viewed("Test_Viewed_Recipe") == false, "Second mark_fusion_recipe_viewed returns false")
+
+	# Restore pre-test GameManager profile state on disk
+	GameManager.player_inventory_cards = orig_inv
+	GameManager.owned_card_counts = orig_counts
+	GameManager.player_coins = orig_coins
+	GameManager.save_profile()

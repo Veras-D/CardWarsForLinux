@@ -44,6 +44,10 @@
 [ext_resource type="PackedScene" path="res://scenes/algebraic_chest_icon.tscn" id="61_palgchest"]
 [ext_resource type="PackedScene" path="res://scenes/dungeon_portal_icon.tscn" id="62_pdungeon"]
 [ext_resource type="PackedScene" path="res://scenes/daily_gift_icon.tscn" id="63_pgift"]
+[ext_resource type="PackedScene" path="res://scenes/deck_card_box_icon.tscn" id="64_pdcardbox"]
+[ext_resource type="PackedScene" path="res://scenes/deck_sell_icon.tscn" id="65_pdsell"]
+[ext_resource type="PackedScene" path="res://scenes/deck_build_icon.tscn" id="66_pdbuild"]
+[ext_resource type="PackedScene" path="res://scenes/deck_craft_icon.tscn" id="67_pdcraft"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/low_FionnaCakeIcon.png" id="38_tbook"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="43_font"]
 [ext_resource type="PackedScene" path="res://scenes/deck_wars_stadium.tscn" id="50_pstadium"]
@@ -445,6 +449,77 @@ render_priority = 5
 outline_render_priority = 4
 pixel_size = 0.0022
 text = "Daily Gift"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="DeckModesGroup" type="Node3D" parent="."]
+visible = false
+
+[node name="CardBoxMode" type="Node3D" parent="DeckModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.12, -0.47)
+
+[node name="DeckCardBoxIcon" parent="DeckModesGroup/CardBoxMode" instance=ExtResource("64_pdcardbox")]
+
+[node name="SellCardsMode" type="Node3D" parent="DeckModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.46, -0.12, 0.47)
+
+[node name="DeckSellIcon" parent="DeckModesGroup/SellCardsMode" instance=ExtResource("65_pdsell")]
+
+[node name="BuildDeckMode" type="Node3D" parent="DeckModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.56, -0.12, -0.47)
+
+[node name="DeckBuildIcon" parent="DeckModesGroup/BuildDeckMode" instance=ExtResource("66_pdbuild")]
+
+[node name="CraftCardsMode" type="Node3D" parent="DeckModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.56, -0.12, 0.47)
+
+[node name="DeckCraftIcon" parent="DeckModesGroup/CraftCardsMode" instance=ExtResource("67_pdcraft")]
+
+[node name="CardBoxLabel" type="Label3D" parent="DeckModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, 0.11, -0.118, -0.47)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.002
+text = "Card Box"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="SellCardsLabel" type="Label3D" parent="DeckModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, 0.11, -0.118, 0.47)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.002
+text = "Sell Cards"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="BuildDeckLabel" type="Label3D" parent="DeckModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.96, -0.118, -0.47)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Build Deck"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="CraftCardsLabel" type="Label3D" parent="DeckModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.96, -0.118, 0.47)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Craft Cards"
 font = ExtResource("43_font")
 font_size = 64
 outline_size = 18

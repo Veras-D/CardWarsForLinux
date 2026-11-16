@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/ui/DeckBoardIcon.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/deck/low_BuildDeck.png" id="2_tex"]
+[ext_resource type="PackedScene" path="res://assets/models/deck/build_deck/BuildDeck.glb" id="3_glb"]
+
+[node name="DeckBuildIcon" type="Node3D"]
+script = ExtResource("1_script")
+icon_texture = ExtResource("2_tex")
+
+[node name="BuildDeckRoot" type="Node3D" parent="."]
+transform = Transform3D(-0.00935, 0, -0.048099, 0, 0.049, 0, 0.048099, 0, -0.00935, 0, 0, 0)
+
+[node name="BuildDeck" parent="BuildDeckRoot" instance=ExtResource("3_glb")]

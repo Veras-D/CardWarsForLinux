@@ -1,0 +1,882 @@
+[gd_scene load_steps=23 format=3]
+
+[ext_resource type="Script" path="res://src/ui/CraftCardsModal.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/cards/CW_Grey.png" id="3_cwgrey"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/GoldPlaque.png" id="4_plaque"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Craft_Anvil.png" id="5_anvil"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Craft_Tongs.png" id="6_tongs"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/EmptyCardSlot.png" id="7_slot"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/QuestInfo_BG.png" id="8_qbg"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Craft_MaterialsFrame.png" id="9_mats"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Craft_MaterialCardsFrame.png" id="10_matcards"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Craft_CheckMark.png" id="11_check"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/UI_Coin_Icon.png" id="12_coin"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Craft_Button.png" id="13_craftbtn"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/uiButtonBlue.png" id="14_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/nodes/Button_Back_Gold.png" id="15_back"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Craft_ScrollBarBg.png" id="16_sbbg"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Craft_ScrollBar.png" id="17_sb"]
+[ext_resource type="PackedScene" path="res://assets/models/deck/craft_cards/Crafting.glb" id="18_craft3d"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/Card_Back.png" id="19_cardback"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_quest_lock"]
+bg_color = Color(0.02, 0.05, 0.08, 0.84)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.48, 0.56, 0.72)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+content_margin_left = 34.0
+content_margin_top = 24.0
+content_margin_right = 34.0
+content_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_error_panel"]
+bg_color = Color(0.11, 0.19, 0.25, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 0.92, 0.96, 0.95)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_scroll"]
+
+[node name="CraftCardsModal" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(640, 360)
+script = ExtResource("1_script")
+
+[node name="ForgeCanvas" type="Control" parent="."]
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+scale = Vector2(0.625, 0.625)
+
+[node name="SolidFloor" type="TextureRect" parent="ForgeCanvas"]
+modulate = Color(0.158, 0.232, 0.25, 1)
+layout_mode = 0
+offset_top = 114.0
+offset_right = 2048.0
+offset_bottom = 1152.0
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="BottomFloor" type="TextureRect" parent="ForgeCanvas"]
+modulate = Color(0.125, 0.205, 0.228, 1)
+layout_mode = 0
+offset_top = 800.0
+offset_right = 2048.0
+offset_bottom = 1152.0
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="BG_Top" type="NinePatchRect" parent="ForgeCanvas"]
+modulate = Color(0.509, 0.67, 0.706, 1)
+layout_mode = 0
+offset_left = -26.0
+offset_top = 119.0
+offset_right = 2074.0
+offset_bottom = 807.0
+texture = ExtResource("10_matcards")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+
+[node name="BG_TopFrame" type="NinePatchRect" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = -76.0
+offset_top = 119.0
+offset_right = 2124.0
+offset_bottom = 807.0
+texture = ExtResource("8_qbg")
+patch_margin_left = 250
+patch_margin_top = 100
+patch_margin_right = 170
+patch_margin_bottom = 100
+
+[node name="AnvilBench" type="NinePatchRect" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = -84.0
+offset_top = 290.0
+offset_right = 776.0
+offset_bottom = 782.0
+texture = ExtResource("5_anvil")
+patch_margin_left = 50
+patch_margin_right = 290
+
+[node name="ArmHolder" type="Control" parent="ForgeCanvas"]
+layout_mode = 0
+offset_right = 860.0
+offset_bottom = 800.0
+mouse_filter = 2
+
+[node name="TargetCardHolder" type="Control" parent="ForgeCanvas/ArmHolder"]
+layout_mode = 0
+offset_left = 446.0
+offset_top = 342.0
+offset_right = 698.0
+offset_bottom = 699.0
+mouse_filter = 2
+
+[node name="Tongs" type="TextureRect" parent="ForgeCanvas/ArmHolder"]
+layout_mode = 0
+offset_left = -37.0
+offset_top = 420.0
+offset_right = 458.0
+offset_bottom = 579.0
+mouse_filter = 2
+texture = ExtResource("6_tongs")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitlePlaque" type="NinePatchRect" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 124.0
+offset_right = 640.0
+offset_bottom = 277.0
+texture = ExtResource("4_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="TitleLabel" type="Label" parent="ForgeCanvas/TitlePlaque"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 104.0
+offset_right = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.96, 0.9, 0.72, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 64
+text = "Card Forge"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InventoryPill" type="NinePatchRect" parent="ForgeCanvas"]
+modulate = Color(0, 0.834, 1, 1)
+layout_mode = 0
+offset_left = 382.0
+offset_top = 698.0
+offset_right = 762.0
+offset_bottom = 766.0
+texture = ExtResource("7_slot")
+patch_margin_left = 20
+patch_margin_top = 20
+patch_margin_right = 20
+patch_margin_bottom = 20
+
+[node name="Label" type="Label" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = 382.0
+offset_top = 698.0
+offset_right = 762.0
+offset_bottom = 766.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "0 in inventory"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NeededRoot" type="Control" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = 766.0
+offset_top = 118.0
+offset_right = 1882.0
+offset_bottom = 806.0
+
+[node name="Card_BG" type="NinePatchRect" parent="ForgeCanvas/NeededRoot"]
+modulate = Color(0.509, 0.67, 0.706, 1)
+layout_mode = 0
+offset_left = 12.0
+offset_top = 14.0
+offset_right = 1104.0
+offset_bottom = 678.0
+texture = ExtResource("9_mats")
+patch_margin_left = 80
+patch_margin_top = 80
+patch_margin_right = 80
+patch_margin_bottom = 80
+
+[node name="Card_BGFrame" type="NinePatchRect" parent="ForgeCanvas/NeededRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_qbg")
+patch_margin_left = 250
+patch_margin_top = 100
+patch_margin_right = 170
+patch_margin_bottom = 100
+
+[node name="NeededLabel" type="Label" parent="ForgeCanvas/NeededRoot"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 30.0
+offset_right = 1080.0
+offset_bottom = 86.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 40
+text = "Card Materials Needed:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NeededFrame" type="NinePatchRect" parent="ForgeCanvas/NeededRoot"]
+layout_mode = 0
+offset_left = 78.0
+offset_top = 88.0
+offset_right = 1038.0
+offset_bottom = 478.0
+texture = ExtResource("10_matcards")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+
+[node name="SlotBGs" type="Control" parent="ForgeCanvas/NeededRoot"]
+layout_mode = 0
+offset_left = 182.0
+offset_top = 104.0
+offset_right = 934.0
+offset_bottom = 470.0
+
+[node name="Bg1" type="TextureRect" parent="ForgeCanvas/NeededRoot/SlotBGs"]
+modulate = Color(0.137, 0.224, 0.251, 1)
+layout_mode = 0
+offset_right = 225.0
+offset_bottom = 315.0
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+
+[node name="Bg2" type="TextureRect" parent="ForgeCanvas/NeededRoot/SlotBGs"]
+modulate = Color(0.137, 0.224, 0.251, 1)
+layout_mode = 0
+offset_left = 260.0
+offset_right = 485.0
+offset_bottom = 315.0
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+
+[node name="Bg3" type="TextureRect" parent="ForgeCanvas/NeededRoot/SlotBGs"]
+modulate = Color(0.137, 0.224, 0.251, 1)
+layout_mode = 0
+offset_left = 520.0
+offset_right = 745.0
+offset_bottom = 315.0
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+
+[node name="Ingredients" type="Control" parent="ForgeCanvas/NeededRoot"]
+layout_mode = 0
+offset_left = 182.0
+offset_top = 104.0
+offset_right = 934.0
+offset_bottom = 478.0
+
+[node name="Ingredient1" type="Control" parent="ForgeCanvas/NeededRoot/Ingredients"]
+layout_mode = 0
+offset_right = 225.0
+offset_bottom = 370.0
+
+[node name="CardHolder" type="Control" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient1"]
+layout_mode = 0
+offset_right = 225.0
+offset_bottom = 315.0
+
+[node name="CheckMark" type="TextureRect" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient1"]
+visible = false
+modulate = Color(0.38, 0.894, 0.133, 1)
+layout_mode = 0
+offset_left = 175.0
+offset_top = 246.0
+offset_right = 255.0
+offset_bottom = 326.0
+texture = ExtResource("11_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="QtyLabel" type="Label" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient1"]
+layout_mode = 0
+offset_left = -20.0
+offset_top = 318.0
+offset_right = 245.0
+offset_bottom = 370.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "0/1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Ingredient2" type="Control" parent="ForgeCanvas/NeededRoot/Ingredients"]
+layout_mode = 0
+offset_left = 260.0
+offset_right = 485.0
+offset_bottom = 370.0
+
+[node name="CardHolder" type="Control" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient2"]
+layout_mode = 0
+offset_right = 225.0
+offset_bottom = 315.0
+
+[node name="CheckMark" type="TextureRect" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient2"]
+visible = false
+modulate = Color(0.38, 0.894, 0.133, 1)
+layout_mode = 0
+offset_left = 175.0
+offset_top = 246.0
+offset_right = 255.0
+offset_bottom = 326.0
+texture = ExtResource("11_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="QtyLabel" type="Label" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient2"]
+layout_mode = 0
+offset_left = -20.0
+offset_top = 318.0
+offset_right = 245.0
+offset_bottom = 370.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "0/1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Ingredient3" type="Control" parent="ForgeCanvas/NeededRoot/Ingredients"]
+layout_mode = 0
+offset_left = 520.0
+offset_right = 745.0
+offset_bottom = 370.0
+
+[node name="CardHolder" type="Control" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient3"]
+layout_mode = 0
+offset_right = 225.0
+offset_bottom = 315.0
+
+[node name="CheckMark" type="TextureRect" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient3"]
+visible = false
+modulate = Color(0.38, 0.894, 0.133, 1)
+layout_mode = 0
+offset_left = 175.0
+offset_top = 246.0
+offset_right = 255.0
+offset_bottom = 326.0
+texture = ExtResource("11_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="QtyLabel" type="Label" parent="ForgeCanvas/NeededRoot/Ingredients/Ingredient3"]
+layout_mode = 0
+offset_left = -20.0
+offset_top = 318.0
+offset_right = 245.0
+offset_bottom = 370.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "0/1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CostLabel" type="Label" parent="ForgeCanvas/NeededRoot"]
+layout_mode = 0
+offset_left = 188.0
+offset_top = 488.0
+offset_right = 378.0
+offset_bottom = 532.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "COST"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CostPill" type="Control" parent="ForgeCanvas/NeededRoot"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 540.0
+offset_right = 430.0
+offset_bottom = 650.0
+
+[node name="CoinIcon" type="TextureRect" parent="ForgeCanvas/NeededRoot/CostPill"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 106.0
+offset_bottom = 98.0
+texture = ExtResource("12_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CostValue" type="Label" parent="ForgeCanvas/NeededRoot/CostPill"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 10.0
+offset_right = 266.0
+offset_bottom = 98.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 46
+text = "95"
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="CraftButton" type="TextureButton" parent="ForgeCanvas/NeededRoot"]
+layout_mode = 0
+offset_left = 536.0
+offset_top = 502.0
+offset_right = 932.0
+offset_bottom = 688.0
+pivot_offset = Vector2(198, 93)
+texture_normal = ExtResource("13_craftbtn")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="ForgeCanvas/NeededRoot/CraftButton"]
+layout_mode = 0
+offset_left = 116.0
+offset_top = 42.0
+offset_right = 382.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 48
+text = "CRAFT!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TableBG" type="NinePatchRect" parent="ForgeCanvas"]
+modulate = Color(0.509, 0.67, 0.706, 1)
+layout_mode = 0
+offset_left = 482.0
+offset_top = 801.0
+offset_right = 2048.0
+offset_bottom = 1151.0
+texture = ExtResource("10_matcards")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+
+[node name="Scroll" type="ScrollContainer" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = 576.0
+offset_top = 814.0
+offset_right = 1880.0
+offset_bottom = 1126.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_scroll")
+vertical_scroll_mode = 0
+
+[node name="RecipeHBox" type="HBoxContainer" parent="ForgeCanvas/Scroll"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="ScrollBarBg" type="NinePatchRect" parent="ForgeCanvas"]
+modulate = Color(0.137, 0.224, 0.251, 1)
+layout_mode = 0
+offset_left = 576.0
+offset_top = 1126.0
+offset_right = 1880.0
+offset_bottom = 1144.0
+texture = ExtResource("16_sbbg")
+patch_margin_left = 10
+patch_margin_top = 4
+patch_margin_right = 10
+patch_margin_bottom = 4
+
+[node name="ScrollBarThumb" type="NinePatchRect" parent="ForgeCanvas/ScrollBarBg"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 2.0
+offset_right = 340.0
+offset_bottom = 16.0
+texture = ExtResource("17_sb")
+patch_margin_left = 5
+patch_margin_top = 2
+patch_margin_right = 5
+patch_margin_bottom = 2
+
+[node name="Lower_BG" type="TextureRect" parent="ForgeCanvas"]
+modulate = Color(0.251, 0.408, 0.443, 1)
+layout_mode = 0
+offset_top = 780.0
+offset_right = 540.0
+offset_bottom = 1152.0
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+
+[node name="Lower_Frame" type="NinePatchRect" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = -330.0
+offset_top = 769.0
+offset_right = 562.0
+offset_bottom = 1166.0
+texture = ExtResource("8_qbg")
+patch_margin_left = 250
+patch_margin_top = 100
+patch_margin_right = 170
+patch_margin_bottom = 100
+
+[node name="BackBtn" type="TextureButton" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 932.0
+offset_right = 200.0
+offset_bottom = 1092.0
+texture_normal = ExtResource("15_back")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="SortByLabel" type="Label" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = 224.0
+offset_top = 804.0
+offset_right = 508.0
+offset_bottom = 908.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "Sort
+by"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SortBtn" type="TextureButton" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = 232.0
+offset_top = 918.0
+offset_right = 508.0
+offset_bottom = 1094.0
+texture_normal = ExtResource("14_btnblue")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="SortLabel" type="Label" parent="ForgeCanvas/SortBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 48
+text = "NEW"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightEdgeColumn" type="Control" parent="ForgeCanvas"]
+layout_mode = 0
+offset_left = 1882.0
+offset_top = 114.0
+offset_right = 2482.0
+offset_bottom = 1164.0
+
+[node name="Bg" type="TextureRect" parent="ForgeCanvas/RightEdgeColumn"]
+modulate = Color(0.251, 0.408, 0.443, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+
+[node name="Frame" type="NinePatchRect" parent="ForgeCanvas/RightEdgeColumn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_qbg")
+patch_margin_left = 250
+patch_margin_top = 100
+patch_margin_right = 170
+patch_margin_bottom = 100
+
+[node name="QuestLockOverlay" type="Control" parent="ForgeCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+
+[node name="Black" type="ColorRect" parent="ForgeCanvas/QuestLockOverlay"]
+layout_mode = 0
+offset_top = 114.0
+offset_right = 2048.0
+offset_bottom = 1152.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Panel" type="PanelContainer" parent="ForgeCanvas/QuestLockOverlay"]
+layout_mode = 0
+offset_left = 590.0
+offset_top = 330.0
+offset_right = 1590.0
+offset_bottom = 666.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_quest_lock")
+
+[node name="Text" type="Label" parent="ForgeCanvas/QuestLockOverlay/Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Welcome To The Card Forge!
+
+We’re closed until you finish your 4th quest!
+Go battle your butt off and come back!"
+horizontal_alignment = 0
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ErrorOverlay" type="Control" parent="."]
+visible = false
+z_index = 10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="ErrorOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.62)
+
+[node name="Center" type="CenterContainer" parent="ErrorOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="ErrorOverlay/Center"]
+custom_minimum_size = Vector2(540, 240)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_error_panel")
+
+[node name="VBox" type="VBoxContainer" parent="ErrorOverlay/Center/Panel"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 18
+
+[node name="ErrorLabel" type="Label" parent="ErrorOverlay/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 19
+text = "Hey Buddy!"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="OkBtn" type="Button" parent="ErrorOverlay/Center/Panel/VBox"]
+custom_minimum_size = Vector2(140, 42)
+size_flags_horizontal = 4
+layout_mode = 2
+text = "OK"
+
+[node name="CraftSeqOverlay" type="Control" parent="."]
+visible = false
+z_index = 12
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BlackPanel" type="ColorRect" parent="CraftSeqOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.84)
+
+[node name="Forge3DContainer" type="SubViewportContainer" parent="CraftSeqOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="ForgeViewport" type="SubViewport" parent="CraftSeqOverlay/Forge3DContainer"]
+own_world_3d = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1280, 720)
+render_target_update_mode = 0
+
+[node name="Camera3D" type="Camera3D" parent="CraftSeqOverlay/Forge3DContainer/ForgeViewport"]
+transform = Transform3D(1, 0, 0, 0, 0.927184, 0.374607, 0, -0.374607, 0.927184, 0, 2.3, 5.2)
+fov = 38.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="CraftSeqOverlay/Forge3DContainer/ForgeViewport"]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 6, 4)
+light_energy = 1.25
+
+[node name="Forge3DRoot" type="Node3D" parent="CraftSeqOverlay/Forge3DContainer/ForgeViewport"]
+transform = Transform3D(-0.0871557, 0, 0.996195, 0, 1, 0, -0.996195, 0, -0.0871557, 0, -0.3, 0)
+
+[node name="CraftingModel" parent="CraftSeqOverlay/Forge3DContainer/ForgeViewport/Forge3DRoot" instance=ExtResource("18_craft3d")]
+transform = Transform3D(0.06, 0, 0, 0, 0.06, 0, 0, 0, 0.06, 0, 0, 0)
+
+[node name="FlyingLayer" type="Control" parent="CraftSeqOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="RevealLayer" type="Control" parent="CraftSeqOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CardBack" type="TextureRect" parent="CraftSeqOverlay/RevealLayer"]
+visible = false
+layout_mode = 0
+offset_left = 540.0
+offset_top = 220.0
+offset_right = 740.0
+offset_bottom = 504.0
+pivot_offset = Vector2(100, 142)
+mouse_filter = 2
+texture = ExtResource("19_cardback")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RarityBanner" type="Label" parent="CraftSeqOverlay/RevealLayer"]
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 56.0
+offset_bottom = 132.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "NEW CARD!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResultCardHolder" type="Control" parent="CraftSeqOverlay/RevealLayer"]
+visible = false
+layout_mode = 0
+offset_left = 533.0
+offset_top = 208.0
+offset_right = 747.0
+offset_bottom = 512.0
+pivot_offset = Vector2(107, 152)
+mouse_filter = 2
+
+[node name="TapAnywhereLabel" type="Label" parent="CraftSeqOverlay/RevealLayer"]
+visible = false
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -98.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 26
+text = "Tap anywhere to continue"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WhiteFlash" type="ColorRect" parent="CraftSeqOverlay"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
