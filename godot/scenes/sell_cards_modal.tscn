@@ -1081,14 +1081,14 @@ vertical_alignment = 1
 
 [node name="CloseButton" type="TextureButton" parent="SellCanvas/E_3_SortPanel"]
 layout_mode = 0
-offset_left = 1408.0
-offset_top = 150.0
-offset_right = 1558.0
-offset_bottom = 308.0
-scale = Vector2(0.7, 0.7)
-pivot_offset = Vector2(75, 79)
+offset_left = 1394.0
+offset_top = 148.0
+offset_right = 1499.0
+offset_bottom = 259.0
+pivot_offset = Vector2(52.5, 55.5)
 mouse_default_cursor_shape = 2
 texture_normal = ExtResource("21_cancel")
+ignore_texture_size = true
 stretch_mode = 5
 
 [node name="ButtonsGrid" type="GridContainer" parent="SellCanvas/E_3_SortPanel"]

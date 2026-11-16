@@ -1168,9 +1168,9 @@ vertical_alignment = 1
 [node name="TableRoot" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel"]
 layout_mode = 0
 offset_left = 75.0
-offset_top = 282.0
+offset_top = 272.0
 offset_right = 1973.0
-offset_bottom = 966.0
+offset_bottom = 938.0
 texture = ExtResource("6_indent")
 patch_margin_left = 90
 patch_margin_top = 90
@@ -1180,9 +1180,9 @@ patch_margin_bottom = 90
 [node name="AddScroll" type="ScrollContainer" parent="DeckCanvas/B_1_AddPanel/TableRoot"]
 layout_mode = 0
 offset_left = 44.0
-offset_top = 42.0
+offset_top = 34.0
 offset_right = 1854.0
-offset_bottom = 650.0
+offset_bottom = 626.0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_scroll")
 horizontal_scroll_mode = 3
 vertical_scroll_mode = 0
@@ -1194,9 +1194,9 @@ theme_override_constants/separation = 16
 [node name="ScrollBarBG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/TableRoot"]
 layout_mode = 0
 offset_left = 34.0
-offset_top = 662.0
+offset_top = 640.0
 offset_right = 1864.0
-offset_bottom = 678.0
+offset_bottom = 656.0
 texture = ExtResource("22_sbbg")
 patch_margin_left = 25
 patch_margin_top = 8
@@ -1215,10 +1215,10 @@ patch_margin_bottom = 8
 
 [node name="SortButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
 layout_mode = 0
-offset_left = 80.0
-offset_top = 975.0
-offset_right = 320.0
-offset_bottom = 1125.0
+offset_left = 75.0
+offset_top = 950.0
+offset_right = 315.0
+offset_bottom = 1100.0
 scale = Vector2(0.9, 0.9)
 pivot_offset = Vector2(120, 75)
 mouse_default_cursor_shape = 2
@@ -1255,10 +1255,10 @@ vertical_alignment = 1
 
 [node name="TotalSizeLabel" type="Label" parent="DeckCanvas/B_1_AddPanel"]
 layout_mode = 0
-offset_left = 680.0
-offset_top = 998.0
-offset_right = 1230.0
-offset_bottom = 1082.0
+offset_left = 590.0
+offset_top = 978.0
+offset_right = 1140.0
+offset_bottom = 1072.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_shadow_color = Color(1, 1, 1, 0.85)
 theme_override_constants/shadow_offset_x = 0
@@ -1271,10 +1271,10 @@ vertical_alignment = 1
 
 [node name="CancelButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
 layout_mode = 0
-offset_left = 1270.0
-offset_top = 975.0
-offset_right = 1620.0
-offset_bottom = 1125.0
+offset_left = 1235.0
+offset_top = 950.0
+offset_right = 1585.0
+offset_bottom = 1100.0
 scale = Vector2(0.9, 0.9)
 pivot_offset = Vector2(175, 75)
 mouse_default_cursor_shape = 2
@@ -1311,10 +1311,10 @@ vertical_alignment = 1
 
 [node name="ConfirmButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
 layout_mode = 0
-offset_left = 1628.0
-offset_top = 975.0
-offset_right = 1978.0
-offset_bottom = 1125.0
+offset_left = 1615.0
+offset_top = 950.0
+offset_right = 1965.0
+offset_bottom = 1100.0
 scale = Vector2(0.9, 0.9)
 pivot_offset = Vector2(175, 75)
 mouse_default_cursor_shape = 2
@@ -1753,14 +1753,14 @@ vertical_alignment = 1
 
 [node name="CloseButton" type="TextureButton" parent="DeckCanvas/B_5_SortPanel"]
 layout_mode = 0
-offset_left = 1408.0
-offset_top = 150.0
-offset_right = 1558.0
-offset_bottom = 308.0
-scale = Vector2(0.7, 0.7)
-pivot_offset = Vector2(75, 79)
+offset_left = 1394.0
+offset_top = 148.0
+offset_right = 1499.0
+offset_bottom = 259.0
+pivot_offset = Vector2(52.5, 55.5)
 mouse_default_cursor_shape = 2
 texture_normal = ExtResource("24_cancel")
+ignore_texture_size = true
 stretch_mode = 5
 
 [node name="ButtonsGrid" type="GridContainer" parent="DeckCanvas/B_5_SortPanel"]
@@ -1823,14 +1823,14 @@ vertical_alignment = 1
 
 [node name="CloseButton" type="TextureButton" parent="DeckCanvas/B_6_SortPanelB1"]
 layout_mode = 0
-offset_left = 1408.0
-offset_top = 150.0
-offset_right = 1558.0
-offset_bottom = 308.0
-scale = Vector2(0.7, 0.7)
-pivot_offset = Vector2(75, 79)
+offset_left = 1394.0
+offset_top = 148.0
+offset_right = 1499.0
+offset_bottom = 259.0
+pivot_offset = Vector2(52.5, 55.5)
 mouse_default_cursor_shape = 2
 texture_normal = ExtResource("24_cancel")
+ignore_texture_size = true
 stretch_mode = 5
 
 [node name="ButtonsGrid" type="GridContainer" parent="DeckCanvas/B_6_SortPanelB1"]

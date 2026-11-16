@@ -441,13 +441,13 @@ func _connect_signals() -> void:
 
 	# Sort close buttons
 	if b5_close_btn:
-		_attach_btn_bounce(b5_close_btn, 0.7)
+		_attach_btn_bounce(b5_close_btn, 1.0)
 		b5_close_btn.pressed.connect(func():
 			_play_sfx(SFX_BACK)
 			_close_b5_sort_panel()
 		)
 	if b6_close_btn:
-		_attach_btn_bounce(b6_close_btn, 0.7)
+		_attach_btn_bounce(b6_close_btn, 1.0)
 		b6_close_btn.pressed.connect(func():
 			_play_sfx(SFX_BACK)
 			_close_b6_sort_panel()
@@ -1001,8 +1001,8 @@ func _refresh_b1_grid(preserve_scroll: bool = false) -> void:
 	ordered.append_array(in_use_indices)
 	ordered.append_array(other_indices)
 
-	var card_w := 208.0
-	var card_h := 292.0
+	var card_w := 204.0
+	var card_h := 286.0
 	var col_vbox: VBoxContainer = null
 	for k in range(ordered.size()):
 		if k % 2 == 0:
