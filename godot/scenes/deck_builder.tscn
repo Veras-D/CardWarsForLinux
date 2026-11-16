@@ -1,21 +1,33 @@
-[gd_scene format=3 uid="uid://d3k8x7w2p1m4q"]
+[gd_scene load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://src/ui/DeckBuilder.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/cards/CW_Grey.png" id="3_cwgrey"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/PopUpSprite_1.png" id="4_popup1"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/GoldPlaque.png" id="5_plaque"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Frame_Indent.png" id="6_indent"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Deck_ArrowLeft.png" id="7_arrl"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Deck_ArrowRight.png" id="8_arrr"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Frame_Hero.png" id="9_heroframe"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/portraits/Portrait_Jake_Frame.png" id="10_jake"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonGrey.png" id="11_btngrey"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonFrame.png" id="12_btnframe"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/uiButtonBlue.png" id="13_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonDarkBlue.png" id="14_btndblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="15_btngreen"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonRed.png" id="16_btnred"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/nodes/Button_Back_Gold.png" id="17_back"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconCreatures.png" id="18_icreat"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconSpells.png" id="19_ispell"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconBuildings.png" id="20_ibldg"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Stack_Circle.png" id="21_circle"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/ScrollBar_BG2.png" id="22_sbbg"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/ScrollBar4.png" id="23_sb"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="24_cancel"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/PopUpSprite_2.png" id="25_popup2"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/QuestInfo_BG2_Small.png" id="26_errframe"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.075, 0.095, 0.14, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.11, 0.135, 0.2, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.69, 0.27, 0.9)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_scroll"]
 
 [node name="DeckBuilder" type="Control"]
 layout_mode = 3
@@ -24,213 +36,1941 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(640, 360)
 script = ExtResource("1_script")
 
-[node name="Background" type="Panel" parent="."]
+[node name="StandaloneBackdrop" type="ColorRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+color = Color(0.11, 0.16, 0.19, 1)
 
-[node name="MainVBox" type="VBoxContainer" parent="."]
+[node name="DeckCanvas" type="Control" parent="."]
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+scale = Vector2(0.625, 0.625)
+
+[node name="StandaloneTopBar" type="Control" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 112.0
+
+[node name="TopBg" type="ColorRect" parent="DeckCanvas/StandaloneTopBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = 14.0
-offset_right = -18.0
-offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+color = Color(0.08, 0.13, 0.17, 0.92)
 
-[node name="TopBar" type="VBoxContainer" parent="MainVBox"]
-layout_mode = 2
-theme_override_constants/separation = 4
+[node name="PlayerLabel" type="Label" parent="DeckCanvas/StandaloneTopBar"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 24.0
+offset_right = 640.0
+offset_bottom = 86.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+text = "Jake   Lvl. 1"
 
-[node name="HBox" type="HBoxContainer" parent="MainVBox/TopBar"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="BackBtn" type="Button" parent="MainVBox/TopBar/HBox"]
-custom_minimum_size = Vector2(110, 36)
-layout_mode = 2
-text = "⬅ Back"
-
-[node name="TitleLabel" type="Label" parent="MainVBox/TopBar/HBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.96, 0.82, 0.32, 1)
-theme_override_font_sizes/font_size = 20
-text = "🃏 DECK BUILDER"
-
-[node name="DeckNameEdit" type="LineEdit" parent="MainVBox/TopBar/HBox"]
-custom_minimum_size = Vector2(210, 34)
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Enter Deck Name..."
-text = "Finn Starter Deck"
-
-[node name="PresetSelect" type="OptionButton" parent="MainVBox/TopBar/HBox"]
-custom_minimum_size = Vector2(220, 34)
-layout_mode = 2
-
-[node name="SaveBtn" type="Button" parent="MainVBox/TopBar/HBox"]
-custom_minimum_size = Vector2(140, 36)
-layout_mode = 2
-text = "💾 Save & Equip"
-
-[node name="FusionBtn" type="Button" parent="MainVBox/TopBar/HBox"]
-custom_minimum_size = Vector2(130, 36)
-layout_mode = 2
-text = "⚗️ Fusion Lab"
-
-[node name="ClearBtn" type="Button" parent="MainVBox/TopBar/HBox"]
-custom_minimum_size = Vector2(90, 36)
-layout_mode = 2
-text = "🗑️ Clear"
-
-[node name="StatusBanner" type="Label" parent="MainVBox/TopBar"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.85, 0.96, 1)
-theme_override_font_sizes/font_size = 12
-text = "Build a legal deck of 10 to 25 cards (maximum 4 copies of any single card)."
-
-[node name="ContentSplit" type="HSplitContainer" parent="MainVBox"]
-layout_mode = 2
-size_flags_vertical = 3
-split_offset = 760
-
-[node name="LeftCollection" type="VBoxContainer" parent="MainVBox/ContentSplit"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="FilterRow" type="HBoxContainer" parent="MainVBox/ContentSplit/LeftCollection"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SearchEdit" type="LineEdit" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
-custom_minimum_size = Vector2(160, 32)
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "🔍 Search name, ability, ID..."
-
-[node name="FactionSelect" type="OptionButton" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
-custom_minimum_size = Vector2(135, 32)
-layout_mode = 2
-
-[node name="TypeSelect" type="OptionButton" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
-custom_minimum_size = Vector2(135, 32)
-layout_mode = 2
-
-[node name="CostSelect" type="OptionButton" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
-custom_minimum_size = Vector2(115, 32)
-layout_mode = 2
-
-[node name="CollectionCountLabel" type="Label" parent="MainVBox/ContentSplit/LeftCollection/FilterRow"]
-custom_minimum_size = Vector2(95, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "416 Cards"
+[node name="InventoryLabel" type="Label" parent="DeckCanvas/StandaloneTopBar"]
+layout_mode = 0
+offset_left = 1480.0
+offset_top = 24.0
+offset_right = 2000.0
+offset_bottom = 86.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "15/50"
 horizontal_alignment = 2
 
-[node name="Scroll" type="ScrollContainer" parent="MainVBox/ContentSplit/LeftCollection"]
-layout_mode = 2
-size_flags_vertical = 3
+[node name="B_0_BuildDeck" type="Control" parent="DeckCanvas"]
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
 
-[node name="CollectionGrid" type="GridContainer" parent="MainVBox/ContentSplit/LeftCollection/Scroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 12
-columns = 5
+[node name="BG_Frame" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck"]
+modulate = Color(1, 0.985, 0.985, 1)
+layout_mode = 0
+offset_left = -22.8
+offset_top = 114.0
+offset_right = 2070.8
+offset_bottom = 1134.0
+texture = ExtResource("4_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
 
-[node name="RightDeckPanel" type="VBoxContainer" parent="MainVBox/ContentSplit"]
-custom_minimum_size = Vector2(390, 0)
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="LeftPane" type="Control" parent="DeckCanvas/B_0_BuildDeck"]
+layout_mode = 0
+offset_right = 510.0
+offset_bottom = 1152.0
 
-[node name="ConfigBox" type="VBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel"]
-layout_mode = 2
-theme_override_constants/separation = 6
+[node name="NameplateRoot" type="Control" parent="DeckCanvas/B_0_BuildDeck/LeftPane"]
+layout_mode = 0
+offset_left = 40.7
+offset_top = 164.75
+offset_right = 518.7
+offset_bottom = 317.75
+scale = Vector2(0.9, 0.9)
 
-[node name="LeaderRow" type="HBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="Nameplate" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/LeftPane/NameplateRoot"]
+layout_mode = 0
+offset_right = 478.0
+offset_bottom = 153.0
+texture = ExtResource("5_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
 
-[node name="LeaderLabel" type="Label" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LeaderRow"]
-layout_mode = 2
-text = "👑 Hero Leader:"
+[node name="DeckLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/NameplateRoot"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 42.0
+offset_right = 278.0
+offset_bottom = 116.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 52
+text = "Deck"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="LeaderSelect" type="OptionButton" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LeaderRow"]
-layout_mode = 2
-size_flags_horizontal = 3
+[node name="DeckNumber" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/NameplateRoot"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 12.0
+offset_right = 420.0
+offset_bottom = 142.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 12
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 104
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="LandscapesRow" type="HBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
+[node name="ButtonPrevDeck" type="TextureButton" parent="DeckCanvas/B_0_BuildDeck/LeftPane/NameplateRoot"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = 16.5
+offset_right = 68.0
+offset_bottom = 136.5
+pivot_offset = Vector2(39, 60)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("7_arrl")
+stretch_mode = 5
 
-[node name="Lane0Btn" type="Button" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LandscapesRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "L1: Plains"
+[node name="ButtonNextDeck" type="TextureButton" parent="DeckCanvas/B_0_BuildDeck/LeftPane/NameplateRoot"]
+layout_mode = 0
+offset_left = 410.0
+offset_top = 17.5
+offset_right = 488.0
+offset_bottom = 135.5
+pivot_offset = Vector2(39, 59)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("8_arrr")
+stretch_mode = 5
 
-[node name="Lane1Btn" type="Button" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LandscapesRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "L2: Plains"
+[node name="HeroCardsTitle" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 315.0
+offset_right = 486.0
+offset_bottom = 370.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 0.85)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "Hero Cards"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Lane2Btn" type="Button" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LandscapesRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "L3: Cotton"
+[node name="HeroFrameIndent" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/LeftPane"]
+layout_mode = 0
+offset_left = 81.0
+offset_top = 376.0
+offset_right = 441.0
+offset_bottom = 894.0
+texture = ExtResource("6_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
 
-[node name="Lane3Btn" type="Button" parent="MainVBox/ContentSplit/RightDeckPanel/ConfigBox/LandscapesRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "L4: Plains"
+[node name="HeroCard" type="Control" parent="DeckCanvas/B_0_BuildDeck/LeftPane"]
+layout_mode = 0
+offset_left = 103.5
+offset_top = 408.5
+offset_right = 370.5
+offset_bottom = 786.5
+scale = Vector2(1.18, 1.18)
+mouse_default_cursor_shape = 2
 
-[node name="ManaCurveBox" type="VBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel"]
-layout_mode = 2
-theme_override_constants/separation = 4
+[node name="CardArt" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 11.0
+offset_right = 253.0
+offset_bottom = 250.0
+mouse_filter = 2
+texture = ExtResource("10_jake")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="CurveTitle" type="Label" parent="MainVBox/ContentSplit/RightDeckPanel/ManaCurveBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "📊 Mana Cost Curve (0 - 5+ MP)"
+[node name="XPBarBG" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+modulate = Color(0.996, 0.996, 0.796, 1)
+layout_mode = 0
+offset_left = 56.5
+offset_top = 342.0
+offset_right = 256.5
+offset_bottom = 367.0
+mouse_filter = 2
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+stretch_mode = 0
 
-[node name="BarsHBox" type="HBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel/ManaCurveBox"]
-custom_minimum_size = Vector2(0, 82)
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="XPBarProgress" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+modulate = Color(0, 0.616, 0.929, 1)
+layout_mode = 0
+offset_left = 56.5
+offset_top = 342.0
+offset_right = 56.5
+offset_bottom = 367.0
+mouse_filter = 2
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+stretch_mode = 0
 
-[node name="DeckHeaderRow" type="HBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel"]
-layout_mode = 2
+[node name="CardFrame" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("9_heroframe")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="DeckCountLabel" type="Label" parent="MainVBox/ContentSplit/RightDeckPanel/DeckHeaderRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 13
-text = "Deck: 10 / 25 Cards"
+[node name="LevelLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 13.0
+offset_right = 92.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "Level: 1"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="ValidationLabel" type="Label" parent="MainVBox/ContentSplit/RightDeckPanel/DeckHeaderRow"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "✅ Legal Deck"
+[node name="HPLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+layout_mode = 0
+offset_left = 194.0
+offset_top = 10.0
+offset_right = 254.0
+offset_bottom = 62.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 33
+text = "15"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="DeckScroll" type="ScrollContainer" parent="MainVBox/ContentSplit/RightDeckPanel"]
-layout_mode = 2
-size_flags_vertical = 3
+[node name="NameLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 236.0
+offset_right = 249.0
+offset_bottom = 264.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 0.8)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 1
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "Jake"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="DeckListVBox" type="VBoxContainer" parent="MainVBox/ContentSplit/RightDeckPanel/DeckScroll"]
+[node name="DescLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 266.0
+offset_right = 251.0
+offset_bottom = 334.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "(3 Turns) All your Corn creatures gain +3 Attack."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ToNextLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 342.0
+offset_right = 252.0
+offset_bottom = 367.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 0.8)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 1
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 15
+text = "To Next:50"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SwapHeroLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/HeroCard"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 150.0
+offset_right = 261.0
+offset_bottom = 222.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+text = "Swap Hero"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LabelBattleDeck" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane"]
+layout_mode = 0
+offset_left = 215.0
+offset_top = 900.0
+offset_right = 507.0
+offset_bottom = 955.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 0.8)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "Battle Deck?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BattleDeckButton" type="TextureButton" parent="DeckCanvas/B_0_BuildDeck/LeftPane"]
+layout_mode = 0
+offset_left = 253.0
+offset_top = 960.0
+offset_right = 493.0
+offset_bottom = 1110.0
+scale = Vector2(0.9, 0.9)
+pivot_offset = Vector2(120, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/LeftPane/BattleDeckButton"]
+modulate = Color(1, 0.6, 0, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("11_btngrey")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Frame" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/LeftPane/BattleDeckButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_btnframe")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_0_BuildDeck/LeftPane/BattleDeckButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "ON"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DeckSizeRow" type="Label" parent="DeckCanvas/B_0_BuildDeck"]
+layout_mode = 0
+offset_left = 510.0
+offset_top = 170.0
+offset_right = 1040.0
+offset_bottom = 228.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 9
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Deck Size:10/15"
+vertical_alignment = 1
+
+[node name="TopTabs" type="Control" parent="DeckCanvas/B_0_BuildDeck"]
+layout_mode = 0
+offset_left = 1238.0
+offset_top = 118.0
+offset_right = 2000.0
+offset_bottom = 242.0
+
+[node name="Creatures" type="Control" parent="DeckCanvas/B_0_BuildDeck/TopTabs"]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 8.0
+offset_right = 290.0
+offset_bottom = 122.0
+
+[node name="Icon" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Creatures"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 6.0
+offset_right = 124.0
+offset_bottom = 86.0
+texture = ExtResource("18_icreat")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SizeBG" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Creatures"]
+self_modulate = Color(1, 0, 0, 1)
+layout_mode = 0
+offset_left = 88.0
+offset_top = -4.0
+offset_right = 154.0
+offset_bottom = 62.0
+texture = ExtResource("21_circle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SizeLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Creatures/SizeBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "8"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Title" type="Label" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Creatures"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = 82.0
+offset_right = 170.0
+offset_bottom = 118.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Creatures"
+horizontal_alignment = 1
+
+[node name="Spells" type="Control" parent="DeckCanvas/B_0_BuildDeck/TopTabs"]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 8.0
+offset_right = 500.0
+offset_bottom = 122.0
+
+[node name="Icon" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Spells"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 4.0
+offset_right = 130.0
+offset_bottom = 86.0
+texture = ExtResource("19_ispell")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SizeBG" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Spells"]
+self_modulate = Color(1, 0, 0, 1)
+layout_mode = 0
+offset_left = 88.0
+offset_top = -4.0
+offset_right = 154.0
+offset_bottom = 62.0
+texture = ExtResource("21_circle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SizeLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Spells/SizeBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Title" type="Label" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Spells"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = 82.0
+offset_right = 170.0
+offset_bottom = 118.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Spells"
+horizontal_alignment = 1
+
+[node name="Buildings" type="Control" parent="DeckCanvas/B_0_BuildDeck/TopTabs"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 8.0
+offset_right = 710.0
+offset_bottom = 122.0
+
+[node name="Icon" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Buildings"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 4.0
+offset_right = 118.0
+offset_bottom = 86.0
+texture = ExtResource("20_ibldg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SizeBG" type="TextureRect" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Buildings"]
+self_modulate = Color(1, 0, 0, 1)
+layout_mode = 0
+offset_left = 88.0
+offset_top = -4.0
+offset_right = 154.0
+offset_bottom = 62.0
+texture = ExtResource("21_circle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SizeLabel" type="Label" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Buildings/SizeBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Title" type="Label" parent="DeckCanvas/B_0_BuildDeck/TopTabs/Buildings"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = 82.0
+offset_right = 170.0
+offset_bottom = 118.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Buildings"
+horizontal_alignment = 1
+
+[node name="CardGridBG" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 248.0
+offset_right = 1989.0
+offset_bottom = 948.0
+texture = ExtResource("6_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="DeckScroll" type="ScrollContainer" parent="DeckCanvas/B_0_BuildDeck/CardGridBG"]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 42.0
+offset_right = 1445.0
+offset_bottom = 662.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_scroll")
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
+
+[node name="DeckColumns" type="HBoxContainer" parent="DeckCanvas/B_0_BuildDeck/CardGridBG/DeckScroll"]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 4
+theme_override_constants/separation = 18
+
+[node name="ScrollBarBG" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/CardGridBG"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 674.0
+offset_right = 1453.0
+offset_bottom = 690.0
+texture = ExtResource("22_sbbg")
+patch_margin_left = 25
+patch_margin_top = 8
+patch_margin_right = 25
+patch_margin_bottom = 8
+
+[node name="Thumb" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/CardGridBG/ScrollBarBG"]
+layout_mode = 0
+offset_right = 320.0
+offset_bottom = 16.0
+texture = ExtResource("23_sb")
+patch_margin_left = 28
+patch_margin_top = 8
+patch_margin_right = 28
+patch_margin_bottom = 8
+
+[node name="BottomButtons" type="Control" parent="DeckCanvas/B_0_BuildDeck"]
+layout_mode = 0
+offset_left = 720.0
+offset_top = 955.0
+offset_right = 1995.0
+offset_bottom = 1110.0
+
+[node name="SortButton" type="TextureButton" parent="DeckCanvas/B_0_BuildDeck/BottomButtons"]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 2.0
+offset_right = 380.0
+offset_bottom = 152.0
+scale = Vector2(0.9, 0.9)
+pivot_offset = Vector2(120, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/BottomButtons/SortButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("13_btnblue")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_0_BuildDeck/BottomButtons/SortButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Sort"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LandscapeButton" type="TextureButton" parent="DeckCanvas/B_0_BuildDeck/BottomButtons"]
+layout_mode = 0
+offset_left = 415.0
+offset_top = -3.0
+offset_right = 765.0
+offset_bottom = 157.0
+scale = Vector2(0.9, 0.9)
+pivot_offset = Vector2(175, 80)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/BottomButtons/LandscapeButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("14_btndblue")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_0_BuildDeck/BottomButtons/LandscapeButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Landscapes"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EditDeckButton" type="TextureButton" parent="DeckCanvas/B_0_BuildDeck/BottomButtons"]
+layout_mode = 0
+offset_left = 800.0
+offset_top = -3.0
+offset_right = 1200.0
+offset_bottom = 157.0
+scale = Vector2(0.9, 0.9)
+pivot_offset = Vector2(200, 80)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_0_BuildDeck/BottomButtons/EditDeckButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15_btngreen")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_0_BuildDeck/BottomButtons/EditDeckButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Edit Deck"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackBtn" type="TextureButton" parent="DeckCanvas/B_0_BuildDeck"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 955.0
+offset_right = 185.0
+offset_bottom = 1098.0
+pivot_offset = Vector2(72, 71)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("17_back")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="PopUpFade" type="ColorRect" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_left = -1200.0
+offset_top = -1200.0
+offset_right = 3248.0
+offset_bottom = 2352.0
+color = Color(0, 0, 0, 0)
+
+[node name="B_1_AddPanel" type="Control" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 114.0
+offset_right = 2034.0
+offset_bottom = 1134.0
+texture = ExtResource("4_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="TitleRoot" type="Control" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 148.0
+offset_right = 565.0
+offset_bottom = 278.0
+scale = Vector2(0.85, 0.85)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/TitleRoot"]
+layout_mode = 0
+offset_right = 600.0
+offset_bottom = 153.0
+texture = ExtResource("5_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="Label" type="Label" parent="DeckCanvas/B_1_AddPanel/TitleRoot"]
+layout_mode = 0
+offset_right = 600.0
+offset_bottom = 153.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 64
+text = "Edit Deck"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CreaturesButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 1085.0
+offset_top = 148.0
+offset_right = 1385.0
+offset_bottom = 308.0
+scale = Vector2(0.8, 0.8)
+pivot_offset = Vector2(150, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="DeckCanvas/B_1_AddPanel/CreaturesButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(150, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/CreaturesButton/ScaleRoot"]
+modulate = Color(0.302, 0.177, 0.588, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("11_btngrey")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Frame" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/CreaturesButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_btnframe")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Icon" type="TextureRect" parent="DeckCanvas/B_1_AddPanel/CreaturesButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 18.0
+offset_right = 188.0
+offset_bottom = 84.0
+texture = ExtResource("18_icreat")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DeckCanvas/B_1_AddPanel/CreaturesButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 86.0
+offset_right = 280.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+text = "Creatures"
+horizontal_alignment = 1
+
+[node name="StackBG" type="TextureRect" parent="DeckCanvas/B_1_AddPanel/CreaturesButton/ScaleRoot"]
+self_modulate = Color(1, 0, 0, 1)
+layout_mode = 0
+offset_left = 224.0
+offset_top = -12.0
+offset_right = 314.0
+offset_bottom = 78.0
+texture = ExtResource("21_circle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StackText" type="Label" parent="DeckCanvas/B_1_AddPanel/CreaturesButton/ScaleRoot/StackBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpellsButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 1392.0
+offset_top = 148.0
+offset_right = 1692.0
+offset_bottom = 308.0
+scale = Vector2(0.8, 0.8)
+pivot_offset = Vector2(150, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="DeckCanvas/B_1_AddPanel/SpellsButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(150, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/SpellsButton/ScaleRoot"]
+modulate = Color(0.072, 0.463, 0.412, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("11_btngrey")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Frame" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/SpellsButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_btnframe")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Icon" type="TextureRect" parent="DeckCanvas/B_1_AddPanel/SpellsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 16.0
+offset_right = 192.0
+offset_bottom = 86.0
+texture = ExtResource("19_ispell")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DeckCanvas/B_1_AddPanel/SpellsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 86.0
+offset_right = 280.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+text = "Spells"
+horizontal_alignment = 1
+
+[node name="StackBG" type="TextureRect" parent="DeckCanvas/B_1_AddPanel/SpellsButton/ScaleRoot"]
+self_modulate = Color(1, 0, 0, 1)
+layout_mode = 0
+offset_left = 224.0
+offset_top = -12.0
+offset_right = 314.0
+offset_bottom = 78.0
+texture = ExtResource("21_circle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StackText" type="Label" parent="DeckCanvas/B_1_AddPanel/SpellsButton/ScaleRoot/StackBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BuildingsButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 1700.0
+offset_top = 148.0
+offset_right = 2000.0
+offset_bottom = 308.0
+scale = Vector2(0.8, 0.8)
+pivot_offset = Vector2(150, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="DeckCanvas/B_1_AddPanel/BuildingsButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(150, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/BuildingsButton/ScaleRoot"]
+modulate = Color(0.108, 0.344, 0.566, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("11_btngrey")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Frame" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/BuildingsButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_btnframe")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Icon" type="TextureRect" parent="DeckCanvas/B_1_AddPanel/BuildingsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 16.0
+offset_right = 186.0
+offset_bottom = 86.0
+texture = ExtResource("20_ibldg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DeckCanvas/B_1_AddPanel/BuildingsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 86.0
+offset_right = 280.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+text = "Buildings"
+horizontal_alignment = 1
+
+[node name="StackBG" type="TextureRect" parent="DeckCanvas/B_1_AddPanel/BuildingsButton/ScaleRoot"]
+self_modulate = Color(1, 0, 0, 1)
+layout_mode = 0
+offset_left = 224.0
+offset_top = -12.0
+offset_right = 314.0
+offset_bottom = 78.0
+texture = ExtResource("21_circle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StackText" type="Label" parent="DeckCanvas/B_1_AddPanel/BuildingsButton/ScaleRoot/StackBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TableRoot" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 282.0
+offset_right = 1973.0
+offset_bottom = 966.0
+texture = ExtResource("6_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="AddScroll" type="ScrollContainer" parent="DeckCanvas/B_1_AddPanel/TableRoot"]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 42.0
+offset_right = 1854.0
+offset_bottom = 650.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_scroll")
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
+
+[node name="AddColumns" type="HBoxContainer" parent="DeckCanvas/B_1_AddPanel/TableRoot/AddScroll"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ScrollBarBG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/TableRoot"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 662.0
+offset_right = 1864.0
+offset_bottom = 678.0
+texture = ExtResource("22_sbbg")
+patch_margin_left = 25
+patch_margin_top = 8
+patch_margin_right = 25
+patch_margin_bottom = 8
+
+[node name="Thumb" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/TableRoot/ScrollBarBG"]
+layout_mode = 0
+offset_right = 320.0
+offset_bottom = 16.0
+texture = ExtResource("23_sb")
+patch_margin_left = 28
+patch_margin_top = 8
+patch_margin_right = 28
+patch_margin_bottom = 8
+
+[node name="SortButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 975.0
+offset_right = 320.0
+offset_bottom = 1125.0
+scale = Vector2(0.9, 0.9)
+pivot_offset = Vector2(120, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/SortButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("13_btnblue")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_1_AddPanel/SortButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Sort"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TotalSizeLabel" type="Label" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 680.0
+offset_top = 998.0
+offset_right = 1230.0
+offset_bottom = 1082.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 0.85)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 46
+text = "Deck Size: 10/15"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CancelButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 1270.0
+offset_top = 975.0
+offset_right = 1620.0
+offset_bottom = 1125.0
+scale = Vector2(0.9, 0.9)
+pivot_offset = Vector2(175, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/CancelButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("16_btnred")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_1_AddPanel/CancelButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Cancel"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ConfirmButton" type="TextureButton" parent="DeckCanvas/B_1_AddPanel"]
+layout_mode = 0
+offset_left = 1628.0
+offset_top = 975.0
+offset_right = 1978.0
+offset_bottom = 1125.0
+scale = Vector2(0.9, 0.9)
+pivot_offset = Vector2(175, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_1_AddPanel/ConfirmButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15_btngreen")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_1_AddPanel/ConfirmButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Confirm"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="B_4_SelectHero" type="Control" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_4_SelectHero"]
+layout_mode = 0
+offset_left = 238.0
+offset_top = 114.0
+offset_right = 1810.0
+offset_bottom = 1134.0
+texture = ExtResource("4_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="TitleRoot" type="Control" parent="DeckCanvas/B_4_SelectHero"]
+layout_mode = 0
+offset_left = 793.0
+offset_top = 148.0
+offset_right = 1453.0
+offset_bottom = 301.0
+scale = Vector2(0.7, 0.7)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_4_SelectHero/TitleRoot"]
+layout_mode = 0
+offset_right = 660.0
+offset_bottom = 153.0
+texture = ExtResource("5_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="Label" type="Label" parent="DeckCanvas/B_4_SelectHero/TitleRoot"]
+layout_mode = 0
+offset_right = 660.0
+offset_bottom = 153.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 11
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 76
+text = "Choose Hero"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TableRoot" type="NinePatchRect" parent="DeckCanvas/B_4_SelectHero"]
+layout_mode = 0
+offset_left = 299.0
+offset_top = 282.0
+offset_right = 1749.0
+offset_bottom = 892.0
+texture = ExtResource("6_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="HeroScroll" type="ScrollContainer" parent="DeckCanvas/B_4_SelectHero/TableRoot"]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 42.0
+offset_right = 1406.0
+offset_bottom = 576.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_scroll")
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
+
+[node name="HeroColumns" type="HBoxContainer" parent="DeckCanvas/B_4_SelectHero/TableRoot/HeroScroll"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="ScrollBarBG" type="NinePatchRect" parent="DeckCanvas/B_4_SelectHero/TableRoot"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 586.0
+offset_right = 1416.0
+offset_bottom = 602.0
+texture = ExtResource("22_sbbg")
+patch_margin_left = 25
+patch_margin_top = 8
+patch_margin_right = 25
+patch_margin_bottom = 8
+
+[node name="Thumb" type="NinePatchRect" parent="DeckCanvas/B_4_SelectHero/TableRoot/ScrollBarBG"]
+layout_mode = 0
+offset_right = 320.0
+offset_bottom = 16.0
+texture = ExtResource("23_sb")
+patch_margin_left = 28
+patch_margin_top = 8
+patch_margin_right = 28
+patch_margin_bottom = 8
+
+[node name="CloseButton" type="TextureButton" parent="DeckCanvas/B_4_SelectHero"]
+layout_mode = 0
+offset_left = 620.0
+offset_top = 935.0
+offset_right = 940.0
+offset_bottom = 1085.0
+pivot_offset = Vector2(160, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_4_SelectHero/CloseButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("16_btnred")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_4_SelectHero/CloseButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Cancel"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SelectButton" type="TextureButton" parent="DeckCanvas/B_4_SelectHero"]
+layout_mode = 0
+offset_left = 1108.0
+offset_top = 935.0
+offset_right = 1428.0
+offset_bottom = 1085.0
+pivot_offset = Vector2(160, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_4_SelectHero/SelectButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15_btngreen")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_4_SelectHero/SelectButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Confirm"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="B_3_Confirm" type="Control" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_3_Confirm"]
+layout_mode = 0
+offset_left = 243.0
+offset_top = 114.0
+offset_right = 1805.0
+offset_bottom = 1134.0
+texture = ExtResource("4_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="TitleRoot" type="Control" parent="DeckCanvas/B_3_Confirm"]
+layout_mode = 0
+offset_left = 796.0
+offset_top = 148.0
+offset_right = 1446.0
+offset_bottom = 301.0
+scale = Vector2(0.7, 0.7)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_3_Confirm/TitleRoot"]
+layout_mode = 0
+offset_right = 650.0
+offset_bottom = 153.0
+texture = ExtResource("5_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="Label" type="Label" parent="DeckCanvas/B_3_Confirm/TitleRoot"]
+layout_mode = 0
+offset_right = 650.0
+offset_bottom = 153.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 11
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 76
+text = "Landscape"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PromptBanner" type="TextureRect" parent="DeckCanvas/B_3_Confirm"]
+modulate = Color(0.769, 0.671, 0.475, 1)
+layout_mode = 0
+offset_left = 574.0
+offset_top = 272.0
+offset_right = 1474.0
+offset_bottom = 412.0
+texture = ExtResource("3_cwgrey")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="PromptLabel" type="Label" parent="DeckCanvas/B_3_Confirm"]
+layout_mode = 0
+offset_left = 560.0
+offset_top = 272.0
+offset_right = 1488.0
+offset_bottom = 412.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 0.85)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Tap the cards to make 
+a custom landscape!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardsFrame" type="NinePatchRect" parent="DeckCanvas/B_3_Confirm"]
+layout_mode = 0
+offset_left = 416.0
+offset_top = 428.0
+offset_right = 1632.0
+offset_bottom = 876.0
+texture = ExtResource("6_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="CardsHBox" type="HBoxContainer" parent="DeckCanvas/B_3_Confirm/CardsFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 44.0
+offset_top = 34.0
+offset_right = -44.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 26
+alignment = 1
+
+[node name="CloseButton" type="TextureButton" parent="DeckCanvas/B_3_Confirm"]
+layout_mode = 0
+offset_left = 454.0
+offset_top = 918.0
+offset_right = 854.0
+offset_bottom = 1098.0
+pivot_offset = Vector2(200, 90)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_3_Confirm/CloseButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("16_btnred")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_3_Confirm/CloseButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Cancel"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OKButton" type="TextureButton" parent="DeckCanvas/B_3_Confirm"]
+layout_mode = 0
+offset_left = 1194.0
+offset_top = 918.0
+offset_right = 1594.0
+offset_bottom = 1098.0
+pivot_offset = Vector2(200, 90)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_3_Confirm/OKButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15_btngreen")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_3_Confirm/OKButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Confirm"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="B_5_SortPanel" type="Control" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_5_SortPanel"]
+layout_mode = 0
+offset_left = 491.0
+offset_top = 114.0
+offset_right = 1557.0
+offset_bottom = 1129.0
+texture = ExtResource("4_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="TitleRoot" type="Control" parent="DeckCanvas/B_5_SortPanel"]
+layout_mode = 0
+offset_left = 761.0
+offset_top = 148.0
+offset_right = 1511.0
+offset_bottom = 301.0
+scale = Vector2(0.7, 0.7)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_5_SortPanel/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
+texture = ExtResource("5_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="Label" type="Label" parent="DeckCanvas/B_5_SortPanel/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 62
+text = "SORT OPTIONS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="TextureButton" parent="DeckCanvas/B_5_SortPanel"]
+layout_mode = 0
+offset_left = 1408.0
+offset_top = 150.0
+offset_right = 1558.0
+offset_bottom = 308.0
+scale = Vector2(0.7, 0.7)
+pivot_offset = Vector2(75, 79)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("24_cancel")
+stretch_mode = 5
+
+[node name="ButtonsGrid" type="GridContainer" parent="DeckCanvas/B_5_SortPanel"]
+layout_mode = 0
+offset_left = 605.0
+offset_top = 275.0
+offset_right = 1445.0
+offset_bottom = 1090.0
+theme_override_constants/h_separation = 140
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="B_6_SortPanelB1" type="Control" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_6_SortPanelB1"]
+layout_mode = 0
+offset_left = 491.0
+offset_top = 114.0
+offset_right = 1557.0
+offset_bottom = 1129.0
+texture = ExtResource("4_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="TitleRoot" type="Control" parent="DeckCanvas/B_6_SortPanelB1"]
+layout_mode = 0
+offset_left = 761.0
+offset_top = 148.0
+offset_right = 1511.0
+offset_bottom = 301.0
+scale = Vector2(0.7, 0.7)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_6_SortPanelB1/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
+texture = ExtResource("5_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="Label" type="Label" parent="DeckCanvas/B_6_SortPanelB1/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 62
+text = "SORT OPTIONS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="TextureButton" parent="DeckCanvas/B_6_SortPanelB1"]
+layout_mode = 0
+offset_left = 1408.0
+offset_top = 150.0
+offset_right = 1558.0
+offset_bottom = 308.0
+scale = Vector2(0.7, 0.7)
+pivot_offset = Vector2(75, 79)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("24_cancel")
+stretch_mode = 5
+
+[node name="ButtonsGrid" type="GridContainer" parent="DeckCanvas/B_6_SortPanelB1"]
+layout_mode = 0
+offset_left = 605.0
+offset_top = 295.0
+offset_right = 1445.0
+offset_bottom = 1070.0
+theme_override_constants/h_separation = 140
+theme_override_constants/v_separation = 20
+columns = 2
+
+[node name="ZoomOverlay" type="Control" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_left = -1200.0
+offset_top = -1200.0
+offset_right = 3248.0
+offset_bottom = 2352.0
+mouse_default_cursor_shape = 2
+
+[node name="Dimmer" type="ColorRect" parent="DeckCanvas/ZoomOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="CardHolder" type="Control" parent="DeckCanvas/ZoomOverlay"]
+layout_mode = 0
+offset_left = 2224.0
+offset_top = 1776.0
+offset_right = 2224.0
+offset_bottom = 1776.0
+mouse_filter = 2
+
+[node name="B_7_BattleDeckError" type="Control" parent="DeckCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+
+[node name="Dimmer" type="ColorRect" parent="DeckCanvas/B_7_BattleDeckError"]
+layout_mode = 0
+offset_left = -1200.0
+offset_top = -1200.0
+offset_right = 3248.0
+offset_bottom = 2352.0
+color = Color(0, 0, 0, 0.55)
+
+[node name="Panel" type="Control" parent="DeckCanvas/B_7_BattleDeckError"]
+layout_mode = 0
+offset_left = 529.0
+offset_top = 276.0
+offset_right = 1519.0
+offset_bottom = 876.0
+pivot_offset = Vector2(495, 300)
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_7_BattleDeckError/Panel"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 28.0
+offset_right = 970.0
+offset_bottom = 570.0
+texture = ExtResource("25_popup2")
+patch_margin_left = 65
+patch_margin_top = 30
+patch_margin_right = 98
+patch_margin_bottom = 90
+
+[node name="Frame" type="NinePatchRect" parent="DeckCanvas/B_7_BattleDeckError/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("26_errframe")
+patch_margin_left = 85
+patch_margin_top = 70
+patch_margin_right = 105
+patch_margin_bottom = 80
+
+[node name="MessageLabel" type="Label" parent="DeckCanvas/B_7_BattleDeckError/Panel"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 74.0
+offset_right = 918.0
+offset_bottom = 374.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Error"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="OKButton" type="TextureButton" parent="DeckCanvas/B_7_BattleDeckError/Panel"]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 378.0
+offset_right = 720.0
+offset_bottom = 558.0
+pivot_offset = Vector2(225, 90)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="DeckCanvas/B_7_BattleDeckError/Panel/OKButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15_btngreen")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="DeckCanvas/B_7_BattleDeckError/Panel/OKButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 56
+text = "OK"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="FusionModal" type="Panel" parent="."]
 visible = false
@@ -238,67 +1978,39 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 70.0
-offset_top = 46.0
-offset_right = -70.0
-offset_bottom = -46.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="VBox" type="VBoxContainer" parent="FusionModal"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = 14.0
-offset_right = -18.0
-offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
 
 [node name="Header" type="HBoxContainer" parent="FusionModal/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="Title" type="Label" parent="FusionModal/VBox/Header"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 20
-text = "⚗️ CARD FUSION LAB (204 Recipes • Standard / Gold / Obsidian)"
 
 [node name="CoinsLabel" type="Label" parent="FusionModal/VBox/Header"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.35, 1)
-theme_override_font_sizes/font_size = 15
-text = "🪙 5000 Coins"
+text = "0 Coins"
 
 [node name="CloseFusionBtn" type="Button" parent="FusionModal/VBox/Header"]
-custom_minimum_size = Vector2(90, 32)
 layout_mode = 2
-text = "✖ Close"
+text = "Close"
 
 [node name="FilterBar" type="HBoxContainer" parent="FusionModal/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 10
 
 [node name="FusionSearchEdit" type="LineEdit" parent="FusionModal/VBox/FilterBar"]
-custom_minimum_size = Vector2(220, 32)
 layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "🔍 Search fusion recipes or ingredients..."
 
 [node name="QualityFilterSelect" type="OptionButton" parent="FusionModal/VBox/FilterBar"]
-custom_minimum_size = Vector2(180, 32)
 layout_mode = 2
 
 [node name="FusionStatusLabel" type="Label" parent="FusionModal/VBox/FilterBar"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Select a recipe to craft."
 
 [node name="RecipeScroll" type="ScrollContainer" parent="FusionModal/VBox"]
 layout_mode = 2
@@ -307,4 +2019,9 @@ size_flags_vertical = 3
 [node name="RecipeListVBox" type="VBoxContainer" parent="FusionModal/VBox/RecipeScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+
+[node name="DeckNameEditCompat" type="LineEdit" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 30.0

@@ -48,18 +48,20 @@ var remote_landscapes: Array[String] = []
 
 var current_state: MatchState = MatchState.MENU
 
-# Default Player Deck (Finn's deck)
+# Default Player Deck (Unity PlayerDeck1 — Jake's 12-card Corn/Swamp starter deck)
 var player_deck: Array[String] = [
-	"Creature_Pig",
-	"Creature_CoolDog",
-	"Creature_AngelEye",
-	"Creature_AncientScholar",
-	"Creature_Pig",
-	"Creature_CoolDog",
-	"Creature_AngelEye",
-	"Spell_CerebralBloodstorm",
-	"Building_RedDome",
-	"Creature_Axey"
+	"Creature_Cornball",
+	"Creature_Cornball",
+	"Creature_Cornball",
+	"Creature_Cornball",
+	"Creature_WanderingBaldMan",
+	"Creature_WanderingBaldMan",
+	"Creature_WanderingBaldMan",
+	"Creature_BurningBush",
+	"Creature_BurningBush",
+	"Creature_Mouthball",
+	"Creature_Mouthball",
+	"Creature_Mouthball"
 ]
 
 # Default Opponent Deck (Jake's deck)
@@ -88,8 +90,8 @@ var opponent_landscapes: Array[String] = ["Corn", "Corn", "Sand", "Corn"]
 # Wheel mode: "NORMAL" (interactive roulette), "QUICK" (auto quick-resolve)
 var wheel_mode: String = "NORMAL"
 
-# Session & persistent rewards
-var _raw_player_coins: int = 5000
+# Session & persistent rewards (Unity db_Parameters: New_Player_Coins = 0, New_Player_Gems = 5, New_Player_Max_Stamina = 5)
+var _raw_player_coins: int = 0
 var player_coins: int:
 	get:
 		if wallet:
@@ -109,10 +111,16 @@ var owned_card_counts: Dictionary = {}
 const DEFAULT_MAX_INVENTORY: int = 50
 const MIN_CARDS_IN_INVENTORY: int = 10
 const MIN_CREATURES_IN_INVENTORY: int = 10
+const MAX_NUM_DECKS: int = 5
+const MIN_CARDS_IN_DECK: int = 10
+const MAX_DUPLICATES_IN_DECK: int = 4
 const CARD_FORGE_UNLOCK_QUEST: String = "4"
 var viewed_fusion_recipes: Array[String] = []
 var max_inventory: int = DEFAULT_MAX_INVENTORY
-var active_deck_name: String = "Jake Starter Deck"
+var active_deck_name: String = "Deck 1"
+var decks: Array[Dictionary] = []
+var current_deck_index: int = 0
+var battle_deck_index: int = 0
 
 # Core Economy & Progression Systems (SYS-8)
 var wallet: CurrencyWallet
@@ -141,10 +149,10 @@ var claimed_star_milestones: Array[int] = []
 # Daily Dungeons & El Fisto Arena (Task 7.4)
 const MIN_DUNGEON_LEVEL: int = 5
 const DAILY_GIFT_REFRESH_SEC: int = 86400
-var max_stamina: int = 100
+var max_stamina: int = 5
 var stamina: int:
 	get:
-		return wallet.get_balance("energy") if wallet else 100
+		return wallet.get_balance("energy") if wallet else 5
 var dungeon_stage_clears: Dictionary = {}
 var active_dungeon_name: String = ""
 var active_dungeon_stage_index: int = -1
@@ -181,9 +189,9 @@ func _init_settings() -> void:
 func _init_wallet() -> void:
 	if wallet == null:
 		wallet = CurrencyWallet.new()
-		wallet.register_currency("coins", player_coins, 99999999)
-		wallet.register_currency("gems", 50, 999999)
-		wallet.register_currency("energy", 100, 9999)
+		wallet.register_currency("coins", _raw_player_coins, 99999999)
+		wallet.register_currency("gems", 5, 999999)
+		wallet.register_currency("energy", 5, 9999)
 
 		wallet.balance_changed.connect(func(cid, _old, new_bal):
 			if cid == "coins":
@@ -438,7 +446,11 @@ func _sync_legacy_unlocked_leaders() -> void:
 # ==============================================================================
 
 ## Serializes wallet balances, hero progression, decks, and inventory to JSON.
+var suppress_profile_save: bool = false
+
 func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
+	if suppress_profile_save and save_path == DEFAULT_PROFILE_PATH:
+		return true
 	_init_wallet()
 	var hero_data: Dictionary = {}
 	for hid in hero_trackers.keys():
@@ -463,6 +475,11 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		},
 		"active_deck_name": active_deck_name,
 		"player_hero_name": player_hero_name,
+		"player_deck": player_deck,
+		"player_landscapes": player_landscapes,
+		"decks": decks,
+		"current_deck_index": current_deck_index,
+		"battle_deck_index": battle_deck_index,
 		"unlocked_leaders": unlocked_leaders,
 		"player_inventory_cards": player_inventory_cards,
 		"owned_card_counts": owned_card_counts,
@@ -516,6 +533,23 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		player_hero_name = str(data["player_hero_name"])
 		if player_hero_name == "Fionna":
 			player_hero_name = "Fiona"
+	if data.has("player_deck") and typeof(data["player_deck"]) == TYPE_ARRAY:
+		player_deck.clear()
+		for c in data["player_deck"]:
+			player_deck.append(str(c))
+	if data.has("player_landscapes") and typeof(data["player_landscapes"]) == TYPE_ARRAY and data["player_landscapes"].size() == 4:
+		player_landscapes.clear()
+		for l in data["player_landscapes"]:
+			player_landscapes.append(str(l))
+	if data.has("decks") and typeof(data["decks"]) == TYPE_ARRAY:
+		decks.clear()
+		for d in data["decks"]:
+			if typeof(d) == TYPE_DICTIONARY:
+				decks.append(d.duplicate(true))
+	if data.has("current_deck_index"):
+		current_deck_index = clampi(int(data["current_deck_index"]), 0, MAX_NUM_DECKS - 1)
+	if data.has("battle_deck_index"):
+		battle_deck_index = clampi(int(data["battle_deck_index"]), 0, MAX_NUM_DECKS - 1)
 	if data.has("player_inventory_cards") and typeof(data["player_inventory_cards"]) == TYPE_ARRAY:
 		player_inventory_cards.clear()
 		for c in data["player_inventory_cards"]:
@@ -557,7 +591,7 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 	if data.has("last_daily_gift_timestamp"):
 		last_daily_gift_timestamp = int(data["last_daily_gift_timestamp"])
 	if data.has("max_stamina"):
-		max_stamina = maxi(100, int(data["max_stamina"]))
+		max_stamina = maxi(5, int(data["max_stamina"]))
 	if data.has("elfisto") and typeof(data["elfisto"]) == TYPE_DICTIONARY:
 		var ef = data["elfisto"]
 		elfisto_current_round = int(ef.get("current_round", 1))
@@ -882,6 +916,12 @@ func apply_custom_deck(deck_data: Dictionary) -> void:
 		for c in cards_arr:
 			typed_cards.append(str(c))
 		player_deck = typed_cards
+	if not decks.is_empty():
+		var slot := decks[clampi(current_deck_index, 0, decks.size() - 1)]
+		slot["name"] = active_deck_name
+		slot["leader"] = _normalize_hero_id(player_hero_name)
+		slot["landscapes"] = player_landscapes.duplicate()
+		slot["cards"] = player_deck.duplicate()
 
 
 func open_deck_builder() -> void:
@@ -1629,4 +1669,233 @@ func purchase_gem_pack(product_id: String) -> Dictionary:
 			save_profile()
 			return {"ok": true, "gems_added": gem_gain, "coin_price": coin_price}
 	return {"ok": false, "reason": "Product not found."}
+
+
+# ==============================================================================
+# MULTI-DECK BUILDER SLOTS (UNITY PlayerDeckManager + CWDeckController)
+# ==============================================================================
+
+func ensure_decks_initialized() -> void:
+	if decks.is_empty():
+		var starter_cards: Array[String] = []
+		for c in player_deck:
+			starter_cards.append(str(c))
+		var starter_lands: Array[String] = []
+		for l in player_landscapes:
+			starter_lands.append(str(l))
+		while starter_lands.size() < 4:
+			starter_lands.append("Corn")
+		decks.append({
+			"name": active_deck_name if active_deck_name != "" else "Deck 1",
+			"leader": _normalize_hero_id(player_hero_name),
+			"cards": starter_cards,
+			"landscapes": starter_lands.slice(0, 4),
+		})
+	while decks.size() < MAX_NUM_DECKS:
+		var idx := decks.size()
+		decks.append({
+			"name": "Deck %d" % (idx + 1),
+			"leader": "Leader_Jake",
+			"cards": [] as Array[String],
+			"landscapes": ["Corn", "Corn", "Corn", "Corn"] as Array[String],
+		})
+	if decks.size() > MAX_NUM_DECKS:
+		decks.resize(MAX_NUM_DECKS)
+	current_deck_index = clampi(current_deck_index, 0, MAX_NUM_DECKS - 1)
+	battle_deck_index = clampi(battle_deck_index, 0, MAX_NUM_DECKS - 1)
+
+
+func get_deck_slot(idx: int) -> Dictionary:
+	ensure_decks_initialized()
+	var slot_idx := clampi(idx, 0, MAX_NUM_DECKS - 1)
+	return decks[slot_idx]
+
+
+func get_all_owned_card_instances() -> Array[String]:
+	var list: Array[String] = []
+	for c in player_deck:
+		var s := str(c)
+		if s != "":
+			list.append(s)
+	for c in player_inventory_cards:
+		var s := str(c)
+		if s != "":
+			list.append(s)
+	return list
+
+
+func _apply_equipped_slot_to_active_player(slot_idx: int) -> void:
+	ensure_decks_initialized()
+	if slot_idx < 0 or slot_idx >= decks.size():
+		return
+	var slot: Dictionary = decks[slot_idx]
+	var slot_cards: Array = slot.get("cards", [])
+	if slot_cards.is_empty():
+		return
+
+	# Reconcile player_inventory_cards so total owned multiset (player_deck + player_inventory_cards) never changes
+	var total_pool: Array[String] = get_all_owned_card_instances()
+	var new_player_deck: Array[String] = []
+	for c in slot_cards:
+		var s := str(c)
+		new_player_deck.append(s)
+		var pool_i := total_pool.find(s)
+		if pool_i != -1:
+			total_pool.remove_at(pool_i)
+	player_deck = new_player_deck
+	player_inventory_cards = total_pool
+
+	var leader_id := str(slot.get("leader", "Leader_Jake"))
+	var leader_data := Database.get_leader(leader_id)
+	player_hero_name = str(leader_data.get("character_id", leader_id.replace("Leader_", ""))) if not leader_data.is_empty() else leader_id.replace("Leader_", "")
+	if player_hero_name == "Fionna":
+		player_hero_name = "Fiona"
+	_update_active_hero_hp()
+
+	var lands: Array[String] = []
+	for l in slot.get("landscapes", []):
+		lands.append(str(l))
+	while lands.size() < 4:
+		lands.append("Corn")
+	player_landscapes = lands.slice(0, 4)
+	active_deck_name = str(slot.get("name", "Deck %d" % (slot_idx + 1)))
+
+
+func set_deck_slot_cards(slot_idx: int, cards: Array[String], recalculate_landscapes: bool = true) -> void:
+	ensure_decks_initialized()
+	slot_idx = clampi(slot_idx, 0, MAX_NUM_DECKS - 1)
+	var typed_cards: Array[String] = []
+	for c in cards:
+		typed_cards.append(str(c))
+	decks[slot_idx]["cards"] = typed_cards
+	if recalculate_landscapes:
+		decks[slot_idx]["landscapes"] = auto_calculate_landscapes(typed_cards)
+	if slot_idx == battle_deck_index or (slot_idx == current_deck_index and typed_cards.size() >= MIN_CARDS_IN_DECK):
+		_apply_equipped_slot_to_active_player(slot_idx)
+	save_profile()
+
+
+func set_deck_slot_leader(slot_idx: int, leader_id: String) -> void:
+	ensure_decks_initialized()
+	slot_idx = clampi(slot_idx, 0, MAX_NUM_DECKS - 1)
+	decks[slot_idx]["leader"] = _normalize_hero_id(leader_id)
+	if slot_idx == battle_deck_index or slot_idx == current_deck_index:
+		var slot: Dictionary = decks[slot_idx]
+		var l_id := str(slot.get("leader", "Leader_Jake"))
+		var leader_data := Database.get_leader(l_id)
+		player_hero_name = str(leader_data.get("character_id", l_id.replace("Leader_", ""))) if not leader_data.is_empty() else l_id.replace("Leader_", "")
+		if player_hero_name == "Fionna":
+			player_hero_name = "Fiona"
+		_update_active_hero_hp()
+	save_profile()
+
+
+func set_deck_slot_landscapes(slot_idx: int, landscapes: Array[String]) -> void:
+	ensure_decks_initialized()
+	slot_idx = clampi(slot_idx, 0, MAX_NUM_DECKS - 1)
+	var typed: Array[String] = []
+	for l in landscapes:
+		typed.append(str(l))
+	while typed.size() < 4:
+		typed.append("Corn")
+	decks[slot_idx]["landscapes"] = typed.slice(0, 4)
+	if slot_idx == battle_deck_index or slot_idx == current_deck_index:
+		player_landscapes = typed.slice(0, 4)
+	save_profile()
+
+
+func set_battle_deck_index(slot_idx: int) -> Dictionary:
+	ensure_decks_initialized()
+	slot_idx = clampi(slot_idx, 0, MAX_NUM_DECKS - 1)
+	var slot: Dictionary = decks[slot_idx]
+	var cards: Array = slot.get("cards", [])
+	if cards.is_empty():
+		return {"ok": false, "reason": "Deck %d has no cards!" % (slot_idx + 1)}
+	var l_data := Database.get_leader(str(slot.get("leader", "Leader_Jake")))
+	if bool(l_data.get("fc_world", false)):
+		return {"ok": false, "reason": "Fionna & Cake Heroes cannot be used in Battle Decks."}
+	battle_deck_index = slot_idx
+	_apply_equipped_slot_to_active_player(slot_idx)
+	save_profile()
+	return {"ok": true}
+
+
+func auto_calculate_landscapes(cards: Array[String]) -> Array[String]:
+	## Mirrors Unity CWDeckController.SetLandscapes() exact faction distribution algorithm
+	if cards.is_empty():
+		return ["Corn", "Corn", "Corn", "Corn"]
+	var counts: Dictionary = {}
+	var non_uni_total := 0
+	for cid in cards:
+		var c := Database.get_card(str(cid))
+		var fact := str(c.get("faction", "Universal"))
+		if fact == "Universal" or fact == "" or fact == "None":
+			continue
+		counts[fact] = int(counts.get(fact, 0)) + 1
+		non_uni_total += 1
+	if counts.is_empty():
+		return ["Corn", "Corn", "Corn", "Corn"]
+	var sorted_factions: Array = counts.keys()
+	sorted_factions.sort_custom(func(a, b): return int(counts[a]) > int(counts[b]))
+	var out: Array[String] = []
+	var n := sorted_factions.size()
+	if n >= 4:
+		for i in range(4):
+			out.append(str(sorted_factions[i]))
+	elif n == 3:
+		var ratio := float(counts[sorted_factions[0]]) / float(maxi(1, non_uni_total))
+		if ratio >= 0.5:
+			out.append(str(sorted_factions[0]))
+			out.append(str(sorted_factions[0]))
+			out.append(str(sorted_factions[1]))
+			out.append(str(sorted_factions[2]))
+		else:
+			out.append(str(sorted_factions[0]))
+			out.append(str(sorted_factions[1]))
+			out.append(str(sorted_factions[1]))
+			out.append(str(sorted_factions[2]))
+	elif n == 2:
+		var ratio := float(counts[sorted_factions[0]]) / float(maxi(1, non_uni_total))
+		if ratio >= 0.65:
+			out.append(str(sorted_factions[0]))
+			out.append(str(sorted_factions[0]))
+			out.append(str(sorted_factions[0]))
+			out.append(str(sorted_factions[1]))
+		else:
+			out.append(str(sorted_factions[0]))
+			out.append(str(sorted_factions[0]))
+			out.append(str(sorted_factions[1]))
+			out.append(str(sorted_factions[1]))
+	else:
+		var f0 := str(sorted_factions[0])
+		out = [f0, f0, f0, f0]
+	return out
+
+
+func check_all_decks_validity() -> String:
+	## Mirrors Unity PlayerDeckManager.CheckValidity()
+	ensure_decks_initialized()
+	for i in range(decks.size()):
+		var slot: Dictionary = decks[i]
+		var cards: Array = slot.get("cards", [])
+		if cards.is_empty():
+			continue
+		var deck_num := i + 1
+		if cards.size() < MIN_CARDS_IN_DECK:
+			return "Deck %d contains less than %d cards.  Edit Deck to add more." % [deck_num, MIN_CARDS_IN_DECK]
+		var leader_id := str(slot.get("leader", "Leader_Jake"))
+		var leader_data := Database.get_leader(leader_id)
+		var leader_name := str(leader_data.get("name", leader_id))
+		var max_size := get_hero_deck_max_size(leader_id)
+		if cards.size() > max_size:
+			return "Deck %d, %s can only hold %d cards in a deck" % [deck_num, leader_name, max_size]
+		var dup_counts: Dictionary = {}
+		for cid in cards:
+			var k := str(cid)
+			dup_counts[k] = int(dup_counts.get(k, 0)) + 1
+			if int(dup_counts[k]) > MAX_DUPLICATES_IN_DECK:
+				var cname := str(Database.get_card(k).get("name", k))
+				return "Deck %d contains more than %d of the card \"%s\"" % [deck_num, MAX_DUPLICATES_IN_DECK, cname]
+	return ""
+
 

@@ -33,6 +33,8 @@ signal card_clicked(card_view)
 var is_flooped: bool = false
 var can_play: bool = true
 var current_quality: int = FusionEngine.QualityTier.STANDARD
+var _ui_scale: Vector2 = Vector2.ONE
+var _base_metrics: Dictionary = {}
 
 @onready var panel: Panel = $Panel
 @onready var bg_type: TextureRect = $BgType
@@ -59,8 +61,75 @@ var current_quality: int = FusionEngine.QualityTier.STANDARD
 
 func _ready() -> void:
 	gui_input.connect(_on_gui_input)
+	_capture_base_metrics(self)
 	if not card_data.is_empty():
 		render_card(card_data)
+
+
+func render_card_at_size(data: Dictionary, target_size: Vector2) -> void:
+	set_render_size(target_size)
+	render_card(data)
+
+
+func set_render_size(target_size: Vector2) -> void:
+	if _base_metrics.is_empty():
+		_capture_base_metrics(self)
+	var sx := target_size.x / 130.0
+	var sy := target_size.y / 184.0
+	_ui_scale = Vector2(sx, sy)
+	custom_minimum_size = target_size
+	size = target_size
+	pivot_offset = target_size * 0.5
+	scale = Vector2.ONE
+	_apply_scaled_metrics(self, sx, sy)
+
+
+func _capture_base_metrics(root: Node) -> void:
+	for ch in root.get_children():
+		if ch is Control:
+			var c := ch as Control
+			var entry: Dictionary = {
+				"full_rect": is_equal_approx(c.anchor_right, 1.0) and is_equal_approx(c.anchor_bottom, 1.0),
+				"left": c.offset_left,
+				"top": c.offset_top,
+				"right": c.offset_right,
+				"bottom": c.offset_bottom,
+				"min_size": c.custom_minimum_size,
+			}
+			if c is Label:
+				entry["font_size"] = c.get_theme_font_size("font_size")
+				if c.has_theme_constant("shadow_offset_x"):
+					entry["shadow_x"] = c.get_theme_constant("shadow_offset_x")
+					entry["shadow_y"] = c.get_theme_constant("shadow_offset_y")
+			if c is HBoxContainer:
+				entry["sep"] = c.get_theme_constant("separation")
+			_base_metrics[c.get_instance_id()] = entry
+		_capture_base_metrics(ch)
+
+
+func _apply_scaled_metrics(root: Node, sx: float, sy: float) -> void:
+	var font_scale := minf(sx, sy)
+	for ch in root.get_children():
+		if ch is Control:
+			var c := ch as Control
+			var entry: Dictionary = _base_metrics.get(c.get_instance_id(), {})
+			if not entry.is_empty():
+				if not bool(entry.get("full_rect", false)):
+					c.offset_left = float(entry["left"]) * sx
+					c.offset_top = float(entry["top"]) * sy
+					c.offset_right = float(entry["right"]) * sx
+					c.offset_bottom = float(entry["bottom"]) * sy
+				var base_min: Vector2 = entry["min_size"]
+				if base_min != Vector2.ZERO:
+					c.custom_minimum_size = Vector2(base_min.x * sx, base_min.y * sy)
+				if c is Label and entry.has("font_size"):
+					c.add_theme_font_size_override("font_size", maxi(1, roundi(float(entry["font_size"]) * font_scale)))
+					if entry.has("shadow_x"):
+						c.add_theme_constant_override("shadow_offset_x", maxi(1, roundi(float(entry["shadow_x"]) * font_scale)))
+						c.add_theme_constant_override("shadow_offset_y", maxi(1, roundi(float(entry["shadow_y"]) * font_scale)))
+				if c is HBoxContainer and entry.has("sep"):
+					c.add_theme_constant_override("separation", maxi(1, roundi(float(entry["sep"]) * sx)))
+		_apply_scaled_metrics(ch, sx, sy)
 
 
 func render_card(data: Dictionary) -> void:
@@ -118,18 +187,21 @@ func render_card(data: Dictionary) -> void:
 		if floop_cost > 0:
 			floop_badge.visible = true
 			floop_label.text = "FLOOP (%d Magic)" % floop_cost
-			desc_label.offset_top = 134.0
-			desc_label.offset_bottom = 164.0
+			desc_label.offset_top = 133.5 * _ui_scale.y
+			desc_label.offset_bottom = 161.5 * _ui_scale.y
+			desc_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 		else:
 			floop_badge.visible = false
-			desc_label.offset_top = 124.5
-			desc_label.offset_bottom = 164.0
+			desc_label.offset_top = 124.5 * _ui_scale.y
+			desc_label.offset_bottom = 161.5 * _ui_scale.y
+			desc_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	else:
 		atk_badge.visible = false
 		def_badge.visible = false
 		floop_badge.visible = false
-		desc_label.offset_top = 124.5
-		desc_label.offset_bottom = 166.0
+		desc_label.offset_top = 124.5 * _ui_scale.y
+		desc_label.offset_bottom = 166.0 * _ui_scale.y
+		desc_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
 	var rarity := clampi(int(data.get("rarity", 1)), 1, 5)
 	var stars := rarity_hbox.get_children()

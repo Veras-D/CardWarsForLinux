@@ -190,18 +190,41 @@ func test_deck_persistence_save_load_delete() -> void:
 
 func test_deck_builder_scene_integration() -> void:
 	print("\n[Test 6] DeckBuilder Scene UI & GameManager Integration")
+	var orig_deck := GameManager.player_deck.duplicate()
+	var orig_decks := GameManager.decks.duplicate(true)
+	var orig_deck_idx := GameManager.current_deck_index
+	var orig_battle_idx := GameManager.battle_deck_index
+	var orig_hero := GameManager.player_hero_name
+	var orig_name := GameManager.active_deck_name
+	var orig_lands := GameManager.player_landscapes.duplicate()
+	GameManager.suppress_profile_save = true
+
+	var starter_12: Array[String] = [
+		"Creature_Cornball", "Creature_Cornball", "Creature_Cornball", "Creature_Cornball",
+		"Creature_WanderingBaldMan", "Creature_WanderingBaldMan", "Creature_WanderingBaldMan",
+		"Creature_BurningBush", "Creature_BurningBush",
+		"Creature_Mouthball", "Creature_Mouthball", "Creature_Mouthball"
+	]
+	GameManager.player_deck = starter_12
+	GameManager.decks.clear()
+	GameManager.current_deck_index = 0
+	GameManager.battle_deck_index = 0
+	GameManager.player_hero_name = "Jake"
+	GameManager.active_deck_name = "Deck 1"
+	GameManager.player_landscapes = ["Corn", "Corn", "Corn", "Swamp"]
+
 	var scene = preload("res://scenes/deck_builder.tscn")
 	var builder = scene.instantiate() as DeckBuilder
 	add_child(builder)
 
 	assert_true(builder != null, "DeckBuilder scene instantiated")
-	assert_true(builder.current_deck_cards.size() == 10, "DeckBuilder initialized with 10 starter cards")
-	assert_true(builder.save_btn.disabled == false, "Save button enabled for legal 10-card starter deck")
+	assert_true(builder.current_deck_cards.size() == 12, "DeckBuilder initialized with 12 Jake starter cards")
+	assert_true(builder.save_btn.disabled == false, "Save button enabled for legal 12-card starter deck")
 
 	# Add a card via UI controller
 	var added = builder.add_card_to_deck("Creature_HuskerKnight")
-	assert_true(added == true, "Added Creature_HuskerKnight to deck (now 11 cards)")
-	assert_true(builder.current_deck_cards.size() == 11, "Deck count updated to 11")
+	assert_true(added == true, "Added Creature_HuskerKnight to deck (now 13 cards)")
+	assert_true(builder.current_deck_cards.size() == 13, "Deck count updated to 13")
 
 	# Rename and save to test directory
 	builder.deck_name_edit.text = "Finn Custom Tournament"
@@ -212,7 +235,7 @@ func test_deck_builder_scene_integration() -> void:
 	assert_true(save_res.get("ok", false) == true, "DeckBuilder saved 'Finn Custom Tournament' to disk")
 	assert_true(GameManager.active_deck_name == "Finn Custom Tournament", "GameManager.active_deck_name updated")
 	assert_true(GameManager.player_hero_name == "Marceline", "GameManager.player_hero_name updated to Marceline")
-	assert_true(GameManager.player_deck.size() == 11, "GameManager.player_deck updated to 11 cards")
+	assert_true(GameManager.player_deck.size() == 13, "GameManager.player_deck updated to 13 cards")
 
 	# Clear deck -> should disable save button
 	builder.clear_deck()
@@ -222,9 +245,16 @@ func test_deck_builder_scene_integration() -> void:
 	# Reload saved deck via UI controller
 	var reload_ok = builder.load_saved_deck("finn_custom_tournament", TEST_DECKS_DIR)
 	assert_true(reload_ok == true, "Reloaded 'finn_custom_tournament' into DeckBuilder")
-	assert_true(builder.current_deck_cards.size() == 11, "Reloaded deck restored all 11 cards")
+	assert_true(builder.current_deck_cards.size() == 13, "Reloaded deck restored all 13 cards")
 	assert_true(builder.save_btn.disabled == false, "Save button re-enabled after loading legal deck")
 
-	# Restore default Finn state on GameManager
-	GameManager.player_hero_name = "Finn"
+	# Restore pre-test GameManager state
+	GameManager.suppress_profile_save = false
+	GameManager.player_deck = orig_deck
+	GameManager.decks = orig_decks
+	GameManager.current_deck_index = orig_deck_idx
+	GameManager.battle_deck_index = orig_battle_idx
+	GameManager.player_hero_name = orig_hero
+	GameManager.active_deck_name = orig_name
+	GameManager.player_landscapes = orig_lands
 	builder.queue_free()

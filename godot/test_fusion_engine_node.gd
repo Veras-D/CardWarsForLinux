@@ -21,6 +21,7 @@ func _ready() -> void:
 	var pre_test_coins := GameManager.get_coins()
 	var pre_test_campaign := GameManager.campaign_graph.serialize() if GameManager.campaign_graph != null else {}
 	var pre_test_viewed := GameManager.viewed_fusion_recipes.duplicate()
+	GameManager.suppress_profile_save = true
 
 	test_quality_tiers_and_stat_scaling()
 	test_card_view_quality_shaders()
@@ -36,7 +37,7 @@ func _ready() -> void:
 	if GameManager.campaign_graph != null and not pre_test_campaign.is_empty():
 		GameManager.campaign_graph.deserialize(pre_test_campaign)
 	GameManager.viewed_fusion_recipes = pre_test_viewed
-	GameManager.save_profile()
+	GameManager.suppress_profile_save = false
 
 	print("\n==================================================")
 	print("  TEST SUMMARY: %d PASSED, %d FAILED" % [passed_count, failed_count])
@@ -175,6 +176,8 @@ func test_deck_builder_fusion_lab_integration() -> void:
 	# Craft Care Crow (Cost 50: 1x Creature_Cornball + 1x Creature_WanderingBaldMan)
 	GameManager.player_coins = 1000
 	var counts = GameManager.get_owned_card_counts()
+	counts["Creature_Cornball"] = maxi(1, int(counts.get("Creature_Cornball", 0)))
+	counts["Creature_WanderingBaldMan"] = maxi(1, int(counts.get("Creature_WanderingBaldMan", 0)))
 	var before_care_crow = int(counts.get("Creature_CareCrow", 0))
 	var before_cornball = int(counts.get("Creature_Cornball", 0))
 
@@ -192,6 +195,7 @@ func test_deck_builder_fusion_lab_integration() -> void:
 
 func test_real_inventory_sell_and_craft_guards() -> void:
 	print("\n[Test 7] Card Box BaseSalePrice, Sell Cards & Real Inventory Craft Guards")
+	var orig_deck := GameManager.player_deck.duplicate()
 	var orig_inv := GameManager.player_inventory_cards.duplicate()
 	var orig_counts := GameManager.owned_card_counts.duplicate(true)
 	var orig_coins := GameManager.get_coins()
@@ -200,7 +204,13 @@ func test_real_inventory_sell_and_craft_guards() -> void:
 	var scholar = Database.get_card("Creature_AncientScholar")
 	assert_true(int(scholar.get("sale_price", 0)) == 100, "Database parsed Creature_AncientScholar BaseSalePrice == 100")
 
-	# Seed controlled box inventory: 3 extra creatures (total with starter 8 deck creatures = 11 creatures, 13 total cards)
+	# Seed controlled deck (8 creatures, 2 non-creatures) + 3 extra box creatures (= 11 total creatures, 13 total cards)
+	var seeded_deck: Array[String] = [
+		"Creature_Pig", "Creature_CoolDog", "Creature_AngelEye", "Creature_AncientScholar",
+		"Creature_Pig", "Creature_CoolDog", "Creature_AngelEye",
+		"Spell_CerebralBloodstorm", "Building_RedDome", "Creature_Axey"
+	]
+	GameManager.player_deck = seeded_deck
 	GameManager.player_inventory_cards = [
 		"Creature_Cornball",
 		"Creature_WanderingBaldMan",
@@ -258,8 +268,8 @@ func test_real_inventory_sell_and_craft_guards() -> void:
 	assert_true(GameManager.has_viewed_fusion_recipe("Test_Viewed_Recipe") == true, "Viewed recipe no longer reports NEW!")
 	assert_true(GameManager.mark_fusion_recipe_viewed("Test_Viewed_Recipe") == false, "Second mark_fusion_recipe_viewed returns false")
 
-	# Restore pre-test GameManager profile state on disk
+	# Restore pre-test GameManager profile state
+	GameManager.player_deck = orig_deck
 	GameManager.player_inventory_cards = orig_inv
 	GameManager.owned_card_counts = orig_counts
 	GameManager.player_coins = orig_coins
-	GameManager.save_profile()

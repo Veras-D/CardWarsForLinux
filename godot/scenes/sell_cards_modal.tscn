@@ -1,44 +1,29 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://src/ui/SellCardsModal.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/store/QuestInfo_BG2_Small.png" id="3_frame"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="4_cancel"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="5_btngreen"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonBlue.png" id="6_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/PopUpSprite_1.png" id="3_popup1"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/PopUpSprite_2.png" id="4_popup2"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/QuestInfo_BG2_Small.png" id="5_errframe"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/GoldPlaque.png" id="6_plaque"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/cards/CW_Grey.png" id="7_cwgrey"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Frame_Indent.png" id="8_indent"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonGrey.png" id="9_btngrey"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonFrame.png" id="10_btnframe"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/uiButtonBlue.png" id="11_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="12_btngreen"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonRed.png" id="13_btnred"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/nodes/Button_Back_Gold.png" id="14_back"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconCreatures.png" id="15_icreat"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconSpells.png" id="16_ispell"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/IconBuildings.png" id="17_ibldg"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Stack_Circle.png" id="18_circle"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/ScrollBar_BG2.png" id="19_sbbg"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/ScrollBar4.png" id="20_sb"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="21_cancel"]
+[ext_resource type="Texture2D" path="res://assets/textures/questmap/quest_info/EmptyCardSlot.png" id="22_titlebar"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bodyfill"]
-bg_color = Color(0.188, 0.314, 0.376, 0.96)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_confirm"]
-bg_color = Color(0.11, 0.19, 0.25, 0.98)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.85, 0.92, 0.96, 0.95)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_green"]
-texture = ExtResource("5_btngreen")
-texture_margin_left = 14
-texture_margin_top = 12
-texture_margin_right = 14
-texture_margin_bottom = 12
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_blue"]
-texture = ExtResource("6_btnblue")
-texture_margin_left = 14
-texture_margin_top = 12
-texture_margin_right = 14
-texture_margin_bottom = 12
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_scroll"]
 
 [node name="SellCardsModal" type="Control"]
 visible = false
@@ -48,7 +33,18 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(640, 360)
 script = ExtResource("1_script")
+
+[node name="StandaloneBackdrop" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.11, 0.16, 0.19, 1)
 
 [node name="Dimmer" type="ColorRect" parent="."]
 layout_mode = 1
@@ -57,54 +53,56 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.58)
+color = Color(0, 0, 0, 0.12)
 
-[node name="Center" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Frame" type="Control" parent="Center"]
-custom_minimum_size = Vector2(860, 560)
-layout_mode = 2
-
-[node name="TitleBar" type="Control" parent="Center/Frame"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 96.0
-grow_horizontal = 2
-
-[node name="FillBg" type="Panel" parent="Center/Frame/TitleBar"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 8.0
-offset_right = -12.0
-offset_bottom = -10.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bodyfill")
-
-[node name="Bg" type="NinePatchRect" parent="Center/Frame/TitleBar"]
+[node name="SellCanvas" type="Control" parent="."]
 layout_mode = 0
-offset_right = 1228.0
-offset_bottom = 138.0
-scale = Vector2(0.7, 0.7)
-mouse_filter = 2
-texture = ExtResource("3_frame")
-patch_margin_left = 58
-patch_margin_top = 42
-patch_margin_right = 65
-patch_margin_bottom = 44
+offset_right = 2048.0
+offset_bottom = 1152.0
+scale = Vector2(0.625, 0.625)
 
-[node name="TitleLabel" type="Label" parent="Center/Frame/TitleBar"]
+[node name="E_0_SellCards" type="Control" parent="SellCanvas"]
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="BG_Frame" type="NinePatchRect" parent="SellCanvas/E_0_SellCards"]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 114.0
+offset_right = 2006.0
+offset_bottom = 1134.0
+texture = ExtResource("3_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="LeftPane" type="Control" parent="SellCanvas/E_0_SellCards"]
+layout_mode = 0
+offset_right = 568.0
+offset_bottom = 1152.0
+
+[node name="SellCardsTitle" type="Control" parent="SellCanvas/E_0_SellCards/LeftPane"]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 159.5
+offset_right = 570.0
+offset_bottom = 312.5
+
+[node name="BG_Header" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/LeftPane/SellCardsTitle"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_plaque")
+patch_margin_left = 180
+patch_margin_right = 180
+
+[node name="Header" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/SellCardsTitle"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -113,189 +111,542 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_constants/outline_size = 11
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 34
-text = "SELL CARDS"
+theme_override_font_sizes/font_size = 64
+text = "Sell Cards"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CloseBtn" type="TextureButton" parent="Center/Frame/TitleBar"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -64.0
-offset_top = 8.0
-offset_right = 4.0
-offset_bottom = 76.0
-grow_horizontal = 0
-texture_normal = ExtResource("4_cancel")
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Body" type="Control" parent="Center/Frame"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 92.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="FillBg" type="Panel" parent="Center/Frame/Body"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 8.0
-offset_right = -12.0
-offset_bottom = -12.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bodyfill")
-
-[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body"]
+[node name="CardCounts" type="Control" parent="SellCanvas/E_0_SellCards/LeftPane"]
 layout_mode = 0
-offset_right = 1228.0
-offset_bottom = 668.0
-scale = Vector2(0.7, 0.7)
-mouse_filter = 2
-texture = ExtResource("3_frame")
-patch_margin_left = 58
-patch_margin_top = 52
-patch_margin_right = 65
-patch_margin_bottom = 58
+offset_left = 112.0
+offset_top = 330.0
+offset_right = 549.0
+offset_bottom = 750.0
 
-[node name="TopBar" type="HBoxContainer" parent="Center/Frame/Body"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 34.0
-offset_top = 24.0
-offset_right = -34.0
-offset_bottom = 62.0
-grow_horizontal = 2
-theme_override_constants/separation = 12
-
-[node name="StatsLabel" type="Label" parent="Center/Frame/Body/TopBar"]
-size_flags_horizontal = 3
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.94, 0.65, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
-text = "Box: 10 / 50  |  Creatures: 8 (Min 10)"
-vertical_alignment = 1
-
-[node name="TypeSelect" type="OptionButton" parent="Center/Frame/Body/TopBar"]
-custom_minimum_size = Vector2(160, 34)
-layout_mode = 2
-
-[node name="Scroll" type="ScrollContainer" parent="Center/Frame/Body"]
+[node name="CardCount_BG" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+modulate = Color(0.768627, 0.670588, 0.47451, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 32.0
-offset_top = 70.0
-offset_right = -32.0
-offset_bottom = -82.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("7_cwgrey")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
 
-[node name="CardsGrid" type="GridContainer" parent="Center/Frame/Body/Scroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 10
-columns = 5
-
-[node name="EmptyLabel" type="Label" parent="Center/Frame/Body"]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -25.0
-offset_right = 260.0
-offset_bottom = 25.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.85, 0.92, 0.98, 1)
+[node name="Card_Label" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 8.0
+offset_right = 330.0
+offset_bottom = 122.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/line_spacing = -4
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 17
-text = "No extra sellable cards in your Card Box right now."
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 44
+text = "Cards
+Collected"
 vertical_alignment = 1
 
-[node name="FooterRow" type="HBoxContainer" parent="Center/Frame/Body"]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 34.0
-offset_top = -72.0
-offset_right = -34.0
-offset_bottom = -24.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_constants/separation = 12
-
-[node name="StatusLabel" type="Label" parent="Center/Frame/Body/FooterRow"]
-size_flags_horizontal = 3
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = ""
-vertical_alignment = 1
-autowrap_mode = 2
-
-[node name="ValueLabel" type="Label" parent="Center/Frame/Body/FooterRow"]
-custom_minimum_size = Vector2(235, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.92, 0.45, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+[node name="Card_Count" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 54.0
+offset_right = 421.0
+offset_bottom = 118.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 17
-text = "Selected: 0  |  Total: 0 Coins"
+theme_override_font_sizes/font_size = 44
+text = "0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="ClearBtn" type="Button" parent="Center/Frame/Body/FooterRow"]
-custom_minimum_size = Vector2(105, 42)
-layout_mode = 2
+[node name="Hero_Label" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 128.0
+offset_right = 310.0
+offset_bottom = 188.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Heroes"
+vertical_alignment = 1
+
+[node name="Hero_Count" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 128.0
+offset_right = 421.0
+offset_bottom = 188.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "1"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Creature_Label" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 200.0
+offset_right = 310.0
+offset_bottom = 260.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Creatures"
+vertical_alignment = 1
+
+[node name="Creature_Count" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 200.0
+offset_right = 421.0
+offset_bottom = 260.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Spell_Label" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 270.0
+offset_right = 310.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Spells"
+vertical_alignment = 1
+
+[node name="Spell_Count" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 270.0
+offset_right = 421.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Building_Label" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 340.0
+offset_right = 310.0
+offset_bottom = 400.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Buildings"
+vertical_alignment = 1
+
+[node name="Building_Count" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/CardCounts"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 340.0
+offset_right = 421.0
+offset_bottom = 400.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SellButton" type="TextureButton" parent="SellCanvas/E_0_SellCards/LeftPane"]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 771.0
+offset_right = 553.0
+offset_bottom = 951.0
+pivot_offset = Vector2(222.5, 90)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/LeftPane/SellButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_btngreen")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="SellTitle" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/SellButton"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 20.0
+offset_right = 429.0
+offset_bottom = 76.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxTexture_blue")
-theme_override_styles/hover = SubResource("StyleBoxTexture_blue")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_blue")
-text = "CLEAR"
+theme_override_font_sizes/font_size = 38
+text = "Sell"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="SellBtn" type="Button" parent="Center/Frame/Body/FooterRow"]
-custom_minimum_size = Vector2(125, 42)
-layout_mode = 2
+[node name="SellPriceLabel" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/SellButton"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 72.0
+offset_right = 429.0
+offset_bottom = 148.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 9
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_green")
-theme_override_styles/hover = SubResource("StyleBoxTexture_green")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_green")
-text = "SELL!"
+theme_override_font_sizes/font_size = 54
+text = "0 Coins"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="ConfirmOverlay" type="Control" parent="."]
+[node name="BackBtn" type="TextureButton" parent="SellCanvas/E_0_SellCards/LeftPane"]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 955.0
+offset_right = 257.0
+offset_bottom = 1098.0
+pivot_offset = Vector2(72, 71)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("14_back")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="SortButton" type="TextureButton" parent="SellCanvas/E_0_SellCards/LeftPane"]
+layout_mode = 0
+offset_left = 315.0
+offset_top = 951.0
+offset_right = 555.0
+offset_bottom = 1101.0
+pivot_offset = Vector2(120, 75)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/LeftPane/SortButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("11_btnblue")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="SellCanvas/E_0_SellCards/LeftPane/SortButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 40
+text = "Sort"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopTabs" type="Control" parent="SellCanvas/E_0_SellCards"]
+layout_mode = 0
+offset_left = 1085.0
+offset_top = 152.0
+offset_right = 1945.0
+offset_bottom = 314.0
+
+[node name="CreaturesButton" type="TextureButton" parent="SellCanvas/E_0_SellCards/TopTabs"]
+layout_mode = 0
+offset_right = 210.0
+offset_bottom = 160.0
+pivot_offset = Vector2(105, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="SellCanvas/E_0_SellCards/TopTabs/CreaturesButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(105, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/TopTabs/CreaturesButton/ScaleRoot"]
+modulate = Color(0.301991, 0.177336, 0.588235, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("9_btngrey")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Frame" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/TopTabs/CreaturesButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_btnframe")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Icon" type="TextureRect" parent="SellCanvas/E_0_SellCards/TopTabs/CreaturesButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 20.0
+offset_right = 142.0
+offset_bottom = 93.0
+texture = ExtResource("15_icreat")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SellCanvas/E_0_SellCards/TopTabs/CreaturesButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 88.0
+offset_right = 204.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "Creatures"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpellsButton" type="TextureButton" parent="SellCanvas/E_0_SellCards/TopTabs"]
+layout_mode = 0
+offset_left = 315.0
+offset_right = 525.0
+offset_bottom = 160.0
+pivot_offset = Vector2(105, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="SellCanvas/E_0_SellCards/TopTabs/SpellsButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(105, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/TopTabs/SpellsButton/ScaleRoot"]
+modulate = Color(0.071529, 0.463235, 0.411695, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("9_btngrey")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Frame" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/TopTabs/SpellsButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_btnframe")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Icon" type="TextureRect" parent="SellCanvas/E_0_SellCards/TopTabs/SpellsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 20.0
+offset_right = 146.0
+offset_bottom = 95.0
+texture = ExtResource("16_ispell")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SellCanvas/E_0_SellCards/TopTabs/SpellsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 88.0
+offset_right = 204.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "Spells"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BuildingsButton" type="TextureButton" parent="SellCanvas/E_0_SellCards/TopTabs"]
+layout_mode = 0
+offset_left = 630.0
+offset_right = 840.0
+offset_bottom = 160.0
+pivot_offset = Vector2(105, 80)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="SellCanvas/E_0_SellCards/TopTabs/BuildingsButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(105, 80)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/TopTabs/BuildingsButton/ScaleRoot"]
+modulate = Color(0.10824, 0.34375, 0.566176, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("9_btngrey")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Frame" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/TopTabs/BuildingsButton/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_btnframe")
+patch_margin_left = 60
+patch_margin_top = 55
+patch_margin_right = 55
+patch_margin_bottom = 80
+
+[node name="Icon" type="TextureRect" parent="SellCanvas/E_0_SellCards/TopTabs/BuildingsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 66.0
+offset_top = 20.0
+offset_right = 135.0
+offset_bottom = 95.0
+texture = ExtResource("17_ibldg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SellCanvas/E_0_SellCards/TopTabs/BuildingsButton/ScaleRoot"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 88.0
+offset_right = 204.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "Buildings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardGridFrame" type="NinePatchRect" parent="SellCanvas/E_0_SellCards"]
+layout_mode = 0
+offset_left = 563.0
+offset_top = 314.0
+offset_right = 1933.0
+offset_bottom = 998.0
+texture = ExtResource("8_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="CardScroll" type="ScrollContainer" parent="SellCanvas/E_0_SellCards/CardGridFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_scroll")
+vertical_scroll_mode = 0
+
+[node name="CardColumns" type="HBoxContainer" parent="SellCanvas/E_0_SellCards/CardGridFrame/CardScroll"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="EmptyLabel" type="Label" parent="SellCanvas/E_0_SellCards/CardGridFrame"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -303,72 +654,476 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Dim" type="ColorRect" parent="ConfirmOverlay"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.65)
-
-[node name="Center" type="CenterContainer" parent="ConfirmOverlay"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Panel" type="PanelContainer" parent="ConfirmOverlay/Center"]
-custom_minimum_size = Vector2(450, 195)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_confirm")
-
-[node name="VBox" type="VBoxContainer" parent="ConfirmOverlay/Center/Panel"]
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 20
-
-[node name="ConfirmLabel" type="Label" parent="ConfirmOverlay/Center/Panel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 22
-text = "Sell Cards For 0 Coins?"
+theme_override_font_sizes/font_size = 42
+text = "No cards in this category."
 horizontal_alignment = 1
-autowrap_mode = 2
+vertical_alignment = 1
 
-[node name="Buttons" type="HBoxContainer" parent="ConfirmOverlay/Center/Panel/VBox"]
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 24
+[node name="ScrollBarBG" type="NinePatchRect" parent="SellCanvas/E_0_SellCards"]
+layout_mode = 0
+offset_left = 585.0
+offset_top = 968.0
+offset_right = 1911.0
+offset_bottom = 988.0
+texture = ExtResource("19_sbbg")
+patch_margin_left = 16
+patch_margin_top = 4
+patch_margin_right = 16
+patch_margin_bottom = 4
 
-[node name="YesBtn" type="Button" parent="ConfirmOverlay/Center/Panel/VBox/Buttons"]
-custom_minimum_size = Vector2(130, 44)
-layout_mode = 2
+[node name="Thumb" type="NinePatchRect" parent="SellCanvas/E_0_SellCards/ScrollBarBG"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 1.0
+offset_right = 320.0
+offset_bottom = 19.0
+texture = ExtResource("20_sb")
+patch_margin_left = 16
+patch_margin_top = 4
+patch_margin_right = 16
+patch_margin_bottom = 4
+
+[node name="E_1_SellConfirm" type="Control" parent="SellCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="Dimmer" type="ColorRect" parent="SellCanvas/E_1_SellConfirm"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.52)
+
+[node name="Panel" type="Control" parent="SellCanvas/E_1_SellConfirm"]
+layout_mode = 0
+offset_left = 243.0
+offset_top = 66.0
+offset_right = 1805.0
+offset_bottom = 1086.0
+pivot_offset = Vector2(781, 510)
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_1_SellConfirm/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="TitleRoot" type="Control" parent="SellCanvas/E_1_SellConfirm/Panel"]
+layout_mode = 0
+offset_left = 518.0
+offset_top = 44.0
+offset_right = 1268.0
+offset_bottom = 197.0
+scale = Vector2(0.7, 0.7)
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_1_SellConfirm/Panel/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
+texture = ExtResource("6_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="Label" type="Label" parent="SellCanvas/E_1_SellConfirm/Panel/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 11
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_green")
-theme_override_styles/hover = SubResource("StyleBoxTexture_green")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_green")
-text = "YES"
+theme_override_font_sizes/font_size = 76
+text = "Confirm Sell"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="NoBtn" type="Button" parent="ConfirmOverlay/Center/Panel/VBox/Buttons"]
-custom_minimum_size = Vector2(130, 44)
+[node name="DescBG" type="NinePatchRect" parent="SellCanvas/E_1_SellConfirm/Panel"]
+modulate = Color(0.768627, 0.670588, 0.47451, 1)
+layout_mode = 0
+offset_left = 281.0
+offset_top = 166.0
+offset_right = 1281.0
+offset_bottom = 266.0
+texture = ExtResource("7_cwgrey")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="DescLabel" type="Label" parent="SellCanvas/E_1_SellConfirm/Panel"]
+layout_mode = 0
+offset_left = 281.0
+offset_top = 166.0
+offset_right = 1281.0
+offset_bottom = 266.0
+theme_override_colors/font_color = Color(0.05, 0.04, 0.03, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.25)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Sell These Cards For 0 Coins?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardsFrame" type="NinePatchRect" parent="SellCanvas/E_1_SellConfirm/Panel"]
+layout_mode = 0
+offset_left = 247.0
+offset_top = 292.0
+offset_right = 1315.0
+offset_bottom = 836.0
+texture = ExtResource("8_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="ConfirmScroll" type="ScrollContainer" parent="SellCanvas/E_1_SellConfirm/Panel/CardsFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_scroll")
+horizontal_scroll_mode = 0
+
+[node name="ConfirmGrid" type="GridContainer" parent="SellCanvas/E_1_SellConfirm/Panel/CardsFrame/ConfirmScroll"]
 layout_mode = 2
+size_flags_horizontal = 6
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 14
+columns = 5
+
+[node name="CancelButton" type="TextureButton" parent="SellCanvas/E_1_SellConfirm/Panel"]
+layout_mode = 0
+offset_left = 272.0
+offset_top = 852.0
+offset_right = 672.0
+offset_bottom = 1032.0
+pivot_offset = Vector2(200, 90)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_1_SellConfirm/Panel/CancelButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("13_btnred")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="SellCanvas/E_1_SellConfirm/Panel/CancelButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_blue")
-theme_override_styles/hover = SubResource("StyleBoxTexture_blue")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_blue")
-text = "NO"
+theme_override_font_sizes/font_size = 42
+text = "Cancel"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ConfirmSellButton" type="TextureButton" parent="SellCanvas/E_1_SellConfirm/Panel"]
+layout_mode = 0
+offset_left = 890.0
+offset_top = 852.0
+offset_right = 1290.0
+offset_bottom = 1032.0
+pivot_offset = Vector2(200, 90)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_1_SellConfirm/Panel/ConfirmSellButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_btngreen")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="SellCanvas/E_1_SellConfirm/Panel/ConfirmSellButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 42
+text = "Sell"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="E_2_ErrorPopup" type="Control" parent="SellCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="Dimmer" type="ColorRect" parent="SellCanvas/E_2_ErrorPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Panel" type="Control" parent="SellCanvas/E_2_ErrorPopup"]
+layout_mode = 0
+offset_left = 529.0
+offset_top = 228.0
+offset_right = 1519.0
+offset_bottom = 828.0
+pivot_offset = Vector2(495, 300)
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_2_ErrorPopup/Panel"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 28.0
+offset_right = 972.0
+offset_bottom = 570.0
+texture = ExtResource("4_popup2")
+patch_margin_left = 80
+patch_margin_top = 80
+patch_margin_right = 80
+patch_margin_bottom = 80
+
+[node name="Frame" type="NinePatchRect" parent="SellCanvas/E_2_ErrorPopup/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_errframe")
+patch_margin_left = 80
+patch_margin_top = 80
+patch_margin_right = 80
+patch_margin_bottom = 80
+
+[node name="TitleBanner" type="TextureRect" parent="SellCanvas/E_2_ErrorPopup/Panel"]
+modulate = Color(1, 1, 1, 0.392157)
+layout_mode = 0
+offset_left = 20.0
+offset_top = 12.0
+offset_right = 970.0
+offset_bottom = 162.0
+texture = ExtResource("22_titlebar")
+expand_mode = 1
+
+[node name="TitleLabel" type="Label" parent="SellCanvas/E_2_ErrorPopup/Panel"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 22.0
+offset_right = 970.0
+offset_bottom = 154.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 11
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 82
+text = "Nope!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MsgLabel" type="Label" parent="SellCanvas/E_2_ErrorPopup/Panel"]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 175.0
+offset_right = 920.0
+offset_bottom = 365.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "You haven't selected any cards to sell!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="OKButton" type="TextureButton" parent="SellCanvas/E_2_ErrorPopup/Panel"]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 378.0
+offset_right = 720.0
+offset_bottom = 558.0
+pivot_offset = Vector2(225, 90)
+mouse_default_cursor_shape = 2
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_2_ErrorPopup/Panel/OKButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_btngreen")
+patch_margin_left = 70
+patch_margin_top = 60
+patch_margin_right = 60
+patch_margin_bottom = 90
+
+[node name="Label" type="Label" parent="SellCanvas/E_2_ErrorPopup/Panel/OKButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 64
+text = "OK"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="E_3_SortPanel" type="Control" parent="SellCanvas"]
+visible = false
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+pivot_offset = Vector2(1024, 576)
+
+[node name="Dimmer" type="ColorRect" parent="SellCanvas/E_3_SortPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_3_SortPanel"]
+layout_mode = 0
+offset_left = 491.0
+offset_top = 114.0
+offset_right = 1557.0
+offset_bottom = 1129.0
+texture = ExtResource("3_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
+
+[node name="TitleRoot" type="Control" parent="SellCanvas/E_3_SortPanel"]
+layout_mode = 0
+offset_left = 761.0
+offset_top = 148.0
+offset_right = 1511.0
+offset_bottom = 301.0
+scale = Vector2(0.7, 0.7)
+
+[node name="BG" type="NinePatchRect" parent="SellCanvas/E_3_SortPanel/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
+texture = ExtResource("6_plaque")
+patch_margin_left = 275
+patch_margin_right = 175
+
+[node name="Label" type="Label" parent="SellCanvas/E_3_SortPanel/TitleRoot"]
+layout_mode = 0
+offset_right = 750.0
+offset_bottom = 153.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 62
+text = "SORT OPTIONS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="TextureButton" parent="SellCanvas/E_3_SortPanel"]
+layout_mode = 0
+offset_left = 1408.0
+offset_top = 150.0
+offset_right = 1558.0
+offset_bottom = 308.0
+scale = Vector2(0.7, 0.7)
+pivot_offset = Vector2(75, 79)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("21_cancel")
+stretch_mode = 5
+
+[node name="ButtonsGrid" type="GridContainer" parent="SellCanvas/E_3_SortPanel"]
+layout_mode = 0
+offset_left = 605.0
+offset_top = 275.0
+offset_right = 1445.0
+offset_bottom = 860.0
+theme_override_constants/h_separation = 140
+theme_override_constants/v_separation = 20
+columns = 2
+
+[node name="ZoomOverlay" type="Control" parent="SellCanvas"]
+visible = false
+layout_mode = 0
+offset_left = -1200.0
+offset_top = -1200.0
+offset_right = 3248.0
+offset_bottom = 2352.0
+mouse_default_cursor_shape = 2
+
+[node name="Dimmer" type="ColorRect" parent="SellCanvas/ZoomOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="CardHolder" type="Control" parent="SellCanvas/ZoomOverlay"]
+layout_mode = 0
+offset_left = 2224.0
+offset_top = 1776.0
+offset_right = 2224.0
+offset_bottom = 1776.0
+mouse_filter = 2

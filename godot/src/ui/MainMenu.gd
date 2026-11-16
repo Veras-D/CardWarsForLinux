@@ -100,6 +100,7 @@ var _press_select_sfx_played: bool = false
 @onready var card_box_modal: CardBoxModal = get_node_or_null("CardBoxModal")
 @onready var sell_cards_modal: SellCardsModal = get_node_or_null("SellCardsModal")
 @onready var craft_cards_modal: CraftCardsModal = get_node_or_null("CraftCardsModal")
+@onready var build_deck_modal: DeckBuilder = get_node_or_null("BuildDeckModal")
 
 func _ready() -> void:
 	# Autoplay Treehouse BGM
@@ -210,6 +211,9 @@ func _ready() -> void:
 	if craft_cards_modal:
 		craft_cards_modal.closed.connect(_on_deck_modal_closed)
 		craft_cards_modal.card_crafted.connect(func(_id: String): _update_player_stats())
+	if build_deck_modal:
+		build_deck_modal.closed.connect(_on_deck_modal_closed)
+		build_deck_modal.deck_saved.connect(func(_n: String, _p: String): _update_player_stats())
 	if GameManager:
 		if GameManager.has_signal("player_currencies_updated"):
 			GameManager.player_currencies_updated.connect(func(_coins: int, _gems: int): _update_player_stats())
@@ -484,7 +488,7 @@ func _auto_screenshot() -> void:
 				daily_gift_modal.open_modal(9)
 				daily_gift_modal.show_reward_preview({"type": "Card gold", "quantity": 1, "card_id": "Creature_GL_HuskerKnight"})
 				await get_tree().create_timer(0.45).timeout
-	elif mode in ["deck", "deck_fx_in", "card_box", "sell_cards", "craft_cards", "craft_cards_unlocked"]:
+	elif mode in ["deck", "deck_fx_in", "card_box", "sell_cards", "sell_confirm", "sell_sort", "sell_error", "craft_cards", "craft_cards_unlocked", "build_deck", "edit_deck", "select_hero", "landscapes", "sort_deck", "zoom_card"]:
 		if start_overlay and start_overlay.visible:
 			_on_start_tapped()
 		await get_tree().create_timer(1.0).timeout
@@ -496,8 +500,19 @@ func _auto_screenshot() -> void:
 			if mode == "card_box" and card_box_modal:
 				_open_deck_modal(card_box_modal)
 				await get_tree().create_timer(0.45).timeout
-			elif mode == "sell_cards" and sell_cards_modal:
+			elif mode in ["sell_cards", "sell_confirm", "sell_sort", "sell_error"] and sell_cards_modal:
 				_open_deck_modal(sell_cards_modal)
+				await get_tree().create_timer(0.35).timeout
+				if mode != "sell_cards" and sell_cards_modal.has_method("show_panel_preview"):
+					sell_cards_modal.show_panel_preview(mode)
+					await get_tree().create_timer(0.15).timeout
+				await get_tree().create_timer(0.45).timeout
+			elif mode in ["build_deck", "edit_deck", "select_hero", "landscapes", "sort_deck", "zoom_card"] and build_deck_modal:
+				_open_deck_modal(build_deck_modal)
+				await get_tree().create_timer(0.35).timeout
+				if build_deck_modal.has_method("show_panel_preview"):
+					build_deck_modal.show_panel_preview(mode)
+					await get_tree().create_timer(0.15).timeout
 				await get_tree().create_timer(0.45).timeout
 			elif mode == "craft_cards" and craft_cards_modal:
 				_open_deck_modal(craft_cards_modal)
@@ -567,7 +582,7 @@ func _input(event: InputEvent) -> void:
 			return
 	
 	if event.is_action_pressed("ui_cancel"):
-		for m in [store_inventory_modal, store_gems_modal, card_box_modal, sell_cards_modal, craft_cards_modal]:
+		for m in [store_inventory_modal, store_gems_modal, card_box_modal, sell_cards_modal, craft_cards_modal, build_deck_modal]:
 			if m and m.visible:
 				if m.has_method("close_modal"):
 					m.close_modal()
@@ -634,9 +649,12 @@ func _trigger_board_icon_activate(buttons: Array, activate_method: String, on_do
 		on_done.call()
 
 func _update_player_stats() -> void:
-	var level = GameManager.player_level if "player_level" in GameManager else 1
-	var xp = GameManager.player_xp if "player_xp" in GameManager else 56
-	var max_xp = GameManager.xp_to_next_level if "xp_to_next_level" in GameManager else 106
+	var hero_id: String = GameManager.player_hero_name if "player_hero_name" in GameManager else "Jake"
+	var level: int = GameManager.get_hero_level(hero_id) if GameManager.has_method("get_hero_level") else 1
+	var xp: int = GameManager.get_hero_xp(hero_id) if GameManager.has_method("get_hero_xp") else 0
+	var max_xp: int = GameManager.get_hero_tracker(hero_id).get_xp_for_next_level() if GameManager.has_method("get_hero_tracker") else 106
+	if max_xp <= 0:
+		max_xp = 1
 	var stamina = GameManager.stamina if "stamina" in GameManager else 5
 	var max_stamina = GameManager.max_stamina if "max_stamina" in GameManager else 5
 	var gems: int = GameManager.get_gems() if GameManager.has_method("get_gems") else 5
@@ -887,7 +905,7 @@ func close_deck() -> void:
 func _open_deck_modal(modal: Control) -> void:
 	if treehouse_3d and treehouse_3d.has_method("set_deck_idle_audio_enabled"):
 		treehouse_3d.set_deck_idle_audio_enabled(false)
-	if modal == craft_cards_modal:
+	if modal == craft_cards_modal or modal == build_deck_modal or modal == sell_cards_modal:
 		if deck_overlay:
 			deck_overlay.visible = false
 		if top_bar:
@@ -937,11 +955,14 @@ func _on_quad_sell_cards_pressed() -> void:
 
 func _on_quad_build_deck_pressed() -> void:
 	_trigger_board_icon_activate([quad_card_box, quad_sell_cards, quad_build_deck, quad_craft_cards], "play_deck_build_activate", func():
-		if "menu_return_view" in GameManager:
-			GameManager.menu_return_view = "deck"
-		if treehouse_3d and treehouse_3d.has_method("set_deck_idle_audio_enabled"):
-			treehouse_3d.set_deck_idle_audio_enabled(false)
-		GameManager.open_deck_builder()
+		if build_deck_modal:
+			_open_deck_modal(build_deck_modal)
+		else:
+			if "menu_return_view" in GameManager:
+				GameManager.menu_return_view = "deck"
+			if treehouse_3d and treehouse_3d.has_method("set_deck_idle_audio_enabled"):
+				treehouse_3d.set_deck_idle_audio_enabled(false)
+			GameManager.open_deck_builder()
 	)
 
 

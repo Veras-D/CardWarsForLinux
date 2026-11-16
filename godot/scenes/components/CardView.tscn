@@ -68,10 +68,10 @@ stretch_mode = 0
 
 [node name="IconMagic" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 7.2
+offset_left = 7.5
 offset_top = 7.5
-offset_right = 33.5
-offset_bottom = 33.8
+offset_right = 34.1
+offset_bottom = 34.1
 mouse_filter = 2
 texture = ExtResource("5_cost")
 expand_mode = 1
@@ -103,20 +103,20 @@ stretch_mode = 5
 
 [node name="IconFact" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 109.5
-offset_top = 7.5
-offset_right = 123.5
-offset_bottom = 21.5
+offset_left = 107.4
+offset_top = 6.2
+offset_right = 122.9
+offset_bottom = 21.7
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="AtkBadge" type="Control" parent="."]
 layout_mode = 0
-offset_left = 4.5
-offset_top = 155.0
-offset_right = 42.0
-offset_bottom = 179.5
+offset_left = 5.5
+offset_top = 156.3
+offset_right = 38.9
+offset_bottom = 178.4
 mouse_filter = 2
 
 [node name="Frame" type="TextureRect" parent="AtkBadge"]
@@ -133,10 +133,10 @@ stretch_mode = 0
 
 [node name="Icon" type="TextureRect" parent="AtkBadge"]
 layout_mode = 0
-offset_left = 22.5
-offset_top = 4.5
-offset_right = 31.0
-offset_bottom = 20.0
+offset_left = 15.8
+offset_top = 6.2
+offset_right = 23.0
+offset_bottom = 18.8
 mouse_filter = 2
 texture = ExtResource("8_atk")
 expand_mode = 1
@@ -144,23 +144,23 @@ stretch_mode = 5
 
 [node name="AtkLabel" type="Label" parent="AtkBadge"]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 23.0
-offset_bottom = 22.5
+offset_left = 2.5
+offset_top = 4.5
+offset_right = 16.0
+offset_bottom = 20.5
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DefBadge" type="Control" parent="."]
 layout_mode = 0
-offset_left = 88.0
-offset_top = 155.0
-offset_right = 125.5
-offset_bottom = 179.5
+offset_left = 91.1
+offset_top = 156.3
+offset_right = 124.5
+offset_bottom = 178.4
 mouse_filter = 2
 
 [node name="Frame" type="TextureRect" parent="DefBadge"]
@@ -178,10 +178,10 @@ flip_h = true
 
 [node name="Icon" type="TextureRect" parent="DefBadge"]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 5.5
-offset_right = 17.5
-offset_bottom = 18.5
+offset_left = 9.5
+offset_top = 6.8
+offset_right = 17.6
+offset_bottom = 17.8
 mouse_filter = 2
 texture = ExtResource("9_def")
 expand_mode = 1
@@ -189,29 +189,29 @@ stretch_mode = 5
 
 [node name="DefLabel" type="Label" parent="DefBadge"]
 layout_mode = 0
-offset_left = 16.5
-offset_top = 2.0
-offset_right = 35.5
-offset_bottom = 22.5
+offset_left = 17.4
+offset_top = 4.5
+offset_right = 30.9
+offset_bottom = 20.5
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RarityHBox" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 169.5
-offset_right = 88.0
-offset_bottom = 177.5
+offset_left = 48.0
+offset_top = 166.5
+offset_right = 84.0
+offset_bottom = 173.5
 mouse_filter = 2
 theme_override_constants/separation = 1
-alignment = 1
+alignment = 0
 
 [node name="Star1" type="TextureRect" parent="RarityHBox"]
-custom_minimum_size = Vector2(7, 7)
+custom_minimum_size = Vector2(6, 6)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("10_star")
@@ -219,7 +219,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Star2" type="TextureRect" parent="RarityHBox"]
-custom_minimum_size = Vector2(7, 7)
+custom_minimum_size = Vector2(6, 6)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("10_star")
@@ -227,7 +227,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Star3" type="TextureRect" parent="RarityHBox"]
-custom_minimum_size = Vector2(7, 7)
+custom_minimum_size = Vector2(6, 6)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("10_star")
@@ -235,7 +235,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Star4" type="TextureRect" parent="RarityHBox"]
-custom_minimum_size = Vector2(7, 7)
+custom_minimum_size = Vector2(6, 6)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("10_star")
@@ -243,7 +243,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Star5" type="TextureRect" parent="RarityHBox"]
-custom_minimum_size = Vector2(7, 7)
+custom_minimum_size = Vector2(6, 6)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("10_star")
@@ -252,16 +252,16 @@ stretch_mode = 5
 
 [node name="CostLabel" type="Label" parent="."]
 layout_mode = 0
-offset_left = 7.2
+offset_left = 6.6
 offset_top = 7.0
-offset_right = 33.5
+offset_right = 33.2
 offset_bottom = 34.0
 theme_override_colors/font_color = Color(0.976, 0.831, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -297,9 +297,9 @@ clip_text = true
 visible = false
 layout_mode = 0
 offset_left = 6.0
-offset_top = 123.5
+offset_top = 123.0
 offset_right = 124.0
-offset_bottom = 133.5
+offset_bottom = 132.5
 mouse_filter = 2
 
 [node name="FloopLabel" type="Label" parent="FloopBadge"]
@@ -320,14 +320,14 @@ clip_text = true
 [node name="DescLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 7.0
-offset_top = 124.5
+offset_top = 124.0
 offset_right = 123.0
-offset_bottom = 164.0
+offset_bottom = 161.5
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 6
 text = "Card Description"
 horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
+vertical_alignment = 0
+autowrap_mode = 3
 clip_text = true

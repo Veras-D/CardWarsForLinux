@@ -35,6 +35,7 @@
 [ext_resource type="PackedScene" path="res://scenes/card_box_modal.tscn" id="32_card_box_modal"]
 [ext_resource type="PackedScene" path="res://scenes/sell_cards_modal.tscn" id="33_sell_cards_modal"]
 [ext_resource type="PackedScene" path="res://scenes/craft_cards_modal.tscn" id="34_craft_cards_modal"]
+[ext_resource type="PackedScene" path="res://scenes/deck_builder.tscn" id="35_build_deck_modal"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_Banner"]
 bg_color = Color(0.08, 0.12, 0.16, 0.78)
@@ -1552,5 +1553,9 @@ visible = false
 layout_mode = 1
 
 [node name="CraftCardsModal" parent="." instance=ExtResource("34_craft_cards_modal")]
+visible = false
+layout_mode = 1
+
+[node name="BuildDeckModal" parent="." instance=ExtResource("35_build_deck_modal")]
 visible = false
 layout_mode = 1
