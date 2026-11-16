@@ -7,6 +7,9 @@ const SettingsManagerClass = preload("res://src/systems/settings_vault/SettingsM
 const FONT_KB := preload("res://assets/fonts/KBPlanetEarth.ttf")
 const TEX_GEAR := preload("res://assets/textures/ui/UI_Gear.png")
 const TEX_BTN_BLUE := preload("res://assets/textures/ui/forge/uiButtonBlue.png")
+const TEX_BTN_RED := preload("res://assets/textures/ui/deck/uiButtonRed.png")
+const TEX_BTN_GREY := preload("res://assets/textures/ui/deck/uiButtonGrey.png")
+const TEX_ARROW := preload("res://assets/textures/questmap/nodes/Arrow_Icon.png")
 const SFX_SELECT := preload("res://assets/audio/sfx/UI_Select.wav")
 const SFX_BACK := preload("res://assets/audio/sfx/UI_Back.wav")
 const SFX_CLICK := preload("res://assets/audio/sfx/ButtonClick5.wav")
@@ -72,6 +75,13 @@ var _updating_ui: bool = false
 var _active_tab: int = 0
 var _snapshot: Dictionary = {}
 var _gear_thumb_tex: Texture2D = null
+var _compact_blue_sb: StyleBoxTexture = null
+var _compact_blue_hover_sb: StyleBoxTexture = null
+var _compact_red_sb: StyleBoxTexture = null
+var _compact_grey_sb: StyleBoxTexture = null
+var _dropdown_arrow_tex: Texture2D = null
+var _popup_frame_sb: StyleBoxFlat = null
+var _popup_hover_sb: StyleBoxFlat = null
 
 const REBINDABLE_ACTIONS: Array[Dictionary] = [
 	{"name": &"confirm", "label": "Select / Confirm Card", "key": KEY_ENTER},
@@ -127,7 +137,35 @@ func close_modal() -> void:
 # ==============================================================================
 
 func _apply_card_wars_styling() -> void:
-	_gear_thumb_tex = _build_scaled_gear_texture(Vector2i(54, 58))
+	_gear_thumb_tex = _build_resized_texture(TEX_GEAR, Vector2i(54, 58))
+	_dropdown_arrow_tex = _build_resized_texture(TEX_ARROW, Vector2i(32, 32), true)
+
+	var blue_tex := _build_resized_texture(TEX_BTN_BLUE, Vector2i(68, 72))
+	var red_tex := _build_resized_texture(TEX_BTN_RED, Vector2i(68, 72))
+	var grey_tex := _build_resized_texture(TEX_BTN_GREY, Vector2i(68, 72))
+
+	_compact_blue_sb = _make_compact_button_sb(blue_tex, Color.WHITE)
+	_compact_blue_hover_sb = _make_compact_button_sb(blue_tex, Color(1.14, 1.14, 1.14, 1.0))
+	_compact_red_sb = _make_compact_button_sb(red_tex, Color.WHITE)
+	_compact_grey_sb = _make_compact_button_sb(grey_tex, Color(0.55, 0.48, 0.40, 1.0))
+
+	_popup_frame_sb = StyleBoxFlat.new()
+	_popup_frame_sb.bg_color = Color(0.10, 0.20, 0.28, 0.98)
+	_popup_frame_sb.border_width_left = 3
+	_popup_frame_sb.border_width_top = 3
+	_popup_frame_sb.border_width_right = 3
+	_popup_frame_sb.border_width_bottom = 3
+	_popup_frame_sb.border_color = Color(0.04, 0.08, 0.12, 1.0)
+	_popup_frame_sb.set_corner_radius_all(10)
+	_popup_frame_sb.content_margin_left = 10
+	_popup_frame_sb.content_margin_top = 8
+	_popup_frame_sb.content_margin_right = 10
+	_popup_frame_sb.content_margin_bottom = 8
+
+	_popup_hover_sb = StyleBoxFlat.new()
+	_popup_hover_sb.bg_color = Color(0.08, 0.45, 0.72, 1.0)
+	_popup_hover_sb.set_corner_radius_all(6)
+
 	for s in [master_slider, bgm_slider, sfx_slider, vo_slider, scale_slider]:
 		if s:
 			_style_cw_slider(s)
@@ -141,15 +179,39 @@ func _apply_card_wars_styling() -> void:
 			_style_cw_option_button(ob)
 
 
-func _build_scaled_gear_texture(target_sz: Vector2i) -> Texture2D:
-	if TEX_GEAR == null:
+func _build_resized_texture(tex: Texture2D, target_sz: Vector2i, rotate_cw: bool = false, make_opaque: bool = false) -> Texture2D:
+	if tex == null:
 		return null
-	var img := TEX_GEAR.get_image()
+	var img := tex.get_image()
 	if img == null:
-		return TEX_GEAR
-	var resized := img.duplicate() as Image
-	resized.resize(target_sz.x, target_sz.y, Image.INTERPOLATE_BILINEAR)
-	return ImageTexture.create_from_image(resized)
+		return tex
+	var work := img.duplicate() as Image
+	if rotate_cw:
+		work.rotate_90(CLOCKWISE)
+	work.resize(target_sz.x, target_sz.y, Image.INTERPOLATE_BILINEAR)
+	if make_opaque:
+		for py in range(work.get_height()):
+			for px in range(work.get_width()):
+				var c := work.get_pixel(px, py)
+				if c.a > 0.25:
+					c.a = 1.0
+					work.set_pixel(px, py, c)
+	return ImageTexture.create_from_image(work)
+
+
+func _make_compact_button_sb(tex: Texture2D, tint: Color) -> StyleBoxTexture:
+	var sb := StyleBoxTexture.new()
+	sb.texture = tex
+	sb.modulate_color = tint
+	sb.texture_margin_left = 15
+	sb.texture_margin_top = 13
+	sb.texture_margin_right = 13
+	sb.texture_margin_bottom = 16
+	sb.content_margin_left = 18
+	sb.content_margin_right = 18
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 8
+	return sb
 
 
 func _style_cw_slider(slider: HSlider) -> void:
@@ -185,39 +247,21 @@ func _style_cw_slider(slider: HSlider) -> void:
 
 
 func _style_cw_mute_checkbox(cb: CheckBox) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.24, 0.19, 0.14, 0.95)
-	normal.border_width_left = 3
-	normal.border_width_top = 3
-	normal.border_width_right = 3
-	normal.border_width_bottom = 3
-	normal.border_color = Color(0.06, 0.04, 0.03, 1.0)
-	normal.set_corner_radius_all(12)
-	normal.content_margin_left = 14
-	normal.content_margin_right = 14
-	normal.content_margin_top = 6
-	normal.content_margin_bottom = 6
-
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.34, 0.27, 0.20, 0.98)
-
-	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.76, 0.19, 0.15, 0.98)
-	pressed.border_color = Color(0.28, 0.04, 0.04, 1.0)
-
-	var hover_pressed := pressed.duplicate() as StyleBoxFlat
-	hover_pressed.bg_color = Color(0.86, 0.24, 0.18, 1.0)
-
 	var empty_icon := ImageTexture.create_from_image(Image.create(1, 1, false, Image.FORMAT_RGBA8))
 	for icon_name in ["checked", "unchecked", "checked_disabled", "unchecked_disabled"]:
 		cb.add_theme_icon_override(icon_name, empty_icon)
 
 	cb.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	cb.add_theme_stylebox_override("normal", normal)
-	cb.add_theme_stylebox_override("hover", hover)
-	cb.add_theme_stylebox_override("pressed", pressed)
-	cb.add_theme_stylebox_override("hover_pressed", hover_pressed)
-	cb.add_theme_stylebox_override("focus", hover)
+	var grey_hover := _compact_grey_sb.duplicate() as StyleBoxTexture
+	grey_hover.modulate_color = Color(0.70, 0.61, 0.50, 1.0)
+	var red_hover := _compact_red_sb.duplicate() as StyleBoxTexture
+	red_hover.modulate_color = Color(1.12, 1.12, 1.12, 1.0)
+
+	cb.add_theme_stylebox_override("normal", _compact_grey_sb)
+	cb.add_theme_stylebox_override("hover", grey_hover)
+	cb.add_theme_stylebox_override("pressed", _compact_red_sb)
+	cb.add_theme_stylebox_override("hover_pressed", red_hover)
+	cb.add_theme_stylebox_override("focus", grey_hover)
 
 
 func _refresh_mute_button_text(cb: CheckBox) -> void:
@@ -226,42 +270,25 @@ func _refresh_mute_button_text(cb: CheckBox) -> void:
 
 
 func _style_cw_option_button(ob: OptionButton) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.11, 0.34, 0.50, 0.98)
-	normal.border_width_left = 3
-	normal.border_width_top = 3
-	normal.border_width_right = 3
-	normal.border_width_bottom = 3
-	normal.border_color = Color(0.05, 0.12, 0.18, 1.0)
-	normal.set_corner_radius_all(12)
-	normal.content_margin_left = 18
-	normal.content_margin_right = 18
-	normal.content_margin_top = 8
-	normal.content_margin_bottom = 8
-
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.15, 0.44, 0.64, 1.0)
-
-	ob.add_theme_stylebox_override("normal", normal)
-	ob.add_theme_stylebox_override("hover", hover)
-	ob.add_theme_stylebox_override("pressed", hover)
-	ob.add_theme_stylebox_override("focus", hover)
+	ob.add_theme_stylebox_override("normal", _compact_blue_sb)
+	ob.add_theme_stylebox_override("hover", _compact_blue_hover_sb)
+	ob.add_theme_stylebox_override("pressed", _compact_blue_hover_sb)
+	ob.add_theme_stylebox_override("focus", _compact_blue_hover_sb)
+	if _dropdown_arrow_tex:
+		ob.add_theme_icon_override("arrow", _dropdown_arrow_tex)
+	ob.add_theme_constant_override("arrow_margin", 18)
 
 	var popup := ob.get_popup()
 	if popup:
-		var panel_sb := StyleBoxFlat.new()
-		panel_sb.bg_color = Color(0.10, 0.20, 0.28, 0.98)
-		panel_sb.border_width_left = 3
-		panel_sb.border_width_top = 3
-		panel_sb.border_width_right = 3
-		panel_sb.border_width_bottom = 3
-		panel_sb.border_color = Color(0.04, 0.08, 0.12, 1.0)
-		panel_sb.set_corner_radius_all(10)
-		popup.add_theme_stylebox_override("panel", panel_sb)
+		if _popup_frame_sb:
+			popup.add_theme_stylebox_override("panel", _popup_frame_sb)
+		if _popup_hover_sb:
+			popup.add_theme_stylebox_override("hover", _popup_hover_sb)
 		popup.add_theme_font_override("font", FONT_KB)
 		popup.add_theme_font_size_override("font_size", 24)
 		popup.add_theme_color_override("font_color", Color.WHITE)
 		popup.add_theme_color_override("font_hover_color", Color(1.0, 0.92, 0.45))
+		popup.add_theme_constant_override("v_separation", 8)
 
 
 # ==============================================================================
@@ -363,23 +390,13 @@ func _populate_controls() -> void:
 		row.add_child(label)
 
 		var btn = Button.new()
-		btn.custom_minimum_size = Vector2(280, 54)
+		btn.custom_minimum_size = Vector2(280, 56)
 		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		btn.text = _get_action_binding_text(act_name)
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(0.08, 0.42, 0.64, 0.98)
-		sb.border_width_left = 3
-		sb.border_width_top = 3
-		sb.border_width_right = 3
-		sb.border_width_bottom = 4
-		sb.border_color = Color(0.03, 0.11, 0.18, 1.0)
-		sb.set_corner_radius_all(12)
-		var sb_hover := sb.duplicate() as StyleBoxFlat
-		sb_hover.bg_color = Color(0.12, 0.52, 0.78, 1.0)
-		btn.add_theme_stylebox_override("normal", sb)
-		btn.add_theme_stylebox_override("hover", sb_hover)
-		btn.add_theme_stylebox_override("pressed", sb_hover)
-		btn.add_theme_stylebox_override("focus", sb_hover)
+		btn.add_theme_stylebox_override("normal", _compact_blue_sb)
+		btn.add_theme_stylebox_override("hover", _compact_blue_hover_sb)
+		btn.add_theme_stylebox_override("pressed", _compact_blue_hover_sb)
+		btn.add_theme_stylebox_override("focus", _compact_blue_hover_sb)
 		btn.add_theme_font_override("font", FONT_KB)
 		btn.add_theme_font_size_override("font_size", 26)
 		btn.add_theme_color_override("font_color", Color.WHITE)
@@ -702,6 +719,10 @@ func _sync_ui_from_manager() -> void:
 func show_panel_preview(mode: String) -> void:
 	if mode == "settings_display":
 		_select_tab(1, false)
+	elif mode == "settings_display_popup":
+		_select_tab(1, false)
+		if lang_option:
+			lang_option.call_deferred("show_popup")
 	elif mode == "settings_controls":
 		_select_tab(2, false)
 	else:

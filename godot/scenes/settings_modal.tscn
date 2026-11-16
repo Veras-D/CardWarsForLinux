@@ -95,10 +95,11 @@ patch_margin_bottom = 100
 
 [node name="TitleRoot" type="Control" parent="OptionsCanvas/PanelRoot"]
 layout_mode = 0
-offset_left = 415.0
-offset_top = 24.0
-offset_right = 1085.0
-offset_bottom = 170.0
+offset_left = 502.5
+offset_top = 50.0
+offset_right = 1252.5
+offset_bottom = 203.0
+scale = Vector2(0.66, 0.66)
 
 [node name="BG" type="NinePatchRect" parent="OptionsCanvas/PanelRoot/TitleRoot"]
 layout_mode = 1
@@ -108,15 +109,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("4_plaque")
-patch_margin_left = 180
-patch_margin_right = 180
+patch_margin_left = 200
+patch_margin_right = 200
 
 [node name="GearIcon" type="TextureRect" parent="OptionsCanvas/PanelRoot/TitleRoot"]
 layout_mode = 0
 offset_left = 148.0
-offset_top = 34.0
+offset_top = 38.0
 offset_right = 222.0
-offset_bottom = 112.0
+offset_bottom = 114.0
 texture = ExtResource("12_gear")
 expand_mode = 1
 stretch_mode = 5
@@ -126,25 +127,25 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 54.0
+offset_left = 68.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 11
+theme_override_constants/outline_size = 12
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 58
+theme_override_font_sizes/font_size = 64
 text = "OPTIONS"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CloseBtn" type="TextureButton" parent="OptionsCanvas/PanelRoot"]
 layout_mode = 0
-offset_left = 1344.0
-offset_top = 28.0
-offset_right = 1452.0
-offset_bottom = 142.0
-pivot_offset = Vector2(54, 57)
+offset_left = 1356.0
+offset_top = 40.0
+offset_right = 1454.0
+offset_bottom = 144.0
+pivot_offset = Vector2(49, 52)
 mouse_default_cursor_shape = 2
 texture_normal = ExtResource("11_cancel")
 ignore_texture_size = true
@@ -153,9 +154,9 @@ stretch_mode = 5
 [node name="TabsBar" type="Control" parent="OptionsCanvas/PanelRoot"]
 layout_mode = 0
 offset_left = 245.0
-offset_top = 180.0
+offset_top = 172.0
 offset_right = 1255.0
-offset_bottom = 280.0
+offset_bottom = 272.0
 
 [node name="AudioTabBtn" type="TextureButton" parent="OptionsCanvas/PanelRoot/TabsBar"]
 layout_mode = 0

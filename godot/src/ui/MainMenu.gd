@@ -488,7 +488,7 @@ func _auto_screenshot() -> void:
 				daily_gift_modal.open_modal(9)
 				daily_gift_modal.show_reward_preview({"type": "Card gold", "quantity": 1, "card_id": "Creature_GL_HuskerKnight"})
 				await get_tree().create_timer(0.45).timeout
-	elif mode in ["settings", "settings_display", "settings_controls"]:
+	elif mode in ["settings", "settings_display", "settings_display_popup", "settings_controls"]:
 		if start_overlay and start_overlay.visible:
 			_on_start_tapped()
 		await get_tree().create_timer(1.0).timeout
