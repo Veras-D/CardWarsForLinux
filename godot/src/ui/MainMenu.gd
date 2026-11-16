@@ -502,6 +502,16 @@ func _auto_screenshot() -> void:
 		if settings_modal and settings_modal.has_method("show_panel_preview"):
 			settings_modal.show_panel_preview(mode)
 			await get_tree().create_timer(0.15).timeout
+	elif mode in ["lan", "lan_join", "lan_popup"]:
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		if lan_modal:
+			lan_modal.open_modal()
+		await get_tree().create_timer(0.35).timeout
+		if lan_modal and lan_modal.has_method("show_panel_preview"):
+			lan_modal.show_panel_preview(mode)
+			await get_tree().create_timer(0.15).timeout
 	elif mode in ["deck", "deck_fx_in", "card_box", "card_box_heroes", "card_box_hero_zoom", "card_box_sort", "card_box_zoom", "sell_cards", "sell_confirm", "sell_sort", "sell_error", "craft_cards", "craft_cards_unlocked", "build_deck", "edit_deck", "select_hero", "landscapes", "sort_deck", "zoom_card"]:
 		if start_overlay and start_overlay.visible:
 			_on_start_tapped()

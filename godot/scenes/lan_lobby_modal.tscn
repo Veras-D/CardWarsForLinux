@@ -1,22 +1,53 @@
-[gd_scene load_steps=3 format=3 uid="uid://lan_lobby_modal_001"]
+[gd_scene format=3 uid="uid://lan_lobby_modal_001"]
 
 [ext_resource type="Script" path="res://src/ui/LanLobbyModal.gd" id="1_modal"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/PopUpSprite_1.png" id="3_popup1"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/GoldPlaque.png" id="4_plaque"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/Frame_Indent.png" id="5_indent"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonGrey.png" id="6_btngrey"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonFrame.png" id="7_btnframe"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/forge/uiButtonBlue.png" id="8_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="9_btngreen"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonRed.png" id="10_btnred"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="11_cancel"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.12, 0.14, 0.18, 0.96)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.25, 0.65, 0.95, 0.9)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.6)
-shadow_size = 16
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_blue"]
+texture = ExtResource("8_btnblue")
+texture_margin_left = 70.0
+texture_margin_top = 50.0
+texture_margin_right = 60.0
+texture_margin_bottom = 70.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_red"]
+texture = ExtResource("10_btnred")
+texture_margin_left = 70.0
+texture_margin_top = 50.0
+texture_margin_right = 60.0
+texture_margin_bottom = 70.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_green"]
+texture = ExtResource("9_btngreen")
+texture_margin_left = 70.0
+texture_margin_top = 50.0
+texture_margin_right = 60.0
+texture_margin_bottom = 70.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 14.0
 
 [node name="LanLobbyModal" type="Control"]
+visible = false
+z_index = 20
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,189 +63,558 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.8)
+color = Color(0, 0, 0, 0.58)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="LanCanvas" type="Control" parent="."]
+layout_mode = 0
+offset_right = 2048.0
+offset_bottom = 1152.0
+scale = Vector2(0.625, 0.625)
+
+[node name="PanelRoot" type="Control" parent="LanCanvas"]
+layout_mode = 0
+offset_left = 274.0
+offset_top = 60.0
+offset_right = 1774.0
+offset_bottom = 1092.0
+pivot_offset = Vector2(750, 516)
+
+[node name="BG" type="NinePatchRect" parent="LanCanvas/PanelRoot"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("3_popup1")
+patch_margin_left = 100
+patch_margin_top = 100
+patch_margin_right = 100
+patch_margin_bottom = 100
 
-[node name="Panel" type="PanelContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(680, 500)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+[node name="TitleRoot" type="Control" parent="LanCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 466.0
+offset_top = 44.0
+offset_right = 1326.0
+offset_bottom = 197.0
+scale = Vector2(0.66, 0.66)
 
-[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel"]
-layout_mode = 2
-theme_override_constants/separation = 14
+[node name="BG" type="NinePatchRect" parent="LanCanvas/PanelRoot/TitleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_plaque")
+patch_margin_left = 200
+patch_margin_right = 200
 
-[node name="Header" type="VBoxContainer" parent="CenterContainer/Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="Title" type="Label" parent="CenterContainer/Panel/VBox/Header"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "🌐 Local Network (LAN) Multiplayer"
+[node name="Title" type="Label" parent="LanCanvas/PanelRoot/TitleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 12
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 62
+text = "LAN BATTLE"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Subtitle" type="Label" parent="CenterContainer/Panel/VBox/Header"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
-theme_override_font_sizes/font_size = 13
-text = "Zero-Configuration UDP Discovery (Port 47777) & Action RPC Turn Sync"
+[node name="CloseBtn" type="TextureButton" parent="LanCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 1356.0
+offset_top = 38.0
+offset_right = 1454.0
+offset_bottom = 142.0
+pivot_offset = Vector2(49, 52)
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("11_cancel")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TabsBar" type="Control" parent="LanCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 340.0
+offset_top = 166.0
+offset_right = 1160.0
+offset_bottom = 264.0
+
+[node name="HostTabBtn" type="TextureButton" parent="LanCanvas/PanelRoot/TabsBar"]
+layout_mode = 0
+offset_right = 380.0
+offset_bottom = 98.0
+pivot_offset = Vector2(190, 49)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="LanCanvas/PanelRoot/TabsBar/HostTabBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(190, 49)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="LanCanvas/PanelRoot/TabsBar/HostTabBtn/ScaleRoot"]
+modulate = Color(0.105882, 0.45098, 0.72549, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Frame" type="NinePatchRect" parent="LanCanvas/PanelRoot/TabsBar/HostTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Label" type="Label" parent="LanCanvas/PanelRoot/TabsBar/HostTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "Host"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="TabContainer" type="TabContainer" parent="CenterContainer/Panel/VBox"]
+[node name="JoinTabBtn" type="TextureButton" parent="LanCanvas/PanelRoot/TabsBar"]
+layout_mode = 0
+offset_left = 440.0
+offset_right = 820.0
+offset_bottom = 98.0
+pivot_offset = Vector2(190, 49)
+mouse_default_cursor_shape = 2
+
+[node name="ScaleRoot" type="Control" parent="LanCanvas/PanelRoot/TabsBar/JoinTabBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(190, 49)
+mouse_filter = 2
+
+[node name="BG" type="NinePatchRect" parent="LanCanvas/PanelRoot/TabsBar/JoinTabBtn/ScaleRoot"]
+modulate = Color(0.071529, 0.463235, 0.411695, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_btngrey")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Frame" type="NinePatchRect" parent="LanCanvas/PanelRoot/TabsBar/JoinTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_btnframe")
+patch_margin_left = 55
+patch_margin_top = 45
+patch_margin_right = 55
+patch_margin_bottom = 55
+
+[node name="Label" type="Label" parent="LanCanvas/PanelRoot/TabsBar/JoinTabBtn/ScaleRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+text = "Join"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ContentFrame" type="NinePatchRect" parent="LanCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 272.0
+offset_right = 1432.0
+offset_bottom = 860.0
+texture = ExtResource("5_indent")
+patch_margin_left = 90
+patch_margin_top = 90
+patch_margin_right = 90
+patch_margin_bottom = 90
+
+[node name="HostPage" type="Control" parent="LanCanvas/PanelRoot/ContentFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 52.0
+offset_top = 42.0
+offset_right = -52.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HostVBox" type="VBoxContainer" parent="LanCanvas/PanelRoot/ContentFrame/HostPage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 26
+
+[node name="HostGrid" type="GridContainer" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox"]
 layout_mode = 2
 size_flags_vertical = 3
-
-[node name="Host" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
-layout_mode = 2
-
-[node name="HostVBox" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Host"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 10
-
-[node name="RoomNameLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-layout_mode = 2
-text = "Room Name:"
-
-[node name="RoomNameEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-layout_mode = 2
-text = "Finn's LAN Match"
-
-[node name="HeroLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-layout_mode = 2
-text = "Choose Your Hero:"
-
-[node name="HostHeroOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-layout_mode = 2
-
-[node name="DeckLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-layout_mode = 2
-text = "Choose Your Deck:"
-
-[node name="HostDeckOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-layout_mode = 2
-
-[node name="PortHBox" type="HBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-layout_mode = 2
-
-[node name="PortLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox/PortHBox"]
-layout_mode = 2
-text = "Game Port:"
-
-[node name="HostPortEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox/PortHBox"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-text = "8910"
-
-[node name="HostStartBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-custom_minimum_size = Vector2(0, 36)
-layout_mode = 2
-text = "📡 Host LAN Game"
-
-[node name="HostStatusLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Host/HostVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.9, 0.6, 1)
-theme_override_font_sizes/font_size = 12
-text = "Set room details and click Host."
-horizontal_alignment = 1
-
-[node name="Join" type="TabBar" parent="CenterContainer/Panel/VBox/TabContainer"]
-visible = false
-layout_mode = 2
-
-[node name="JoinVBox" type="VBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Join"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 10
-
-[node name="ScanBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
-layout_mode = 2
-text = "🔍 Scan Local Network (UDP 47777)"
-
-[node name="ServerListLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
-layout_mode = 2
-text = "Discovered LAN Hosts (Click to select):"
-
-[node name="ServerList" type="ItemList" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="LoadoutGrid" type="GridContainer" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
-layout_mode = 2
+theme_override_constants/h_separation = 34
+theme_override_constants/v_separation = 24
 columns = 2
 
-[node name="JoinHeroLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/LoadoutGrid"]
+[node name="RoomNameLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox/HostGrid"]
+custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
-text = "Hero:"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Room Name"
+vertical_alignment = 1
 
-[node name="JoinHeroOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/LoadoutGrid"]
+[node name="RoomNameEdit" type="LineEdit" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox/HostGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 62)
 layout_mode = 2
 size_flags_horizontal = 3
+text = "Finn's LAN Match"
 
-[node name="JoinDeckLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/LoadoutGrid"]
+[node name="HeroLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox/HostGrid"]
 layout_mode = 2
-text = "Deck:"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Your Hero"
+vertical_alignment = 1
 
-[node name="JoinDeckOption" type="OptionButton" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/LoadoutGrid"]
+[node name="HostHeroOption" type="OptionButton" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox/HostGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 62)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 26
 
-[node name="DirectHBox" type="HBoxContainer" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
+[node name="DeckLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox/HostGrid"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Your Deck"
+vertical_alignment = 1
 
-[node name="DirectIpLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/DirectHBox"]
+[node name="HostDeckOption" type="OptionButton" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox/HostGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 62)
 layout_mode = 2
-text = "Direct IP:"
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 26
 
-[node name="DirectIpEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/DirectHBox"]
+[node name="PortLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox/HostGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Game Port"
+vertical_alignment = 1
+
+[node name="HostPortEdit" type="LineEdit" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox/HostGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 62)
+layout_mode = 2
+size_flags_horizontal = 0
+text = "8910"
+
+[node name="HostStatusLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/HostPage/HostVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94902, 0.768627, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "Set room details and click Host Match."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="JoinPage" type="Control" parent="LanCanvas/PanelRoot/ContentFrame"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 36.0
+offset_right = -48.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="JoinVBox" type="VBoxContainer" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="ScanRow" type="HBoxContainer" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ServerListLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/ScanRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.94902, 0.768627, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Discovered LAN Hosts (UDP 47777)"
+vertical_alignment = 1
+
+[node name="ScanBtn" type="Button" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/ScanRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 68)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxTexture_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_blue")
+theme_override_styles/focus = SubResource("StyleBoxTexture_blue")
+text = "Scan LAN"
+
+[node name="ServerList" type="ItemList" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_default_cursor_shape = 2
+
+[node name="JoinGrid" type="GridContainer" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 18
+theme_override_constants/v_separation = 14
+columns = 4
+
+[node name="JoinHeroLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/JoinGrid"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Hero"
+vertical_alignment = 1
+
+[node name="JoinHeroOption" type="OptionButton" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/JoinGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+
+[node name="JoinDeckLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/JoinGrid"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Deck"
+vertical_alignment = 1
+
+[node name="JoinDeckOption" type="OptionButton" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/JoinGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+
+[node name="DirectIpLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/JoinGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Direct IP"
+vertical_alignment = 1
+
+[node name="DirectIpEdit" type="LineEdit" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/JoinGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "127.0.0.1"
 
-[node name="DirectPortEdit" type="LineEdit" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox/DirectHBox"]
-custom_minimum_size = Vector2(70, 0)
+[node name="DirectPortLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/JoinGrid"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "Port"
+vertical_alignment = 1
+
+[node name="DirectPortEdit" type="LineEdit" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox/JoinGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 56)
+layout_mode = 2
+size_flags_horizontal = 0
 text = "8910"
 
-[node name="DirectConnectBtn" type="Button" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
-custom_minimum_size = Vector2(0, 36)
+[node name="JoinStatusLabel" type="Label" parent="LanCanvas/PanelRoot/ContentFrame/JoinPage/JoinVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-text = "⚡ Connect & Join Match"
-
-[node name="JoinStatusLabel" type="Label" parent="CenterContainer/Panel/VBox/TabContainer/Join/JoinVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.9, 0.6, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.94902, 0.768627, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
 text = "Scan for local games or enter direct IP."
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="CloseBtn" type="Button" parent="CenterContainer/Panel/VBox"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
+[node name="FooterBar" type="Control" parent="LanCanvas/PanelRoot"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 876.0
+offset_right = 1432.0
+offset_bottom = 1004.0
+
+[node name="CloseFooterBtn" type="Button" parent="LanCanvas/PanelRoot/FooterBar"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 320.0
+offset_bottom = 124.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxTexture_red")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_red")
+theme_override_styles/hover = SubResource("StyleBoxTexture_red")
+theme_override_styles/focus = SubResource("StyleBoxTexture_red")
 text = "Close"
+
+[node name="HostStartBtn" type="Button" parent="LanCanvas/PanelRoot/FooterBar"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 984.0
+offset_right = 1364.0
+offset_bottom = 124.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxTexture_green")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_green")
+theme_override_styles/hover = SubResource("StyleBoxTexture_green")
+theme_override_styles/focus = SubResource("StyleBoxTexture_green")
+text = "Host Match"
+
+[node name="DirectConnectBtn" type="Button" parent="LanCanvas/PanelRoot/FooterBar"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 984.0
+offset_right = 1364.0
+offset_bottom = 124.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxTexture_green")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_green")
+theme_override_styles/hover = SubResource("StyleBoxTexture_green")
+theme_override_styles/focus = SubResource("StyleBoxTexture_green")
+text = "Join Match"
