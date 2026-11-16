@@ -347,7 +347,7 @@ func _clear_mode_tweens() -> void:
 		if tw and tw.is_valid():
 			tw.kill()
 	_mode_tweens.clear()
-	for icon in [store_inventory_icon, store_gems_icon, deckwars_stadium, cool_chest_icon, algebraic_chest_icon, dungeon_portal_icon, daily_gift_icon, deck_card_box_icon, deck_sell_icon, deck_build_icon, deck_craft_icon]:
+	for icon in [solo_quests, store_inventory_icon, store_gems_icon, deckwars_stadium, cool_chest_icon, algebraic_chest_icon, dungeon_portal_icon, daily_gift_icon, deck_card_box_icon, deck_sell_icon, deck_build_icon, deck_craft_icon]:
 		if icon:
 			_reset_icon_reaction(icon)
 
@@ -681,13 +681,19 @@ func play_fionna_activate(on_finished: Callable) -> void:
 	else:
 		on_finished.call()
 
+func set_quests_pressed(is_down: bool) -> void:
+	_set_icon_pressed(solo_quests, is_down, ICON_REACTION_SCALE, false)
+
+
 func play_quests_activate(on_finished: Callable) -> void:
-	if solo_quests:
-		if not solo_quests.activate_finished.is_connected(on_finished):
-			solo_quests.activate_finished.connect(on_finished, CONNECT_ONE_SHOT)
-		solo_quests.play_activate()
-	else:
-		on_finished.call()
+	_play_icon_activate(solo_quests, ICON_REACTION_SCALE, false, func():
+		if solo_quests:
+			if not solo_quests.activate_finished.is_connected(on_finished):
+				solo_quests.activate_finished.connect(on_finished, CONNECT_ONE_SHOT)
+			solo_quests.play_activate()
+		else:
+			on_finished.call()
+	)
 
 
 func set_store_inventory_pressed(is_down: bool) -> void:

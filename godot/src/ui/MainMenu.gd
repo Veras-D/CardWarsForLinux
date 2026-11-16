@@ -159,8 +159,8 @@ func _ready() -> void:
 	_connect_board_button(quad_deck_wars, "set_deckwars_pressed", _on_deck_wars_pressed)
 	if quad_fionna:
 		quad_fionna.pressed.connect(_on_fionna_pressed)
+	_connect_board_button(quad_quests, "set_quests_pressed", _on_quests_pressed)
 	if quad_quests:
-		quad_quests.pressed.connect(_on_quests_pressed)
 		if "hit_tester" in quad_quests and treehouse_3d and treehouse_3d.has_method("is_quests_hit_at_viewport_pos"):
 			quad_quests.hit_tester = func(canvas_pos: Vector2) -> bool:
 				return treehouse_3d.is_quests_hit_at_viewport_pos(_screen_to_subviewport(canvas_pos))
@@ -779,15 +779,9 @@ func close_quest_mode_select() -> void:
 		treehouse_3d.hide_quest_modes()
 
 func _on_quests_pressed() -> void:
-	_play_select_sfx()
-	if treehouse_3d and treehouse_3d.has_method("play_quests_activate"):
-		_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars], true)
-		treehouse_3d.play_quests_activate(func():
-			_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars], false)
-			GameManager.open_campaign_map(0)
-		)
-	else:
+	_trigger_board_icon_activate([quad_quests, quad_fionna, quad_deck_wars], "play_quests_activate", func():
 		GameManager.open_campaign_map(0)
+	)
 
 func _on_fionna_pressed() -> void:
 	_play_select_sfx()
