@@ -178,8 +178,10 @@ func _ready() -> void:
 	_on_map_enter()
 
 	if back_btn:
+		_wire_hud_button_reaction(back_btn)
 		back_btn.pressed.connect(_on_back_pressed)
 	if deck_btn:
+		_wire_hud_button_reaction(deck_btn)
 		deck_btn.pressed.connect(_on_deck_pressed)
 	if modal_close_btn:
 		modal_close_btn.pressed.connect(_close_quest_modal)
@@ -1392,6 +1394,23 @@ func _on_battle_pressed() -> void:
 	GameManager.launch_quest_battle(_selected_quest_id)
 
 
+func _wire_hud_button_reaction(btn: TextureButton) -> void:
+	if not btn:
+		return
+	btn.button_down.connect(func():
+		btn.pivot_offset = btn.size * 0.5
+		var tw := create_tween().set_parallel(true)
+		tw.tween_property(btn, "scale", Vector2(0.8, 0.8), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn, "modulate", Color(0.5, 0.5, 0.5, 1.0), 0.05)
+	)
+	btn.button_up.connect(func():
+		btn.pivot_offset = btn.size * 0.5
+		var tw := create_tween().set_parallel(true)
+		tw.tween_property(btn, "scale", Vector2.ONE, 0.05).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn, "modulate", Color.WHITE, 0.05)
+	)
+
+
 func _on_back_pressed() -> void:
 	if Audio and SFX_CLICK:
 		Audio.play_sfx(SFX_CLICK)
@@ -1401,4 +1420,10 @@ func _on_back_pressed() -> void:
 func _on_deck_pressed() -> void:
 	if Audio and SFX_CLICK:
 		Audio.play_sfx(SFX_CLICK)
-	GameManager.open_deck_builder()
+	if deck_btn:
+		deck_btn.disabled = true
+		await get_tree().create_timer(0.06).timeout
+		deck_btn.scale = Vector2.ONE
+		deck_btn.modulate = Color.WHITE
+		deck_btn.disabled = false
+	GameManager.open_deck_menu()

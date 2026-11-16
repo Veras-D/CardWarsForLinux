@@ -927,6 +927,11 @@ func apply_custom_deck(deck_data: Dictionary) -> void:
 		slot["cards"] = player_deck.duplicate()
 
 
+func open_deck_menu() -> void:
+	menu_return_view = "deck_transition"
+	return_to_menu()
+
+
 func open_deck_builder() -> void:
 	current_state = MatchState.MENU
 	_clear_cached_menu_scenes(get_tree().current_scene)

@@ -349,6 +349,20 @@ func restore_return_view() -> void:
 			deck_overlay.modulate.a = 1.0
 		if treehouse_3d and treehouse_3d.has_method("set_deck_modes_view"):
 			treehouse_3d.set_deck_modes_view()
+	elif return_view == "deck_transition":
+		if start_overlay:
+			start_overlay.visible = false
+		if top_bar:
+			top_bar.visible = true
+			top_bar.modulate.a = 1.0
+		if bottom_dock:
+			bottom_dock.visible = false
+		if quest_overlay:
+			quest_overlay.visible = true
+			quest_overlay.modulate.a = 1.0
+		if treehouse_3d and treehouse_3d.has_method("set_quest_modes_view"):
+			treehouse_3d.set_quest_modes_view()
+		call_deferred("_transition_quest_to_deck")
 	elif return_view == "hub":
 		if start_overlay:
 			start_overlay.visible = false
@@ -771,7 +785,7 @@ func _on_quest_back_pressed() -> void:
 	_play_sfx()
 	close_quest_mode_select()
 
-func close_quest_mode_select() -> void:
+func close_quest_mode_select(restore_dock: bool = true) -> void:
 	if "menu_return_view" in GameManager:
 		GameManager.menu_return_view = "hub"
 	if quest_overlay:
@@ -779,7 +793,7 @@ func close_quest_mode_select() -> void:
 		tw_o.tween_property(quest_overlay, "modulate:a", 0.0, 0.2)
 		tw_o.tween_callback(func(): quest_overlay.visible = false)
 	
-	if bottom_dock:
+	if bottom_dock and restore_dock:
 		bottom_dock.visible = true
 		bottom_dock.modulate.a = 0.0
 		var tw = create_tween()
@@ -787,6 +801,15 @@ func close_quest_mode_select() -> void:
 	
 	if treehouse_3d and treehouse_3d.has_method("hide_quest_modes"):
 		treehouse_3d.hide_quest_modes()
+
+
+func _transition_quest_to_deck() -> void:
+	_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars, quest_back_btn], true)
+	await get_tree().process_frame
+	close_quest_mode_select(false)
+	await get_tree().create_timer(0.52).timeout
+	_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars, quest_back_btn], false)
+	open_deck()
 
 func _on_quests_pressed() -> void:
 	_trigger_board_icon_activate([quad_quests, quad_fionna, quad_deck_wars], "play_quests_activate", func():
