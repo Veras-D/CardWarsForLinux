@@ -21,6 +21,13 @@ extends Node3D
 @onready var store_gems_mode: Node3D = get_node_or_null("StoreModesGroup/StoreGemsMode")
 @onready var store_inventory_icon: StoreInventoryIcon = get_node_or_null("StoreModesGroup/StoreInventoryMode/StoreInventoryIcon")
 @onready var store_gems_icon: StoreGemsIcon = get_node_or_null("StoreModesGroup/StoreGemsMode/StoreGemsIcon")
+@onready var chests_modes_group: Node3D = get_node_or_null("ChestsModesGroup")
+@onready var cool_chest_mode: Node3D = get_node_or_null("ChestsModesGroup/CoolChestMode")
+@onready var algebraic_chest_mode: Node3D = get_node_or_null("ChestsModesGroup/AlgebraicChestMode")
+@onready var cool_chest_icon: CoolChestIcon = get_node_or_null("ChestsModesGroup/CoolChestMode/CoolChestIcon")
+@onready var algebraic_chest_icon: AlgebraicChestIcon = get_node_or_null("ChestsModesGroup/AlgebraicChestMode/AlgebraicChestIcon")
+@onready var cool_chest_label: Label3D = get_node_or_null("ChestsModesGroup/CoolChestLabel")
+@onready var algebraic_chest_label: Label3D = get_node_or_null("ChestsModesGroup/AlgebraicChestLabel")
 
 # Camera transforms
 # Start View: Front view framing Jake (left), Finn (right), and the Table
@@ -91,6 +98,9 @@ func set_start_view() -> void:
 		board_modes_group.visible = false
 	if store_modes_group:
 		store_modes_group.visible = false
+	if chests_modes_group:
+		chests_modes_group.visible = false
+	set_chests_idle_audio_enabled(false)
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
 	
@@ -115,8 +125,6 @@ func set_start_view() -> void:
 		fionna_book.close_book(0.0)
 	if solo_quests:
 		solo_quests.stop_audio()
-	if store_modes_group:
-		store_modes_group.visible = false
 
 func set_hub_view() -> void:
 	is_hub_view = true
@@ -147,6 +155,9 @@ func set_hub_view() -> void:
 		solo_quests.stop_audio()
 	if store_modes_group:
 		store_modes_group.visible = false
+	if chests_modes_group:
+		chests_modes_group.visible = false
+	set_chests_idle_audio_enabled(false)
 
 func set_quest_modes_view() -> void:
 	is_hub_view = true
@@ -183,6 +194,9 @@ func set_quest_modes_view() -> void:
 				m.position.y = -0.12
 	if store_modes_group:
 		store_modes_group.visible = false
+	if chests_modes_group:
+		chests_modes_group.visible = false
+	set_chests_idle_audio_enabled(false)
 
 
 func set_store_modes_view() -> void:
@@ -209,6 +223,9 @@ func set_store_modes_view() -> void:
 
 	if board_modes_group:
 		board_modes_group.visible = false
+	if chests_modes_group:
+		chests_modes_group.visible = false
+	set_chests_idle_audio_enabled(false)
 	if store_modes_group:
 		store_modes_group.visible = true
 		_set_group_labels_alpha(store_modes_group, 1.0)
@@ -217,6 +234,47 @@ func set_store_modes_view() -> void:
 		if store_gems_icon:
 			store_gems_icon.reset_anim()
 		for m in [store_inventory_mode, store_gems_mode]:
+			if m:
+				m.scale = Vector3.ONE
+				m.position.y = -0.12
+
+
+func set_chests_modes_view() -> void:
+	is_hub_view = true
+	is_mode_select = true
+	props_anim_ready = true
+	is_logo_animating = false
+	_clear_mode_tweens()
+	if active_tween and active_tween.is_valid():
+		active_tween.kill()
+
+	if camera:
+		camera.position = BATTLE_SELECT_CAM_POS
+		camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
+
+	if logo_group:
+		logo_group.visible = false
+		logo_group.scale = Vector3.ZERO
+
+	if jake_node:
+		jake_node.visible = false
+	if jake_stool:
+		jake_stool.visible = true
+
+	if board_modes_group:
+		board_modes_group.visible = false
+	if store_modes_group:
+		store_modes_group.visible = false
+	if chests_modes_group:
+		chests_modes_group.visible = true
+		_set_group_labels_alpha(chests_modes_group, 1.0)
+		_restore_chests_board_visibility()
+		if cool_chest_icon:
+			cool_chest_icon.reset_anim()
+		if algebraic_chest_icon:
+			algebraic_chest_icon.reset_anim()
+		set_chests_idle_audio_enabled(true)
+		for m in [cool_chest_mode, algebraic_chest_mode]:
 			if m:
 				m.scale = Vector3.ONE
 				m.position.y = -0.12
@@ -318,7 +376,7 @@ func _clear_mode_tweens() -> void:
 		if tw and tw.is_valid():
 			tw.kill()
 	_mode_tweens.clear()
-	for icon in [store_inventory_icon, store_gems_icon, deckwars_stadium]:
+	for icon in [store_inventory_icon, store_gems_icon, deckwars_stadium, cool_chest_icon, algebraic_chest_icon]:
 		if icon:
 			_reset_icon_reaction(icon)
 
@@ -442,6 +500,9 @@ func show_quest_modes() -> void:
 	_begin_board_mode_transition()
 	if store_modes_group:
 		store_modes_group.visible = false
+	if chests_modes_group:
+		chests_modes_group.visible = false
+	set_chests_idle_audio_enabled(false)
 	if board_modes_group:
 		board_modes_group.visible = true
 		if fionna_book:
@@ -467,6 +528,9 @@ func show_store_modes() -> void:
 	_begin_board_mode_transition()
 	if board_modes_group:
 		board_modes_group.visible = false
+	if chests_modes_group:
+		chests_modes_group.visible = false
+	set_chests_idle_audio_enabled(false)
 	if store_modes_group:
 		store_modes_group.visible = true
 		if store_inventory_icon:
@@ -480,6 +544,115 @@ func hide_store_modes() -> void:
 	if not is_mode_select:
 		return
 	_end_board_mode_transition(store_modes_group, [store_inventory_mode, store_gems_mode])
+
+
+func show_chests_modes() -> void:
+	if is_mode_select:
+		return
+	_begin_board_mode_transition()
+	if board_modes_group:
+		board_modes_group.visible = false
+	if store_modes_group:
+		store_modes_group.visible = false
+	if chests_modes_group:
+		chests_modes_group.visible = true
+		_restore_chests_board_visibility()
+		if cool_chest_icon:
+			cool_chest_icon.reset_anim()
+		if algebraic_chest_icon:
+			algebraic_chest_icon.reset_anim()
+		set_chests_idle_audio_enabled(true)
+		_pop_up_board_modes(chests_modes_group, [cool_chest_mode, algebraic_chest_mode])
+
+
+func hide_chests_modes() -> void:
+	if not is_mode_select:
+		return
+	set_chests_idle_audio_enabled(false)
+	_restore_chests_board_visibility()
+	_end_board_mode_transition(chests_modes_group, [cool_chest_mode, algebraic_chest_mode])
+
+
+func set_chests_idle_audio_enabled(enabled: bool) -> void:
+	if cool_chest_icon:
+		cool_chest_icon.set_idle_audio_enabled(enabled)
+		if not enabled:
+			cool_chest_icon.stop_audio()
+	if algebraic_chest_icon:
+		algebraic_chest_icon.set_idle_audio_enabled(enabled)
+		if not enabled:
+			algebraic_chest_icon.stop_audio()
+
+
+func _restore_chests_board_visibility() -> void:
+	if cool_chest_mode:
+		cool_chest_mode.visible = true
+	if algebraic_chest_mode:
+		algebraic_chest_mode.visible = true
+	if cool_chest_label:
+		cool_chest_label.visible = true
+	if algebraic_chest_label:
+		algebraic_chest_label.visible = true
+
+
+func get_chest_icon(chest_key: String) -> ChestIconBase:
+	if chest_key == "cool" or chest_key == "cool_chest":
+		return cool_chest_icon
+	return algebraic_chest_icon
+
+
+func focus_chest(chest_key: String, duration: float = 0.45) -> void:
+	var is_cool := (chest_key == "cool" or chest_key == "cool_chest")
+	var target_mode := cool_chest_mode if is_cool else algebraic_chest_mode
+	var other_mode := algebraic_chest_mode if is_cool else cool_chest_mode
+	if other_mode:
+		other_mode.visible = false
+	if target_mode:
+		target_mode.visible = true
+	if cool_chest_label:
+		cool_chest_label.visible = false
+	if algebraic_chest_label:
+		algebraic_chest_label.visible = false
+	set_chests_idle_audio_enabled(false)
+	if not camera or not target_mode:
+		return
+	var focus_origin := target_mode.global_position
+	var target_pos := focus_origin + Vector3(0.0, 0.20, 0.0)
+	var cam_pos := focus_origin + Vector3(-1.26, 1.08, 0.0)
+	var saved_cam_xf := camera.transform
+	camera.position = cam_pos
+	camera.look_at(target_pos, Vector3.UP)
+	var target_cam_xf := camera.transform
+	camera.transform = saved_cam_xf
+	if active_tween and active_tween.is_valid():
+		active_tween.kill()
+	if duration <= 0.0:
+		camera.transform = target_cam_xf
+		return
+	active_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	active_tween.tween_property(camera, "transform", target_cam_xf, duration)
+
+
+func unfocus_chest(duration: float = 0.35) -> void:
+	_restore_chests_board_visibility()
+	if cool_chest_icon:
+		cool_chest_icon.reset_anim()
+	if algebraic_chest_icon:
+		algebraic_chest_icon.reset_anim()
+	if not camera:
+		return
+	var saved_cam_xf := camera.transform
+	camera.position = BATTLE_SELECT_CAM_POS
+	camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
+	var target_cam_xf := camera.transform
+	camera.transform = saved_cam_xf
+	if active_tween and active_tween.is_valid():
+		active_tween.kill()
+	if duration <= 0.0:
+		camera.transform = target_cam_xf
+		return
+	active_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	active_tween.tween_property(camera, "transform", target_cam_xf, duration)
 
 func play_fionna_activate(on_finished: Callable) -> void:
 	if fionna_book:
@@ -510,6 +683,14 @@ func set_deckwars_pressed(is_down: bool) -> void:
 	_set_icon_pressed(deckwars_stadium, is_down, STADIUM_REACTION_SCALE, false)
 
 
+func set_cool_chest_pressed(is_down: bool) -> void:
+	_set_icon_pressed(cool_chest_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func set_algebraic_chest_pressed(is_down: bool) -> void:
+	_set_icon_pressed(algebraic_chest_icon, is_down, ICON_REACTION_SCALE, true)
+
+
 func play_store_inventory_activate(on_finished: Callable) -> void:
 	_play_icon_activate(store_inventory_icon, ICON_REACTION_SCALE, true, on_finished)
 
@@ -520,6 +701,14 @@ func play_store_gems_activate(on_finished: Callable) -> void:
 
 func play_deckwars_activate(on_finished: Callable) -> void:
 	_play_icon_activate(deckwars_stadium, STADIUM_REACTION_SCALE, false, on_finished)
+
+
+func play_cool_chest_activate(on_finished: Callable) -> void:
+	_play_icon_activate(cool_chest_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func play_algebraic_chest_activate(on_finished: Callable) -> void:
+	_play_icon_activate(algebraic_chest_icon, ICON_REACTION_SCALE, true, on_finished)
 
 
 func _ensure_icon_mats(icon: Node3D) -> Array:

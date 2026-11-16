@@ -1,0 +1,104 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://src/ui/CoolChestIcon.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/chests/low_NChest.png" id="2_tchest"]
+[ext_resource type="Texture2D" path="res://assets/textures/chests/low_Chest_Card.png" id="3_tcard"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_Base.obj" id="4_mbase"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_Lid.obj" id="5_mlid"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_LooseBoard.obj" id="6_mboard"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool_card/Puppet_Card.obj" id="7_mcard"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_Moth01_Body.obj" id="8_mm1b"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_Moth01_WingL.obj" id="9_mm1wl"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_Moth01_WingR.obj" id="10_mm1wr"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_Moth02_Body.obj" id="11_mm2b"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_Moth02_WingL.obj" id="12_mm2wl"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/cool/Puppet_Moth02_WingR.obj" id="13_mm2wr"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_NChest"]
+shading_mode = 0
+albedo_texture = ExtResource("2_tchest")
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="Mat_ChestCard"]
+shading_mode = 0
+albedo_texture = ExtResource("3_tcard")
+texture_filter = 3
+
+[node name="CoolChestIcon" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="CoolChestRoot" type="Node3D" parent="."]
+transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0.3375, 0.125, 0.525)
+
+[node name="Puppet_Global" type="Node3D" parent="CoolChestRoot"]
+transform = Transform3D(-0.083047, 0.996546, 0, -0.996546, -0.083047, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Puppet_Base" type="Node3D" parent="CoolChestRoot/Puppet_Global"]
+transform = Transform3D(0.523186, 0.0436, 0, 0.0436, -0.523186, 0, 0, 0, -0.525, 3.06439, -6.668552, -10.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Base"]
+mesh = ExtResource("4_mbase")
+surface_material_override/0 = SubResource("Mat_NChest")
+
+[node name="Puppet_Lid" type="Node3D" parent="CoolChestRoot/Puppet_Global/Puppet_Base"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.816042, -6.266258, -0.107103)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Base/Puppet_Lid"]
+mesh = ExtResource("5_mlid")
+surface_material_override/0 = SubResource("Mat_NChest")
+
+[node name="Puppet_LooseBoard" type="Node3D" parent="CoolChestRoot/Puppet_Global/Puppet_Base/Puppet_Lid"]
+transform = Transform3D(-0.001955, 0.674351, -0.739432, 0.000028, -0.735438, -0.678017, -0.998971, -0.00134, 0.001428, -1.16905, 11.64389, -7.710169)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Base/Puppet_Lid/Puppet_LooseBoard"]
+mesh = ExtResource("6_mboard")
+surface_material_override/0 = SubResource("Mat_NChest")
+
+[node name="Puppet_Card" type="Node3D" parent="CoolChestRoot/Puppet_Global"]
+transform = Transform3D(0.022668, 0.000135, 0.044566, 0.044553, -0.001284, -0.022658, 0.001083, 0.049983, -0.000702, 4.325926, -6.696117, -10.36889)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Card"]
+mesh = ExtResource("7_mcard")
+surface_material_override/0 = SubResource("Mat_ChestCard")
+
+[node name="Puppet_Moth01_Body" type="Node3D" parent="CoolChestRoot/Puppet_Global"]
+transform = Transform3D(-0.002824, -0.007854, -0.001609, 0.00345, -0.002731, 0.007273, -0.007237, 0.001763, 0.004095, 1.0315, -6.9514, 9.376)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth01_Body"]
+mesh = ExtResource("8_mm1b")
+surface_material_override/0 = SubResource("Mat_NChest")
+
+[node name="Puppet_Moth01_WingL" type="Node3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth01_Body"]
+transform = Transform3D(-0.73432, -0.671744, 0.097638, -0.662375, 0.740551, 0.113331, -0.148435, 0.018548, -0.988748, 0.059558, 0.069555, 0.073765)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth01_Body/Puppet_Moth01_WingL"]
+mesh = ExtResource("9_mm1wl")
+surface_material_override/0 = SubResource("Mat_NChest")
+
+[node name="Puppet_Moth01_WingR" type="Node3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth01_Body"]
+transform = Transform3D(-0.790313, -0.610652, 0.050093, -0.608962, 0.791879, 0.045747, -0.067603, 0.00565, -0.997696, 0.065572, 0.082864, -0.051572)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth01_Body/Puppet_Moth01_WingR"]
+mesh = ExtResource("10_mm1wr")
+surface_material_override/0 = SubResource("Mat_NChest")
+
+[node name="Puppet_Moth02_Body" type="Node3D" parent="CoolChestRoot/Puppet_Global"]
+transform = Transform3D(-0.001536, -0.00832, -0.000819, -0.002549, 0.001259, -0.00801, 0.007962, -0.001202, -0.002722, 0.9874, -6.5217, 11.8864)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth02_Body"]
+mesh = ExtResource("11_mm2b")
+surface_material_override/0 = SubResource("Mat_NChest")
+
+[node name="Puppet_Moth02_WingL" type="Node3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth02_Body"]
+transform = Transform3D(-0.73432, -0.671744, 0.097638, -0.662375, 0.740551, 0.113329, -0.148434, 0.018547, -0.988748, 0.059558, 0.069554, 0.073763)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth02_Body/Puppet_Moth02_WingL"]
+mesh = ExtResource("12_mm2wl")
+surface_material_override/0 = SubResource("Mat_NChest")
+
+[node name="Puppet_Moth02_WingR" type="Node3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth02_Body"]
+transform = Transform3D(-0.790314, -0.610651, 0.050093, -0.608961, 0.79188, 0.045746, -0.067602, 0.005649, -0.997696, 0.065571, 0.082864, -0.051574)
+
+[node name="Mesh" type="MeshInstance3D" parent="CoolChestRoot/Puppet_Global/Puppet_Moth02_Body/Puppet_Moth02_WingR"]
+mesh = ExtResource("13_mm2wr")
+surface_material_override/0 = SubResource("Mat_NChest")

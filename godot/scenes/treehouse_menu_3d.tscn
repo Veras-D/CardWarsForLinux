@@ -1,4 +1,4 @@
-[gd_scene load_steps=76 format=3]
+[gd_scene load_steps=78 format=3]
 
 [ext_resource type="Script" path="res://src/ui/TreehouseMenu3D.gd" id="1_script"]
 [ext_resource type="ArrayMesh" path="res://assets/models/TreeFort_FloorCeiling.obj" id="2_floor"]
@@ -40,6 +40,8 @@
 [ext_resource type="PackedScene" path="res://scenes/solo_quests_icon.tscn" id="57_pquests"]
 [ext_resource type="PackedScene" path="res://scenes/store_inventory_icon.tscn" id="58_pstoreinv"]
 [ext_resource type="PackedScene" path="res://scenes/store_gems_icon.tscn" id="59_pstoregems"]
+[ext_resource type="PackedScene" path="res://scenes/cool_chest_icon.tscn" id="60_pcoolchest"]
+[ext_resource type="PackedScene" path="res://scenes/algebraic_chest_icon.tscn" id="61_palgchest"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/low_FionnaCakeIcon.png" id="38_tbook"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="43_font"]
 [ext_resource type="PackedScene" path="res://scenes/deck_wars_stadium.tscn" id="50_pstadium"]
@@ -364,6 +366,45 @@ render_priority = 5
 outline_render_priority = 4
 pixel_size = 0.0022
 text = "Gems"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="ChestsModesGroup" type="Node3D" parent="."]
+visible = false
+
+[node name="CoolChestMode" type="Node3D" parent="ChestsModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, -0.12, -0.52)
+
+[node name="CoolChestIcon" parent="ChestsModesGroup/CoolChestMode" instance=ExtResource("60_pcoolchest")]
+
+[node name="AlgebraicChestMode" type="Node3D" parent="ChestsModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, -0.12, 0.52)
+
+[node name="AlgebraicChestIcon" parent="ChestsModesGroup/AlgebraicChestMode" instance=ExtResource("61_palgchest")]
+
+[node name="CoolChestLabel" type="Label3D" parent="ChestsModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.76, -0.118, -0.52)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Cool
+Chest"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="AlgebraicChestLabel" type="Label3D" parent="ChestsModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.76, -0.118, 0.52)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Algebraic
+Chest"
 font = ExtResource("43_font")
 font_size = 64
 outline_size = 18

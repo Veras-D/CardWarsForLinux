@@ -4,6 +4,7 @@ extends Control
 const BGM_TREEHOUSE = preload("res://assets/audio/bgm/MainMenu.wav")
 const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 const SFX_UI_SELECT = preload("res://assets/audio/sfx/UI_Select.wav")
+const SFX_UI_BACK = preload("res://assets/audio/sfx/UI_Back.wav")
 
 var _press_select_sfx_played: bool = false
 
@@ -50,6 +51,7 @@ var _press_select_sfx_played: bool = false
 @onready var dungeon_modal: Control = $DungeonArenaModal
 @onready var store_inventory_modal: Control = get_node_or_null("StoreInventoryModal")
 @onready var store_gems_modal: Control = get_node_or_null("StoreGemsModal")
+@onready var chest_flow_overlay: ChestFlowOverlay = get_node_or_null("ChestFlowOverlay")
 @onready var compendium_dialog: Control = $CompendiumDialog
 @onready var cards_grid: GridContainer = $CompendiumDialog/VBox/Scroll/Grid
 @onready var compendium_count_label: Label = $CompendiumDialog/VBox/CountLabel
@@ -73,6 +75,12 @@ var _press_select_sfx_played: bool = false
 @onready var store_back_btn: BaseButton = get_node_or_null("StoreOverlay/BackBtn")
 @onready var quad_inventory: BaseButton = get_node_or_null("StoreOverlay/QuadInventory")
 @onready var quad_gems: BaseButton = get_node_or_null("StoreOverlay/QuadGems")
+
+# Chests Overlay
+@onready var chests_overlay: Control = get_node_or_null("ChestsOverlay")
+@onready var chests_back_btn: BaseButton = get_node_or_null("ChestsOverlay/BackBtn")
+@onready var quad_cool_chest: BaseButton = get_node_or_null("ChestsOverlay/QuadCoolChest")
+@onready var quad_algebraic_chest: BaseButton = get_node_or_null("ChestsOverlay/QuadAlgebraicChest")
 
 func _ready() -> void:
 	# Autoplay Treehouse BGM
@@ -141,6 +149,18 @@ func _ready() -> void:
 		store_inventory_modal.inventory_upgraded.connect(func(_new_max: int): _update_player_stats())
 	if store_gems_modal and store_gems_modal.has_signal("gems_purchased"):
 		store_gems_modal.gems_purchased.connect(func(_added: int): _update_player_stats())
+
+	# Chests Overlay Buttons & Flow
+	if chests_back_btn:
+		chests_back_btn.pressed.connect(_on_chests_back_pressed)
+	_connect_board_button(quad_cool_chest, "set_cool_chest_pressed", _on_quad_cool_chest_pressed)
+	_connect_board_button(quad_algebraic_chest, "set_algebraic_chest_pressed", _on_quad_algebraic_chest_pressed)
+	if chest_flow_overlay:
+		chest_flow_overlay.closed.connect(_on_chest_flow_closed)
+		chest_flow_overlay.chest_opening_started.connect(_on_chest_opening_started)
+		chest_flow_overlay.flow_finished.connect(_on_chest_flow_finished)
+		chest_flow_overlay.open_store_inventory_requested.connect(_on_chest_request_store_inventory)
+		chest_flow_overlay.open_store_gems_requested.connect(_on_chest_request_store_gems)
 	if GameManager:
 		if GameManager.has_signal("player_currencies_updated"):
 			GameManager.player_currencies_updated.connect(_update_player_stats)
@@ -172,6 +192,10 @@ func _ready() -> void:
 		quest_overlay.visible = false
 	if store_overlay:
 		store_overlay.visible = false
+	if chests_overlay:
+		chests_overlay.visible = false
+	if chest_flow_overlay:
+		chest_flow_overlay.reset_immediately()
 	
 	restore_return_view()
 	
@@ -198,6 +222,8 @@ func restore_return_view() -> void:
 			quest_overlay.modulate.a = 1.0
 		if store_overlay:
 			store_overlay.visible = false
+		if chests_overlay:
+			chests_overlay.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_quest_modes_view"):
 			treehouse_3d.set_quest_modes_view()
 	elif return_view == "store":
@@ -213,8 +239,27 @@ func restore_return_view() -> void:
 		if store_overlay:
 			store_overlay.visible = true
 			store_overlay.modulate.a = 1.0
+		if chests_overlay:
+			chests_overlay.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_store_modes_view"):
 			treehouse_3d.set_store_modes_view()
+	elif return_view == "chests":
+		if start_overlay:
+			start_overlay.visible = false
+		if top_bar:
+			top_bar.visible = true
+			top_bar.modulate.a = 1.0
+		if bottom_dock:
+			bottom_dock.visible = false
+		if quest_overlay:
+			quest_overlay.visible = false
+		if store_overlay:
+			store_overlay.visible = false
+		if chests_overlay:
+			chests_overlay.visible = true
+			chests_overlay.modulate.a = 1.0
+		if treehouse_3d and treehouse_3d.has_method("set_chests_modes_view"):
+			treehouse_3d.set_chests_modes_view()
 	elif return_view == "hub":
 		if start_overlay:
 			start_overlay.visible = false
@@ -228,6 +273,8 @@ func restore_return_view() -> void:
 			quest_overlay.visible = false
 		if store_overlay:
 			store_overlay.visible = false
+		if chests_overlay:
+			chests_overlay.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_hub_view"):
 			treehouse_3d.set_hub_view()
 	else:
@@ -242,6 +289,8 @@ func restore_return_view() -> void:
 				quest_overlay.visible = false
 			if store_overlay:
 				store_overlay.visible = false
+			if chests_overlay:
+				chests_overlay.visible = false
 			if treehouse_3d and treehouse_3d.has_method("set_start_view"):
 				treehouse_3d.set_start_view()
 	_update_player_stats()
@@ -303,6 +352,48 @@ func _auto_screenshot() -> void:
 		elif mode == "store_click_gems":
 			_on_quad_gems_pressed()
 			await get_tree().create_timer(0.05).timeout
+	elif mode in ["chests", "chests_fx_in", "chests_confirm", "chests_confirm_alg", "chests_opening", "chests_opening_alg", "chests_reveal"]:
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		open_chests()
+		if mode == "chests_fx_in":
+			await get_tree().create_timer(0.25).timeout
+		else:
+			await get_tree().create_timer(1.2).timeout
+			if mode == "chests_confirm":
+				_open_chest_confirm("cool")
+				await get_tree().create_timer(0.45).timeout
+			elif mode == "chests_confirm_alg":
+				_open_chest_confirm("algebraic")
+				await get_tree().create_timer(0.45).timeout
+			elif mode == "chests_opening":
+				if chests_overlay:
+					chests_overlay.visible = false
+				if treehouse_3d:
+					treehouse_3d.focus_chest("cool", 0.0)
+				if chest_flow_overlay and treehouse_3d:
+					chest_flow_overlay.start_preview_opening("cool", treehouse_3d.get_chest_icon("cool"), "Creature_CoolDog", 4.7)
+				await get_tree().create_timer(0.15).timeout
+			elif mode == "chests_opening_alg":
+				if chests_overlay:
+					chests_overlay.visible = false
+				if treehouse_3d:
+					treehouse_3d.focus_chest("algebraic", 0.0)
+				if chest_flow_overlay and treehouse_3d:
+					chest_flow_overlay.start_preview_opening("algebraic", treehouse_3d.get_chest_icon("algebraic"), "Creature_GL_HuskerKnight", 4.6)
+				await get_tree().create_timer(0.15).timeout
+			elif mode == "chests_reveal":
+				if chests_overlay:
+					chests_overlay.visible = false
+				if treehouse_3d:
+					treehouse_3d.focus_chest("algebraic", 0.0)
+					var alg_icon: ChestIconBase = treehouse_3d.get_chest_icon("algebraic")
+					if alg_icon:
+						alg_icon.set_open_preview_time(5.99)
+				if chest_flow_overlay:
+					chest_flow_overlay.show_preview_reveal("Creature_GL_HuskerKnight", "Gold", false)
+				await get_tree().create_timer(0.4).timeout
 	elif mode == "hub":
 		# Auto tap start to transition into hub
 		if start_overlay and start_overlay.visible:
@@ -340,6 +431,8 @@ func _auto_screenshot() -> void:
 				out_file = "../captured_godot_store_click_inv.png"
 			elif mode == "store_click_gems":
 				out_file = "../captured_godot_store_click_gems.png"
+			elif mode != "":
+				out_file = "../captured_godot_%s.png" % mode
 			img.save_png(out_file)
 			print(">>> SCREENSHOT SAVED TO " + out_file + " <<<")
 	get_tree().quit(0)
@@ -634,10 +727,121 @@ func _on_quad_gems_pressed() -> void:
 	)
 
 func _on_chests_pressed() -> void:
-	_play_sfx()
-	if chest_modal:
-		chest_modal.refresh_display()
-		chest_modal.visible = true
+	_play_select_sfx()
+	open_chests()
+
+
+func open_chests() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "chests"
+	if bottom_dock:
+		var tw = create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(func(): bottom_dock.visible = false)
+
+	if chests_overlay:
+		chests_overlay.visible = true
+		chests_overlay.modulate.a = 0.0
+		var tw_o = create_tween()
+		tw_o.tween_property(chests_overlay, "modulate:a", 1.0, 0.3)
+
+	if treehouse_3d and treehouse_3d.has_method("show_chests_modes"):
+		treehouse_3d.show_chests_modes()
+
+
+func _on_chests_back_pressed() -> void:
+	if Audio and SFX_UI_BACK:
+		Audio.play_sfx(SFX_UI_BACK)
+	else:
+		_play_sfx()
+	close_chests()
+
+
+func close_chests() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "hub"
+	if chest_flow_overlay:
+		chest_flow_overlay.reset_immediately()
+	if chests_overlay:
+		var tw_o = create_tween()
+		tw_o.tween_property(chests_overlay, "modulate:a", 0.0, 0.2)
+		tw_o.tween_callback(func(): chests_overlay.visible = false)
+
+	if bottom_dock:
+		bottom_dock.visible = true
+		bottom_dock.modulate.a = 0.0
+		var tw = create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 1.0, 0.3)
+
+	if treehouse_3d and treehouse_3d.has_method("hide_chests_modes"):
+		treehouse_3d.hide_chests_modes()
+
+
+func _on_quad_cool_chest_pressed() -> void:
+	_trigger_board_icon_activate([quad_cool_chest, quad_algebraic_chest], "play_cool_chest_activate", func():
+		_open_chest_confirm("cool")
+	)
+
+
+func _on_quad_algebraic_chest_pressed() -> void:
+	_trigger_board_icon_activate([quad_cool_chest, quad_algebraic_chest], "play_algebraic_chest_activate", func():
+		_open_chest_confirm("algebraic")
+	)
+
+
+func _open_chest_confirm(chest_key: String) -> void:
+	if treehouse_3d and treehouse_3d.has_method("set_chests_idle_audio_enabled"):
+		treehouse_3d.set_chests_idle_audio_enabled(false)
+	var icon: ChestIconBase = treehouse_3d.get_chest_icon(chest_key) if treehouse_3d and treehouse_3d.has_method("get_chest_icon") else null
+	if chest_flow_overlay:
+		chest_flow_overlay.open_confirm(chest_key, icon)
+
+
+func _on_chest_flow_closed() -> void:
+	if chests_overlay and chests_overlay.visible and treehouse_3d and treehouse_3d.has_method("set_chests_idle_audio_enabled"):
+		treehouse_3d.set_chests_idle_audio_enabled(true)
+
+
+func _on_chest_opening_started(chest_key: String) -> void:
+	if chests_overlay:
+		chests_overlay.visible = false
+	if treehouse_3d and treehouse_3d.has_method("focus_chest"):
+		treehouse_3d.focus_chest(chest_key, 0.45)
+	_update_player_stats()
+
+
+func _on_chest_flow_finished() -> void:
+	if treehouse_3d and treehouse_3d.has_method("unfocus_chest"):
+		treehouse_3d.unfocus_chest(0.35)
+	if chests_overlay:
+		chests_overlay.visible = true
+		chests_overlay.modulate.a = 0.0
+		var tw_o := create_tween()
+		tw_o.tween_property(chests_overlay, "modulate:a", 1.0, 0.28)
+	if treehouse_3d and treehouse_3d.has_method("set_chests_idle_audio_enabled"):
+		treehouse_3d.set_chests_idle_audio_enabled(true)
+	_update_player_stats()
+
+
+func _on_chest_request_store_inventory() -> void:
+	_switch_chests_to_store_modal(store_inventory_modal)
+
+
+func _on_chest_request_store_gems() -> void:
+	_switch_chests_to_store_modal(store_gems_modal)
+
+
+func _switch_chests_to_store_modal(modal: Control) -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "store"
+	if chests_overlay:
+		chests_overlay.visible = false
+	if store_overlay:
+		store_overlay.visible = true
+		store_overlay.modulate.a = 1.0
+	if treehouse_3d and treehouse_3d.has_method("set_store_modes_view"):
+		treehouse_3d.set_store_modes_view()
+	_open_store_modal(modal)
 
 func _on_settings_pressed() -> void:
 	_play_sfx()

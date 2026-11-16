@@ -1,0 +1,56 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://src/ui/AlgebraicChestIcon.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/chests/low_PChest.png" id="2_tchest"]
+[ext_resource type="Texture2D" path="res://assets/textures/chests/low_Chest_Card.png" id="3_tcard"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/algebraic/Puppet_Base.obj" id="4_mbase"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/algebraic/Puppet_Lid.obj" id="5_mlid"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/algebraic_card/Puppet_Card.obj" id="6_mcard"]
+[ext_resource type="ArrayMesh" path="res://assets/models/chests/algebraic/Puppet_Sparkle.obj" id="7_msparkle"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_PChest"]
+shading_mode = 0
+albedo_texture = ExtResource("2_tchest")
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="Mat_ChestCard"]
+shading_mode = 0
+albedo_texture = ExtResource("3_tcard")
+texture_filter = 3
+
+[node name="AlgebraicChestIcon" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="AlgebraicChestRoot" type="Node3D" parent="."]
+transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0.3375, 0.125, -0.525)
+
+[node name="Puppet_Global" type="Node3D" parent="AlgebraicChestRoot"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+
+[node name="Puppet_Base" type="Node3D" parent="AlgebraicChestRoot/Puppet_Global"]
+transform = Transform3D(0, -0.650001, 0.000002, 0, -0.000002, -0.65, 0.650001, 0, 0, -6.90002, 10.50003, 2.500007)
+
+[node name="Mesh" type="MeshInstance3D" parent="AlgebraicChestRoot/Puppet_Global/Puppet_Base"]
+mesh = ExtResource("4_mbase")
+surface_material_override/0 = SubResource("Mat_PChest")
+
+[node name="Puppet_Lid" type="Node3D" parent="AlgebraicChestRoot/Puppet_Global/Puppet_Base"]
+transform = Transform3D(0.999998, 0, 0, 0, 0.999998, 0, 0, 0, 1, -10.68543, -6.577678, -0.000004)
+
+[node name="Mesh" type="MeshInstance3D" parent="AlgebraicChestRoot/Puppet_Global/Puppet_Base/Puppet_Lid"]
+mesh = ExtResource("5_mlid")
+surface_material_override/0 = SubResource("Mat_PChest")
+
+[node name="Puppet_Card" type="Node3D" parent="AlgebraicChestRoot/Puppet_Global"]
+transform = Transform3D(-0.008458, 0.005307, 0.000557, -0.000349, 0.000492, -0.009982, -0.005324, -0.008462, -0.000231, -6.656927, 9.325278, -3.415009)
+
+[node name="Mesh" type="MeshInstance3D" parent="AlgebraicChestRoot/Puppet_Global/Puppet_Card"]
+mesh = ExtResource("6_mcard")
+surface_material_override/0 = SubResource("Mat_ChestCard")
+
+[node name="Puppet_Sparkle" type="Node3D" parent="AlgebraicChestRoot/Puppet_Global"]
+transform = Transform3D(-0.042431, 0.254497, 0, -0.090841, -0.118874, 0, 0, 0, 0.20386, -6.764229, 5.66294, 1.134866)
+
+[node name="Mesh" type="MeshInstance3D" parent="AlgebraicChestRoot/Puppet_Global/Puppet_Sparkle"]
+mesh = ExtResource("7_msparkle")
+surface_material_override/0 = SubResource("Mat_PChest")
