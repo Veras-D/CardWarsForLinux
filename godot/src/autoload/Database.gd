@@ -19,6 +19,8 @@ var lvup_schemes_db: Dictionary = {}
 var gacha_pools_db: Dictionary = {}
 var gacha_schedules_list: Array[Dictionary] = []
 var chest_defs_db: Dictionary = {}
+var daily_gift_table: Array[Dictionary] = []
+var daily_gift_card_pools: Dictionary = {}
 var quests_db: Dictionary = {}
 var main_quests_list: Array[Dictionary] = []
 var fc_quests_list: Array[Dictionary] = []
@@ -71,6 +73,7 @@ func load_blueprints() -> void:
 	_load_lvup_schemes()
 	_load_gacha_weights()
 	_load_gacha_schedule()
+	_load_daily_gifts()
 	_load_quest_conditions()
 	_load_map_regions()
 	_load_fc_map()
@@ -415,6 +418,9 @@ func _load_gacha_weights() -> void:
 		return
 	var cool_items: Array[Dictionary] = []
 	var algebraic_items: Array[Dictionary] = []
+	var dg_std: Array[Dictionary] = []
+	var dg_gold: Array[Dictionary] = []
+	var dg_obs: Array[Dictionary] = []
 	for item in json.data:
 		var card_id = str(item.get("CardID", "")).strip_edges()
 		if card_id == "":
@@ -438,8 +444,20 @@ func _load_gacha_weights() -> void:
 				"rarity": rarity,
 				"metadata": {"card_id": card_id, "quality": rarity}
 			})
+		var w_std = int(item.get("DailyGiftStandard", "0"))
+		var w_gold = int(item.get("DailyGiftGold", "0"))
+		var w_obs = int(item.get("DailyGiftObsidian", "0"))
+		if w_std > 0:
+			dg_std.append({"id": card_id, "weight": w_std})
+		if w_gold > 0:
+			dg_gold.append({"id": card_id, "weight": w_gold})
+		if w_obs > 0:
+			dg_obs.append({"id": card_id, "weight": w_obs})
 	gacha_pools_db["cool_chest"] = cool_items
 	gacha_pools_db["algebraic_chest"] = algebraic_items
+	daily_gift_card_pools["Standard"] = dg_std
+	daily_gift_card_pools["Gold"] = dg_gold
+	daily_gift_card_pools["Obsidian"] = dg_obs
 
 func _load_gacha_schedule() -> void:
 	chest_defs_db = {
@@ -930,6 +948,74 @@ func get_gem_shop_products() -> Array[Dictionary]:
 	for p in gem_shop_products:
 		res.append(p.duplicate(true))
 	return res
+
+
+func _load_daily_gifts() -> void:
+	var path = "res://data/db_DailyGift.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK or typeof(json.data) != TYPE_ARRAY:
+		return
+	daily_gift_table.clear()
+	for i in range(json.data.size()):
+		var item = json.data[i]
+		daily_gift_table.append({
+			"index": i,
+			"type": str(item.get("Type", "")).strip_edges(),
+			"quantity": int(item.get("Quantity", "1")),
+			"rarity": maxi(1, int(item.get("Rarity", "1"))),
+			"name": str(item.get("Name", "")).strip_edges(),
+			"icon": str(item.get("Icon", "")).strip_edges(),
+			"retry_gem_cost": maxi(1, int(item.get("RetryGemCost", "1")))
+		})
+
+
+func get_daily_gift_entries() -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for e in daily_gift_table:
+		res.append(e.duplicate(true))
+	return res
+
+
+func get_daily_gift_retry_cost() -> int:
+	if daily_gift_table.is_empty():
+		return 1
+	return int(daily_gift_table[0].get("retry_gem_cost", 1))
+
+
+func roll_daily_gift(rng: RandomNumberGenerator = null) -> Dictionary:
+	if daily_gift_table.is_empty():
+		return {}
+	var total_weight: int = 0
+	for e in daily_gift_table:
+		total_weight += int(e.get("rarity", 1))
+	var r: int = rng.randi_range(0, total_weight - 1) if rng else randi_range(0, total_weight - 1)
+	var acc: int = 0
+	for e in daily_gift_table:
+		acc += int(e.get("rarity", 1))
+		if r < acc:
+			return e.duplicate(true)
+	return daily_gift_table[0].duplicate(true)
+
+
+func pick_daily_gift_card_id(quality: String, rng: RandomNumberGenerator = null) -> String:
+	var pool: Array = daily_gift_card_pools.get(quality, [])
+	if pool.is_empty():
+		pool = daily_gift_card_pools.get("Standard", [])
+	if pool.is_empty():
+		return "Creature_CoolDog"
+	var total_w: int = 0
+	for entry in pool:
+		total_w += int(entry.get("weight", 1))
+	var roll: int = rng.randi_range(0, maxi(0, total_w - 1)) if rng else randi_range(0, maxi(0, total_w - 1))
+	var acc: int = 0
+	for entry in pool:
+		acc += int(entry.get("weight", 1))
+		if roll < acc:
+			return str(entry.get("id", "Creature_CoolDog"))
+	return str(pool[0].get("id", "Creature_CoolDog"))
 
 
 

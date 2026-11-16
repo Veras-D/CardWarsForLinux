@@ -1,30 +1,35 @@
-[gd_scene format=3 uid="uid://dungeon_arena_modal_001"]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://src/ui/DungeonArenaModal.gd" id="1_modal_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/QuestInfo_BG2_Small.png" id="3_frame"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="4_cancel"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="5_btngreen"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonBlue.png" id="6_btnblue"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/heart.png" id="7_heart"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_dungeons.png" id="8_portal"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
-bg_color = Color(0, 0, 0, 0.75)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bodyfill"]
+bg_color = Color(0.188, 0.314, 0.376, 0.96)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.1, 0.12, 0.18, 0.98)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.85, 0.65, 0.25, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_info"]
-bg_color = Color(0.06, 0.08, 0.12, 0.8)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_infopanel"]
+bg_color = Color(0.09, 0.16, 0.21, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65, 0.78, 0.85, 0.85)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="DungeonArenaModal" type="Control"]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,159 +38,382 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_modal_script")
 
-[node name="DimOverlay" type="Panel" parent="."]
+[node name="Dimmer" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
+color = Color(0, 0, 0, 0.58)
 
-[node name="Panel" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(760, 560)
+[node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -380.0
-offset_top = -280.0
-offset_right = 380.0
-offset_bottom = 280.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="Header" type="HBoxContainer" parent="Panel/VBox"]
+[node name="Frame" type="Control" parent="Center"]
+custom_minimum_size = Vector2(760, 560)
 layout_mode = 2
 
-[node name="Title" type="Label" parent="Panel/VBox/Header"]
+[node name="TitleBar" type="Control" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 114.0
+grow_horizontal = 2
+
+[node name="FillBg" type="Panel" parent="Center/Frame/TitleBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bodyfill")
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/TitleBar"]
+layout_mode = 0
+offset_right = 1086.0
+offset_bottom = 163.0
+scale = Vector2(0.7, 0.7)
+mouse_filter = 2
+texture = ExtResource("3_frame")
+patch_margin_left = 58
+patch_margin_top = 52
+patch_margin_right = 65
+patch_margin_bottom = 58
+
+[node name="TitleLabel" type="Label" parent="Center/Frame/TitleBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 6.0
+offset_right = -84.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+text = "DAILY DUNGEONS OF DOOM"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseBtn" type="TextureButton" parent="Center/Frame/TitleBar"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -94.0
+offset_top = -37.0
+offset_right = -20.0
+offset_bottom = 37.0
+grow_horizontal = 0
+grow_vertical = 2
+focus_mode = 0
+texture_normal = ExtResource("4_cancel")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Body" type="Control" parent="Center/Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 108.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FillBg" type="Panel" parent="Center/Frame/Body"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bodyfill")
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body"]
+layout_mode = 0
+offset_right = 1086.0
+offset_bottom = 646.0
+scale = Vector2(0.7, 0.7)
+mouse_filter = 2
+texture = ExtResource("3_frame")
+patch_margin_left = 58
+patch_margin_top = 52
+patch_margin_right = 65
+patch_margin_bottom = 58
+
+[node name="DungeonBanner" type="Panel" parent="Center/Frame/Body"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 28.0
+offset_top = 24.0
+offset_right = -28.0
+offset_bottom = 106.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_infopanel")
+
+[node name="HBox" type="HBoxContainer" parent="Center/Frame/Body/DungeonBanner"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 8.0
+offset_right = -14.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="PortalIcon" type="TextureRect" parent="Center/Frame/Body/DungeonBanner/HBox"]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("8_portal")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextVBox" type="VBoxContainer" parent="Center/Frame/Body/DungeonBanner/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.8, 0.3, 1)
-theme_override_font_sizes/font_size = 20
-text = "⚔️ DUNGEONS & SURVIVAL ARENA"
-
-[node name="CloseBtn" type="Button" parent="Panel/VBox/Header"]
-custom_minimum_size = Vector2(40, 32)
-layout_mode = 2
-text = "✖"
-
-[node name="TabBar" type="HBoxContainer" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="DungeonsTabBtn" type="Button" parent="Panel/VBox/TabBar"]
-custom_minimum_size = Vector2(180, 36)
-layout_mode = 2
-text = "📅 Daily Dungeons"
-
-[node name="ElFistoTabBtn" type="Button" parent="Panel/VBox/TabBar"]
-custom_minimum_size = Vector2(180, 36)
-layout_mode = 2
-text = "🥊 El Fisto Gauntlet"
-
-[node name="HSeparator" type="HSeparator" parent="Panel/VBox"]
-layout_mode = 2
-
-[node name="ContentArea" type="Control" parent="Panel/VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="DungeonsView" type="VBoxContainer" parent="Panel/VBox/ContentArea"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 10
-
-[node name="WeekdayBar" type="HBoxContainer" parent="Panel/VBox/ContentArea/DungeonsView"]
-layout_mode = 2
-theme_override_constants/separation = 8
 alignment = 1
 
-[node name="DungeonInfo" type="PanelContainer" parent="Panel/VBox/ContentArea/DungeonsView"]
+[node name="DungeonName" type="Label" parent="Center/Frame/Body/DungeonBanner/HBox/TextVBox"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_info")
+theme_override_colors/font_color = Color(1, 0.88, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "MONDAY DUNGEON"
 
-[node name="VBox" type="VBoxContainer" parent="Panel/VBox/ContentArea/DungeonsView/DungeonInfo"]
+[node name="DungeonDesc" type="Label" parent="Center/Frame/Body/DungeonBanner/HBox/TextVBox"]
 layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="Title" type="Label" parent="Panel/VBox/ContentArea/DungeonsView/DungeonInfo"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 18
-text = "🏛️ MONDAY DUNGEON"
+text = "Get your Plains Cards here!"
 
-[node name="Desc" type="Label" parent="Panel/VBox/ContentArea/DungeonsView/DungeonInfo"]
+[node name="HeartBadge" type="HBoxContainer" parent="Center/Frame/Body/DungeonBanner/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 13
-text = "Clear daily elemental stages to claim bonus crafting ingredients and rare creatures."
+size_flags_vertical = 4
+theme_override_constants/separation = 6
 
-[node name="StagesScroll" type="ScrollContainer" parent="Panel/VBox/ContentArea/DungeonsView"]
+[node name="HeartIcon" type="TextureRect" parent="Center/Frame/Body/DungeonBanner/HBox/HeartBadge"]
+custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 4
+texture = ExtResource("7_heart")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="StagesList" type="VBoxContainer" parent="Panel/VBox/ContentArea/DungeonsView/StagesScroll"]
+[node name="StaminaLabel" type="Label" parent="Center/Frame/Body/DungeonBanner/HBox/HeartBadge"]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "100 / 100"
 
-[node name="ElFistoView" type="VBoxContainer" parent="Panel/VBox/ContentArea"]
+[node name="LockedGatePanel" type="Control" parent="Center/Frame/Body"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = 120.0
+offset_right = -30.0
+offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center/Frame/Body/LockedGatePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="GateMsg" type="Label" parent="Center/Frame/Body/LockedGatePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.72, 0.35, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "Your Leader is not at a rad enough level to enter the Dungeons! You must have a leader that is level 5 or higher to enter."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="SubMsg" type="Label" parent="Center/Frame/Body/LockedGatePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.94, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 19
+text = "Win Quests to level up your Leader, or switch Heroes in Deck Builder."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="GateBtns" type="HBoxContainer" parent="Center/Frame/Body/LockedGatePanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 26
+alignment = 1
+
+[node name="DeckBtn" type="TextureButton" parent="Center/Frame/Body/LockedGatePanel/VBox/GateBtns"]
+custom_minimum_size = Vector2(214, 72)
+layout_mode = 2
+focus_mode = 0
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/LockedGatePanel/VBox/GateBtns/DeckBtn"]
+layout_mode = 0
+offset_right = 428.0
+offset_bottom = 144.0
+scale = Vector2(0.5, 0.5)
+mouse_filter = 2
+texture = ExtResource("5_btngreen")
+patch_margin_left = 36
+patch_margin_top = 30
+patch_margin_right = 36
+patch_margin_bottom = 40
+
+[node name="Label" type="Label" parent="Center/Frame/Body/LockedGatePanel/VBox/GateBtns/DeckBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "DECKS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OkBtn" type="TextureButton" parent="Center/Frame/Body/LockedGatePanel/VBox/GateBtns"]
+custom_minimum_size = Vector2(180, 72)
+layout_mode = 2
+focus_mode = 0
+
+[node name="Bg" type="NinePatchRect" parent="Center/Frame/Body/LockedGatePanel/VBox/GateBtns/OkBtn"]
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 144.0
+scale = Vector2(0.5, 0.5)
+mouse_filter = 2
+texture = ExtResource("6_btnblue")
+patch_margin_left = 36
+patch_margin_top = 30
+patch_margin_right = 36
+patch_margin_bottom = 40
+
+[node name="Label" type="Label" parent="Center/Frame/Body/LockedGatePanel/VBox/GateBtns/OkBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "CLOSE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StagesPanel" type="Control" parent="Center/Frame/Body"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 114.0
+offset_right = -28.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StagesList" type="VBoxContainer" parent="Center/Frame/Body/StagesPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -42.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="StatusRow" type="HBoxContainer" parent="Center/Frame/Body/StagesPanel"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -38.0
+grow_horizontal = 2
+grow_vertical = 0
 theme_override_constants/separation = 12
+alignment = 1
 
-[node name="StatsPanel" type="PanelContainer" parent="Panel/VBox/ContentArea/ElFistoView"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_info")
-
-[node name="VBox" type="VBoxContainer" parent="Panel/VBox/ContentArea/ElFistoView/StatsPanel"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="StatusLabel" type="Label" parent="Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
-theme_override_font_sizes/font_size = 16
-text = "🥊 Status: READY TO ENTER (Round 1 / 8)"
-
-[node name="HpLabel" type="Label" parent="Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
-text = "❤️ Survival HP: 45 / 45"
-
-[node name="RecordLabel" type="Label" parent="Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
-text = "🏆 Highest Round: 1 | 🔥 Win Streak: 0"
-
-[node name="LadderScroll" type="ScrollContainer" parent="Panel/VBox/ContentArea/ElFistoView"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="LadderList" type="VBoxContainer" parent="Panel/VBox/ContentArea/ElFistoView/LadderScroll"]
+[node name="StatusLabel" type="Label" parent="Center/Frame/Body/StagesPanel/StatusRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_colors/font_color = Color(1, 0.45, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="ActionBtn" type="Button" parent="Panel/VBox/ContentArea/ElFistoView"]
-custom_minimum_size = Vector2(260, 42)
+[node name="RefillBtn" type="Button" parent="Center/Frame/Body/StagesPanel/StatusRow"]
+visible = false
+custom_minimum_size = Vector2(180, 34)
 layout_mode = 2
-size_flags_horizontal = 4
-text = "🥊 Enter El Fisto Arena (Round 1)"
+focus_mode = 0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "Refill (1 Gem)"

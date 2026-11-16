@@ -135,7 +135,16 @@ const STAR_MILESTONES: Array[Dictionary] = [
 var claimed_star_milestones: Array[int] = []
 
 # Daily Dungeons & El Fisto Arena (Task 7.4)
+const MIN_DUNGEON_LEVEL: int = 5
+const DAILY_GIFT_REFRESH_SEC: int = 86400
+var max_stamina: int = 100
+var stamina: int:
+	get:
+		return wallet.get_balance("energy") if wallet else 100
 var dungeon_stage_clears: Dictionary = {}
+var active_dungeon_name: String = ""
+var active_dungeon_stage_index: int = -1
+var last_daily_gift_timestamp: int = 0
 var elfisto_current_round: int = 1
 var elfisto_highest_round: int = 1
 var elfisto_consecutive_wins: int = 0
@@ -170,7 +179,7 @@ func _init_wallet() -> void:
 		wallet = CurrencyWallet.new()
 		wallet.register_currency("coins", player_coins, 99999999)
 		wallet.register_currency("gems", 50, 999999)
-		wallet.register_currency("energy", 100, 100)
+		wallet.register_currency("energy", 100, 9999)
 
 		wallet.balance_changed.connect(func(cid, _old, new_bal):
 			if cid == "coins":
@@ -441,6 +450,8 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"fc_campaign": fc_campaign_graph.serialize() if fc_campaign_graph != null else {},
 		"claimed_star_milestones": claimed_star_milestones,
 		"dungeon_stage_clears": dungeon_stage_clears,
+		"last_daily_gift_timestamp": last_daily_gift_timestamp,
+		"max_stamina": max_stamina,
 		"elfisto": {
 			"current_round": elfisto_current_round,
 			"highest_round": elfisto_highest_round,
@@ -532,6 +543,10 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 			claimed_star_milestones.append(int(m))
 	if data.has("dungeon_stage_clears") and typeof(data["dungeon_stage_clears"]) == TYPE_DICTIONARY:
 		dungeon_stage_clears = data["dungeon_stage_clears"].duplicate(true)
+	if data.has("last_daily_gift_timestamp"):
+		last_daily_gift_timestamp = int(data["last_daily_gift_timestamp"])
+	if data.has("max_stamina"):
+		max_stamina = maxi(100, int(data["max_stamina"]))
 	if data.has("elfisto") and typeof(data["elfisto"]) == TYPE_DICTIONARY:
 		var ef = data["elfisto"]
 		elfisto_current_round = int(ef.get("current_round", 1))
@@ -1094,6 +1109,234 @@ func complete_dungeon_stage(dungeon_name: String, stage_index: int) -> void:
 	if stage_index + 1 > curr:
 		dungeon_stage_clears[dungeon_name] = stage_index + 1
 	save_profile()
+
+
+func get_stamina() -> int:
+	if wallet == null:
+		_init_wallet()
+	return wallet.get_balance("energy")
+
+
+func get_max_stamina() -> int:
+	return max_stamina
+
+
+func refill_stamina_with_gems() -> Dictionary:
+	_init_wallet()
+	if not spend_gems(1):
+		return {"ok": false, "reason": "Not enough Gems!", "not_enough_gems": true}
+	var cur := get_stamina()
+	if cur < max_stamina:
+		wallet.deposit("energy", max_stamina - cur)
+	save_profile()
+	player_currencies_updated.emit(get_coins(), get_gems())
+	return {"ok": true, "stamina": get_stamina()}
+
+
+func validate_dungeon_entry() -> Dictionary:
+	var cur_lvl := get_hero_level(player_hero_name)
+	var is_fc := Database.is_leader_fc(player_hero_name)
+	if cur_lvl < MIN_DUNGEON_LEVEL:
+		return {
+			"ok": false,
+			"reason": "Your Leader is not at a rad enough level to enter the Dungeons! You must have a leader that is level %d or higher to enter." % MIN_DUNGEON_LEVEL,
+			"fail_type": "level",
+			"level": cur_lvl
+		}
+	if is_fc:
+		return {
+			"ok": false,
+			"reason": "Fionna & Cake World Leaders cannot enter the Daily Dungeons of Doom! Switch to an Ooo Leader in Deck Builder.",
+			"fail_type": "fc_hero",
+			"level": cur_lvl
+		}
+	return {"ok": true, "level": cur_lvl}
+
+
+func launch_dungeon_stage(dungeon_name: String, stage_index: int, quest_id: String, heart_cost: int) -> Dictionary:
+	var entry_chk := validate_dungeon_entry()
+	if not bool(entry_chk.get("ok", false)):
+		return entry_chk
+	if not is_dungeon_stage_unlocked(dungeon_name, stage_index):
+		return {"ok": false, "reason": "Clear the previous stage first!", "fail_type": "locked"}
+	if get_total_card_count() > get_max_inventory():
+		return {"ok": false, "reason": "Your Card Box is full! Expand or sell cards first.", "fail_type": "inventory"}
+	var quest: Dictionary = Database.get_quest(quest_id)
+	if quest.is_empty():
+		return {"ok": false, "reason": "Dungeon quest not found.", "fail_type": "missing"}
+	_init_wallet()
+	var cost := maxi(1, heart_cost)
+	if get_stamina() < cost:
+		return {"ok": false, "reason": "Not enough Hearts! Spend 1 Gem to refill?", "fail_type": "stamina", "needed": cost}
+	wallet.withdraw("energy", cost)
+	player_currencies_updated.emit(get_coins(), get_gems())
+
+	active_quest_id = quest_id
+	active_dungeon_name = dungeon_name
+	active_dungeon_stage_index = stage_index
+	menu_return_view = "dungeon_list"
+
+	var opp_name = str(quest.get("opponent", "Finn"))
+	if opp_name != "":
+		opponent_hero_name = opp_name
+	var leader_lvl = int(quest.get("leader_level", 1))
+	var base_hp = 25
+	var leader_data = Database.leaders_db.get(quest.get("leader_id", ""), {})
+	if not leader_data.is_empty():
+		base_hp = int(leader_data.get("base_hp", 25))
+	opponent_hero_max_hp = base_hp + (leader_lvl * 5)
+
+	var deck_id = str(quest.get("deck_id", ""))
+	if deck_id != "" and Database.preset_decks_db.has(deck_id):
+		var raw_deck = Database.get_preset_deck(deck_id)
+		if not raw_deck.is_empty():
+			var typed_deck: Array[String] = []
+			for c in raw_deck:
+				typed_deck.append(str(c))
+			opponent_deck = typed_deck
+
+	save_profile()
+	start_battle()
+	return {"ok": true}
+
+
+func retry_active_dungeon() -> bool:
+	if active_dungeon_name == "" or active_dungeon_stage_index < 0 or active_quest_id == "":
+		return false
+	var stages := Database.get_dungeon_stages(active_dungeon_name)
+	var h_cost := 5
+	if active_dungeon_stage_index < stages.size():
+		h_cost = int(stages[active_dungeon_stage_index].get("heart_cost", 5))
+	var res := launch_dungeon_stage(active_dungeon_name, active_dungeon_stage_index, active_quest_id, h_cost)
+	return bool(res.get("ok", false))
+
+
+func complete_dungeon_quest(quest_id: String, match_stats: Dictionary) -> Dictionary:
+	var quest: Dictionary = Database.get_quest(quest_id)
+	if quest.is_empty():
+		return {"ok": false, "rewards": {}}
+
+	var prev_cleared := get_dungeon_max_cleared_stage(active_dungeon_name)
+	var newly_cleared := (active_dungeon_name != "" and active_dungeon_stage_index >= 0 and active_dungeon_stage_index + 1 > prev_cleared)
+	if active_dungeon_name != "" and active_dungeon_stage_index >= 0:
+		complete_dungeon_stage(active_dungeon_name, active_dungeon_stage_index)
+
+	var min_c := int(quest.get("min_coins", 0))
+	var max_c := int(quest.get("max_coins", 0))
+	var awarded_coins := randi_range(min_c, max_c) if max_c >= min_c else min_c
+	var min_xp := int(quest.get("min_xp", 0))
+	var max_xp := int(quest.get("max_xp", 0))
+	var awarded_xp := randi_range(min_xp, max_xp) if max_xp >= min_xp else min_xp
+
+	var card_drops: Array[String] = []
+	for cd in quest.get("card_drops", []):
+		card_drops.append(str(cd))
+
+	var leader_awarded := str(quest.get("leader_awarded", "")).strip_edges()
+	var newly_unlocked_leader := ""
+	if newly_cleared and leader_awarded != "" and unlock_leader(leader_awarded):
+		newly_unlocked_leader = leader_awarded
+
+	var stamina_award := int(quest.get("stamina_awarded", 0)) if newly_cleared else 0
+	if stamina_award > 0:
+		max_stamina += stamina_award
+		if wallet:
+			wallet.deposit("energy", stamina_award)
+
+	add_rewards(awarded_coins, card_drops, awarded_xp)
+	save_profile()
+	player_currencies_updated.emit(get_coins(), get_gems())
+
+	return {
+		"ok": true,
+		"newly_cleared": newly_cleared,
+		"rewards": {
+			"coins": awarded_coins,
+			"xp": awarded_xp,
+			"cards": card_drops,
+			"leader_awarded": newly_unlocked_leader,
+			"stamina_awarded": stamina_award
+		}
+	}
+
+
+func open_dungeon_menu() -> void:
+	menu_return_view = "dungeon_list"
+	current_state = MatchState.MENU
+	return_to_menu()
+
+
+# ==============================================================================
+# DAILY GIFT ROULETTE
+# ==============================================================================
+
+func get_daily_gift_seconds_left() -> int:
+	if last_daily_gift_timestamp <= 0:
+		return 0
+	var now_sec := int(Time.get_unix_time_from_system())
+	var elapsed := now_sec - last_daily_gift_timestamp
+	return maxi(0, DAILY_GIFT_REFRESH_SEC - elapsed)
+
+
+func is_daily_gift_free_ready() -> bool:
+	return get_daily_gift_seconds_left() <= 0
+
+
+func start_daily_gift_spin(use_gem_retry: bool = false, rng: RandomNumberGenerator = null) -> Dictionary:
+	_init_wallet()
+	var free_ready := is_daily_gift_free_ready()
+	var retry_cost := Database.get_daily_gift_retry_cost()
+	if not free_ready:
+		if not use_gem_retry:
+			return {"ok": false, "reason": "Free Daily Gift on cooldown.", "cooldown": get_daily_gift_seconds_left()}
+		if not spend_gems(retry_cost):
+			return {"ok": false, "reason": "Not enough Gems!", "not_enough_gems": true}
+	else:
+		last_daily_gift_timestamp = int(Time.get_unix_time_from_system())
+
+	var entry := Database.roll_daily_gift(rng)
+	if entry.is_empty():
+		return {"ok": false, "reason": "Daily Gift table empty."}
+
+	var gtype := str(entry.get("type", ""))
+	var card_id := ""
+	if gtype == "Card normal":
+		card_id = Database.pick_daily_gift_card_id("Standard", rng)
+	elif gtype == "Card gold":
+		card_id = Database.pick_daily_gift_card_id("Gold", rng)
+	elif gtype == "Card obsidian":
+		card_id = Database.pick_daily_gift_card_id("Obsidian", rng)
+
+	save_profile()
+	player_currencies_updated.emit(get_coins(), get_gems())
+	return {
+		"ok": true,
+		"used_free": free_ready,
+		"cell_index": int(entry.get("index", 0)),
+		"entry": entry,
+		"card_id": card_id
+	}
+
+
+func grant_daily_gift_reward(spin_res: Dictionary) -> Dictionary:
+	_init_wallet()
+	var entry: Dictionary = spin_res.get("entry", {})
+	var gtype := str(entry.get("type", ""))
+	var qty := maxi(1, int(entry.get("quantity", 1)))
+	var card_id := str(spin_res.get("card_id", ""))
+	match gtype:
+		"Coins":
+			add_coins(qty)
+		"Gems":
+			add_gems(qty)
+		"Hearts":
+			wallet.deposit("energy", qty)
+		"Card normal", "Card gold", "Card obsidian":
+			if card_id != "":
+				add_card_to_inventory(card_id)
+	save_profile()
+	player_currencies_updated.emit(get_coins(), get_gems())
+	return {"ok": true, "type": gtype, "quantity": qty, "card_id": card_id}
 
 
 ## El Fisto Survival Gauntlet lifecycle

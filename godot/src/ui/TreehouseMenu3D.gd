@@ -28,6 +28,11 @@ extends Node3D
 @onready var algebraic_chest_icon: AlgebraicChestIcon = get_node_or_null("ChestsModesGroup/AlgebraicChestMode/AlgebraicChestIcon")
 @onready var cool_chest_label: Label3D = get_node_or_null("ChestsModesGroup/CoolChestLabel")
 @onready var algebraic_chest_label: Label3D = get_node_or_null("ChestsModesGroup/AlgebraicChestLabel")
+@onready var dungeons_modes_group: Node3D = get_node_or_null("DungeonsModesGroup")
+@onready var dungeon_portal_mode: Node3D = get_node_or_null("DungeonsModesGroup/DungeonPortalMode")
+@onready var daily_gift_mode: Node3D = get_node_or_null("DungeonsModesGroup/DailyGiftMode")
+@onready var dungeon_portal_icon: DungeonPortalIcon = get_node_or_null("DungeonsModesGroup/DungeonPortalMode/DungeonPortalIcon")
+@onready var daily_gift_icon: DailyGiftIcon = get_node_or_null("DungeonsModesGroup/DailyGiftMode/DailyGiftIcon")
 
 # Camera transforms
 # Start View: Front view framing Jake (left), Finn (right), and the Table
@@ -100,6 +105,8 @@ func set_start_view() -> void:
 		store_modes_group.visible = false
 	if chests_modes_group:
 		chests_modes_group.visible = false
+	if dungeons_modes_group:
+		dungeons_modes_group.visible = false
 	set_chests_idle_audio_enabled(false)
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
@@ -157,89 +164,53 @@ func set_hub_view() -> void:
 		store_modes_group.visible = false
 	if chests_modes_group:
 		chests_modes_group.visible = false
+	if dungeons_modes_group:
+		dungeons_modes_group.visible = false
 	set_chests_idle_audio_enabled(false)
 
 func set_quest_modes_view() -> void:
-	is_hub_view = true
-	is_mode_select = true
-	props_anim_ready = true
-	is_logo_animating = false
-	_clear_mode_tweens()
-	if active_tween and active_tween.is_valid():
-		active_tween.kill()
-
-	if camera:
-		camera.position = BATTLE_SELECT_CAM_POS
-		camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
-
-	if logo_group:
-		logo_group.visible = false
-		logo_group.scale = Vector3.ZERO
-
-	if jake_node:
-		jake_node.visible = false
-	if jake_stool:
-		jake_stool.visible = true
-
-	if board_modes_group:
-		board_modes_group.visible = true
-		_set_group_labels_alpha(board_modes_group, 1.0)
-		if fionna_book:
-			fionna_book.reset_anim()
-		if solo_quests:
-			solo_quests.reset_anim()
-		for m in [deckwars_mode, fionna_mode, quests_mode]:
-			if m:
-				m.scale = Vector3.ONE
-				m.position.y = -0.12
-	if store_modes_group:
-		store_modes_group.visible = false
-	if chests_modes_group:
-		chests_modes_group.visible = false
-	set_chests_idle_audio_enabled(false)
+	_prepare_instant_board_view(board_modes_group)
+	if fionna_book:
+		fionna_book.reset_anim()
+	if solo_quests:
+		solo_quests.reset_anim()
+	_reset_mode_anchors([deckwars_mode, fionna_mode, quests_mode])
 
 
 func set_store_modes_view() -> void:
-	is_hub_view = true
-	is_mode_select = true
-	props_anim_ready = true
-	is_logo_animating = false
-	_clear_mode_tweens()
-	if active_tween and active_tween.is_valid():
-		active_tween.kill()
-
-	if camera:
-		camera.position = BATTLE_SELECT_CAM_POS
-		camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
-
-	if logo_group:
-		logo_group.visible = false
-		logo_group.scale = Vector3.ZERO
-
-	if jake_node:
-		jake_node.visible = false
-	if jake_stool:
-		jake_stool.visible = true
-
-	if board_modes_group:
-		board_modes_group.visible = false
-	if chests_modes_group:
-		chests_modes_group.visible = false
-	set_chests_idle_audio_enabled(false)
-	if store_modes_group:
-		store_modes_group.visible = true
-		_set_group_labels_alpha(store_modes_group, 1.0)
-		if store_inventory_icon:
-			store_inventory_icon.reset_anim()
-		if store_gems_icon:
-			store_gems_icon.reset_anim()
-		for m in [store_inventory_mode, store_gems_mode]:
-			if m:
-				m.scale = Vector3.ONE
-				m.position.y = -0.12
+	_prepare_instant_board_view(store_modes_group)
+	if store_inventory_icon:
+		store_inventory_icon.reset_anim()
+	if store_gems_icon:
+		store_gems_icon.reset_anim()
+	_reset_mode_anchors([store_inventory_mode, store_gems_mode])
 
 
 func set_chests_modes_view() -> void:
+	_prepare_instant_board_view(chests_modes_group)
+	_restore_chests_board_visibility()
+	if cool_chest_icon:
+		cool_chest_icon.reset_anim()
+	if algebraic_chest_icon:
+		algebraic_chest_icon.reset_anim()
+	set_chests_idle_audio_enabled(true)
+	_reset_mode_anchors([cool_chest_mode, algebraic_chest_mode])
+
+func _hide_all_mode_groups() -> void:
+	for grp in [board_modes_group, store_modes_group, chests_modes_group, dungeons_modes_group]:
+		if grp:
+			grp.visible = false
+	set_chests_idle_audio_enabled(false)
+
+
+func _reset_mode_anchors(anchors: Array) -> void:
+	for m in anchors:
+		if m:
+			m.scale = Vector3.ONE
+			m.position.y = MODE_REST_Y
+
+
+func _prepare_instant_board_view(group: Node3D) -> void:
 	is_hub_view = true
 	is_mode_select = true
 	props_anim_ready = true
@@ -247,37 +218,30 @@ func set_chests_modes_view() -> void:
 	_clear_mode_tweens()
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
-
 	if camera:
 		camera.position = BATTLE_SELECT_CAM_POS
 		camera.look_at(BATTLE_SELECT_CAM_TARGET, Vector3.UP)
-
 	if logo_group:
 		logo_group.visible = false
 		logo_group.scale = Vector3.ZERO
-
 	if jake_node:
 		jake_node.visible = false
 	if jake_stool:
 		jake_stool.visible = true
+	_hide_all_mode_groups()
+	if group:
+		group.visible = true
+		_set_group_labels_alpha(group, 1.0)
 
-	if board_modes_group:
-		board_modes_group.visible = false
-	if store_modes_group:
-		store_modes_group.visible = false
-	if chests_modes_group:
-		chests_modes_group.visible = true
-		_set_group_labels_alpha(chests_modes_group, 1.0)
-		_restore_chests_board_visibility()
-		if cool_chest_icon:
-			cool_chest_icon.reset_anim()
-		if algebraic_chest_icon:
-			algebraic_chest_icon.reset_anim()
-		set_chests_idle_audio_enabled(true)
-		for m in [cool_chest_mode, algebraic_chest_mode]:
-			if m:
-				m.scale = Vector3.ONE
-				m.position.y = -0.12
+
+func set_dungeons_modes_view() -> void:
+	_prepare_instant_board_view(dungeons_modes_group)
+	if dungeon_portal_icon:
+		dungeon_portal_icon.reset_anim()
+	if daily_gift_icon:
+		daily_gift_icon.reset_anim()
+	_reset_mode_anchors([dungeon_portal_mode, daily_gift_mode])
+
 
 func transition_to_hub(duration: float = 0.8) -> void:
 	if is_hub_view:
@@ -376,7 +340,7 @@ func _clear_mode_tweens() -> void:
 		if tw and tw.is_valid():
 			tw.kill()
 	_mode_tweens.clear()
-	for icon in [store_inventory_icon, store_gems_icon, deckwars_stadium, cool_chest_icon, algebraic_chest_icon]:
+	for icon in [store_inventory_icon, store_gems_icon, deckwars_stadium, cool_chest_icon, algebraic_chest_icon, dungeon_portal_icon, daily_gift_icon]:
 		if icon:
 			_reset_icon_reaction(icon)
 
@@ -573,6 +537,26 @@ func hide_chests_modes() -> void:
 	_end_board_mode_transition(chests_modes_group, [cool_chest_mode, algebraic_chest_mode])
 
 
+func show_dungeons_modes() -> void:
+	if is_mode_select:
+		return
+	_begin_board_mode_transition()
+	_hide_all_mode_groups()
+	if dungeons_modes_group:
+		dungeons_modes_group.visible = true
+		if dungeon_portal_icon:
+			dungeon_portal_icon.reset_anim()
+		if daily_gift_icon:
+			daily_gift_icon.reset_anim()
+		_pop_up_board_modes(dungeons_modes_group, [dungeon_portal_mode, daily_gift_mode])
+
+
+func hide_dungeons_modes() -> void:
+	if not is_mode_select:
+		return
+	_end_board_mode_transition(dungeons_modes_group, [dungeon_portal_mode, daily_gift_mode])
+
+
 func set_chests_idle_audio_enabled(enabled: bool) -> void:
 	if cool_chest_icon:
 		cool_chest_icon.set_idle_audio_enabled(enabled)
@@ -709,6 +693,22 @@ func play_cool_chest_activate(on_finished: Callable) -> void:
 
 func play_algebraic_chest_activate(on_finished: Callable) -> void:
 	_play_icon_activate(algebraic_chest_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func set_dungeon_portal_pressed(is_down: bool) -> void:
+	_set_icon_pressed(dungeon_portal_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func set_daily_gift_pressed(is_down: bool) -> void:
+	_set_icon_pressed(daily_gift_icon, is_down, ICON_REACTION_SCALE, true)
+
+
+func play_dungeon_portal_activate(on_finished: Callable) -> void:
+	_play_icon_activate(dungeon_portal_icon, ICON_REACTION_SCALE, true, on_finished)
+
+
+func play_daily_gift_activate(on_finished: Callable) -> void:
+	_play_icon_activate(daily_gift_icon, ICON_REACTION_SCALE, true, on_finished)
 
 
 func _ensure_icon_mats(icon: Node3D) -> Array:

@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/ui/DungeonPortalIcon.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeons/low_DungeonPortal.png" id="2_tex"]
+[ext_resource type="ArrayMesh" path="res://assets/models/dungeons/portal/Puppet_Global.obj" id="3_mglobal"]
+[ext_resource type="ArrayMesh" path="res://assets/models/dungeons/portal/Outline_Global.obj" id="4_oglobal"]
+[ext_resource type="ArrayMesh" path="res://assets/models/dungeons/portal/Puppet_Portal.obj" id="5_mportal"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Portal"]
+shading_mode = 0
+albedo_texture = ExtResource("2_tex")
+texture_filter = 3
+
+[node name="DungeonPortalIcon" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="PortalRoot" type="Node3D" parent="."]
+transform = Transform3D(0, 0, -0.042, 0, 0.042, 0, 0.042, 0, 0, 0, 0.021, 0)
+
+[node name="Puppet_Global" type="Node3D" parent="PortalRoot"]
+
+[node name="ArchMesh" type="MeshInstance3D" parent="PortalRoot/Puppet_Global"]
+mesh = ExtResource("3_mglobal")
+surface_material_override/0 = SubResource("Mat_Portal")
+
+[node name="ArchOutline" type="MeshInstance3D" parent="PortalRoot/Puppet_Global"]
+mesh = ExtResource("4_oglobal")
+surface_material_override/0 = SubResource("Mat_Portal")
+
+[node name="Puppet_PortalParent" type="Node3D" parent="PortalRoot/Puppet_Global"]
+transform = Transform3D(0.600868, 0, 0, 0, -1, 0, 0, 0, -1, -0.155567, 5.061071, -0.008418)
+
+[node name="Puppet_Portal" type="Node3D" parent="PortalRoot/Puppet_Global/Puppet_PortalParent"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+
+[node name="VortexMesh" type="MeshInstance3D" parent="PortalRoot/Puppet_Global/Puppet_PortalParent/Puppet_Portal"]
+mesh = ExtResource("5_mportal")
+surface_material_override/0 = SubResource("Mat_Portal")

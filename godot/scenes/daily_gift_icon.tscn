@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/ui/DailyGiftIcon.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeons/daily_gift/DailyGift_Normal.glb" id="2_glb"]
+
+[node name="DailyGiftIcon" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="GiftRoot" type="Node3D" parent="."]
+transform = Transform3D(0, 0, -0.046, 0, 0.046, 0, 0.046, 0, 0, 0, -0.005, 0)
+
+[node name="DailyGift_Normal" parent="GiftRoot" instance=ExtResource("2_glb")]

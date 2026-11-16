@@ -209,44 +209,95 @@ func _ready() -> void:
 		failed += 1
 
 	# -------------------------------------------------------------
-	# Test 6: DungeonArenaModal UI Lifecycle & Tab Switching
+	# Test 6: DungeonArenaModal UI Lifecycle & Strict Level Gate
 	# -------------------------------------------------------------
 	print("\n[Test 6] DungeonArenaModal UI Component")
 	var modal_scene = load("res://scenes/dungeon_arena_modal.tscn").instantiate()
 	add_child(modal_scene)
 
-	modal_scene.open_modal()
-	if modal_scene.visible and modal_scene.dungeons_container.visible:
-		print("  [PASS] Modal opened on Dungeons tab")
+	modal_scene.open_modal(false)
+	var gate = GameManager.validate_dungeon_entry()
+	var expect_locked = not bool(gate.get("ok", false))
+	if modal_scene.visible and modal_scene.locked_gate_panel.visible == expect_locked:
+		print("  [PASS] Modal opened with strict level gate respected (locked=%s)" % str(expect_locked))
 		passed += 1
 	else:
-		printerr("  [FAIL] Modal failed to open on Dungeons tab")
+		printerr("  [FAIL] Modal failed strict gate check")
 		failed += 1
 
-	modal_scene.show_tab(1)
-	if modal_scene.elfisto_container.visible and not modal_scene.dungeons_container.visible:
-		print("  [PASS] Switched to El Fisto Gauntlet tab")
+	modal_scene.open_modal(true)
+	if modal_scene.stages_panel.visible and modal_scene.stages_list.get_child_count() == 5:
+		print("  [PASS] Stages panel displays 5 dungeon stages")
 		passed += 1
 	else:
-		printerr("  [FAIL] Failed to switch to El Fisto tab")
-		failed += 1
-
-	if modal_scene.elfisto_ladder_list.get_child_count() == 8:
-		print("  [PASS] El Fisto ladder displays 8 rounds")
-		passed += 1
-	else:
-		printerr("  [FAIL] Expected 8 ladder children, got %d" % modal_scene.elfisto_ladder_list.get_child_count())
+		printerr("  [FAIL] Expected 5 stage rows, got %d" % modal_scene.stages_list.get_child_count())
 		failed += 1
 
 	modal_scene.close_btn.emit_signal("pressed")
+	await get_tree().create_timer(0.45).timeout
 	if not modal_scene.visible:
-		print("  [PASS] Modal closed on close button")
+		print("  [PASS] Modal closed cleanly on close button")
 		passed += 1
 	else:
 		printerr("  [FAIL] Modal should be hidden after close")
 		failed += 1
 
 	modal_scene.queue_free()
+
+	# -------------------------------------------------------------
+	# Test 7: Daily Gift Blueprints, Spin & UI Modal
+	# -------------------------------------------------------------
+	print("\n[Test 7] Daily Gift Blueprints & UI")
+	var gift_entries = Database.get_daily_gift_entries()
+	var has_hearts = false
+	for ge in gift_entries:
+		if str(ge.get("type", "")) == "Hearts":
+			has_hearts = true
+	if gift_entries.size() == 12 and not has_hearts:
+		print("  [PASS] Exactly 12 Daily Gift slots loaded from db_DailyGift.json (no Hearts)")
+		passed += 1
+	else:
+		printerr("  [FAIL] Daily gift slot check failed (size=%d, has_hearts=%s)" % [gift_entries.size(), str(has_hearts)])
+		failed += 1
+
+	var prev_ts = GameManager.last_daily_gift_timestamp
+	var prev_coins = GameManager.get_coins()
+	var prev_gems = GameManager.get_gems()
+	GameManager.last_daily_gift_timestamp = 0
+	var spin_res = GameManager.start_daily_gift_spin(false)
+	if bool(spin_res.get("ok", false)) and bool(spin_res.get("used_free", false)):
+		print("  [PASS] Free Daily Gift spin succeeded")
+		passed += 1
+	else:
+		printerr("  [FAIL] Free Daily Gift spin failed: %s" % str(spin_res))
+		failed += 1
+
+	# Second immediate spin without retry flag should reject due to 24h cooldown
+	var cooldown_res = GameManager.start_daily_gift_spin(false)
+	if not bool(cooldown_res.get("ok", false)) and int(cooldown_res.get("cooldown", 0)) > 0:
+		print("  [PASS] 24h Daily Gift cooldown enforced")
+		passed += 1
+	else:
+		printerr("  [FAIL] Cooldown was not enforced")
+		failed += 1
+
+	# Restore timestamp/wallet state so test leaves profile untouched
+	GameManager.last_daily_gift_timestamp = prev_ts
+	GameManager.player_coins = prev_coins
+	var gem_diff = GameManager.get_gems() - prev_gems
+	if gem_diff > 0:
+		GameManager.spend_gems(gem_diff)
+
+	var gift_modal = load("res://scenes/daily_gift_modal.tscn").instantiate()
+	add_child(gift_modal)
+	gift_modal.open_modal(0)
+	if gift_modal.visible and gift_modal._cell_panels.size() == 12:
+		print("  [PASS] DailyGiftModal opened with 12 prize cells")
+		passed += 1
+	else:
+		printerr("  [FAIL] DailyGiftModal cell count mismatch")
+		failed += 1
+	gift_modal.queue_free()
 
 	print("\n==================================================")
 	print("  TEST SUMMARY: %d PASSED, %d FAILED" % [passed, failed])

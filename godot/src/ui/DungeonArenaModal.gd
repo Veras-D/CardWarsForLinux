@@ -1,248 +1,271 @@
 extends Control
 
-@onready var close_btn: Button = $Panel/VBox/Header/CloseBtn
-@onready var tab_dungeons_btn: Button = $Panel/VBox/TabBar/DungeonsTabBtn
-@onready var tab_elfisto_btn: Button = $Panel/VBox/TabBar/ElFistoTabBtn
+signal closed
 
-# Dungeons Tab elements
-@onready var dungeons_container: Control = $Panel/VBox/ContentArea/DungeonsView
-@onready var weekday_bar: HBoxContainer = $Panel/VBox/ContentArea/DungeonsView/WeekdayBar
-@onready var dungeon_title: Label = $Panel/VBox/ContentArea/DungeonsView/DungeonInfo/Title
-@onready var dungeon_desc: Label = $Panel/VBox/ContentArea/DungeonsView/DungeonInfo/Desc
-@onready var stages_list: VBoxContainer = $Panel/VBox/ContentArea/DungeonsView/StagesScroll/StagesList
+const FONT_MAIN: FontFile = preload("res://assets/fonts/KBPlanetEarth.ttf")
+const TEX_BTN_GREEN: Texture2D = preload("res://assets/textures/ui/store/uiButtonGreen.png")
+const TEX_BTN_BLUE: Texture2D = preload("res://assets/textures/ui/store/uiButtonBlue.png")
+const TEX_HEART: Texture2D = preload("res://assets/textures/ui/heart.png")
+const SFX_SELECT: AudioStream = preload("res://assets/audio/sfx/UI_Select.wav")
+const SFX_BACK: AudioStream = preload("res://assets/audio/sfx/UI_Back.wav")
 
-# El Fisto Tab elements
-@onready var elfisto_container: Control = $Panel/VBox/ContentArea/ElFistoView
-@onready var elfisto_status_label: Label = $Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox/StatusLabel
-@onready var elfisto_hp_label: Label = $Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox/HpLabel
-@onready var elfisto_record_label: Label = $Panel/VBox/ContentArea/ElFistoView/StatsPanel/VBox/RecordLabel
-@onready var elfisto_action_btn: Button = $Panel/VBox/ContentArea/ElFistoView/ActionBtn
-@onready var elfisto_ladder_list: VBoxContainer = $Panel/VBox/ContentArea/ElFistoView/LadderScroll/LadderList
+const DUNGEON_INFO_TEXT: Dictionary = {
+	"!!Monday_Dungeon_Info": "Get your Plains Cards here!",
+	"!!Tuesday_Dungeon_Info": "Get your Corn Cards here!",
+	"!!Wednesday_Dungeon_Info": "Get your Swamp Cards here!",
+	"!!Thursday_Dungeon_Info": "Get your Cotton Cards here!",
+	"!!Friday_Dungeon_Info": "Get your Sand Cards here!",
+	"!!Saturday_Dungeon_Info": "Today is 2x Coins Day!",
+	"!!Sunday_Dungeon_Info": "Today is 2x XP Day!",
+}
 
-var selected_weekday: int = 1 # 1=Mon, ..., 6=Sat, 0=Sun
+@onready var dimmer: ColorRect = $Dimmer
+@onready var frame: Control = $Center/Frame
+@onready var close_btn: BaseButton = $Center/Frame/TitleBar/CloseBtn
+@onready var dungeon_name_lbl: Label = $Center/Frame/Body/DungeonBanner/HBox/TextVBox/DungeonName
+@onready var dungeon_desc_lbl: Label = $Center/Frame/Body/DungeonBanner/HBox/TextVBox/DungeonDesc
+@onready var stamina_lbl: Label = $Center/Frame/Body/DungeonBanner/HBox/HeartBadge/StaminaLabel
+
+@onready var locked_gate_panel: Control = $Center/Frame/Body/LockedGatePanel
+@onready var gate_msg_lbl: Label = $Center/Frame/Body/LockedGatePanel/VBox/GateMsg
+@onready var gate_sub_lbl: Label = $Center/Frame/Body/LockedGatePanel/VBox/SubMsg
+@onready var gate_deck_btn: BaseButton = $Center/Frame/Body/LockedGatePanel/VBox/GateBtns/DeckBtn
+@onready var gate_ok_btn: BaseButton = $Center/Frame/Body/LockedGatePanel/VBox/GateBtns/OkBtn
+
+@onready var stages_panel: Control = $Center/Frame/Body/StagesPanel
+@onready var stages_list: VBoxContainer = $Center/Frame/Body/StagesPanel/StagesList
+@onready var status_label: Label = $Center/Frame/Body/StagesPanel/StatusRow/StatusLabel
+@onready var refill_btn: Button = $Center/Frame/Body/StagesPanel/StatusRow/RefillBtn
+
+var _anim_tween: Tween = null
+var _is_closing: bool = false
+var _force_unlocked_preview: bool = false
 
 
 func _ready() -> void:
 	if close_btn:
-		close_btn.pressed.connect(func(): visible = false)
-	if tab_dungeons_btn:
-		tab_dungeons_btn.pressed.connect(func(): show_tab(0))
-	if tab_elfisto_btn:
-		tab_elfisto_btn.pressed.connect(func(): show_tab(1))
-	if elfisto_action_btn:
-		elfisto_action_btn.pressed.connect(_on_elfisto_action_pressed)
+		close_btn.pressed.connect(_on_close_pressed)
+		StoreModalAnimator.attach_button_reaction(close_btn)
+	if gate_ok_btn:
+		gate_ok_btn.pressed.connect(_on_close_pressed)
+		StoreModalAnimator.attach_button_reaction(gate_ok_btn)
+	if gate_deck_btn:
+		gate_deck_btn.pressed.connect(_on_deck_builder_pressed)
+		StoreModalAnimator.attach_button_reaction(gate_deck_btn)
+	if refill_btn:
+		refill_btn.pressed.connect(_on_refill_stamina_pressed)
 
-	# Set default selected weekday to system weekday
-	var dt = Time.get_date_dict_from_system()
-	selected_weekday = int(dt.get("weekday", 1))
 
-	_setup_weekday_bar()
-	show_tab(0)
+func open_modal(force_unlocked_preview: bool = false) -> void:
+	_is_closing = false
+	_force_unlocked_preview = force_unlocked_preview
+	if status_label:
+		status_label.text = ""
+	if refill_btn:
+		refill_btn.visible = false
 	refresh_views()
+	visible = true
+	_anim_tween = StoreModalAnimator.play_open(self, dimmer, frame, _anim_tween)
 
 
-func show_tab(tab_index: int) -> void:
-	if dungeons_container:
-		dungeons_container.visible = (tab_index == 0)
-	if elfisto_container:
-		elfisto_container.visible = (tab_index == 1)
-
-	if tab_dungeons_btn:
-		tab_dungeons_btn.modulate = Color(1.0, 1.0, 1.0) if tab_index == 0 else Color(0.6, 0.6, 0.6)
-	if tab_elfisto_btn:
-		tab_elfisto_btn.modulate = Color(1.0, 1.0, 1.0) if tab_index == 1 else Color(0.6, 0.6, 0.6)
-
-	refresh_views()
-
-
-func _setup_weekday_bar() -> void:
-	if weekday_bar == null:
+func close_modal() -> void:
+	if _is_closing or not visible:
 		return
-	for c in weekday_bar.get_children():
-		weekday_bar.remove_child(c)
-		c.queue_free()
-
-	# Days order: Mon(1), Tue(2), Wed(3), Thu(4), Fri(5), Sat(6), Sun(0)
-	var days = [
-		{"name": "Mon", "val": 1},
-		{"name": "Tue", "val": 2},
-		{"name": "Wed", "val": 3},
-		{"name": "Thu", "val": 4},
-		{"name": "Fri", "val": 5},
-		{"name": "Sat", "val": 6},
-		{"name": "Sun", "val": 0}
-	]
-
-	var sys_day = Time.get_date_dict_from_system().get("weekday", 1)
-
-	for d in days:
-		var btn = Button.new()
-		var dval = int(d["val"])
-		var prefix = "★ " if dval == sys_day else ""
-		btn.text = prefix + str(d["name"])
-		btn.custom_minimum_size = Vector2(70, 32)
-		btn.pressed.connect(func():
-			selected_weekday = dval
-			_update_weekday_buttons()
-			_refresh_dungeons_tab()
-		)
-		weekday_bar.add_child(btn)
-
-	_update_weekday_buttons()
+	_is_closing = true
+	_anim_tween = StoreModalAnimator.play_close(self, dimmer, frame, _anim_tween, func():
+		_is_closing = false
+		closed.emit()
+	)
 
 
-func _update_weekday_buttons() -> void:
-	if weekday_bar == null:
-		return
-	var days_order = [1, 2, 3, 4, 5, 6, 0]
-	var children = weekday_bar.get_children()
-	for i in range(min(children.size(), days_order.size())):
-		var btn = children[i] as Button
-		if btn:
-			var is_sel = (days_order[i] == selected_weekday)
-			btn.modulate = Color(1.0, 0.9, 0.3) if is_sel else Color(0.8, 0.8, 0.8)
+func _play_sfx(stream: AudioStream) -> void:
+	if Audio and stream:
+		Audio.play_sfx(stream)
+
+
+func _on_close_pressed() -> void:
+	_play_sfx(SFX_BACK)
+	close_modal()
+
+
+func _on_deck_builder_pressed() -> void:
+	_play_sfx(SFX_SELECT)
+	visible = false
+	GameManager.open_deck_builder()
+
+
+func _on_refill_stamina_pressed() -> void:
+	_play_sfx(SFX_SELECT)
+	var res := GameManager.refill_stamina_with_gems()
+	if bool(res.get("ok", false)):
+		if status_label:
+			status_label.text = "Hearts refilled to %d!" % int(res.get("stamina", 100))
+			status_label.add_theme_color_override("font_color", Color(0.45, 0.95, 0.55))
+		if refill_btn:
+			refill_btn.visible = false
+		refresh_views()
+	else:
+		if status_label:
+			status_label.text = str(res.get("reason", "Not enough Gems!"))
+			status_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
 
 
 func refresh_views() -> void:
-	_refresh_dungeons_tab()
-	_refresh_elfisto_tab()
+	var dt := Time.get_date_dict_from_system()
+	var today_weekday := int(dt.get("weekday", 1))
+	var d_data := Database.get_dungeon_for_weekday(today_weekday)
+	var d_name := str(d_data.get("dungeon", "Monday Dungeon"))
+	var raw_info := str(d_data.get("info", ""))
 
+	if dungeon_name_lbl:
+		dungeon_name_lbl.text = d_name.to_upper()
+	if dungeon_desc_lbl:
+		dungeon_desc_lbl.text = DUNGEON_INFO_TEXT.get(raw_info, "Complete today's stages to earn special cards & rewards!")
+	if stamina_lbl:
+		stamina_lbl.text = "%d / %d" % [GameManager.get_stamina(), GameManager.get_max_stamina()]
 
-func _refresh_dungeons_tab() -> void:
-	if dungeons_container == null or not dungeons_container.visible:
+	var gate := GameManager.validate_dungeon_entry()
+	var entry_ok := bool(gate.get("ok", false)) or _force_unlocked_preview
+
+	if locked_gate_panel:
+		locked_gate_panel.visible = not entry_ok
+	if stages_panel:
+		stages_panel.visible = entry_ok
+
+	if not entry_ok:
+		if gate_msg_lbl:
+			gate_msg_lbl.text = str(gate.get("reason", ""))
+		if gate_sub_lbl:
+			var cur_hero := GameManager.player_hero_name
+			var cur_lvl := int(gate.get("level", 1))
+			gate_sub_lbl.text = "Current Hero: %s (Lvl. %d / Required: Lvl. %d)" % [cur_hero, cur_lvl, GameManager.MIN_DUNGEON_LEVEL]
 		return
 
-	var d_data = Database.get_dungeon_for_weekday(selected_weekday)
-	if d_data.is_empty():
+	_populate_stages(d_name)
+
+
+func _populate_stages(d_name: String) -> void:
+	if not stages_list:
 		return
+	for c in stages_list.get_children():
+		stages_list.remove_child(c)
+		c.queue_free()
 
-	var d_name = str(d_data.get("dungeon", "Daily Dungeon"))
-	if dungeon_title:
-		dungeon_title.text = "🏛️ " + d_name.to_upper()
-	if dungeon_desc:
-		var raw_info = str(d_data.get("info", ""))
-		dungeon_desc.text = tr(raw_info) if raw_info != "" else "Complete daily stages to earn bonus cards & materials."
+	var stages := Database.get_dungeon_stages(d_name)
+	var max_cleared := GameManager.get_dungeon_max_cleared_stage(d_name)
 
-	# Populate 5 stages
-	if stages_list:
-		for c in stages_list.get_children():
-			stages_list.remove_child(c)
-			c.queue_free()
+	for i in range(stages.size()):
+		var s: Dictionary = stages[i]
+		var qid := str(s.get("quest_id", ""))
+		var h_cost := int(s.get("heart_cost", 5))
+		var quest := Database.get_quest(qid)
+		var is_unlocked := GameManager.is_dungeon_stage_unlocked(d_name, i)
+		var is_cleared := i < max_cleared
 
-		var stages = Database.get_dungeon_stages(d_name)
-		for i in range(stages.size()):
-			var s = stages[i]
-			var qid = str(s.get("quest_id", ""))
-			var h_cost = int(s.get("heart_cost", 5))
-			var quest = Database.get_quest(qid)
-			var is_unlocked = GameManager.is_dungeon_stage_unlocked(d_name, i)
+		var row := Panel.new()
+		row.custom_minimum_size = Vector2(0, 56)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.11, 0.20, 0.26, 0.92) if is_unlocked else Color(0.08, 0.13, 0.17, 0.72)
+		sb.border_width_left = 2
+		sb.border_width_top = 2
+		sb.border_width_right = 2
+		sb.border_width_bottom = 2
+		sb.border_color = Color(0.45, 0.85, 0.55, 0.85) if is_cleared else (Color(0.75, 0.86, 0.92, 0.85) if is_unlocked else Color(0.35, 0.42, 0.46, 0.6))
+		sb.set_corner_radius_all(8)
+		row.add_theme_stylebox_override("panel", sb)
 
-			var hbox = HBoxContainer.new()
-			hbox.custom_minimum_size = Vector2(0, 42)
+		var hbox := HBoxContainer.new()
+		hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+		hbox.offset_left = 14
+		hbox.offset_right = -12
+		hbox.add_theme_constant_override("separation", 12)
+		row.add_child(hbox)
 
-			var lbl = Label.new()
-			lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			var opp_name = quest.get("opponent", "Opponent")
-			lbl.text = "Stage %d: vs %s (Lv %d) • Cost: %d⚡" % [i + 1, opp_name, quest.get("leader_level", 1), h_cost]
+		var opp_name := str(quest.get("opponent", "Opponent"))
+		var lv := int(quest.get("leader_level", 1))
+		var lbl := Label.new()
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lbl.add_theme_font_override("font", FONT_MAIN)
+		lbl.add_theme_font_size_override("font_size", 20)
+		lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+		lbl.add_theme_constant_override("outline_size", 4)
+		lbl.add_theme_color_override("font_color", Color.WHITE if is_unlocked else Color(0.65, 0.7, 0.74))
+		var prefix := "✓ " if is_cleared else ""
+		lbl.text = "%sStage %d — vs %s (Lv. %d)" % [prefix, i + 1, opp_name, lv]
+		hbox.add_child(lbl)
 
-			var play_btn = Button.new()
-			play_btn.custom_minimum_size = Vector2(140, 36)
-			if is_unlocked:
-				play_btn.text = "⚔️ Battle"
-				play_btn.pressed.connect(func(): _on_launch_dungeon_stage(d_name, i, qid))
-			else:
-				play_btn.text = "🔒 Locked"
-				play_btn.disabled = true
+		var cost_box := HBoxContainer.new()
+		cost_box.add_theme_constant_override("separation", 4)
+		var h_icon := TextureRect.new()
+		h_icon.custom_minimum_size = Vector2(24, 24)
+		h_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h_icon.texture = TEX_HEART
+		h_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		h_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cost_box.add_child(h_icon)
 
-			hbox.add_child(lbl)
-			hbox.add_child(play_btn)
-			stages_list.add_child(hbox)
+		var cost_lbl := Label.new()
+		cost_lbl.add_theme_font_override("font", FONT_MAIN)
+		cost_lbl.add_theme_font_size_override("font_size", 20)
+		cost_lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+		cost_lbl.add_theme_constant_override("outline_size", 4)
+		cost_lbl.text = str(h_cost)
+		cost_box.add_child(cost_lbl)
+		hbox.add_child(cost_box)
+
+		var play_btn := _make_stage_btn(is_unlocked, is_cleared)
+		if is_unlocked:
+			play_btn.pressed.connect(func(): _on_launch_stage(d_name, i, qid, h_cost))
+			StoreModalAnimator.attach_button_reaction(play_btn)
+		hbox.add_child(play_btn)
+
+		stages_list.add_child(row)
 
 
-func _on_launch_dungeon_stage(dungeon_name: String, stage_index: int, quest_id: String) -> void:
+func _make_stage_btn(is_unlocked: bool, is_cleared: bool) -> TextureButton:
+	var btn := TextureButton.new()
+	btn.custom_minimum_size = Vector2(138, 48)
+	btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.disabled = not is_unlocked
+
+	var np := NinePatchRect.new()
+	np.offset_right = 276.0
+	np.offset_bottom = 96.0
+	np.scale = Vector2(0.5, 0.5)
+	np.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	np.texture = TEX_BTN_GREEN if is_unlocked else TEX_BTN_BLUE
+	np.patch_margin_left = 36
+	np.patch_margin_top = 28
+	np.patch_margin_right = 36
+	np.patch_margin_bottom = 36
+	if not is_unlocked:
+		np.modulate = Color(0.55, 0.6, 0.65, 0.9)
+	btn.add_child(np)
+
+	var lbl := Label.new()
+	lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+	lbl.offset_bottom = -3
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_override("font", FONT_MAIN)
+	lbl.add_theme_font_size_override("font_size", 20)
+	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+	lbl.add_theme_constant_override("outline_size", 5)
+	lbl.text = ("REPLAY" if is_cleared else "PLAY") if is_unlocked else "LOCKED"
+	btn.add_child(lbl)
+	return btn
+
+
+func _on_launch_stage(dungeon_name: String, stage_index: int, quest_id: String, heart_cost: int) -> void:
+	_play_sfx(SFX_SELECT)
+	var res := GameManager.launch_dungeon_stage(dungeon_name, stage_index, quest_id, heart_cost)
+	if not bool(res.get("ok", false)):
+		var ftype := str(res.get("fail_type", ""))
+		if status_label:
+			status_label.text = str(res.get("reason", "Cannot start stage."))
+			status_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
+		if refill_btn:
+			refill_btn.visible = (ftype == "stamina")
+		return
 	visible = false
-	GameManager.complete_dungeon_stage(dungeon_name, stage_index)
-	GameManager.launch_quest_battle(quest_id)
-
-
-func _refresh_elfisto_tab() -> void:
-	if elfisto_container == null or not elfisto_container.visible:
-		return
-
-	var is_run = GameManager.elfisto_is_active_run
-	var cur_round = GameManager.elfisto_current_round
-	var hp_curr = GameManager.elfisto_hero_hp_current
-	var hp_max = GameManager.player_hero_max_hp
-	if hp_curr < 0:
-		hp_curr = hp_max
-
-	if elfisto_status_label:
-		elfisto_status_label.text = "🥊 Status: %s (Round %d / 8)" % [
-			("IN PROGRESS" if is_run else "READY TO ENTER"),
-			cur_round
-		]
-	if elfisto_hp_label:
-		elfisto_hp_label.text = "❤️ Survival HP: %d / %d" % [hp_curr, hp_max]
-		elfisto_hp_label.modulate = Color(0.4, 1.0, 0.4) if hp_curr > (hp_max * 0.5) else Color(1.0, 0.3, 0.3)
-	if elfisto_record_label:
-		elfisto_record_label.text = "🏆 Highest Round: %d | 🔥 Win Streak: %d" % [
-			GameManager.elfisto_highest_round,
-			GameManager.elfisto_consecutive_wins
-		]
-
-	if elfisto_action_btn:
-		if is_run:
-			elfisto_action_btn.text = "⚔️ Fight Round %d" % cur_round
-		else:
-			elfisto_action_btn.text = "🥊 Enter El Fisto Arena (Round 1)"
-
-	# Populate ladder list
-	if elfisto_ladder_list:
-		for c in elfisto_ladder_list.get_children():
-			elfisto_ladder_list.remove_child(c)
-			c.queue_free()
-
-		var rounds = Database.get_elfisto_rounds()
-		for r in rounds:
-			var r_num = int(r.get("round", 1))
-			var r_rew = str(r.get("reward_type", ""))
-			var r_qty = int(r.get("reward_quantity", 1))
-			var _qid = str(r.get("quest_id", ""))
-
-			var hbox = HBoxContainer.new()
-			hbox.custom_minimum_size = Vector2(0, 32)
-
-			var is_current = (is_run and r_num == cur_round)
-			var is_cleared = (r_num < cur_round)
-
-			var mark = "👉 " if is_current else ("✓ " if is_cleared else "• ")
-			var lbl = Label.new()
-			lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			lbl.text = "%sRound %d: Reward: %s (x%d)" % [mark, r_num, r_rew.replace("Card Creature_GL_", "Card: "), r_qty]
-
-			if is_current:
-				lbl.modulate = Color(1.0, 0.9, 0.2)
-			elif is_cleared:
-				lbl.modulate = Color(0.5, 0.8, 0.5)
-			else:
-				lbl.modulate = Color(0.7, 0.7, 0.7)
-
-			hbox.add_child(lbl)
-			elfisto_ladder_list.add_child(hbox)
-
-
-func _on_elfisto_action_pressed() -> void:
-	if not GameManager.elfisto_is_active_run:
-		GameManager.start_elfisto_run()
-
-	var cur_round = GameManager.elfisto_current_round
-	var r_data = Database.get_elfisto_round(cur_round)
-	var qid = str(r_data.get("quest_id", "7001"))
-
-	visible = false
-	GameManager.launch_quest_battle(qid)
-
-
-func open_modal() -> void:
-	visible = true
-	refresh_views()

@@ -1159,7 +1159,8 @@ func end_match(victory: bool) -> void:
 		audit_report = StarConditionEvaluator.audit_star_conditions(conditions, match_stats)
 		if victory and GameManager:
 			var prev_lvl = GameManager.get_hero_level(GameManager.player_hero_name)
-			var q_res = GameManager.complete_campaign_quest(qid, match_stats)
+			var is_dungeon := str(quest.get("type", "")) == "dungeon"
+			var q_res = GameManager.complete_dungeon_quest(qid, match_stats) if is_dungeon else GameManager.complete_campaign_quest(qid, match_stats)
 			if q_res.get("ok", false):
 				var q_rew = q_res.get("rewards", {})
 				rewards_dict["coins"] += int(q_rew.get("coins", 0))

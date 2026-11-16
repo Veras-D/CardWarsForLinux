@@ -1,4 +1,4 @@
-[gd_scene load_steps=78 format=3]
+[gd_scene load_steps=80 format=3]
 
 [ext_resource type="Script" path="res://src/ui/TreehouseMenu3D.gd" id="1_script"]
 [ext_resource type="ArrayMesh" path="res://assets/models/TreeFort_FloorCeiling.obj" id="2_floor"]
@@ -42,6 +42,8 @@
 [ext_resource type="PackedScene" path="res://scenes/store_gems_icon.tscn" id="59_pstoregems"]
 [ext_resource type="PackedScene" path="res://scenes/cool_chest_icon.tscn" id="60_pcoolchest"]
 [ext_resource type="PackedScene" path="res://scenes/algebraic_chest_icon.tscn" id="61_palgchest"]
+[ext_resource type="PackedScene" path="res://scenes/dungeon_portal_icon.tscn" id="62_pdungeon"]
+[ext_resource type="PackedScene" path="res://scenes/daily_gift_icon.tscn" id="63_pgift"]
 [ext_resource type="Texture2D" path="res://assets/textures/hub/low_FionnaCakeIcon.png" id="38_tbook"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="43_font"]
 [ext_resource type="PackedScene" path="res://scenes/deck_wars_stadium.tscn" id="50_pstadium"]
@@ -405,6 +407,44 @@ outline_render_priority = 4
 pixel_size = 0.0022
 text = "Algebraic
 Chest"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="DungeonsModesGroup" type="Node3D" parent="."]
+visible = false
+
+[node name="DungeonPortalMode" type="Node3D" parent="DungeonsModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32, -0.12, -0.5)
+
+[node name="DungeonPortalIcon" parent="DungeonsModesGroup/DungeonPortalMode" instance=ExtResource("62_pdungeon")]
+
+[node name="DailyGiftMode" type="Node3D" parent="DungeonsModesGroup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34, -0.12, 0.5)
+
+[node name="DailyGiftIcon" parent="DungeonsModesGroup/DailyGiftMode" instance=ExtResource("63_pgift")]
+
+[node name="DungeonLabel" type="Label3D" parent="DungeonsModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.88, -0.118, -0.5)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Daily Dungeons
+of Doom"
+font = ExtResource("43_font")
+font_size = 64
+outline_size = 18
+line_spacing = -8.0
+
+[node name="DailyGiftLabel" type="Label3D" parent="DungeonsModesGroup"]
+transform = Transform3D(0, 1, 0, 0, 0, 1, 1, 0, 0, -0.88, -0.118, 0.5)
+double_sided = false
+render_priority = 5
+outline_render_priority = 4
+pixel_size = 0.0022
+text = "Daily Gift"
 font = ExtResource("43_font")
 font_size = 64
 outline_size = 18

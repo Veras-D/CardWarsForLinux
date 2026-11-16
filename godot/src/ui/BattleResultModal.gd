@@ -33,6 +33,7 @@ signal retry_pressed()
 @onready var retry_btn: Button = $CenterContainer/DialogPanel/VBox/ButtonContainer/RetryBtn
 
 var is_campaign_match: bool = false
+var is_dungeon_match: bool = false
 var active_quest_id: String = ""
 var stars_earned_count: int = 0
 
@@ -48,7 +49,9 @@ func _ready() -> void:
 func display_result(victory: bool, quest_id: String, match_stats: Dictionary, rewards: Dictionary, audit_report: Array = []) -> void:
 	visible = true
 	active_quest_id = quest_id
-	is_campaign_match = (quest_id != "")
+	var q_info: Dictionary = Database.get_quest(quest_id) if (quest_id != "" and Database) else {}
+	is_dungeon_match = (str(q_info.get("type", "")) == "dungeon")
+	is_campaign_match = (quest_id != "" and not is_dungeon_match)
 
 	# Animate dark overlay fade
 	modulate.a = 0.0
@@ -72,7 +75,9 @@ func display_result(victory: bool, quest_id: String, match_stats: Dictionary, re
 	_populate_rewards(victory, rewards)
 
 	# Setup Buttons
-	if is_campaign_match:
+	if is_dungeon_match:
+		continue_btn.text = "Return to Dungeons"
+	elif is_campaign_match:
 		continue_btn.text = "Continue to Map 🗺️"
 	else:
 		continue_btn.text = "Return to Menu 🏠"
@@ -193,7 +198,9 @@ func _populate_rewards(victory: bool, rewards: Dictionary) -> void:
 
 func _on_continue_pressed() -> void:
 	continue_pressed.emit()
-	if is_campaign_match and GameManager:
+	if is_dungeon_match and GameManager:
+		GameManager.open_dungeon_menu()
+	elif is_campaign_match and GameManager:
 		GameManager.open_campaign_map()
 	elif GameManager:
 		GameManager.return_to_menu()
@@ -202,6 +209,9 @@ func _on_continue_pressed() -> void:
 func _on_retry_pressed() -> void:
 	retry_pressed.emit()
 	if GameManager:
-		if is_campaign_match and active_quest_id != "":
+		if is_dungeon_match:
+			if GameManager.retry_active_dungeon():
+				return
+		elif is_campaign_match and active_quest_id != "":
 			GameManager.launch_quest_battle(active_quest_id)
 		GameManager.start_battle()

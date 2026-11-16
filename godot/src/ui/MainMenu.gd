@@ -5,6 +5,7 @@ const BGM_TREEHOUSE = preload("res://assets/audio/bgm/MainMenu.wav")
 const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
 const SFX_UI_SELECT = preload("res://assets/audio/sfx/UI_Select.wav")
 const SFX_UI_BACK = preload("res://assets/audio/sfx/UI_Back.wav")
+const SFX_SPELL_PORTAL = preload("res://assets/audio/sfx/Spell_Portal.wav")
 
 var _press_select_sfx_played: bool = false
 
@@ -49,6 +50,7 @@ var _press_select_sfx_played: bool = false
 @onready var lan_modal: Control = $LanLobbyModal
 @onready var settings_modal: Control = $SettingsModal
 @onready var dungeon_modal: Control = $DungeonArenaModal
+@onready var daily_gift_modal: DailyGiftModal = get_node_or_null("DailyGiftModal")
 @onready var store_inventory_modal: Control = get_node_or_null("StoreInventoryModal")
 @onready var store_gems_modal: Control = get_node_or_null("StoreGemsModal")
 @onready var chest_flow_overlay: ChestFlowOverlay = get_node_or_null("ChestFlowOverlay")
@@ -81,6 +83,12 @@ var _press_select_sfx_played: bool = false
 @onready var chests_back_btn: BaseButton = get_node_or_null("ChestsOverlay/BackBtn")
 @onready var quad_cool_chest: BaseButton = get_node_or_null("ChestsOverlay/QuadCoolChest")
 @onready var quad_algebraic_chest: BaseButton = get_node_or_null("ChestsOverlay/QuadAlgebraicChest")
+
+# Dungeons & Daily Gift Overlay
+@onready var dungeons_overlay: Control = get_node_or_null("DungeonsOverlay")
+@onready var dungeons_back_btn: BaseButton = get_node_or_null("DungeonsOverlay/BackBtn")
+@onready var quad_dungeon_portal: BaseButton = get_node_or_null("DungeonsOverlay/QuadDungeonPortal")
+@onready var quad_daily_gift: BaseButton = get_node_or_null("DungeonsOverlay/QuadDailyGift")
 
 func _ready() -> void:
 	# Autoplay Treehouse BGM
@@ -161,9 +169,22 @@ func _ready() -> void:
 		chest_flow_overlay.flow_finished.connect(_on_chest_flow_finished)
 		chest_flow_overlay.open_store_inventory_requested.connect(_on_chest_request_store_inventory)
 		chest_flow_overlay.open_store_gems_requested.connect(_on_chest_request_store_gems)
+
+	# Dungeons & Daily Gift Overlay Buttons & Modals
+	if dungeons_back_btn:
+		dungeons_back_btn.pressed.connect(_on_dungeons_back_pressed)
+	_connect_board_button(quad_dungeon_portal, "set_dungeon_portal_pressed", _on_quad_dungeon_portal_pressed)
+	_connect_board_button(quad_daily_gift, "set_daily_gift_pressed", _on_quad_daily_gift_pressed)
+	if daily_gift_modal:
+		if daily_gift_modal.has_signal("reward_granted"):
+			daily_gift_modal.reward_granted.connect(_update_player_stats)
+		if daily_gift_modal.has_signal("open_store_gems_requested"):
+			daily_gift_modal.open_store_gems_requested.connect(_on_daily_gift_request_store_gems)
+	if dungeon_modal and dungeon_modal.has_signal("closed"):
+		dungeon_modal.closed.connect(_update_player_stats)
 	if GameManager:
 		if GameManager.has_signal("player_currencies_updated"):
-			GameManager.player_currencies_updated.connect(_update_player_stats)
+			GameManager.player_currencies_updated.connect(func(_coins: int, _gems: int): _update_player_stats())
 		if GameManager.has_signal("inventory_capacity_changed"):
 			GameManager.inventory_capacity_changed.connect(func(_new_max: int): _update_player_stats())
 	
@@ -194,6 +215,10 @@ func _ready() -> void:
 		store_overlay.visible = false
 	if chests_overlay:
 		chests_overlay.visible = false
+	if dungeons_overlay:
+		dungeons_overlay.visible = false
+	if daily_gift_modal:
+		daily_gift_modal.visible = false
 	if chest_flow_overlay:
 		chest_flow_overlay.reset_immediately()
 	
@@ -209,6 +234,9 @@ func _ready() -> void:
 func restore_return_view() -> void:
 	# Restore previous view ("quest_select", "store", or "hub") or start at exterior title screen ("start")
 	var return_view = GameManager.menu_return_view if "menu_return_view" in GameManager else "start"
+	for ov in [quest_overlay, store_overlay, chests_overlay, dungeons_overlay]:
+		if ov:
+			ov.visible = false
 	if return_view == "quest_select":
 		if start_overlay:
 			start_overlay.visible = false
@@ -220,10 +248,6 @@ func restore_return_view() -> void:
 		if quest_overlay:
 			quest_overlay.visible = true
 			quest_overlay.modulate.a = 1.0
-		if store_overlay:
-			store_overlay.visible = false
-		if chests_overlay:
-			chests_overlay.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_quest_modes_view"):
 			treehouse_3d.set_quest_modes_view()
 	elif return_view == "store":
@@ -234,13 +258,9 @@ func restore_return_view() -> void:
 			top_bar.modulate.a = 1.0
 		if bottom_dock:
 			bottom_dock.visible = false
-		if quest_overlay:
-			quest_overlay.visible = false
 		if store_overlay:
 			store_overlay.visible = true
 			store_overlay.modulate.a = 1.0
-		if chests_overlay:
-			chests_overlay.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_store_modes_view"):
 			treehouse_3d.set_store_modes_view()
 	elif return_view == "chests":
@@ -251,15 +271,26 @@ func restore_return_view() -> void:
 			top_bar.modulate.a = 1.0
 		if bottom_dock:
 			bottom_dock.visible = false
-		if quest_overlay:
-			quest_overlay.visible = false
-		if store_overlay:
-			store_overlay.visible = false
 		if chests_overlay:
 			chests_overlay.visible = true
 			chests_overlay.modulate.a = 1.0
 		if treehouse_3d and treehouse_3d.has_method("set_chests_modes_view"):
 			treehouse_3d.set_chests_modes_view()
+	elif return_view == "dungeons" or return_view == "dungeon_list":
+		if start_overlay:
+			start_overlay.visible = false
+		if top_bar:
+			top_bar.visible = true
+			top_bar.modulate.a = 1.0
+		if bottom_dock:
+			bottom_dock.visible = false
+		if dungeons_overlay:
+			dungeons_overlay.visible = true
+			dungeons_overlay.modulate.a = 1.0
+		if treehouse_3d and treehouse_3d.has_method("set_dungeons_modes_view"):
+			treehouse_3d.set_dungeons_modes_view()
+		if return_view == "dungeon_list" and dungeon_modal and dungeon_modal.has_method("open_modal"):
+			dungeon_modal.open_modal()
 	elif return_view == "hub":
 		if start_overlay:
 			start_overlay.visible = false
@@ -269,12 +300,6 @@ func restore_return_view() -> void:
 		if bottom_dock:
 			bottom_dock.visible = true
 			bottom_dock.modulate.a = 1.0
-		if quest_overlay:
-			quest_overlay.visible = false
-		if store_overlay:
-			store_overlay.visible = false
-		if chests_overlay:
-			chests_overlay.visible = false
 		if treehouse_3d and treehouse_3d.has_method("set_hub_view"):
 			treehouse_3d.set_hub_view()
 	else:
@@ -285,12 +310,6 @@ func restore_return_view() -> void:
 				top_bar.visible = false
 			if bottom_dock:
 				bottom_dock.visible = false
-			if quest_overlay:
-				quest_overlay.visible = false
-			if store_overlay:
-				store_overlay.visible = false
-			if chests_overlay:
-				chests_overlay.visible = false
 			if treehouse_3d and treehouse_3d.has_method("set_start_view"):
 				treehouse_3d.set_start_view()
 	_update_player_stats()
@@ -394,6 +413,28 @@ func _auto_screenshot() -> void:
 				if chest_flow_overlay:
 					chest_flow_overlay.show_preview_reveal("Creature_GL_HuskerKnight", "Gold", false)
 				await get_tree().create_timer(0.4).timeout
+	elif mode in ["dungeons", "dungeons_fx_in", "dungeons_locked", "dungeons_stages", "daily_gift", "daily_gift_reward"]:
+		if start_overlay and start_overlay.visible:
+			_on_start_tapped()
+		await get_tree().create_timer(1.0).timeout
+		open_dungeons()
+		if mode == "dungeons_fx_in":
+			await get_tree().create_timer(0.25).timeout
+		else:
+			await get_tree().create_timer(1.2).timeout
+			if mode == "dungeons_locked" and dungeon_modal:
+				dungeon_modal.open_modal(false)
+				await get_tree().create_timer(0.45).timeout
+			elif mode == "dungeons_stages" and dungeon_modal:
+				dungeon_modal.open_modal(true)
+				await get_tree().create_timer(0.45).timeout
+			elif mode == "daily_gift" and daily_gift_modal:
+				daily_gift_modal.open_modal(9)
+				await get_tree().create_timer(0.45).timeout
+			elif mode == "daily_gift_reward" and daily_gift_modal:
+				daily_gift_modal.open_modal(9)
+				daily_gift_modal.show_reward_preview({"type": "Card gold", "quantity": 1, "card_id": "Creature_GL_HuskerKnight"})
+				await get_tree().create_timer(0.45).timeout
 	elif mode == "hub":
 		# Auto tap start to transition into hub
 		if start_overlay and start_overlay.visible:
@@ -534,7 +575,10 @@ func _update_player_stats() -> void:
 	if xp_label:
 		xp_label.text = "%d/%d" % [xp, max_xp]
 	if stamina_value_label:
-		stamina_value_label.text = "%d/%d" % [stamina, max_stamina]
+		var stam_str := "%d/%d" % [stamina, max_stamina]
+		stamina_value_label.text = stam_str
+		var stam_font_sz := 24 if stam_str.length() <= 3 else (18 if stam_str.length() <= 5 else 14)
+		stamina_value_label.add_theme_font_size_override("font_size", stam_font_sz)
 	if stamina_status_label:
 		stamina_status_label.text = "Full" if stamina >= max_stamina else "04:30"
 	if cards_label:
@@ -638,9 +682,81 @@ func _on_deck_wars_pressed() -> void:
 	)
 
 func _on_dungeons_pressed() -> void:
-	_play_sfx()
-	if dungeon_modal:
-		dungeon_modal.open_modal()
+	_play_select_sfx()
+	open_dungeons()
+
+
+func open_dungeons() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "dungeons"
+	if bottom_dock:
+		var tw = create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(func(): bottom_dock.visible = false)
+
+	if dungeons_overlay:
+		dungeons_overlay.visible = true
+		dungeons_overlay.modulate.a = 0.0
+		var tw_o = create_tween()
+		tw_o.tween_property(dungeons_overlay, "modulate:a", 1.0, 0.3)
+
+	if treehouse_3d and treehouse_3d.has_method("show_dungeons_modes"):
+		treehouse_3d.show_dungeons_modes()
+
+
+func _on_dungeons_back_pressed() -> void:
+	if Audio and SFX_UI_BACK:
+		Audio.play_sfx(SFX_UI_BACK)
+	else:
+		_play_sfx()
+	close_dungeons()
+
+
+func close_dungeons() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "hub"
+	if dungeons_overlay:
+		var tw_o = create_tween()
+		tw_o.tween_property(dungeons_overlay, "modulate:a", 0.0, 0.2)
+		tw_o.tween_callback(func(): dungeons_overlay.visible = false)
+
+	if bottom_dock:
+		bottom_dock.visible = true
+		bottom_dock.modulate.a = 0.0
+		var tw = create_tween()
+		tw.tween_property(bottom_dock, "modulate:a", 1.0, 0.3)
+
+	if treehouse_3d and treehouse_3d.has_method("hide_dungeons_modes"):
+		treehouse_3d.hide_dungeons_modes()
+
+
+func _on_quad_dungeon_portal_pressed() -> void:
+	if Audio and SFX_SPELL_PORTAL:
+		Audio.play_sfx(SFX_SPELL_PORTAL)
+	_trigger_board_icon_activate([quad_dungeon_portal, quad_daily_gift], "play_dungeon_portal_activate", func():
+		if dungeon_modal and dungeon_modal.has_method("open_modal"):
+			dungeon_modal.open_modal()
+	)
+
+
+func _on_quad_daily_gift_pressed() -> void:
+	_trigger_board_icon_activate([quad_dungeon_portal, quad_daily_gift], "play_daily_gift_activate", func():
+		if daily_gift_modal and daily_gift_modal.has_method("open_modal"):
+			daily_gift_modal.open_modal()
+	)
+
+
+func _on_daily_gift_request_store_gems() -> void:
+	if "menu_return_view" in GameManager:
+		GameManager.menu_return_view = "store"
+	if dungeons_overlay:
+		dungeons_overlay.visible = false
+	if store_overlay:
+		store_overlay.visible = true
+		store_overlay.modulate.a = 1.0
+	if treehouse_3d and treehouse_3d.has_method("set_store_modes_view"):
+		treehouse_3d.set_store_modes_view()
+	_open_store_modal(store_gems_modal)
 
 func _on_deck_pressed() -> void:
 	_play_sfx()
