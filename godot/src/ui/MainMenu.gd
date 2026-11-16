@@ -10,6 +10,8 @@ const SFX_SPELL_PORTAL = preload("res://assets/audio/sfx/Spell_Portal.wav")
 var _press_select_sfx_played: bool = false
 
 # 3D Treehouse & UI Nodes
+@onready var viewport_container: SubViewportContainer = $ViewportContainer
+@onready var subviewport: SubViewport = $ViewportContainer/SubViewport
 @onready var treehouse_3d: Node3D = $ViewportContainer/SubViewport/TreehouseMenu3D
 @onready var top_bar: Control = $TopBar
 @onready var bottom_dock: Control = $BottomDock
@@ -159,6 +161,9 @@ func _ready() -> void:
 		quad_fionna.pressed.connect(_on_fionna_pressed)
 	if quad_quests:
 		quad_quests.pressed.connect(_on_quests_pressed)
+		if "hit_tester" in quad_quests and treehouse_3d and treehouse_3d.has_method("is_quests_hit_at_viewport_pos"):
+			quad_quests.hit_tester = func(canvas_pos: Vector2) -> bool:
+				return treehouse_3d.is_quests_hit_at_viewport_pos(_screen_to_subviewport(canvas_pos))
 	
 	# Store Overlay Buttons & Modals
 	if store_back_btn:
@@ -625,6 +630,18 @@ func _play_select_sfx() -> void:
 		Audio.play_sfx(SFX_UI_SELECT)
 	elif Audio and SFX_CLICK:
 		Audio.play_sfx(SFX_CLICK)
+
+func _screen_to_subviewport(canvas_pos: Vector2) -> Vector2:
+	if not viewport_container or not subviewport:
+		return canvas_pos
+	var local_vc: Vector2 = viewport_container.get_global_transform_with_canvas().affine_inverse() * canvas_pos
+	var vc_size: Vector2 = viewport_container.size
+	var vp_size := Vector2(subviewport.size)
+	return Vector2(
+		local_vc.x * (vp_size.x / maxf(vc_size.x, 1.0)),
+		local_vc.y * (vp_size.y / maxf(vc_size.y, 1.0))
+	)
+
 
 func _connect_board_button(btn: BaseButton, press_method: String, pressed_handler: Callable) -> void:
 	if not btn:

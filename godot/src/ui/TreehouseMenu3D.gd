@@ -15,6 +15,7 @@ extends Node3D
 @onready var deckwars_mode: Node3D = $BoardModesGroup/DeckWarsMode
 @onready var fionna_book: FionnaCakeBook = get_node_or_null("BoardModesGroup/FionnaCakeMode/FionnaCakeBook")
 @onready var solo_quests: SoloQuestsIcon = get_node_or_null("BoardModesGroup/QuestsMode/SoloQuestsIcon")
+@onready var quests_label: Label3D = get_node_or_null("BoardModesGroup/QuestsLabel")
 @onready var deckwars_stadium: DeckWarsStadium = get_node_or_null("BoardModesGroup/DeckWarsMode/DeckWarsStadium")
 @onready var store_modes_group: Node3D = get_node_or_null("StoreModesGroup")
 @onready var store_inventory_mode: Node3D = get_node_or_null("StoreModesGroup/StoreInventoryMode")
@@ -86,6 +87,7 @@ var _mode_tweens: Array[Tween] = []
 var _icon_reaction_tweens: Dictionary = {}
 var _icon_mat_cache: Dictionary = {}
 var _icon_is_down: Dictionary = {}
+var _quests_hit_meshes: Array[Dictionary] = []
 var board_glow_mat: StandardMaterial3D = null
 
 const ICON_REACTION_SCALE := Vector3(0.8, 0.8, 0.8)
@@ -907,3 +909,64 @@ func _process(delta: float) -> void:
 			var is_facing_camera = logo_group.global_transform.basis.z.dot(cam_dir) > 0.0
 			front_group.visible = is_facing_camera
 			back_group.visible = not is_facing_camera
+
+
+func _get_quests_hit_meshes() -> Array[Dictionary]:
+	if _quests_hit_meshes.is_empty() and solo_quests:
+		var node_paths := [
+			"SinglePlayerRoot/ScrollMesh",
+			"SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards/Deck02",
+			"SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards/Deck01",
+			"SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards/Card01",
+			"SinglePlayerRoot/PuppetGlobal/PuppetGlobalAllCards/Card02",
+		]
+		for p in node_paths:
+			var mi := solo_quests.get_node_or_null(p) as MeshInstance3D
+			if mi and mi.mesh:
+				_quests_hit_meshes.append({"mi": mi, "faces": mi.mesh.get_faces()})
+	return _quests_hit_meshes
+
+
+static func _ray_hits_mesh_instance(ray_orig: Vector3, ray_dir: Vector3, mi: MeshInstance3D, faces: PackedVector3Array) -> bool:
+	if not mi or not mi.is_visible_in_tree() or faces.is_empty():
+		return false
+	var inv: Transform3D = mi.global_transform.affine_inverse()
+	var local_orig: Vector3 = inv * ray_orig
+	var local_dir: Vector3 = (inv.basis * ray_dir).normalized()
+	if mi.get_aabb().grow(0.05).intersects_ray(local_orig, local_dir) == null:
+		return false
+	for i in range(0, faces.size(), 3):
+		var a: Vector3 = faces[i]
+		var b: Vector3 = faces[i + 1]
+		var c: Vector3 = faces[i + 2]
+		if Geometry3D.ray_intersects_triangle(local_orig, local_dir, a, b, c) != null:
+			return true
+		if Geometry3D.ray_intersects_triangle(local_orig, local_dir, a, c, b) != null:
+			return true
+	return false
+
+
+static func _ray_hits_label3d(ray_orig: Vector3, ray_dir: Vector3, lbl: Label3D) -> bool:
+	if not lbl or not lbl.is_visible_in_tree():
+		return false
+	var aabb: AABB = lbl.get_aabb()
+	if aabb.size.x <= 0.0 and aabb.size.y <= 0.0:
+		return false
+	aabb = aabb.grow(0.025)
+	aabb.position.z -= 0.04
+	aabb.size.z = maxf(aabb.size.z, 0.08)
+	var inv: Transform3D = lbl.global_transform.affine_inverse()
+	var local_orig: Vector3 = inv * ray_orig
+	var local_dir: Vector3 = (inv.basis * ray_dir).normalized()
+	return aabb.intersects_ray(local_orig, local_dir) != null
+
+
+func is_quests_hit_at_viewport_pos(vp_pos: Vector2) -> bool:
+	if not is_mode_select or not camera or not board_modes_group or not board_modes_group.visible:
+		return false
+	var ray_orig: Vector3 = camera.project_ray_origin(vp_pos)
+	var ray_dir: Vector3 = camera.project_ray_normal(vp_pos)
+	for entry in _get_quests_hit_meshes():
+		if _ray_hits_mesh_instance(ray_orig, ray_dir, entry["mi"], entry["faces"]):
+			return true
+	return _ray_hits_label3d(ray_orig, ray_dir, quests_label)
