@@ -3,11 +3,19 @@ extends Control
 # Audio
 const BGM_TREEHOUSE = preload("res://assets/audio/bgm/MainMenu.wav")
 const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
+const SFX_PRESS_START = preload("res://assets/audio/sfx/PressStart.wav")
 const SFX_UI_SELECT = preload("res://assets/audio/sfx/UI_Select.wav")
 const SFX_UI_BACK = preload("res://assets/audio/sfx/UI_Back.wav")
 const SFX_SPELL_PORTAL = preload("res://assets/audio/sfx/Spell_Portal.wav")
 
+const START_PROMPT_REST_TOP: float = -140.0
+const START_PROMPT_REST_BOTTOM: float = -60.0
+const START_PROMPT_HIDE_DELTA: float = 260.0
+
 var _press_select_sfx_played: bool = false
+var _start_dismissing: bool = false
+var _start_prompt_tween: Tween = null
+var _start_pulse_tween: Tween = null
 
 # 3D Treehouse & UI Nodes
 @onready var viewport_container: SubViewportContainer = $ViewportContainer
@@ -16,6 +24,7 @@ var _press_select_sfx_played: bool = false
 @onready var top_bar: Control = $TopBar
 @onready var bottom_dock: Control = $BottomDock
 @onready var start_overlay: Control = $StartOverlay
+@onready var start_prompt_panel: Panel = $StartOverlay/PromptPanel
 
 # Top Bar Data Labels
 @onready var level_label: Label = $TopBar/PlayerBadge/LevelLabel
@@ -375,9 +384,9 @@ func restore_return_view() -> void:
 		if treehouse_3d and treehouse_3d.has_method("set_hub_view"):
 			treehouse_3d.set_hub_view()
 	else:
+		_start_dismissing = false
 		if start_overlay:
-			start_overlay.visible = true
-			start_overlay.modulate.a = 1.0
+			_animate_start_prompt_in()
 			if top_bar:
 				top_bar.visible = false
 			if bottom_dock:
@@ -739,14 +748,64 @@ func _update_player_stats() -> void:
 	if trophy_label:
 		trophy_label.text = "0"
 
+## Unity AdventureTime.unity &7665 ShowStartTween + &10606 PulsatingScript:
+## Slide up from below screen over 0.5s EaseOut while pulsating scale linearly 1.0 <-> 0.9 over 1.0s each way.
+func _animate_start_prompt_in() -> void:
+	if _start_prompt_tween and _start_prompt_tween.is_valid():
+		_start_prompt_tween.kill()
+	if _start_pulse_tween and _start_pulse_tween.is_valid():
+		_start_pulse_tween.kill()
+	start_overlay.visible = true
+	start_overlay.modulate.a = 1.0
+	if not start_prompt_panel:
+		return
+	start_prompt_panel.scale = Vector2.ONE
+	start_prompt_panel.modulate = Color.WHITE
+	start_prompt_panel.pivot_offset = start_prompt_panel.size * 0.5
+	start_prompt_panel.offset_top = START_PROMPT_REST_TOP + START_PROMPT_HIDE_DELTA
+	start_prompt_panel.offset_bottom = START_PROMPT_REST_BOTTOM + START_PROMPT_HIDE_DELTA
+	_start_prompt_tween = create_tween().set_parallel(true)
+	_start_prompt_tween.tween_property(start_prompt_panel, "offset_top", START_PROMPT_REST_TOP, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_start_prompt_tween.tween_property(start_prompt_panel, "offset_bottom", START_PROMPT_REST_BOTTOM, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_start_pulse_tween = create_tween().set_loops()
+	_start_pulse_tween.tween_property(start_prompt_panel, "scale", Vector2(0.9, 0.9), 1.0).set_trans(Tween.TRANS_LINEAR)
+	_start_pulse_tween.tween_property(start_prompt_panel, "scale", Vector2.ONE, 1.0).set_trans(Tween.TRANS_LINEAR)
+
+
 func _on_start_tapped() -> void:
-	_play_sfx()
+	if _start_dismissing:
+		return
+	_start_dismissing = true
+	if Audio and SFX_PRESS_START:
+		Audio.play_sfx(SFX_PRESS_START)
+	else:
+		_play_sfx()
 	if "menu_return_view" in GameManager:
 		GameManager.menu_return_view = "hub"
 	if start_overlay:
-		var tween = create_tween()
-		tween.tween_property(start_overlay, "modulate:a", 0.0, 0.3)
-		tween.tween_callback(func(): start_overlay.visible = false)
+		if _start_pulse_tween and _start_pulse_tween.is_valid():
+			_start_pulse_tween.kill()
+		if _start_prompt_tween and _start_prompt_tween.is_valid():
+			_start_prompt_tween.kill()
+		if start_prompt_panel:
+			start_prompt_panel.pivot_offset = start_prompt_panel.size * 0.5
+			_start_prompt_tween = create_tween()
+			_start_prompt_tween.tween_property(start_prompt_panel, "scale", Vector2(0.88, 0.88), 0.05)
+			_start_prompt_tween.parallel().tween_property(start_prompt_panel, "modulate", Color(0.5, 0.5, 0.5, 1.0), 0.05)
+			_start_prompt_tween.tween_property(start_prompt_panel, "scale", Vector2.ONE, 0.05)
+			_start_prompt_tween.parallel().tween_property(start_prompt_panel, "modulate", Color.WHITE, 0.05)
+			_start_prompt_tween.tween_property(start_prompt_panel, "offset_top", START_PROMPT_REST_TOP + START_PROMPT_HIDE_DELTA, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			_start_prompt_tween.parallel().tween_property(start_prompt_panel, "offset_bottom", START_PROMPT_REST_BOTTOM + START_PROMPT_HIDE_DELTA, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			_start_prompt_tween.tween_callback(func():
+				start_overlay.visible = false
+				start_prompt_panel.offset_top = START_PROMPT_REST_TOP
+				start_prompt_panel.offset_bottom = START_PROMPT_REST_BOTTOM
+			)
+		else:
+			_start_prompt_tween = create_tween()
+			_start_prompt_tween.tween_property(start_overlay, "modulate:a", 0.0, 0.3)
+			_start_prompt_tween.tween_callback(func(): start_overlay.visible = false)
 	
 	if treehouse_3d and treehouse_3d.has_method("transition_to_hub"):
 		treehouse_3d.transition_to_hub(0.8)

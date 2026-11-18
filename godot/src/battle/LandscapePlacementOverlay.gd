@@ -228,8 +228,8 @@ func _start_prompt_pulse() -> void:
 		return
 	prompt_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
 	_prompt_pulse_tween = create_tween().set_loops()
-	_prompt_pulse_tween.tween_property(prompt_label, "modulate:a", 0.08, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_prompt_pulse_tween.tween_property(prompt_label, "modulate:a", 1.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_prompt_pulse_tween.tween_property(prompt_label, "modulate:a", 0.0, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_prompt_pulse_tween.tween_property(prompt_label, "modulate:a", 1.0, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 func _stop_prompt_pulse() -> void:

@@ -28,6 +28,7 @@ var _defender_atk: int = 0
 var _is_defend_mode: bool = false
 var _is_quick_mode: bool = false
 var _resolved: bool = false
+var _prompt_pulse_tween: Tween = null
 
 
 func _ready() -> void:
@@ -220,6 +221,7 @@ func _launch_wheel(sectors: Array, speed_deg_sec: float, force_quick: bool) -> v
 
 	var is_gm_quick: bool = (GameManager.get("wheel_mode") == "QUICK") if GameManager else false
 	_is_quick_mode = force_quick or is_gm_quick
+	_start_prompt_pulse()
 
 	spinner.start_spin()
 	if _is_quick_mode:
@@ -254,6 +256,7 @@ func _on_spinner_completed(result: Dictionary) -> void:
 	if _resolved:
 		return
 	_resolved = true
+	_stop_prompt_pulse()
 
 	var s_id := str(result.get("id", "hit"))
 	var mult := float(result.get("multiplier", 1.0))
@@ -312,11 +315,31 @@ func _on_spinner_completed(result: Dictionary) -> void:
 
 	visible = false
 	modulate.a = 1.0
+	_stop_prompt_pulse()
 	if star_burst_fx:
 		star_burst_fx.visible = false
 	if result_callout:
 		result_callout.visible = false
 	clash_resolved.emit(clash_res)
+
+
+## Unity BattleScene.unity &5118 TapToAttack: TweenAlpha EaseInOut PingPong 1.0 <-> 0.3 over 0.5s.
+func _start_prompt_pulse() -> void:
+	_stop_prompt_pulse()
+	if not prompt_lbl or _is_quick_mode:
+		return
+	prompt_lbl.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	_prompt_pulse_tween = create_tween().set_loops()
+	_prompt_pulse_tween.tween_property(prompt_lbl, "modulate:a", 0.3, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_prompt_pulse_tween.tween_property(prompt_lbl, "modulate:a", 1.0, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _stop_prompt_pulse() -> void:
+	if _prompt_pulse_tween and _prompt_pulse_tween.is_valid():
+		_prompt_pulse_tween.kill()
+	_prompt_pulse_tween = null
+	if prompt_lbl:
+		prompt_lbl.modulate.a = 1.0
 
 
 func _show_wheel_outcome_fx(s_id: String, is_counter: bool, is_blocked: bool) -> void:
