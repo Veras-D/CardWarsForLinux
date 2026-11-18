@@ -17,6 +17,7 @@ var _tests_failed: int = 0
 
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("\n==================================================")
 	print("  RUNNING GAMEPAD & LOCAL MULTIPLAYER TEST SUITE (Epic 5)")
 	print("==================================================\n")

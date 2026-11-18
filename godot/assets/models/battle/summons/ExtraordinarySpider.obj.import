@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://drf5h3oftyejn"
+path="res://.godot/imported/ExtraordinarySpider.obj-5e330826810d60d857307e6516be7a22.mesh"
+
+[deps]
+
+files=["res://.godot/imported/ExtraordinarySpider.obj-5e330826810d60d857307e6516be7a22.mesh"]
+
+source_file="res://assets/models/battle/summons/ExtraordinarySpider.obj"
+dest_files=["res://.godot/imported/ExtraordinarySpider.obj-5e330826810d60d857307e6516be7a22.mesh", "res://.godot/imported/ExtraordinarySpider.obj-5e330826810d60d857307e6516be7a22.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

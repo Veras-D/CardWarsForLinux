@@ -32,55 +32,133 @@ import re
 import struct
 
 
+def _unpack_packed_ints(num_items: int, data_hex: str, bit_size: int) -> list[int]:
+    if num_items <= 0 or bit_size <= 0 or not data_hex:
+        return []
+    raw = bytes.fromhex(data_hex)
+    bit_stream = int.from_bytes(raw, "little")
+    mask = (1 << bit_size) - 1
+    return [(bit_stream >> (i * bit_size)) & mask for i in range(num_items)]
+
+
+def _unpack_packed_floats(block: str) -> list[float]:
+    m_n = re.search(r"m_NumItems:\s*(\d+)", block)
+    m_r = re.search(r"m_Range:\s*([-0-9.eE+]+)", block)
+    m_s = re.search(r"m_Start:\s*([-0-9.eE+]+)", block)
+    m_d = re.search(r"m_Data:\s*([0-9a-fA-F]*)", block)
+    m_b = re.search(r"m_BitSize:\s*(\d+)", block)
+    if not (m_n and m_r and m_s and m_d and m_b):
+        return []
+    n = int(m_n.group(1))
+    rng = float(m_r.group(1))
+    start = float(m_s.group(1))
+    bit_size = int(m_b.group(1))
+    if n <= 0 or bit_size <= 0:
+        return []
+    denom = float((1 << bit_size) - 1)
+    ints = _unpack_packed_ints(n, m_d.group(1), bit_size)
+    return [start + (iv / denom) * rng for iv in ints]
+
+
+def _unpack_compressed_tris(block: str) -> list[tuple[int, int, int]]:
+    m_n = re.search(r"m_NumItems:\s*(\d+)", block)
+    m_d = re.search(r"m_Data:\s*([0-9a-fA-F]*)", block)
+    m_b = re.search(r"m_BitSize:\s*(\d+)", block)
+    if not (m_n and m_d and m_b):
+        return []
+    n = int(m_n.group(1))
+    ints = _unpack_packed_ints(n, m_d.group(1), int(m_b.group(1)))
+    return [(ints[i], ints[i + 1], ints[i + 2]) for i in range(0, len(ints) - 2, 3)]
+
+
+def _extract_cm_field(cm_txt: str, field_name: str, next_field: str | None) -> str:
+    start = cm_txt.find(f"    {field_name}:")
+    if start < 0:
+        return ""
+    if next_field:
+        end = cm_txt.find(f"    {next_field}:", start)
+        if end >= 0:
+            return cm_txt[start:end]
+    return cm_txt[start:]
+
+
 def parse_unity_mesh(asset_path: str) -> dict:
     with open(asset_path, "r", encoding="utf-8", errors="replace") as f:
         txt = f.read()
 
     vc = int(re.search(r"m_VertexCount:\s*(\d+)", txt).group(1))
-    td = bytes.fromhex(re.search(r"_typelessdata:\s*([0-9a-fA-F]+)", txt).group(1))
-    ib = bytes.fromhex(re.search(r"m_IndexBuffer:\s*([0-9a-fA-F]+)", txt).group(1))
+    td_match = re.search(r"_typelessdata:\s*([0-9a-fA-F]*)", txt)
+    td = bytes.fromhex(td_match.group(1)) if td_match and td_match.group(1) else b""
+    ib_match = re.search(r"m_IndexBuffer:\s*([0-9a-fA-F]*)", txt)
+    ib = bytes.fromhex(ib_match.group(1)) if ib_match and ib_match.group(1) else b""
     ntris = len(ib) // 6
     tris = [struct.unpack_from("<3H", ib, i * 6) for i in range(ntris)]
 
-    # Detect UV0 channel stream & offset from m_Channels[3]
-    ch_pos = txt.find("m_Channels:")
-    ch_sub = txt[ch_pos : txt.find("m_DataSize:", ch_pos)] if ch_pos >= 0 else ""
-    ch_matches = re.findall(
-        r"stream:\s*(\d+)\s+offset:\s*(\d+)\s+format:\s*(\d+)\s+dimension:\s*(\d+)",
-        ch_sub,
-    )
-    uv_stream = 1
-    uv_chan_offset = 0
-    s0_stride_from_ch = 0
-    if len(ch_matches) >= 4:
-        uv_stream = int(ch_matches[3][0])
-        uv_chan_offset = int(ch_matches[3][1])
-        for st_s, off_s, fmt_s, dim_s in ch_matches:
-            st, off, fmt, dim = int(st_s), int(off_s), int(fmt_s), int(dim_s)
-            if st == 0 and dim > 0:
-                bsize = 4 if fmt == 0 else (2 if fmt == 1 else 1)
-                s0_stride_from_ch = max(s0_stride_from_ch, off + dim * bsize)
-
-    if uv_stream == 0 and s0_stride_from_ch > 0 and len(td) == vc * s0_stride_from_ch:
-        layout = f"Layout B (Interleaved {s0_stride_from_ch}B/vert in Stream 0, uv_offset={uv_chan_offset})"
-        verts = []
-        uvs = []
-        for i in range(vc):
-            base = i * s0_stride_from_ch
-            x, y, z = struct.unpack_from("<3f", td, base)
-            u, v = struct.unpack_from("<2f", td, base + uv_chan_offset)
-            verts.append((x, y, z))
-            uvs.append((u, v))
+    if vc == 0 and "  m_CompressedMesh:" in txt:
+        cm_start = txt.index("  m_CompressedMesh:")
+        cm_end = txt.find("  m_LocalAABB:", cm_start)
+        cm_txt = txt[cm_start:cm_end] if cm_end >= 0 else txt[cm_start:]
+        v_floats = _unpack_packed_floats(_extract_cm_field(cm_txt, "m_Vertices", "m_UV"))
+        uv_floats = _unpack_packed_floats(_extract_cm_field(cm_txt, "m_UV", "m_Normals"))
+        if not tris:
+            tris = _unpack_compressed_tris(_extract_cm_field(cm_txt, "m_Triangles", "m_UVInfo"))
+        vc = len(v_floats) // 3
+        verts = [(v_floats[i * 3], v_floats[i * 3 + 1], v_floats[i * 3 + 2]) for i in range(vc)]
+        if len(uv_floats) >= vc * 2:
+            uvs = [(uv_floats[i * 2], uv_floats[i * 2 + 1]) for i in range(vc)]
+        else:
+            uvs = [(0.0, 0.0)] * vc
+        layout = "CompressedMesh (m_CompressedMesh bit-packed)"
     else:
-        stride_s0 = s0_stride_from_ch if s0_stride_from_ch > 0 else 12
-        uv_off = ((vc * stride_s0) + 15) // 16 * 16
-        if len(td) != uv_off + vc * 8:
-            rem = len(td) - vc * 8
-            stride_s0 = (rem // vc // 4) * 4
+        # Detect UV0 channel stream & offset from m_Channels[3]
+        ch_pos = txt.find("m_Channels:")
+        ch_sub = txt[ch_pos : txt.find("m_DataSize:", ch_pos)] if ch_pos >= 0 else ""
+        ch_matches = re.findall(
+            r"stream:\s*(\d+)\s+offset:\s*(\d+)\s+format:\s*(\d+)\s+dimension:\s*(\d+)",
+            ch_sub,
+        )
+        uv_stream = 1
+        uv_chan_offset = 0
+        uv_format = 0
+        s0_stride_from_ch = 0
+        s1_stride_from_ch = 0
+        if len(ch_matches) >= 4:
+            uv_stream = int(ch_matches[3][0])
+            uv_chan_offset = int(ch_matches[3][1])
+            uv_format = int(ch_matches[3][2])
+            for st_s, off_s, fmt_s, dim_s in ch_matches:
+                st, off, fmt, dim = int(st_s), int(off_s), int(fmt_s), int(dim_s)
+                if dim > 0:
+                    bsize = 4 if fmt == 0 else (2 if fmt == 1 else 1)
+                    if st == 0:
+                        s0_stride_from_ch = max(s0_stride_from_ch, off + dim * bsize)
+                    elif st == 1:
+                        s1_stride_from_ch = max(s1_stride_from_ch, off + dim * bsize)
+
+        uv_unpack_fmt = "<2e" if uv_format == 1 else "<2f"
+        uv_elem_bytes = 4 if uv_format == 1 else 8
+
+        if uv_stream == 0 and s0_stride_from_ch > 0 and len(td) == vc * s0_stride_from_ch:
+            layout = f"Layout B (Interleaved {s0_stride_from_ch}B/vert in Stream 0, uv_offset={uv_chan_offset}, uv_fmt={uv_format})"
+            verts = []
+            uvs = []
+            for i in range(vc):
+                base = i * s0_stride_from_ch
+                x, y, z = struct.unpack_from("<3f", td, base)
+                u, v = struct.unpack_from(uv_unpack_fmt, td, base + uv_chan_offset)
+                verts.append((x, y, z))
+                uvs.append((u, v))
+        else:
+            stride_s0 = s0_stride_from_ch if s0_stride_from_ch > 0 else 12
+            stride_s1 = s1_stride_from_ch if s1_stride_from_ch > 0 else uv_elem_bytes
             uv_off = ((vc * stride_s0) + 15) // 16 * 16
-        layout = f"Layout A (Separate Streams, s0_stride={stride_s0}B, uv_offset={uv_off})"
-        verts = [struct.unpack_from("<3f", td, i * stride_s0) for i in range(vc)]
-        uvs = [struct.unpack_from("<2f", td, uv_off + i * 8) for i in range(vc)]
+            if len(td) < uv_off + vc * stride_s1:
+                rem = len(td) - vc * stride_s1
+                stride_s0 = max(12, (rem // vc // 4) * 4)
+                uv_off = ((vc * stride_s0) + 15) // 16 * 16
+            layout = f"Layout A (Separate Streams, s0_stride={stride_s0}B, s1_stride={stride_s1}B, uv_offset={uv_off})"
+            verts = [struct.unpack_from("<3f", td, i * stride_s0) for i in range(vc)]
+            uvs = [struct.unpack_from(uv_unpack_fmt, td, uv_off + i * stride_s1 + uv_chan_offset) for i in range(vc)]
 
     # Parse m_BindPose if present
     bps = []

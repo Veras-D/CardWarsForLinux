@@ -1,32 +1,24 @@
-[gd_scene load_steps=4 format=3 uid="uid://btlwhlmdl01"]
+[gd_scene load_steps=8 format=3 uid="uid://btlwhlmdl01"]
 
 [ext_resource type="Script" path="res://src/battle/BattleWheelModal.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/ring/BattleRing_Outline.png" id="3_outline"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/ring/Ring_Bar_ATK.png" id="4_atk_bar"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Battle_Flash.png" id="5_flash"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
-bg_color = Color(0.1, 0.12, 0.18, 0.98)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.85, 0.7, 0.25, 0.9)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.6)
-shadow_size = 12
+[sub_resource type="LabelSettings" id="LabelSettings_Prompt"]
+font = ExtResource("2_font")
+font_size = 28
+font_color = Color(0.95, 0.97, 1, 1)
+outline_size = 6
+outline_color = Color(0.05, 0.08, 0.14, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_banner"]
-bg_color = Color(0.06, 0.08, 0.12, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.4, 0.6, 0.9, 0.8)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="LabelSettings" id="LabelSettings_Callout"]
+font = ExtResource("2_font")
+font_size = 44
+font_color = Color(1, 0.9, 0.16, 1)
+outline_size = 8
+outline_color = Color(0.78, 0.18, 0.06, 1)
 
 [node name="BattleWheelModal" type="Control"]
 layout_mode = 3
@@ -38,7 +30,22 @@ grow_vertical = 2
 mouse_filter = 0
 script = ExtResource("1_script")
 
-[node name="Backdrop" type="ColorRect" parent="."]
+[node name="RingAnchor" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -318.0
+offset_right = 140.0
+offset_bottom = -38.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="WheelContainer" type="CenterContainer" parent="RingAnchor"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,73 +53,102 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.03, 0.04, 0.06, 0.75)
 
-[node name="ModalPanel" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(400, 460)
+[node name="StarBurstFX" type="TextureRect" parent="RingAnchor"]
+visible = false
+modulate = Color(1, 1, 1, 0.85)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -230.0
-offset_right = 200.0
-offset_bottom = 230.0
+offset_left = -110.0
+offset_top = -110.0
+offset_right = 110.0
+offset_bottom = 110.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+pivot_offset = Vector2(110, 110)
+mouse_filter = 2
+texture = ExtResource("5_flash")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Margin" type="MarginContainer" parent="ModalPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 18
+[node name="RingOutline" type="TextureRect" parent="RingAnchor"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -120.0
+offset_right = 120.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_outline")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="VBox" type="VBoxContainer" parent="ModalPanel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
+[node name="NeedlePivot" type="Control" parent="RingAnchor"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="Title" type="Label" parent="ModalPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 20
-text = "⚔️ CREATURE ATTACK CLASH!"
+[node name="NeedleTex" type="TextureRect" parent="RingAnchor/NeedlePivot"]
+layout_mode = 0
+offset_left = -18.0
+offset_top = -122.0
+offset_right = 18.0
+offset_bottom = 12.0
+mouse_filter = 2
+texture = ExtResource("4_atk_bar")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ResultCallout" type="Label" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -240.0
+offset_top = -372.0
+offset_right = 240.0
+offset_bottom = -312.0
+grow_horizontal = 2
+grow_vertical = 0
+pivot_offset = Vector2(240, 30)
+text = "Good!"
+label_settings = SubResource("LabelSettings_Callout")
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="ClashInfo" type="Label" parent="ModalPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "The Pig (4 ATK) ➔ Cornball"
-horizontal_alignment = 1
-
-[node name="Prompt" type="Label" parent="ModalPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-theme_override_font_sizes/font_size = 12
-text = "Tap anywhere or press SPACE to stop the wheel!"
-horizontal_alignment = 1
-
-[node name="WheelCenter" type="CenterContainer" parent="ModalPanel/Margin/VBox"]
-custom_minimum_size = Vector2(280, 270)
-layout_mode = 2
-
-[node name="WheelContainer" type="Control" parent="ModalPanel/Margin/VBox/WheelCenter"]
-custom_minimum_size = Vector2(260, 260)
-layout_mode = 2
-
-[node name="ResultBanner" type="PanelContainer" parent="ModalPanel/Margin/VBox"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_banner")
-
-[node name="ResultText" type="Label" parent="ModalPanel/Margin/VBox/ResultBanner"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "⚡ CRITICAL HIT! (2x Damage: 8 DMG)"
+[node name="Prompt" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -54.0
+offset_right = 260.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Tap to Attack!"
+label_settings = SubResource("LabelSettings_Prompt")
 horizontal_alignment = 1
 vertical_alignment = 1

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://darvnq5x2eqdg"
+path="res://.godot/imported/HailBall.obj-c19204fb12f012481d5945f130e9e4ae.mesh"
+
+[deps]
+
+files=["res://.godot/imported/HailBall.obj-c19204fb12f012481d5945f130e9e4ae.mesh"]
+
+source_file="res://assets/models/battle/summons/HailBall.obj"
+dest_files=["res://.godot/imported/HailBall.obj-c19204fb12f012481d5945f130e9e4ae.mesh", "res://.godot/imported/HailBall.obj-c19204fb12f012481d5945f130e9e4ae.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,988 @@
+{
+  "landscapes": {
+    "Corn": [
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Corn1.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Corn2.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Corn3.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Corn4.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+      }
+    ],
+    "Plain": [
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Plain1.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Plain2.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Plain3.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Plain4.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      }
+    ],
+    "Cotton": [
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Cotton1.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Cotton2.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Cotton3.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Cotton4.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png"
+      }
+    ],
+    "Sand": [
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Sand1.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Sand2.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Sand3.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Sand4.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      }
+    ],
+    "Swamp": [
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Swamp1.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Swamp2.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Swamp3.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Swamp4.obj",
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+      }
+    ],
+    "Plains": [
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Plain1.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Plain2.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Plain3.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      },
+      {
+        "mesh": "res://assets/models/battle/landscapes/Land_Plain4.obj",
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+      }
+    ]
+  },
+  "summons": {
+    "AncientScholar": {
+      "mesh": "res://assets/models/battle/summons/AncientScholar.obj",
+      "texture": "res://assets/models/battle/textures/AncientScholar.png"
+    },
+    "AngelEye": {
+      "mesh": "res://assets/models/battle/summons/AngelEye.obj",
+      "texture": "res://assets/models/battle/textures/AngelBall.png"
+    },
+    "AngelHeart": {
+      "mesh": "res://assets/models/battle/summons/AngelHeart.obj",
+      "texture": "res://assets/models/battle/textures/HeartAngel.png"
+    },
+    "AngelOfSand": {
+      "mesh": "res://assets/models/battle/summons/AngelOfSand.obj",
+      "texture": "res://assets/models/battle/textures/AngelOfSand.png"
+    },
+    "AngelOfVanilla": {
+      "mesh": "res://assets/models/battle/summons/AngelOfVanilla.obj",
+      "texture": "res://assets/models/battle/textures/AngelOfVanilla.png"
+    },
+    "ArcherDan": {
+      "mesh": "res://assets/models/battle/summons/ArcherDan.obj",
+      "texture": "res://assets/models/battle/textures/ArcherDan.png"
+    },
+    "Axey": {
+      "mesh": "res://assets/models/battle/summons/Axey.obj",
+      "texture": "res://assets/models/battle/textures/AxeTree.png"
+    },
+    "BadRose": {
+      "mesh": "res://assets/models/battle/summons/BadRose.obj",
+      "texture": "res://assets/models/battle/textures/BadRose.png"
+    },
+    "BaldMansThrone": {
+      "mesh": "res://assets/models/battle/summons/BaldMansThrone.obj",
+      "texture": "res://assets/models/battle/textures/BaldMansThrone.png"
+    },
+    "BanshePrincess": {
+      "mesh": "res://assets/models/battle/summons/BanshePrincess.obj",
+      "texture": "res://assets/models/battle/textures/BanshePrincess.png"
+    },
+    "BansheQueen": {
+      "mesh": "res://assets/models/battle/summons/BansheQueen.obj",
+      "texture": "res://assets/models/battle/textures/BansheQueen.png"
+    },
+    "BeachMum": {
+      "mesh": "res://assets/models/battle/summons/BeachMum.obj",
+      "texture": "res://assets/models/battle/textures/Mummy.png"
+    },
+    "BearonSkates": {
+      "mesh": "res://assets/models/battle/summons/BearonSkates.obj",
+      "texture": "res://assets/models/battle/textures/BearonSkates.png"
+    },
+    "BespectacledOgre": {
+      "mesh": "res://assets/models/battle/summons/BespectacledOgre.obj",
+      "texture": "res://assets/models/battle/textures/BespectacledOgre.png"
+    },
+    "BlackCat": {
+      "mesh": "res://assets/models/battle/summons/BlackCat.obj",
+      "texture": "res://assets/models/battle/textures/BlackCat.png"
+    },
+    "BlueSlimey": {
+      "mesh": "res://assets/models/battle/summons/BlueSlimey.obj",
+      "texture": "res://assets/models/battle/textures/BlueSlimey.png"
+    },
+    "BlueberryDjini": {
+      "mesh": "res://assets/models/battle/summons/BlueberryDjini.obj",
+      "texture": "res://assets/models/battle/textures/BlueberryDjini.png"
+    },
+    "BogBansheAngel": {
+      "mesh": "res://assets/models/battle/summons/BogBansheAngel.obj",
+      "texture": "res://assets/models/battle/textures/BogBansheAngel.png"
+    },
+    "BogBum": {
+      "mesh": "res://assets/models/battle/summons/BogBum.obj",
+      "texture": "res://assets/models/battle/textures/BogBum.png"
+    },
+    "BogFrogBomb": {
+      "mesh": "res://assets/models/battle/summons/BogFrogBomb.obj",
+      "texture": "res://assets/models/battle/textures/BogFrogBomb.png"
+    },
+    "BrainBall": {
+      "mesh": "res://assets/models/battle/summons/BrainBall.obj",
+      "texture": "res://assets/models/battle/textures/BrainBall.png"
+    },
+    "BurningBush": {
+      "mesh": "res://assets/models/battle/summons/BurningBush.obj",
+      "texture": "res://assets/models/battle/textures/BurninBush.png"
+    },
+    "CactusBall": {
+      "mesh": "res://assets/models/battle/summons/CactusBall.obj",
+      "texture": "res://assets/models/battle/textures/CactusBall.png"
+    },
+    "CactusThug": {
+      "mesh": "res://assets/models/battle/summons/CactusThug.obj",
+      "texture": "res://assets/models/battle/textures/CactusThug.png"
+    },
+    "CameraDude": {
+      "mesh": "res://assets/models/battle/summons/CameraDude.obj",
+      "texture": "res://assets/models/battle/textures/CameraDude.png"
+    },
+    "CaptainTaco": {
+      "mesh": "res://assets/models/battle/summons/CaptainTaco.obj",
+      "texture": "res://assets/models/battle/textures/CaptainTaco.png"
+    },
+    "CareCrow": {
+      "mesh": "res://assets/models/battle/summons/CareCrow.obj",
+      "texture": "res://assets/models/battle/textures/CareCrow.png"
+    },
+    "ChestBurster": {
+      "mesh": "res://assets/models/battle/summons/ChestBurster.obj",
+      "texture": "res://assets/models/battle/textures/ChestBurster.png"
+    },
+    "CoolDog": {
+      "mesh": "res://assets/models/battle/summons/CoolDog.obj",
+      "texture": "res://assets/models/battle/textures/CoolDog.png"
+    },
+    "CornDog": {
+      "mesh": "res://assets/models/battle/summons/CornDog.obj",
+      "texture": "res://assets/models/battle/textures/CornDog.png"
+    },
+    "CornEyeBat": {
+      "mesh": "res://assets/models/battle/summons/CornEyeBat.obj",
+      "texture": "res://assets/models/battle/textures/CornEyeBat.png"
+    },
+    "CornLord": {
+      "mesh": "res://assets/models/battle/summons/CornLord.obj",
+      "texture": "res://assets/models/battle/textures/CornLord_D.png"
+    },
+    "CornRonin": {
+      "mesh": "res://assets/models/battle/summons/CornRonin.obj",
+      "texture": "res://assets/models/battle/textures/CornRonin.png"
+    },
+    "CornWall": {
+      "mesh": "res://assets/models/battle/summons/CornWall.obj",
+      "texture": "res://assets/models/battle/textures/CornWall.png"
+    },
+    "CornWorm": {
+      "mesh": "res://assets/models/battle/summons/CornWorm.obj",
+      "texture": "res://assets/models/battle/textures/HuskerWorm.png"
+    },
+    "Cornataur": {
+      "mesh": "res://assets/models/battle/summons/Cornataur.obj",
+      "texture": "res://assets/models/battle/textures/Cornataur.png"
+    },
+    "Cornball": {
+      "mesh": "res://assets/models/battle/summons/Cornball.obj",
+      "texture": "res://assets/models/battle/textures/CornBall.png"
+    },
+    "CottonCutie": {
+      "mesh": "res://assets/models/battle/summons/CottonCutie.obj",
+      "texture": "res://assets/models/battle/textures/CottonCutie.png"
+    },
+    "CottonEyeBat": {
+      "mesh": "res://assets/models/battle/summons/CottonEyeBat.obj",
+      "texture": "res://assets/models/battle/textures/CottonEyeBat.png"
+    },
+    "Cottonpult": {
+      "mesh": "res://assets/models/battle/summons/Cottonpult.obj",
+      "texture": "res://assets/models/battle/textures/Cottonpult.png"
+    },
+    "CottonsaurusRex": {
+      "mesh": "res://assets/models/battle/summons/CottonsaurusRex.obj",
+      "texture": "res://assets/models/battle/textures/CottonsaurusRex.png"
+    },
+    "Cow": {
+      "mesh": "res://assets/models/battle/summons/Cow.obj",
+      "texture": "res://assets/models/battle/textures/Cow.png"
+    },
+    "CowPurple": {
+      "mesh": "res://assets/models/battle/summons/CowPurple.obj",
+      "texture": "res://assets/models/battle/textures/CowPurple.png"
+    },
+    "DarkAngel": {
+      "mesh": "res://assets/models/battle/summons/DarkAngel.obj",
+      "texture": "res://assets/models/battle/textures/BlackAngel.png"
+    },
+    "DevilEye": {
+      "mesh": "res://assets/models/battle/summons/DevilEye.obj",
+      "texture": "res://assets/models/battle/textures/DevilEye.png"
+    },
+    "DiamondDan": {
+      "mesh": "res://assets/models/battle/summons/DiamondDan.obj",
+      "texture": "res://assets/models/battle/textures/DiamondDan.png"
+    },
+    "DjiniGhost": {
+      "mesh": "res://assets/models/battle/summons/DjiniGhost.obj",
+      "texture": "res://assets/models/battle/textures/DjiniGhost.png"
+    },
+    "DogBoy": {
+      "mesh": "res://assets/models/battle/summons/DogBoy.obj",
+      "texture": "res://assets/models/battle/textures/DogBoy.png"
+    },
+    "DrDeath": {
+      "mesh": "res://assets/models/battle/summons/DrDeath.obj",
+      "texture": "res://assets/models/battle/textures/DrDeath.png"
+    },
+    "DrStuffenstein": {
+      "mesh": "res://assets/models/battle/summons/DrStuffenstein.obj",
+      "texture": "res://assets/models/battle/textures/DrStuffenstein.png"
+    },
+    "DragonClaw": {
+      "mesh": "res://assets/models/battle/summons/DragonClaw.obj",
+      "texture": "res://assets/models/battle/textures/DragonClaw.png"
+    },
+    "DragonFoot": {
+      "mesh": "res://assets/models/battle/summons/DragonFoot.obj",
+      "texture": "res://assets/models/battle/textures/DragonFoot.png"
+    },
+    "Earl": {
+      "mesh": "res://assets/models/battle/summons/Earl.obj",
+      "texture": "res://assets/models/battle/textures/SmolderingElder.png"
+    },
+    "ElfChief": {
+      "mesh": "res://assets/models/battle/summons/ElfChief.obj",
+      "texture": "res://assets/models/battle/textures/ChiefElf.png"
+    },
+    "ElfMarauder": {
+      "mesh": "res://assets/models/battle/summons/ElfMarauder.obj",
+      "texture": "res://assets/models/battle/textures/ElfDualKnife.png"
+    },
+    "EmbarrassingBard": {
+      "mesh": "res://assets/models/battle/summons/EmbarrassingBard.obj",
+      "texture": "res://assets/models/battle/textures/TheBard.png"
+    },
+    "ExtraordinarySpider": {
+      "mesh": "res://assets/models/battle/summons/ExtraordinarySpider.obj",
+      "texture": "res://assets/models/battle/textures/ExtraordinarySpider.png"
+    },
+    "EyeGuy": {
+      "mesh": "res://assets/models/battle/summons/EyeGuy.obj",
+      "texture": "res://assets/models/battle/textures/EyeGuy.png"
+    },
+    "FairyShepard": {
+      "mesh": "res://assets/models/battle/summons/FairyShepard.obj",
+      "texture": "res://assets/models/battle/textures/Shepard.png"
+    },
+    "FarmerTom": {
+      "mesh": "res://assets/models/battle/summons/FarmerTom.obj",
+      "texture": "res://assets/models/battle/textures/Farmer.png"
+    },
+    "FatGoat": {
+      "mesh": "res://assets/models/battle/summons/FatGoat.obj",
+      "texture": "res://assets/models/battle/textures/Goat.png"
+    },
+    "FieldReaper": {
+      "mesh": "res://assets/models/battle/summons/FieldReaper.obj",
+      "texture": "res://assets/models/battle/textures/FieldReaper.png"
+    },
+    "FisherFish": {
+      "mesh": "res://assets/models/battle/summons/FisherFish.obj",
+      "texture": "res://assets/models/battle/textures/FisherFish.png"
+    },
+    "Fluffantry": {
+      "mesh": "res://assets/models/battle/summons/Fluffantry.obj",
+      "texture": "res://assets/models/battle/textures/Fluffantry.png"
+    },
+    "Flufflapillar": {
+      "mesh": "res://assets/models/battle/summons/Flufflapillar.obj",
+      "texture": "res://assets/models/battle/textures/FlufflapillarHappy.png"
+    },
+    "FlufflapillarSad": {
+      "mesh": "res://assets/models/battle/summons/FlufflapillarSad.obj",
+      "texture": "res://assets/models/battle/textures/FlufflapillarSad.png"
+    },
+    "FlySwatter": {
+      "mesh": "res://assets/models/battle/summons/FlySwatter.obj",
+      "texture": "res://assets/models/battle/textures/FlySwatter.png"
+    },
+    "FreezyJ": {
+      "mesh": "res://assets/models/battle/summons/FreezyJ.obj",
+      "texture": "res://assets/models/battle/textures/IceBush.png"
+    },
+    "Fummy": {
+      "mesh": "res://assets/models/battle/summons/Fummy.obj",
+      "texture": "res://assets/models/battle/textures/LittleMummy.png"
+    },
+    "FuriousChick": {
+      "mesh": "res://assets/models/battle/summons/FuriousChick.obj",
+      "texture": "res://assets/models/battle/textures/FuriousChick.png"
+    },
+    "FuriousHen": {
+      "mesh": "res://assets/models/battle/summons/FuriousHen.obj",
+      "texture": "res://assets/models/battle/textures/FuriousHen.png"
+    },
+    "FuriousRooster": {
+      "mesh": "res://assets/models/battle/summons/FuriousRooster.obj",
+      "texture": "res://assets/models/battle/textures/FuriousRooster.png"
+    },
+    "FutureScholar": {
+      "mesh": "res://assets/models/battle/summons/FutureScholar.obj",
+      "texture": "res://assets/models/battle/textures/FutureScholar.png"
+    },
+    "Ghost": {
+      "mesh": "res://assets/models/battle/summons/Ghost.obj",
+      "texture": "res://assets/models/battle/textures/Ghost.png"
+    },
+    "GhostBull": {
+      "mesh": "res://assets/models/battle/summons/GhostBull.obj",
+      "texture": "res://assets/models/battle/textures/GhostBull.png"
+    },
+    "GhostCow": {
+      "mesh": "res://assets/models/battle/summons/GhostCow.obj",
+      "texture": "res://assets/models/battle/textures/GhostCow.png"
+    },
+    "GhostEye": {
+      "mesh": "res://assets/models/battle/summons/GhostEye.obj",
+      "texture": "res://assets/models/battle/textures/GhostEye.png"
+    },
+    "GhostHag": {
+      "mesh": "res://assets/models/battle/summons/GhostHag.obj",
+      "texture": "res://assets/models/battle/textures/GhostHag.png"
+    },
+    "GhostNinja": {
+      "mesh": "res://assets/models/battle/summons/GhostNinja.obj",
+      "texture": "res://assets/models/battle/textures/GhostNinja.png"
+    },
+    "GhostSludger": {
+      "mesh": "res://assets/models/battle/summons/GhostSludger.obj",
+      "texture": "res://assets/models/battle/textures/GhostSludger.png"
+    },
+    "GhostStalker": {
+      "mesh": "res://assets/models/battle/summons/GhostStalker.obj",
+      "texture": "res://assets/models/battle/textures/GhostStalker.png"
+    },
+    "GhostlyTree": {
+      "mesh": "res://assets/models/battle/summons/GhostlyTree.obj",
+      "texture": "res://assets/models/battle/textures/GhostlyTree.png"
+    },
+    "GiantFoot": {
+      "mesh": "res://assets/models/battle/summons/GiantFoot.obj",
+      "texture": "res://assets/models/battle/textures/GiantFoot.png"
+    },
+    "GiantMummyHand": {
+      "mesh": "res://assets/models/battle/summons/GiantMummyHand.obj",
+      "texture": "res://assets/models/battle/textures/MummyHand.png"
+    },
+    "Gnome": {
+      "mesh": "res://assets/models/battle/summons/Gnome.obj",
+      "texture": "res://assets/models/battle/textures/GnomeYellow.png"
+    },
+    "GnomeRainbow": {
+      "mesh": "res://assets/models/battle/summons/GnomeRainbow.obj",
+      "texture": "res://assets/models/battle/textures/GnomeRainbow.png"
+    },
+    "GrapeSlimey": {
+      "mesh": "res://assets/models/battle/summons/GrapeSlimey.obj",
+      "texture": "res://assets/models/battle/textures/GelatinousCube.png"
+    },
+    "GrayEyeBat": {
+      "mesh": "res://assets/models/battle/summons/GrayEyeBat.obj",
+      "texture": "res://assets/models/battle/textures/EyeBat.png"
+    },
+    "GreenMermaid": {
+      "mesh": "res://assets/models/battle/summons/GreenMermaid.obj",
+      "texture": "res://assets/models/battle/textures/Mermaid.png"
+    },
+    "GreenMerman": {
+      "mesh": "res://assets/models/battle/summons/GreenMerman.obj",
+      "texture": "res://assets/models/battle/textures/Merman.png"
+    },
+    "GreenPartyOgre": {
+      "mesh": "res://assets/models/battle/summons/GreenPartyOgre.obj",
+      "texture": "res://assets/models/battle/textures/GreenPartyOgre.png"
+    },
+    "GreenSnakey": {
+      "mesh": "res://assets/models/battle/summons/GreenSnakey.obj",
+      "texture": "res://assets/models/battle/textures/SneakySnake.png"
+    },
+    "HailBall": {
+      "mesh": "res://assets/models/battle/summons/HailBall.obj",
+      "texture": "res://assets/models/battle/textures/HailBall.png"
+    },
+    "HateBird": {
+      "mesh": "res://assets/models/battle/summons/HateBird.obj",
+      "texture": "res://assets/models/battle/textures/HateBird.png"
+    },
+    "HeadphoneJerk": {
+      "mesh": "res://assets/models/battle/summons/HeadphoneJerk.obj",
+      "texture": "res://assets/models/battle/textures/HeadphoneJerk.png"
+    },
+    "Herculeye": {
+      "mesh": "res://assets/models/battle/summons/Herculeye.obj",
+      "texture": "res://assets/models/battle/textures/Herculeye.png"
+    },
+    "HotEyeBat": {
+      "mesh": "res://assets/models/battle/summons/HotEyeBat.obj",
+      "texture": "res://assets/models/battle/textures/FireEyeBat.png"
+    },
+    "HuskerGiant": {
+      "mesh": "res://assets/models/battle/summons/HuskerGiant.obj",
+      "texture": "res://assets/models/battle/textures/HuskerGiant.png"
+    },
+    "HuskerKnight": {
+      "mesh": "res://assets/models/battle/summons/HuskerKnight.obj",
+      "texture": "res://assets/models/battle/textures/HuskerKnight_D.png"
+    },
+    "IceIceBaby": {
+      "mesh": "res://assets/models/battle/summons/IceIceBaby.obj",
+      "texture": "res://assets/models/battle/textures/IceBaby_D.png"
+    },
+    "IceKnight": {
+      "mesh": "res://assets/models/battle/summons/IceKnight.obj",
+      "texture": "res://assets/models/battle/textures/IceKnight.png"
+    },
+    "InfiniteFigure": {
+      "mesh": "res://assets/models/battle/summons/InfiniteFigure.obj",
+      "texture": "res://assets/models/battle/textures/InfiniteFigure.png"
+    },
+    "KingFluff": {
+      "mesh": "res://assets/models/battle/summons/KingFluff.obj",
+      "texture": "res://assets/models/battle/textures/KingFluff.png"
+    },
+    "KnightOfObesity": {
+      "mesh": "res://assets/models/battle/summons/KnightOfObesity.obj",
+      "texture": "res://assets/models/battle/textures/FatKnight.png"
+    },
+    "LadyScarab": {
+      "mesh": "res://assets/models/battle/summons/LadyScarab.obj",
+      "texture": "res://assets/models/battle/textures/LadyScarab.png"
+    },
+    "LegionOfEarlings": {
+      "mesh": "res://assets/models/battle/summons/LegionOfEarlings.obj",
+      "texture": "res://assets/models/battle/textures/Earling.png"
+    },
+    "LimeSlimey": {
+      "mesh": "res://assets/models/battle/summons/LimeSlimey.obj",
+      "texture": "res://assets/models/battle/textures/LimeSlimey.png"
+    },
+    "LogKnight": {
+      "mesh": "res://assets/models/battle/summons/LogKnight.obj",
+      "texture": "res://assets/models/battle/textures/LogKnight.png"
+    },
+    "LostGolem": {
+      "mesh": "res://assets/models/battle/summons/LostGolem.obj",
+      "texture": "res://assets/models/battle/textures/LostGolem.png"
+    },
+    "LoveBird": {
+      "mesh": "res://assets/models/battle/summons/LoveBird.obj",
+      "texture": "res://assets/models/battle/textures/LoveBird.png"
+    },
+    "LtMushroom": {
+      "mesh": "res://assets/models/battle/summons/LtMushroom.obj",
+      "texture": "res://assets/models/battle/textures/LtMushroom.png"
+    },
+    "MadameSeota": {
+      "mesh": "res://assets/models/battle/summons/MadameSeota.obj",
+      "texture": "res://assets/models/battle/textures/MadameSeota.png"
+    },
+    "MaizeWalker": {
+      "mesh": "res://assets/models/battle/summons/MaizeWalker.obj",
+      "texture": "res://assets/models/battle/textures/MortalMaiseWalker.png"
+    },
+    "ManWitch": {
+      "mesh": "res://assets/models/battle/summons/ManWitch.obj",
+      "texture": "res://assets/models/battle/textures/ManWitch.png"
+    },
+    "ManowarElf": {
+      "mesh": "res://assets/models/battle/summons/ManowarElf.obj",
+      "texture": "res://assets/models/battle/textures/ManowarElf.png"
+    },
+    "MermaidYellow": {
+      "mesh": "res://assets/models/battle/summons/MermaidYellow.obj",
+      "texture": "res://assets/models/battle/textures/MermaidYellow.png"
+    },
+    "MotherFluffBucket": {
+      "mesh": "res://assets/models/battle/summons/MotherFluffBucket.obj",
+      "texture": "res://assets/models/battle/textures/MotherFluffBucket.png"
+    },
+    "Mouthball": {
+      "mesh": "res://assets/models/battle/summons/Mouthball.obj",
+      "texture": "res://assets/models/battle/textures/MouthMonster.png"
+    },
+    "MsMummy": {
+      "mesh": "res://assets/models/battle/summons/MsMummy.obj",
+      "texture": "res://assets/models/battle/textures/MummyBall.png"
+    },
+    "MudAngel": {
+      "mesh": "res://assets/models/battle/summons/MudAngel.obj",
+      "texture": "res://assets/models/battle/textures/AngelOfChocolate.png"
+    },
+    "MusicMallard": {
+      "mesh": "res://assets/models/battle/summons/MusicMallard.obj",
+      "texture": "res://assets/models/battle/textures/MusicMallard.png"
+    },
+    "NiceTree": {
+      "mesh": "res://assets/models/battle/summons/NiceTree.obj",
+      "texture": "res://assets/models/battle/textures/NiceTree.png"
+    },
+    "Ninja": {
+      "mesh": "res://assets/models/battle/summons/Ninja.obj",
+      "texture": "res://assets/models/battle/textures/Ninja.png"
+    },
+    "OrangeSlimey": {
+      "mesh": "res://assets/models/battle/summons/OrangeSlimey.obj",
+      "texture": "res://assets/models/battle/textures/OrangeSlimey.png"
+    },
+    "Paladim": {
+      "mesh": "res://assets/models/battle/summons/Paladim.obj",
+      "texture": "res://assets/models/battle/textures/Paladim.png"
+    },
+    "PapercutTiger": {
+      "mesh": "res://assets/models/battle/summons/PapercutTiger.obj",
+      "texture": "res://assets/models/battle/textures/PapercutTiger.png"
+    },
+    "PatchyThePumpkin": {
+      "mesh": "res://assets/models/battle/summons/PatchyThePumpkin.obj",
+      "texture": "res://assets/models/battle/textures/PatchyThePumpkin.png"
+    },
+    "PeaSoupBarfer": {
+      "mesh": "res://assets/models/battle/summons/PeaSoupBarfer.obj",
+      "texture": "res://assets/models/battle/textures/PeaSoupBarfer.png"
+    },
+    "PeachDjini": {
+      "mesh": "res://assets/models/battle/summons/PeachDjini.obj",
+      "texture": "res://assets/models/battle/textures/PeachDjini.png"
+    },
+    "Pentacutie": {
+      "mesh": "res://assets/models/battle/summons/Pentacutie.obj",
+      "texture": "res://assets/models/battle/textures/Pentacutie.png"
+    },
+    "Phyllis": {
+      "mesh": "res://assets/models/battle/summons/Phyllis.obj",
+      "texture": "res://assets/models/battle/textures/SmolderingElderess.png"
+    },
+    "Pickler": {
+      "mesh": "res://assets/models/battle/summons/Pickler.obj",
+      "texture": "res://assets/models/battle/textures/Pickler.png"
+    },
+    "Pieclops": {
+      "mesh": "res://assets/models/battle/summons/Pieclops.obj",
+      "texture": "res://assets/models/battle/textures/Pieclops.png"
+    },
+    "Pig": {
+      "mesh": "res://assets/models/battle/summons/Pig.obj",
+      "texture": "res://assets/models/battle/textures/Pig.png"
+    },
+    "PirateBear": {
+      "mesh": "res://assets/models/battle/summons/PirateBear.obj",
+      "texture": "res://assets/models/battle/textures/PirateBear.png"
+    },
+    "PorcelainGuardian": {
+      "mesh": "res://assets/models/battle/summons/PorcelainGuardian.obj",
+      "texture": "res://assets/models/battle/textures/ToiletChomper.png"
+    },
+    "Poultrygeist": {
+      "mesh": "res://assets/models/battle/summons/Poultrygeist.obj",
+      "texture": "res://assets/models/battle/textures/Poultergeist.png"
+    },
+    "PunkCat": {
+      "mesh": "res://assets/models/battle/summons/PunkCat.obj",
+      "texture": "res://assets/models/battle/textures/PunkCat.png"
+    },
+    "Quadurai": {
+      "mesh": "res://assets/models/battle/summons/Quadurai.obj",
+      "texture": "res://assets/models/battle/textures/Quadurai.png"
+    },
+    "RainbowBarfer": {
+      "mesh": "res://assets/models/battle/summons/RainbowBarfer.obj",
+      "texture": "res://assets/models/battle/textures/RainbowBarfer.png"
+    },
+    "RecordThug": {
+      "mesh": "res://assets/models/battle/summons/RecordThug.obj",
+      "texture": "res://assets/models/battle/textures/RecordThug.png"
+    },
+    "RedEyeling": {
+      "mesh": "res://assets/models/battle/summons/RedEyeling.obj",
+      "texture": "res://assets/models/battle/textures/EyeFootDevil.png"
+    },
+    "Rocktopus": {
+      "mesh": "res://assets/models/battle/summons/Rocktopus.obj",
+      "texture": "res://assets/models/battle/textures/Rockopus.png"
+    },
+    "SackOfPain": {
+      "mesh": "res://assets/models/battle/summons/SackOfPain.obj",
+      "texture": "res://assets/models/battle/textures/SackOfPain.png"
+    },
+    "SandEyeBat": {
+      "mesh": "res://assets/models/battle/summons/SandEyeBat.obj",
+      "texture": "res://assets/models/battle/textures/SandEyeBat.png"
+    },
+    "SandJackal": {
+      "mesh": "res://assets/models/battle/summons/SandJackal.obj",
+      "texture": "res://assets/models/battle/textures/SandJackal.png"
+    },
+    "SandKnight": {
+      "mesh": "res://assets/models/battle/summons/SandKnight.obj",
+      "texture": "res://assets/models/battle/textures/SandKnight.png"
+    },
+    "SandShark": {
+      "mesh": "res://assets/models/battle/summons/SandShark.obj",
+      "texture": "res://assets/models/battle/textures/SandShark.png"
+    },
+    "SandSnake": {
+      "mesh": "res://assets/models/battle/summons/SandSnake.obj",
+      "texture": "res://assets/models/battle/textures/SandWorm.png"
+    },
+    "SandasaurusRex": {
+      "mesh": "res://assets/models/battle/summons/SandasaurusRex.obj",
+      "texture": "res://assets/models/battle/textures/SandasaurusRex.png"
+    },
+    "Sandfoot": {
+      "mesh": "res://assets/models/battle/summons/Sandfoot.obj",
+      "texture": "res://assets/models/battle/textures/SandFoot.png"
+    },
+    "Sandwitch": {
+      "mesh": "res://assets/models/battle/summons/Sandwitch.obj",
+      "texture": "res://assets/models/battle/textures/SandwichWitch.png"
+    },
+    "SgtMushroom": {
+      "mesh": "res://assets/models/battle/summons/SgtMushroom.obj",
+      "texture": "res://assets/models/battle/textures/MushroomSoldier.png"
+    },
+    "SkeletalHand": {
+      "mesh": "res://assets/models/battle/summons/SkeletalHand.obj",
+      "texture": "res://assets/models/battle/textures/SkeletalGrasp.png"
+    },
+    "Sludger": {
+      "mesh": "res://assets/models/battle/summons/Sludger.obj",
+      "texture": "res://assets/models/battle/textures/Sludger.png"
+    },
+    "SnakeMint": {
+      "mesh": "res://assets/models/battle/summons/SnakeMint.obj",
+      "texture": "res://assets/models/battle/textures/CandyStripeWorm.png"
+    },
+    "SnappyDresser": {
+      "mesh": "res://assets/models/battle/summons/SnappyDresser.obj",
+      "texture": "res://assets/models/battle/textures/HandsomeMan.png"
+    },
+    "SnowBall": {
+      "mesh": "res://assets/models/battle/summons/SnowBall.obj",
+      "texture": "res://assets/models/battle/textures/SnowBall.png"
+    },
+    "SnowCorn": {
+      "mesh": "res://assets/models/battle/summons/SnowCorn.obj",
+      "texture": "res://assets/models/battle/textures/SnowCorn.png"
+    },
+    "SnowNice": {
+      "mesh": "res://assets/models/battle/summons/SnowNice.obj",
+      "texture": "res://assets/models/battle/textures/SnowNice.png"
+    },
+    "SnowPlains": {
+      "mesh": "res://assets/models/battle/summons/SnowPlains.obj",
+      "texture": "res://assets/models/battle/textures/Snowplains.png"
+    },
+    "SnowSand": {
+      "mesh": "res://assets/models/battle/summons/SnowSand.obj",
+      "texture": "res://assets/models/battle/textures/SnowSand.png"
+    },
+    "SnowSwamp": {
+      "mesh": "res://assets/models/battle/summons/SnowSwamp.obj",
+      "texture": "res://assets/models/battle/textures/SnowSwamp.png"
+    },
+    "SnuggleTree": {
+      "mesh": "res://assets/models/battle/summons/SnuggleTree.obj",
+      "texture": "res://assets/models/battle/textures/CottonBully.png"
+    },
+    "SoftEyeling": {
+      "mesh": "res://assets/models/battle/summons/SoftEyeling.obj",
+      "texture": "res://assets/models/battle/textures/CottonEyeFoot.png"
+    },
+    "SpikedMaceStump": {
+      "mesh": "res://assets/models/battle/summons/SpikedMaceStump.obj",
+      "texture": "res://assets/models/battle/textures/SpikedMaceStump.png"
+    },
+    "SteakChop": {
+      "mesh": "res://assets/models/battle/summons/SteakChop.obj",
+      "texture": "res://assets/models/battle/textures/SteakChop.png"
+    },
+    "StruzanJinn": {
+      "mesh": "res://assets/models/battle/summons/StruzanJinn.obj",
+      "texture": "res://assets/models/battle/textures/StruzanJinn.png"
+    },
+    "SugarImp": {
+      "mesh": "res://assets/models/battle/summons/SugarImp.obj",
+      "texture": "res://assets/models/battle/textures/SugarImp.png"
+    },
+    "SunKing": {
+      "mesh": "res://assets/models/battle/summons/SunKing.obj",
+      "texture": "res://assets/models/battle/textures/SunKing.png"
+    },
+    "TeethLeaf": {
+      "mesh": "res://assets/models/battle/summons/TeethLeaf.obj",
+      "texture": "res://assets/models/battle/textures/TeethLeaf.png"
+    },
+    "TheDrooler": {
+      "mesh": "res://assets/models/battle/summons/TheDrooler.obj",
+      "texture": "res://assets/models/battle/textures/TheDrooler.png"
+    },
+    "TheMariachi": {
+      "mesh": "res://assets/models/battle/summons/TheMariachi.obj",
+      "texture": "res://assets/models/battle/textures/TheMariachi.png"
+    },
+    "TravelinSkeleton": {
+      "mesh": "res://assets/models/battle/summons/TravelinSkeleton.obj",
+      "texture": "res://assets/models/battle/textures/TravelingSkeleton.png"
+    },
+    "TravelinWizard": {
+      "mesh": "res://assets/models/battle/summons/TravelinWizard.obj",
+      "texture": "res://assets/models/battle/textures/UnicycleWizard.png"
+    },
+    "TreeEvil": {
+      "mesh": "res://assets/models/battle/summons/TreeEvil.obj",
+      "texture": "res://assets/models/battle/textures/TreeEvil.png"
+    },
+    "TreeOfUgliness": {
+      "mesh": "res://assets/models/battle/summons/TreeOfUgliness.obj",
+      "texture": "res://assets/models/battle/textures/TreeOfUgliness.png"
+    },
+    "UniKnight": {
+      "mesh": "res://assets/models/battle/summons/UniKnight.obj",
+      "texture": "res://assets/models/battle/textures/UnicycleKnight.png"
+    },
+    "Unicyclops": {
+      "mesh": "res://assets/models/battle/summons/Unicyclops.obj",
+      "texture": "res://assets/models/battle/textures/Unicyclops.png"
+    },
+    "VampBaldMan": {
+      "mesh": "res://assets/models/battle/summons/VampBaldMan.obj",
+      "texture": "res://assets/models/battle/textures/VampBaldMan.png"
+    },
+    "VampCactus": {
+      "mesh": "res://assets/models/battle/summons/VampCactus.obj",
+      "texture": "res://assets/models/battle/textures/VampCactus.png"
+    },
+    "VampCorn": {
+      "mesh": "res://assets/models/battle/summons/VampCorn.obj",
+      "texture": "res://assets/models/battle/textures/VampCorn.png"
+    },
+    "VampGhost": {
+      "mesh": "res://assets/models/battle/summons/VampGhost.obj",
+      "texture": "res://assets/models/battle/textures/VampGhost.png"
+    },
+    "VampMarshmallow": {
+      "mesh": "res://assets/models/battle/summons/VampMarshmallow.obj",
+      "texture": "res://assets/models/battle/textures/VampMarshmallow.png"
+    },
+    "WallOfChocolate": {
+      "mesh": "res://assets/models/battle/summons/WallOfChocolate.obj",
+      "texture": "res://assets/models/battle/textures/WallOfChocolate.png"
+    },
+    "WallOfSand": {
+      "mesh": "res://assets/models/battle/summons/WallOfSand.obj",
+      "texture": "res://assets/models/battle/textures/WallOfSand.png"
+    },
+    "WanderingBaldMan": {
+      "mesh": "res://assets/models/battle/summons/WanderingBaldMan.obj",
+      "texture": "res://assets/models/battle/textures/BaldingMan.png"
+    },
+    "WellDressedWolf": {
+      "mesh": "res://assets/models/battle/summons/WellDressedWolf.obj",
+      "texture": "res://assets/models/battle/textures/WellDressedWolf_D.png"
+    },
+    "WhiteNinja": {
+      "mesh": "res://assets/models/battle/summons/WhiteNinja.obj",
+      "texture": "res://assets/models/battle/textures/WhiteNinja.png"
+    },
+    "WizardElf": {
+      "mesh": "res://assets/models/battle/summons/WizardElf.obj",
+      "texture": "res://assets/models/battle/textures/WizardDevil.png"
+    },
+    "WizardOfPoo": {
+      "mesh": "res://assets/models/battle/summons/WizardOfPoo.obj",
+      "texture": "res://assets/models/battle/textures/WizardOfPoo.png"
+    }
+  },
+  "buildings": {
+    "Autoplucker": {
+      "mesh": "res://assets/models/battle/buildings/Autoplucker.obj",
+      "texture": "res://assets/models/battle/textures/Autoplucker.png"
+    },
+    "BlueCastle": {
+      "mesh": "res://assets/models/battle/buildings/BlueCastle.obj",
+      "texture": "res://assets/models/battle/textures/BlueCastle_D.png"
+    },
+    "CaveOfSolitude": {
+      "mesh": "res://assets/models/battle/buildings/CaveOfSolitude.obj",
+      "texture": "res://assets/models/battle/textures/CaveOfSolitude.png"
+    },
+    "ComfyCave": {
+      "mesh": "res://assets/models/battle/buildings/ComfyCave.obj",
+      "texture": "res://assets/models/battle/textures/CottonCave.png"
+    },
+    "ElfTeePee": {
+      "mesh": "res://assets/models/battle/buildings/ElfTeePee.obj",
+      "texture": "res://assets/models/battle/textures/ElfTeepee.png"
+    },
+    "FruitCakeBuilding": {
+      "mesh": "res://assets/models/battle/buildings/FruitCakeBuilding.obj",
+      "texture": "res://assets/models/battle/textures/FruitCakeBuilding.png"
+    },
+    "GhostWindmill": {
+      "mesh": "res://assets/models/battle/buildings/GhostWindmill.obj",
+      "texture": "res://assets/models/battle/textures/GhostWindmill.png"
+    },
+    "GhostlyCastle": {
+      "mesh": "res://assets/models/battle/buildings/GhostlyCastle.obj",
+      "texture": "res://assets/models/battle/textures/GhostlyCastle.png"
+    },
+    "Igloo": {
+      "mesh": "res://assets/models/battle/buildings/Igloo.obj",
+      "texture": "res://assets/models/battle/textures/Igloo.png"
+    },
+    "Mausoleum": {
+      "mesh": "res://assets/models/battle/buildings/Mausoleum.obj",
+      "texture": "res://assets/models/battle/textures/Mausoleum.png"
+    },
+    "NicelandsTower": {
+      "mesh": "res://assets/models/battle/buildings/NicelandsTower.obj",
+      "texture": "res://assets/models/battle/textures/ClockTower.png"
+    },
+    "ObeliskOfVengeance": {
+      "mesh": "res://assets/models/battle/buildings/ObeliskOfVengeance.obj",
+      "texture": "res://assets/models/battle/textures/ObelisxOfVengeance.png"
+    },
+    "PalaceOfBone": {
+      "mesh": "res://assets/models/battle/buildings/PalaceOfBone.obj",
+      "texture": "res://assets/models/battle/textures/PalaceOfBone.png"
+    },
+    "PuffyCastle": {
+      "mesh": "res://assets/models/battle/buildings/PuffyCastle.obj",
+      "texture": "res://assets/models/battle/textures/PuffyCastle.png"
+    },
+    "Pyramidia": {
+      "mesh": "res://assets/models/battle/buildings/Pyramidia.obj",
+      "texture": "res://assets/models/battle/textures/Pyramidia.png"
+    },
+    "RedCastle": {
+      "mesh": "res://assets/models/battle/buildings/RedCastle.obj",
+      "texture": "res://assets/models/battle/textures/RedCastle_D.png"
+    },
+    "RedDome": {
+      "mesh": "res://assets/models/battle/buildings/RedDome.obj",
+      "texture": "res://assets/models/battle/textures/RedRotunda.png"
+    },
+    "RedParthenon": {
+      "mesh": "res://assets/models/battle/buildings/RedParthenon.obj",
+      "texture": "res://assets/models/battle/textures/RedParthenon.png"
+    },
+    "SandCastle": {
+      "mesh": "res://assets/models/battle/buildings/SandCastle.obj",
+      "texture": "res://assets/models/battle/textures/SandCastle.png"
+    },
+    "SandPyramid": {
+      "mesh": "res://assets/models/battle/buildings/SandPyramid.obj",
+      "texture": "res://assets/models/battle/textures/SandPyrimid.png"
+    },
+    "SandSphinx": {
+      "mesh": "res://assets/models/battle/buildings/SandSphinx.obj",
+      "texture": "res://assets/models/battle/textures/Sphinx.png"
+    },
+    "SchoolHouse": {
+      "mesh": "res://assets/models/battle/buildings/SchoolHouse.obj",
+      "texture": "res://assets/models/battle/textures/BlueHouse.png"
+    },
+    "ShadowPyramid": {
+      "mesh": "res://assets/models/battle/buildings/ShadowPyramid.obj",
+      "texture": "res://assets/models/battle/textures/ShadowPyramid.png"
+    },
+    "SiloOfTruth": {
+      "mesh": "res://assets/models/battle/buildings/SiloOfTruth.obj",
+      "texture": "res://assets/models/battle/textures/SiloOfTruth.png"
+    },
+    "SpiritTower": {
+      "mesh": "res://assets/models/battle/buildings/SpiritTower.obj",
+      "texture": "res://assets/models/battle/textures/SpiritTower.png"
+    },
+    "Stonehenge": {
+      "mesh": "res://assets/models/battle/buildings/Stonehenge.obj",
+      "texture": "res://assets/models/battle/textures/Stonehenge.png"
+    },
+    "SunPyramid": {
+      "mesh": "res://assets/models/battle/buildings/SunPyramid.obj",
+      "texture": "res://assets/models/battle/textures/SunPyramid.png"
+    }
+  }
+}

@@ -7,6 +7,7 @@ var _tests_failed: int = 0
 
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("\n==================================================")
 	print("  RUNNING CHEST OPENING & GACHA SYSTEM TEST SUITE (Task 8.2)")
 	print("==================================================\n")

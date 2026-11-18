@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://ca0v46jx27fot"
+path="res://.godot/imported/Land_Plain2.obj-77820136f5ed7946810c246020ec3449.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Land_Plain2.obj-77820136f5ed7946810c246020ec3449.mesh"]
+
+source_file="res://assets/models/battle/landscapes/Land_Plain2.obj"
+dest_files=["res://.godot/imported/Land_Plain2.obj-77820136f5ed7946810c246020ec3449.mesh", "res://.godot/imported/Land_Plain2.obj-77820136f5ed7946810c246020ec3449.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

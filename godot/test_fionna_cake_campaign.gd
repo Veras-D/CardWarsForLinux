@@ -1,6 +1,7 @@
 extends Node
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("\n==================================================")
 	print("  RUNNING FIONNA & CAKE EXPANSION TEST SUITE (Task 7.3)")
 	print("==================================================\n")
@@ -256,10 +257,6 @@ func _ready() -> void:
 		failed += 1
 
 	fc_3d_map.queue_free()
-
-	# Clean up default profile written by complete_campaign_quest during test run
-	if FileAccess.file_exists(GameManager.DEFAULT_PROFILE_PATH):
-		DirAccess.remove_absolute(GameManager.DEFAULT_PROFILE_PATH)
 
 	print("\n==================================================")
 	print("  TEST SUMMARY: %d PASSED, %d FAILED" % [passed, failed])

@@ -3,6 +3,7 @@ extends Control
 const BattlePhaseManager = preload("res://src/battle/BattlePhaseManager.gd")
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("========================================")
 	print("🧪 RUNNING BATTLE PHASE MANAGER UNIT TESTS")
 	print("========================================")

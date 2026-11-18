@@ -97,17 +97,20 @@ func update_landscape(new_landscape: String) -> void:
 	# Label styling
 	landscape_label.text = "%s %s" % [meta["icon"], meta["name"]]
 
-	# Background styling
+	# Background styling (translucent over the 3D Treehouse tabletop)
 	var style = bg_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
 	if style:
-		style.bg_color = meta["color"]
+		var c: Color = meta["color"]
+		c.a = 0.28
+		style.bg_color = c
 		style.border_color = meta["border"]
 		bg_panel.add_theme_stylebox_override("panel", style)
 
-	# Terrain Texture loading
+	# Terrain Texture loading (subtle tint; 3D terrain renders underneath)
 	var tex_path = "res://assets/textures/landscapes/%s.png" % landscape
 	if ResourceLoader.exists(tex_path):
 		terrain_texture.texture = load(tex_path)
+		terrain_texture.modulate = Color(1, 1, 1, 0.22)
 		terrain_texture.visible = true
 	else:
 		terrain_texture.visible = false

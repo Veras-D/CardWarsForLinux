@@ -1,82 +1,28 @@
-[gd_scene format=3 uid="uid://b0y58d4e7n1qa"]
+[gd_scene load_steps=6 format=3 uid="uid://b0y58d4e7n1qa"]
 
 [ext_resource type="Script" path="res://src/battle/LeaderPowerButton.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/uiTurns.png" id="2_turns"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/uiTurnsReady.png" id="3_ready"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="4_font"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glow"]
-bg_color = Color(1, 0.85, 0.2, 0.25)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.9, 0.3, 0.9)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-expand_margin_left = 3.0
-expand_margin_top = 3.0
-expand_margin_right = 3.0
-expand_margin_bottom = 3.0
+[sub_resource type="StyleBoxTexture" id="SB_Turns"]
+texture = ExtResource("2_turns")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
-bg_color = Color(0.12, 0.15, 0.22, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.4, 0.5, 0.65, 0.8)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
-bg_color = Color(0.18, 0.24, 0.35, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 0.85, 0.3, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
-bg_color = Color(0.08, 0.1, 0.15, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 0.7, 0.2, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
-bg_color = Color(0.08, 0.1, 0.14, 0.65)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.25, 0.3, 0.38, 0.5)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxTexture" id="SB_Ready"]
+texture = ExtResource("3_ready")
 
 [node name="LeaderPowerButton" type="Control"]
-custom_minimum_size = Vector2(114, 34)
+custom_minimum_size = Vector2(118, 66)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 114.0
-offset_bottom = 34.0
-pivot_offset = Vector2(57, 17)
+offset_right = 118.0
+offset_bottom = 66.0
+pivot_offset = Vector2(59, 33)
 script = ExtResource("1_script")
 
-[node name="GlowPanel" type="Panel" parent="."]
+[node name="GlowPanel" type="TextureRect" parent="."]
 visible = false
+modulate = Color(1, 1, 1, 0.75)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -84,7 +30,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_glow")
+texture = ExtResource("3_ready")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Button" type="Button" parent="."]
 layout_mode = 1
@@ -94,28 +42,27 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+theme_override_styles/normal = SubResource("SB_Turns")
+theme_override_styles/hover = SubResource("SB_Turns")
+theme_override_styles/pressed = SubResource("SB_Turns")
+theme_override_styles/disabled = SubResource("SB_Turns")
 
 [node name="HBox" type="HBoxContainer" parent="Button"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 2.0
-offset_right = -4.0
-offset_bottom = -2.0
+offset_left = 40.0
+offset_top = 18.0
+offset_right = -10.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 6
 
 [node name="Portrait" type="TextureRect" parent="Button/HBox"]
 visible = false
-custom_minimum_size = Vector2(28, 28)
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -127,15 +74,22 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 mouse_filter = 2
-theme_override_constants/separation = -2
+theme_override_constants/separation = 0
 
 [node name="TitleLabel" type="Label" parent="Button/HBox/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "Leader Power"
 text_overrun_behavior = 3
 
 [node name="StatusLabel" type="Label" parent="Button/HBox/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "⏱️ 3 Turns"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 14
+text = "3 TURNS"
+horizontal_alignment = 1
+vertical_alignment = 1

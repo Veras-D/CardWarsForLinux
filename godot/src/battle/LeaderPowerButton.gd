@@ -3,11 +3,14 @@ class_name LeaderPowerButton
 
 signal power_activated(character_id: String)
 
+const TEX_TURNS: Texture2D = preload("res://assets/textures/battle/hud/uiTurns.png")
+const TEX_READY: Texture2D = preload("res://assets/textures/battle/hud/uiTurnsReady.png")
+
 @onready var main_button: Button = $Button
 @onready var portrait_rect: TextureRect = $Button/HBox/Portrait
 @onready var title_label: Label = $Button/HBox/VBox/TitleLabel
 @onready var status_label: Label = $Button/HBox/VBox/StatusLabel
-@onready var glow_rect: Panel = $GlowPanel
+@onready var glow_rect: Control = $GlowPanel
 
 var character_id: String = ""
 var leader_data: Dictionary = {}
@@ -66,20 +69,27 @@ func update_cooldown(cooldown: int) -> void:
 	var hero_name = leader_data.get("name", character_id)
 	var hero_desc = leader_data.get("desc", "")
 
+	var sb := StyleBoxTexture.new()
 	if current_cooldown <= 0:
-		status_label.text = "⚡ READY!"
-		status_label.modulate = Color(1.0, 0.95, 0.2, 1.0)
+		sb.texture = TEX_READY
+		status_label.text = ""
+		status_label.visible = false
 		main_button.disabled = !is_interactive
 		_start_ready_pulse()
-		tooltip_text = "⚡ READY! Click to activate:\n%s" % hero_desc
+		tooltip_text = "READY! Click to activate:\n%s" % hero_desc
 	else:
-		status_label.text = "⏱️ %d Turn%s" % [current_cooldown, "s" if current_cooldown > 1 else ""]
-		status_label.modulate = Color(0.7, 0.75, 0.85, 0.9)
+		sb.texture = TEX_TURNS
+		status_label.visible = true
+		status_label.text = "%d %s" % [current_cooldown, "TURNS" if current_cooldown != 1 else "TURN"]
+		status_label.modulate = Color.WHITE
 		main_button.disabled = true
 		_stop_ready_pulse()
 		tooltip_text = "%s (%d turn%s cooldown):\n%s" % [
 			hero_name, current_cooldown, "s" if current_cooldown > 1 else "", hero_desc
 		]
+	if main_button:
+		for st in ["normal", "hover", "pressed", "disabled"]:
+			main_button.add_theme_stylebox_override(st, sb)
 
 func _start_ready_pulse() -> void:
 	if is_ready_pulse_active or not is_player:

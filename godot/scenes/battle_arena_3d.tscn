@@ -1,0 +1,63 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/battle/BattleArena3D.gd" id="1_script"]
+[ext_resource type="ArrayMesh" path="res://assets/models/GameBoard_Boarder.obj" id="2_boarder"]
+[ext_resource type="ArrayMesh" path="res://assets/models/GameBoardGrid_Red.obj" id="3_grid_red"]
+[ext_resource type="ArrayMesh" path="res://assets/models/GameBoardGrid_Blue.obj" id="4_grid_blue"]
+[ext_resource type="Texture2D" path="res://assets/textures/environment/GameBoardGrid.png" id="5_tboard"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_BoardBorder"]
+shading_mode = 0
+albedo_texture = ExtResource("5_tboard")
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="Mat_Board"]
+shading_mode = 0
+albedo_texture = ExtResource("5_tboard")
+texture_filter = 3
+
+[sub_resource type="Environment" id="Env_Treehouse"]
+background_mode = 1
+background_color = Color(0.85, 0.93, 0.98, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+
+[node name="BattleArena3D" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_Treehouse")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.92388, 0.382683, 0, -0.382683, 0.92388, 0, 2.5, 6.25)
+current = true
+fov = 60.0
+
+[node name="EnvironmentRoot" type="Node3D" parent="."]
+
+[node name="GameBoard" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+
+[node name="BoardBorder" type="MeshInstance3D" parent="GameBoard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.015, -0.168, -0.029)
+mesh = ExtResource("2_boarder")
+surface_material_override/0 = SubResource("Mat_BoardBorder")
+
+[node name="BoardGridRed" type="MeshInstance3D" parent="GameBoard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5895, -0.149, -0.031)
+mesh = ExtResource("3_grid_red")
+surface_material_override/0 = SubResource("Mat_Board")
+
+[node name="BoardGridBlue" type="MeshInstance3D" parent="GameBoard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.564, -0.149, -0.031)
+mesh = ExtResource("4_grid_blue")
+surface_material_override/0 = SubResource("Mat_Board")
+
+[node name="PlayerSeat" type="Node3D" parent="."]
+
+[node name="OpponentSeat" type="Node3D" parent="."]
+
+[node name="BottleAnchor" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.14, 0.03)
+
+[node name="BoardSlots" type="Node3D" parent="."]

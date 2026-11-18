@@ -9,6 +9,7 @@ var _tests_failed: int = 0
 
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("\n==================================================")
 	print("  RUNNING CAMPAIGN QUEST PROGRESSION TEST SUITE (Task 7.1)")
 	print("==================================================\n")

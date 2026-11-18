@@ -11,6 +11,7 @@ var failed_count: int = 0
 
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("\n==================================================")
 	print("  RUNNING DECK BUILDER TEST SUITE (Task 6.1)")
 	print("==================================================")
@@ -248,8 +249,7 @@ func test_deck_builder_scene_integration() -> void:
 	assert_true(builder.current_deck_cards.size() == 13, "Reloaded deck restored all 13 cards")
 	assert_true(builder.save_btn.disabled == false, "Save button re-enabled after loading legal deck")
 
-	# Restore pre-test GameManager state
-	GameManager.suppress_profile_save = false
+	# Restore pre-test GameManager state (keep suppress_profile_save = true for the whole test run)
 	GameManager.player_deck = orig_deck
 	GameManager.decks = orig_decks
 	GameManager.current_deck_index = orig_deck_idx

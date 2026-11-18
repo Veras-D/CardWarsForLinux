@@ -1,0 +1,83 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/battle/LandscapePlacementOverlay.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Finger_SwipeUp.png" id="3_finger"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/FloopPanel_BG.png" id="4_pill_bg"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_DarkPill"]
+texture = ExtResource("4_pill_bg")
+texture_margin_left = 20.0
+texture_margin_top = 20.0
+texture_margin_right = 20.0
+texture_margin_bottom = 20.0
+content_margin_left = 28.0
+content_margin_top = 10.0
+content_margin_right = 28.0
+content_margin_bottom = 10.0
+
+[node name="LandscapePlacementOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="PromptPill" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -230.0
+offset_top = -318.0
+offset_right = 230.0
+offset_bottom = -256.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_DarkPill")
+
+[node name="Label" type="Label" parent="PromptPill"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+text = "Place Your Landscapes"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardsRow" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -310.0
+offset_top = -222.0
+offset_right = 310.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="FingerHint" type="TextureRect" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 360.0
+offset_top = 520.0
+offset_right = 432.0
+offset_bottom = 668.0
+mouse_filter = 2
+texture = ExtResource("3_finger")
+expand_mode = 1
+stretch_mode = 5

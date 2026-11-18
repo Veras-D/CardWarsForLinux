@@ -3,6 +3,7 @@ extends Node
 const EconomyHeader = preload("res://src/ui/EconomyHeader.gd")
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("\n==================================================")
 	print("  RUNNING ECONOMY & HERO PROGRESSION TEST SUITE (Task 8.1)")
 	print("==================================================\n")

@@ -37,7 +37,6 @@ func _ready() -> void:
 	if GameManager.campaign_graph != null and not pre_test_campaign.is_empty():
 		GameManager.campaign_graph.deserialize(pre_test_campaign)
 	GameManager.viewed_fusion_recipes = pre_test_viewed
-	GameManager.suppress_profile_save = false
 
 	print("\n==================================================")
 	print("  TEST SUMMARY: %d PASSED, %d FAILED" % [passed_count, failed_count])

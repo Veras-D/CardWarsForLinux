@@ -1,6 +1,7 @@
 extends Node
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("\n==================================================")
 	print("  RUNNING DAILY DUNGEONS & EL FISTO ARENA TEST SUITE (Task 7.4)")
 	print("==================================================\n")

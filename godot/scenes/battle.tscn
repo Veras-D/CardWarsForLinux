@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://dmj6kvn8bqp4a"]
+[gd_scene load_steps=42 format=3 uid="uid://dmj6kvn8bqp4a"]
 
 [ext_resource type="Script" path="res://src/battle/BattleController.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://c34e8kfy7m2w8" path="res://scenes/components/LaneSlot.tscn" id="2_lane"]
@@ -8,39 +8,101 @@
 [ext_resource type="PackedScene" path="res://scenes/components/LeaderPowerButton.tscn" id="6_leader"]
 [ext_resource type="PackedScene" path="res://scenes/components/CharacterFaceRig.tscn" id="7_face"]
 [ext_resource type="PackedScene" path="res://scenes/battle_result_modal.tscn" id="8_result_modal"]
+[ext_resource type="PackedScene" path="res://scenes/battle_arena_3d.tscn" id="9_arena3d"]
+[ext_resource type="PackedScene" path="res://scenes/components/LandscapePlacementOverlay.tscn" id="10_landscapes"]
+[ext_resource type="PackedScene" path="res://scenes/components/KetchupBottleSpinner.tscn" id="11_ketchup"]
+[ext_resource type="PackedScene" path="res://scenes/components/BattleModals.tscn" id="12_modals"]
+[ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="13_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_Chest.png" id="14_icon_loot"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/UI_Coin_Icon.png" id="15_icon_coins"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_DeckCount.png" id="16_deck"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_DiscardCount.png" id="17_discard"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_BattleButton.png" id="18_battle_btn"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Pause.png" id="19_pause"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/StarButton.png" id="20_quest_star"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_Player.png" id="21_tray_player"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_PlayerPortrait.png" id="22_tray_portrait"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_PlayerPortrait_MP.png" id="23_tray_mp_ring"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_HealthBart.png" id="24_hp_frame"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_HealthBar.png" id="25_hp_fill"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/UI_MagicPoints.png" id="26_magic_orb"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/FloopPanel_BG.png" id="27_floop_bg"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/PopUpSprite_2.png" id="28_popup_bg"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/CW_White.png" id="29_cw_white"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.0823529, 0.101961, 0.14902, 1)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_Clear"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header"]
-bg_color = Color(0.12, 0.15, 0.22, 0.95)
-border_width_bottom = 2
-border_color = Color(0.85, 0.69, 0.27, 0.6)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_HpOppBg"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 4.0
+content_margin_bottom = 6.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp"]
-bg_color = Color(0.8, 0.2, 0.2, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="AtlasTexture" id="AtlasTexture_HpFrameOpp"]
+atlas = ExtResource("24_hp_frame")
+region = Rect2(76, 8, 126, 56)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_footer"]
-bg_color = Color(0.12, 0.15, 0.22, 0.95)
-border_width_top = 2
-border_color = Color(0.85, 0.69, 0.27, 0.6)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_HpBarFrame"]
+content_margin_left = 4.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("24_hp_frame")
+texture_margin_left = 10.0
+texture_margin_right = 16.0
+region_rect = Rect2(76, 8, 126, 56)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dialog"]
-bg_color = Color(0.08, 0.1, 0.15, 0.98)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.85, 0.69, 0.27, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_size = 10
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_HpFill"]
+texture = ExtResource("29_cw_white")
+expand_margin_left = -3.0
+expand_margin_top = -5.0
+expand_margin_right = -6.0
+expand_margin_bottom = -5.0
+modulate_color = Color(0.14, 0.72, 1, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_MagicOrb"]
+content_margin_left = 4.0
+content_margin_top = 18.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+texture = ExtResource("26_magic_orb")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_BattleBtn"]
+texture = ExtResource("18_battle_btn")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_BattleBtnHover"]
+texture = ExtResource("18_battle_btn")
+modulate_color = Color(1.14, 1.14, 1.14, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_BattleBtnPressed"]
+texture = ExtResource("18_battle_btn")
+modulate_color = Color(0.85, 0.85, 0.85, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_BattleBtnDisabled"]
+texture = ExtResource("18_battle_btn")
+modulate_color = Color(0.55, 0.55, 0.62, 0.82)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ToastPill"]
+content_margin_left = 20.0
+content_margin_top = 6.0
+content_margin_right = 20.0
+content_margin_bottom = 6.0
+texture = ExtResource("27_floop_bg")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_Dialog"]
+content_margin_left = 18.0
+content_margin_top = 18.0
+content_margin_right = 18.0
+content_margin_bottom = 18.0
+texture = ExtResource("28_popup_bg")
+texture_margin_left = 24.0
+texture_margin_top = 24.0
+texture_margin_right = 24.0
+texture_margin_bottom = 24.0
 
 [node name="Battle" type="Control"]
 layout_mode = 3
@@ -51,7 +113,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="Panel" parent="."]
+[node name="ViewportContainer" type="SubViewportContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -59,58 +121,36 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+stretch = true
 
-[node name="Header" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 48)
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 48.0
-grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_header")
+[node name="SubViewport" type="SubViewport" parent="ViewportContainer"]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
 
-[node name="OpponentInfo" type="HBoxContainer" parent="Header"]
+[node name="BattleArena3D" parent="ViewportContainer/SubViewport" instance=ExtResource("9_arena3d")]
+
+[node name="BoardClickSurface" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_right = -20.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+mouse_filter = 1
 
-[node name="OpponentFaceRig" parent="Header/OpponentInfo" instance=ExtResource("7_face")]
-layout_mode = 2
-size_flags_vertical = 4
-character_id = "Jake"
-
-[node name="OpponentLeaderPower" parent="Header/OpponentInfo" instance=ExtResource("6_leader")]
-layout_mode = 2
-size_flags_vertical = 4
-
-[node name="NameLabel" type="Label" parent="Header/OpponentInfo"]
-visible = false
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Jake"
-
-[node name="HpBar" type="ProgressBar" parent="Header/OpponentInfo"]
-custom_minimum_size = Vector2(300, 20)
-layout_mode = 2
-size_flags_vertical = 4
-theme_override_styles/fill = SubResource("StyleBoxFlat_hp")
-value = 100.0
-show_percentage = false
-
-[node name="HpLabel" type="Label" parent="Header/OpponentInfo"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Jake: 25 / 25 HP"
+[node name="CreatureStatsLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="Field" type="VBoxContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -118,16 +158,16 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -310.0
-offset_top = -290.0
+offset_top = -255.0
 offset_right = 310.0
-offset_bottom = 170.0
+offset_bottom = 185.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="OpponentLanes" type="HBoxContainer" parent="Field"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="Lane0" parent="Field/OpponentLanes" instance=ExtResource("2_lane")]
 layout_mode = 2
@@ -143,7 +183,7 @@ layout_mode = 2
 
 [node name="PlayerLanes" type="HBoxContainer" parent="Field"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="Lane0" parent="Field/PlayerLanes" instance=ExtResource("2_lane")]
 layout_mode = 2
@@ -157,133 +197,620 @@ layout_mode = 2
 [node name="Lane3" parent="Field/PlayerLanes" instance=ExtResource("2_lane")]
 layout_mode = 2
 
-[node name="BattleLog" type="PanelContainer" parent="."]
+[node name="Header" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -310.0
-offset_top = -120.0
-offset_right = -20.0
-offset_bottom = 20.0
-grow_horizontal = 0
+offset_bottom = 200.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="PlayerCornerHud" type="Control" parent="Header"]
+layout_mode = 1
+offset_right = 230.0
+offset_bottom = 190.0
+mouse_filter = 2
+
+[node name="HBox" type="Control" parent="Header/PlayerCornerHud"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+
+[node name="PortraitCol" type="Control" parent="Header/PlayerCornerHud/HBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PlayerFaceRig" parent="Header/PlayerCornerHud/HBox/PortraitCol" instance=ExtResource("7_face")]
+custom_minimum_size = Vector2(70, 68)
+offset_left = 15.0
+offset_top = 34.0
+offset_right = 85.0
+offset_bottom = 102.0
+character_id = "Jake"
+
+[node name="PortraitFrame" type="TextureRect" parent="Header/PlayerCornerHud/HBox/PortraitCol"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 98.0
+offset_bottom = 117.0
+mouse_filter = 2
+texture = ExtResource("22_tray_portrait")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MpOrbIcon" type="TextureRect" parent="Header/PlayerCornerHud/HBox/PortraitCol"]
+layout_mode = 0
+offset_left = 78.0
+offset_top = 73.0
+offset_right = 114.0
+offset_bottom = 114.0
+mouse_filter = 2
+texture = ExtResource("26_magic_orb")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MpRing" type="TextureRect" parent="Header/PlayerCornerHud/HBox/PortraitCol"]
+layout_mode = 0
+offset_left = 71.0
+offset_top = 71.0
+offset_right = 121.0
+offset_bottom = 125.0
+mouse_filter = 2
+texture = ExtResource("23_tray_mp_ring")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerLeaderPower" parent="Header/PlayerCornerHud/HBox/PortraitCol" instance=ExtResource("6_leader")]
+offset_left = 2.0
+offset_top = 118.0
+offset_right = 116.0
+offset_bottom = 182.0
+
+[node name="StatsCol" type="Control" parent="Header/PlayerCornerHud/HBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="Header/PlayerCornerHud/HBox/StatsCol"]
+visible = false
+layout_mode = 0
+offset_left = 44.0
+offset_top = 32.0
+offset_right = 190.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(1, 0.94, 0.35, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 13
+text = "JAKE"
+
+[node name="HpBar" type="ProgressBar" parent="Header/PlayerCornerHud/HBox/StatsCol"]
+custom_minimum_size = Vector2(154, 28)
+layout_mode = 0
+offset_left = 42.0
+offset_top = 5.0
+offset_right = 196.0
+offset_bottom = 33.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxTexture_HpBarFrame")
+theme_override_styles/fill = SubResource("StyleBoxTexture_HpFill")
+value = 100.0
+show_percentage = false
+
+[node name="HpLabel" type="Label" parent="Header/PlayerCornerHud/HBox/StatsCol/HpBar"]
+layout_mode = 0
+offset_left = -38.0
+offset_top = -3.0
+offset_right = -2.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 16
+text = "20"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MpLabel" type="Label" parent="Header/PlayerCornerHud/HBox/StatsCol"]
+layout_mode = 0
+offset_left = 74.0
+offset_top = 75.0
+offset_right = 118.0
+offset_bottom = 119.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 22
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OpponentInfo" type="Control" parent="Header"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -230.0
+offset_bottom = 190.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="HBox" type="Control" parent="Header/OpponentInfo"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PortraitCol" type="Control" parent="Header/OpponentInfo/HBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="OpponentFaceRig" parent="Header/OpponentInfo/HBox/PortraitCol" instance=ExtResource("7_face")]
+custom_minimum_size = Vector2(70, 68)
+offset_left = 145.0
+offset_top = 34.0
+offset_right = 215.0
+offset_bottom = 102.0
+character_id = "Finn"
+
+[node name="PortraitFrame" type="TextureRect" parent="Header/OpponentInfo/HBox/PortraitCol"]
+layout_mode = 0
+offset_left = 132.0
+offset_top = 2.0
+offset_right = 228.0
+offset_bottom = 117.0
+mouse_filter = 2
+texture = ExtResource("22_tray_portrait")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="OppMpOrbIcon" type="TextureRect" parent="Header/OpponentInfo/HBox/PortraitCol"]
+layout_mode = 0
+offset_left = 116.0
+offset_top = 73.0
+offset_right = 152.0
+offset_bottom = 114.0
+mouse_filter = 2
+texture = ExtResource("26_magic_orb")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="OppMpRing" type="TextureRect" parent="Header/OpponentInfo/HBox/PortraitCol"]
+layout_mode = 0
+offset_left = 109.0
+offset_top = 71.0
+offset_right = 159.0
+offset_bottom = 125.0
+mouse_filter = 2
+texture = ExtResource("23_tray_mp_ring")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="OpponentLeaderPower" parent="Header/OpponentInfo/HBox/PortraitCol" instance=ExtResource("6_leader")]
+offset_left = 114.0
+offset_top = 118.0
+offset_right = 228.0
+offset_bottom = 182.0
+
+[node name="StatsCol" type="Control" parent="Header/OpponentInfo/HBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="Header/OpponentInfo/HBox/StatsCol"]
+visible = false
+layout_mode = 0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = 186.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.55, 0.88, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 13
+text = "FINN"
+horizontal_alignment = 2
+
+[node name="HpFrameBg" type="TextureRect" parent="Header/OpponentInfo/HBox/StatsCol"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 5.0
+offset_right = 188.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = SubResource("AtlasTexture_HpFrameOpp")
+expand_mode = 1
+stretch_mode = 0
+flip_h = true
+
+[node name="HpBar" type="ProgressBar" parent="Header/OpponentInfo/HBox/StatsCol"]
+custom_minimum_size = Vector2(154, 28)
+layout_mode = 0
+offset_left = 34.0
+offset_top = 5.0
+offset_right = 188.0
+offset_bottom = 33.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxEmpty_HpOppBg")
+theme_override_styles/fill = SubResource("StyleBoxTexture_HpFill")
+value = 100.0
+fill_mode = 1
+show_percentage = false
+
+[node name="HpLabel" type="Label" parent="Header/OpponentInfo/HBox/StatsCol/HpBar"]
+layout_mode = 0
+offset_left = 156.0
+offset_top = -3.0
+offset_right = 192.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 16
+text = "15"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppMpLabel" type="Label" parent="Header/OpponentInfo/HBox/StatsCol"]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 75.0
+offset_right = 156.0
+offset_bottom = 119.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 22
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BattleLog" type="PanelContainer" parent="."]
+modulate = Color(1, 1, 1, 0.94)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 10.0
+offset_right = 220.0
+offset_bottom = 50.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_ToastPill")
 
 [node name="Label" type="Label" parent="BattleLog"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
-theme_override_font_sizes/font_size = 12
-text = "Welcome to Card Wars!"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 14
+text = "Card Wars"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="TurnBtn" type="Button" parent="."]
-custom_minimum_size = Vector2(200, 48)
+[node name="QuestQuickBtn" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 10.0
+offset_top = -34.0
+offset_right = 76.0
+offset_bottom = 32.0
+grow_vertical = 2
+texture_normal = ExtResource("20_quest_star")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="PauseQuickBtn" type="TextureButton" parent="."]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -265.0
-offset_top = 40.0
-offset_right = -65.0
-offset_bottom = 88.0
+offset_left = -76.0
+offset_top = -34.0
+offset_right = -10.0
+offset_bottom = 32.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_font_sizes/font_size = 14
-text = "⚔️ ATTACK! (End Turn)"
+texture_normal = ExtResource("19_pause")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="Footer" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 210)
+[node name="Footer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -210.0
+offset_top = -260.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_footer")
+mouse_filter = 2
 
-[node name="PlayerInfo" type="HBoxContainer" parent="Footer"]
+[node name="TrayPlayerBg" type="TextureRect" parent="Footer"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 20.0
-offset_top = 4.0
-offset_right = -20.0
-offset_bottom = 38.0
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -460.0
+offset_top = -256.0
+offset_right = 460.0
 grow_horizontal = 2
-theme_override_constants/separation = 16
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("21_tray_player")
+expand_mode = 1
+stretch_mode = 0
 
-[node name="PlayerFaceRig" parent="Footer/PlayerInfo" instance=ExtResource("7_face")]
-layout_mode = 2
-size_flags_vertical = 4
-character_id = "Finn"
-
-[node name="PlayerLeaderPower" parent="Footer/PlayerInfo" instance=ExtResource("6_leader")]
-layout_mode = 2
-size_flags_vertical = 4
-
-[node name="NameLabel" type="Label" parent="Footer/PlayerInfo"]
-visible = false
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Finn"
-
-[node name="HpBar" type="ProgressBar" parent="Footer/PlayerInfo"]
-custom_minimum_size = Vector2(250, 16)
-layout_mode = 2
-size_flags_vertical = 4
-theme_override_styles/fill = SubResource("StyleBoxFlat_hp")
-value = 100.0
-show_percentage = false
-
-[node name="HpLabel" type="Label" parent="Footer/PlayerInfo"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-text = "Finn: 25 / 25 HP"
-
-[node name="MpContainer" type="HBoxContainer" parent="Footer"]
+[node name="LeftCounters" type="Control" parent="Footer"]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -250.0
-offset_top = 4.0
-offset_right = -20.0
-offset_bottom = 38.0
-grow_horizontal = 0
-alignment = 2
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -450.0
+offset_top = -205.0
+offset_right = -268.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
 
-[node name="MpLabel" type="Label" parent="Footer/MpContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "⚡ Magic Points: 2 / 2"
-
-[node name="HandScroll" type="ScrollContainer" parent="Footer"]
+[node name="LootCoinRow" type="Control" parent="Footer/LeftCounters"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 30.0
-offset_right = -20.0
-offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+
+[node name="LootBadge" type="PanelContainer" parent="Footer/LeftCounters/LootCoinRow"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 6.0
+offset_right = 158.0
+offset_bottom = 58.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_Clear")
+
+[node name="HBox" type="HBoxContainer" parent="Footer/LeftCounters/LootCoinRow/LootBadge"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Footer/LeftCounters/LootCoinRow/LootBadge/HBox"]
+custom_minimum_size = Vector2(54, 48)
+layout_mode = 2
+texture = ExtResource("14_icon_loot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LootCountLabel" type="Label" parent="Footer/LeftCounters/LootCoinRow/LootBadge/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 24
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CoinsBadge" type="PanelContainer" parent="Footer/LeftCounters/LootCoinRow"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 78.0
+offset_right = 156.0
+offset_bottom = 126.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_Clear")
+
+[node name="HBox" type="HBoxContainer" parent="Footer/LeftCounters/LootCoinRow/CoinsBadge"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Icon" type="TextureRect" parent="Footer/LeftCounters/LootCoinRow/CoinsBadge/HBox"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+texture = ExtResource("15_icon_coins")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CoinsCountLabel" type="Label" parent="Footer/LeftCounters/LootCoinRow/CoinsBadge/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 24
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PilesRow" type="HBoxContainer" parent="Footer/LeftCounters"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 136.0
+offset_right = 176.0
+offset_bottom = 194.0
+theme_override_constants/separation = 6
+
+[node name="DrawPileBox" type="Control" parent="Footer/LeftCounters/PilesRow"]
+custom_minimum_size = Vector2(78, 56)
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="Footer/LeftCounters/PilesRow/DrawPileBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("16_deck")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DrawCountLabel" type="Label" parent="Footer/LeftCounters/PilesRow/DrawPileBox"]
+layout_mode = 1
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 44.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 20
+text = "10"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DiscardPileBtn" type="Button" parent="Footer/LeftCounters/PilesRow"]
+custom_minimum_size = Vector2(78, 56)
+layout_mode = 2
+flat = true
+
+[node name="Icon" type="TextureRect" parent="Footer/LeftCounters/PilesRow/DiscardPileBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("17_discard")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DiscardCountLabel" type="Label" parent="Footer/LeftCounters/PilesRow/DiscardPileBtn"]
+layout_mode = 1
+offset_left = 34.0
+offset_top = 10.0
+offset_right = 74.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 20
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HandScroll" type="ScrollContainer" parent="Footer"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -256.0
+offset_top = -218.0
+offset_right = 296.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
 vertical_scroll_mode = 0
 
 [node name="HandContainer" type="HBoxContainer" parent="Footer/HandScroll"]
 layout_mode = 2
+size_flags_horizontal = 6
 size_flags_vertical = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = -8
+alignment = 1
+
+[node name="RightControls" type="Control" parent="Footer"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 312.0
+offset_top = -250.0
+offset_right = 456.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="MagicOrb" type="PanelContainer" parent="Footer/RightControls"]
+layout_mode = 0
+offset_left = 31.0
+offset_top = 8.0
+offset_right = 109.0
+offset_bottom = 100.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_MagicOrb")
+
+[node name="MagicOrbLabel" type="Label" parent="Footer/RightControls/MagicOrb"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 32
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TurnBtn" type="Button" parent="Footer/RightControls"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 122.0
+offset_right = 132.0
+offset_bottom = 244.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("13_font")
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxTexture_BattleBtn")
+theme_override_styles/hover = SubResource("StyleBoxTexture_BattleBtnHover")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_BattleBtnPressed")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_BattleBtnDisabled")
 
 [node name="EndGameDialog" type="Panel" parent="."]
 visible = false
@@ -300,7 +827,7 @@ offset_right = 200.0
 offset_bottom = 100.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dialog")
+theme_override_styles/panel = SubResource("StyleBoxTexture_Dialog")
 
 [node name="VBox" type="VBoxContainer" parent="EndGameDialog"]
 layout_mode = 1
@@ -332,8 +859,19 @@ text = "Return to Menu"
 visible = false
 layout_mode = 1
 
+[node name="LandscapePlacementOverlay" parent="." instance=ExtResource("10_landscapes")]
+visible = false
+layout_mode = 1
+
+[node name="KetchupBottleSpinner" parent="." instance=ExtResource("11_ketchup")]
+visible = false
+layout_mode = 1
+
 [node name="BattleWheelModal" parent="." instance=ExtResource("5_wheel")]
 visible = false
+layout_mode = 1
+
+[node name="BattleModals" parent="." instance=ExtResource("12_modals")]
 layout_mode = 1
 
 [node name="BattleResultModal" parent="." instance=ExtResource("8_result_modal")]
@@ -343,3 +881,8 @@ layout_mode = 1
 [node name="MatchIntro" parent="." instance=ExtResource("3_intro")]
 visible = false
 layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

@@ -156,19 +156,22 @@ func test_all_38_characters_robustness() -> void:
 
 func test_battle_scene_face_rig_integration() -> void:
 	print("\n[Test 6] Battle Scene Face Rig Integration")
+	GameManager.suppress_profile_save = true
+	GameManager.player_hero_name = "Jake"
+	GameManager.opponent_hero_name = "Finn"
 	var battle_scene = preload("res://scenes/battle.tscn")
 	var battle = battle_scene.instantiate()
 	add_child(battle)
 
-	var p_rig = battle.get_node_or_null("Footer/PlayerInfo/PlayerFaceRig") as CharacterFaceRig
-	var o_rig = battle.get_node_or_null("Header/OpponentInfo/OpponentFaceRig") as CharacterFaceRig
+	var p_rig = battle.get_node_or_null("Header/PlayerCornerHud/HBox/PortraitCol/PlayerFaceRig") as CharacterFaceRig
+	var o_rig = battle.get_node_or_null("Header/OpponentInfo/HBox/PortraitCol/OpponentFaceRig") as CharacterFaceRig
 
 	assert_true(p_rig != null, "PlayerFaceRig exists in Battle scene hierarchy")
 	assert_true(o_rig != null, "OpponentFaceRig exists in Battle scene hierarchy")
 
 	if p_rig and o_rig:
-		assert_true(p_rig.character_id == "Finn", "PlayerFaceRig defaults to Finn")
-		assert_true(o_rig.character_id == "Jake", "OpponentFaceRig defaults to Jake")
+		assert_true(p_rig.character_id == "Jake", "PlayerFaceRig defaults to Jake")
+		assert_true(o_rig.character_id == "Finn", "OpponentFaceRig defaults to Finn")
 
 		# Test end_match victory
 		battle.end_match(true)
@@ -176,6 +179,7 @@ func test_battle_scene_face_rig_integration() -> void:
 		assert_true(o_rig.current_emote == CharacterFaceRig.EmoteState.DEFEAT, "Opponent emote set to DEFEAT on player win")
 
 		# Test end_match defeat
+		battle._match_ended = false
 		battle.end_match(false)
 		assert_true(p_rig.current_emote == CharacterFaceRig.EmoteState.DEFEAT, "Player emote set to DEFEAT on loss")
 		assert_true(o_rig.current_emote == CharacterFaceRig.EmoteState.VICTORY, "Opponent emote set to VICTORY on opponent win")

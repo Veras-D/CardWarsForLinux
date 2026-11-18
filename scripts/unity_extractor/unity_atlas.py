@@ -53,6 +53,14 @@ def parse_ngui_atlas(prefab_path: str, guid_to_path: dict[str, str] | None = Non
                 tex_path = tp
                 break
 
+    m_coords = re.search(r"mCoordinates:\s*(\d+)", txt)
+    coords_mode = int(m_coords.group(1)) if m_coords else 0
+
+    tex_w, tex_h = (0, 0)
+    if coords_mode == 1 and tex_path and os.path.exists(tex_path):
+        with Image.open(tex_path) as im_tmp:
+            tex_w, tex_h = im_tmp.size
+
     sprites = {}
     pattern = re.compile(
         r"-\s*name:\s*([^\n]+)\s+"
@@ -66,8 +74,20 @@ def parse_ngui_atlas(prefab_path: str, guid_to_path: dict[str, str] | None = Non
     )
     for m in pattern.finditer(txt):
         name = m.group(1).strip()
-        ox, oy, ow, oh = (int(round(float(m.group(i).strip()))) for i in range(2, 6))
-        ix, iy, iw, ih = (int(round(float(m.group(i).strip()))) for i in range(6, 10))
+        raw_outer = [float(m.group(i).strip()) for i in range(2, 6)]
+        raw_inner = [float(m.group(i).strip()) for i in range(6, 10)]
+        if coords_mode == 1 and tex_w > 0 and tex_h > 0:
+            ox = int(round(raw_outer[0] * tex_w))
+            ow = int(round(raw_outer[2] * tex_w))
+            oh = int(round(raw_outer[3] * tex_h))
+            oy = int(round((1.0 - (raw_outer[1] + raw_outer[3])) * tex_h))
+            ix = int(round(raw_inner[0] * tex_w))
+            iw = int(round(raw_inner[2] * tex_w))
+            ih = int(round(raw_inner[3] * tex_h))
+            iy = int(round((1.0 - (raw_inner[1] + raw_inner[3])) * tex_h))
+        else:
+            ox, oy, ow, oh = (int(round(v)) for v in raw_outer)
+            ix, iy, iw, ih = (int(round(v)) for v in raw_inner)
         rotated = int(m.group(10).strip())
         pl, pr, pt, pb = (float(m.group(i).strip()) for i in range(11, 15))
         sprites[name] = {
@@ -82,6 +102,7 @@ def parse_ngui_atlas(prefab_path: str, guid_to_path: dict[str, str] | None = Non
         "prefab_path": prefab_path,
         "material_path": mat_path,
         "texture_path": tex_path,
+        "coords_mode": coords_mode,
         "sprites": sprites,
     }
 
@@ -101,6 +122,9 @@ def extract_sprites(atlas_data: dict, sprite_names: list[str], out_dir: str) -> 
             continue
         s = sprites[sname]
         x, y, w, h = s["outer"]
+        if w <= 0 or h <= 0:
+            print(f"WARNING: Skipping zero-size sprite '{sname}' ({w}x{h})")
+            continue
         crop = img.crop((x, y, x + w, y + h))
         out_path = os.path.join(out_dir, f"{sname}.png")
         crop.save(out_path)

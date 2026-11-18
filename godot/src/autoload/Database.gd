@@ -25,6 +25,7 @@ var quests_db: Dictionary = {}
 var main_quests_list: Array[Dictionary] = []
 var fc_quests_list: Array[Dictionary] = []
 var quest_conditions_db: Dictionary = {}
+var battle_meshes_db: Dictionary = {}
 var map_regions_list: Array[Dictionary] = []
 var fc_map_regions_list: Array[Dictionary] = []
 var daily_dungeons_list: Array[Dictionary] = []
@@ -82,6 +83,7 @@ func load_blueprints() -> void:
 	_load_elfisto()
 	_load_card_box()
 	_load_iap()
+	_load_battle_meshes()
 	all_cards_list.clear()
 	all_cards_list.append_array(creatures_list)
 	all_cards_list.append_array(spells_list)
@@ -115,7 +117,20 @@ func _load_leaders() -> void:
 			"sprite_name_hero": item.get("SpriteNameHero", ""),
 			"lv_up_scheme": item.get("LvUpSchemeID", "A"),
 			"start_level": maxi(1, int(item.get("StartLevel", "1"))),
-			"fc_world": int(item.get("FCWorld", "0")) == 1
+			"fc_world": int(item.get("FCWorld", "0")) == 1,
+			"ring_p1_hit_range": float(item.get("Ring_P1_HitAreaRange", "0.8")),
+			"ring_p1_crit_range": float(item.get("Ring_P1_CritAreaRange", "0.07")),
+			"ring_p2_hit_range": float(item.get("Ring_P2_HitAreaRange", "0.15")),
+			"ring_p2_crit_range": float(item.get("Ring_P2_CritAreaRange", "0.05")),
+			"ring_p1_hit_color": str(item.get("Ring_P1_HitColor", "45:150:65:210")),
+			"ring_p1_crit_color": str(item.get("Ring_P1_CritColor", "0:255:0:255")),
+			"ring_p1_bg_color": str(item.get("Ring_P1_BGColor", "173:55:55:173")),
+			"ring_p2_hit_color": str(item.get("Ring_P2_HitColor", "45:150:65:210")),
+			"ring_p2_crit_color": str(item.get("Ring_P2_CritColor", "0:255:0:255")),
+			"ring_p2_bg_color": str(item.get("Ring_P2_BGColor", "173:55:55:173")),
+			"time_for_1_spin_min": float(item.get("TimeFor1SpinMin", "0.18")),
+			"time_for_1_spin_max": float(item.get("TimeFor1SpinMax", "0.23")),
+			"crit_damage_mod": float(item.get("CritDamageMod", "2"))
 		}
 		leaders_db[id] = leader
 		if char_id != "" and not leaders_db.has(char_id):
@@ -140,11 +155,29 @@ func _load_characters() -> void:
 			"name": localize(str(item.get("Name", cid))),
 			"raw_name": str(item.get("Name", cid)),
 			"prefab": str(item.get("Prefab", "")),
+			"object_name": str(item.get("ObjectName", "")),
+			"mouth": str(item.get("Mouth", "")),
+			"hand": str(item.get("Hand", "")),
 			"portrait_atlas": str(item.get("PortraitAtlas", "CharacterIconAtlas")),
 			"portrait": portrait,
 			"portrait_round": portrait.replace("Frame", "Round"),
 			"portrait_hero": portrait.replace("Frame", "Hero"),
-			"battle_music": str(item.get("BattleMusic", ""))
+			"battle_music": str(item.get("BattleMusic", "")),
+			"use_chair": str(item.get("UseChair", "True")).strip_edges().to_lower() == "true",
+			"chair_offset_x": float(item.get("ChairOffsetX", "0") if str(item.get("ChairOffsetX", "")).strip_edges() != "" else "0"),
+			"chair_offset_y": float(item.get("ChairOffsetY", "0") if str(item.get("ChairOffsetY", "")).strip_edges() != "" else "0"),
+			"char_offset_x": float(item.get("CharacterOffsetX", "0") if str(item.get("CharacterOffsetX", "")).strip_edges() != "" else "0"),
+			"char_offset_y": float(item.get("CharacterOffsetY", "0") if str(item.get("CharacterOffsetY", "")).strip_edges() != "" else "0"),
+			"anim_intro_p1": str(item.get("IntroP1", "")),
+			"anim_intro_p2": str(item.get("IntroP2", "")),
+			"anim_card_idle": str(item.get("CardIdle", "")),
+			"anim_play_card": str(item.get("PlayCard", "")),
+			"anim_last_card": str(item.get("LastCard", "")),
+			"anim_play_rare": str(item.get("PlayRare", "")),
+			"anim_happy": str(item.get("Happy", "")),
+			"anim_sad": str(item.get("Sad", "")),
+			"anim_defeated": str(item.get("Defeated", "")),
+			"anim_dweeb_drink": str(item.get("DweebDrink", "")),
 		}
 
 func get_character(character_id: String) -> Dictionary:
@@ -227,13 +260,18 @@ func _parse_card(data: Dictionary, card_type: String) -> Dictionary:
 		"val2": val2,
 		"sale_price": int(data.get("BaseSalePrice", "0")),
 		"can_fuse": str(data.get("CanFuse", "True")).to_lower() == "true",
+		"object_name": str(data.get("ObjectName", id)),
 		"texture_path": tex_path
 	}
 
 func localize(key: String, val1: String = "", val2: String = "") -> String:
 	if not key.begins_with("!!"):
 		return key
-	var text = localized_strings.get(key, key)
+	var text = localized_strings.get(key, "")
+	if text == "" and Localization:
+		text = Localization.translate_text(key, key)
+	elif text == "":
+		text = key
 	if val1 != "":
 		text = text.replace("<val1>", val1)
 	if val2 != "":
@@ -256,6 +294,66 @@ func get_card_texture(texture_path: String) -> Texture2D:
 	if ResourceLoader.exists(texture_path):
 		return load(texture_path)
 	return load("res://assets/textures/icon.png")
+
+
+func get_battle_tip_header() -> String:
+	var h := localize("!!TIP_Battle_End_Header")
+	return "JAKE'S PRO TIP" if h.begins_with("!!") else h
+
+
+func get_random_battle_tip() -> String:
+	var tips: Array[String] = []
+	for k in localized_strings.keys():
+		var ks := str(k)
+		if ks.begins_with("!!TIP_Battle_End_") and ks != "!!TIP_Battle_End_Header":
+			var val := str(localized_strings[k]).strip_edges()
+			if val != "":
+				tips.append(val)
+	if tips.is_empty():
+		return "Homies help homies, so tell your homies about Card Wars."
+	return tips[randi() % tips.size()]
+
+func _load_battle_meshes() -> void:
+	var path := "res://data/battle_meshes.json"
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if parsed is Dictionary:
+		battle_meshes_db = parsed
+
+func get_landscape_mesh_info(faction: String, variant_idx: int = 0) -> Dictionary:
+	var lands: Dictionary = battle_meshes_db.get("landscapes", {})
+	var key := faction
+	if key == "Nicelands":
+		key = "Cotton"
+	elif key == "Blue Plains":
+		key = "Plain"
+	elif key == "Useless Swamp":
+		key = "Swamp"
+	elif key == "SandyLands":
+		key = "Sand"
+	if not lands.has(key) and key.ends_with("s") and lands.has(key.substr(0, key.length() - 1)):
+		key = key.substr(0, key.length() - 1)
+	var arr: Array = lands.get(key, [])
+	if arr.is_empty():
+		return {}
+	return arr[posmod(variant_idx, arr.size())] as Dictionary
+
+func get_entity_mesh_info(card_data: Dictionary) -> Dictionary:
+	var c_type := str(card_data.get("type", "CREATURE"))
+	var bucket_key := "buildings" if c_type == "BUILDING" else "summons"
+	var bucket: Dictionary = battle_meshes_db.get(bucket_key, {})
+	var obj_name := str(card_data.get("object_name", card_data.get("id", ""))).strip_edges()
+	if bucket.has(obj_name):
+		return bucket[obj_name] as Dictionary
+	var low := obj_name.to_lower()
+	for k in bucket.keys():
+		if str(k).to_lower() == low:
+			return bucket[k] as Dictionary
+	return {}
 
 func _load_drop_profiles() -> void:
 	var path = "res://data/db_DropProfile.json"
@@ -737,13 +835,21 @@ func _load_quests() -> void:
 			"min_coins": int(item.get("MinCoins", "0")),
 			"max_coins": int(item.get("MaxCoins", "0")),
 			"spin_factor": float(item.get("SpinFactor", "1.6")),
+			"p1_hit_mod": float(item.get("P1_HitAreaMod", "0") if str(item.get("P1_HitAreaMod", "")).strip_edges() != "" else "0"),
+			"p1_crit_mod": float(item.get("P1_CritAreaMod", "0") if str(item.get("P1_CritAreaMod", "")).strip_edges() != "" else "0"),
+			"p2_hit_mod": float(item.get("P2_HitAreaMod", "0") if str(item.get("P2_HitAreaMod", "")).strip_edges() != "" else "0"),
+			"p2_crit_mod": float(item.get("P2_CritAreaMod", "0") if str(item.get("P2_CritAreaMod", "")).strip_edges() != "" else "0"),
+			"ai_reshuffle": str(item.get("AIReshuffle", "False")).strip_edges().to_lower() == "true",
+			"max_loot_drops": int(item.get("MaxLootDrops", "1") if str(item.get("MaxLootDrops", "")).strip_edges() != "" else "1"),
 			"condition_ids": cond_ids,
 			"conditions": conditions,
 			"unlock_ids": unlock_ids,
 			"unlock_ids_by_star": unlock_ids_by_star,
 			"unlock_paths_by_star": unlock_paths_by_star,
 			"level_prefab": str(item.get("LevelPrefab", "")).strip_edges(),
-			"level_name": str(item.get("LevelName", "")).strip_edges(),
+			"table_prefab": str(item.get("TablePrefab", "")).strip_edges(),
+			"chair_prefab": str(item.get("ChairPrefab", "")).strip_edges(),
+			"level_name": localize(str(item.get("LevelName", "Tree House")).strip_edges()),
 			"drop_profile_id": str(item.get("DropProfileID", "")).strip_edges(),
 			"card_drops": card_drops,
 			"position": pos,

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bo2r5nuf4lhkg"
+path="res://.godot/imported/CornEyeBat.obj-bdaba40c7330383d5ea03d05664c6874.mesh"
+
+[deps]
+
+files=["res://.godot/imported/CornEyeBat.obj-bdaba40c7330383d5ea03d05664c6874.mesh"]
+
+source_file="res://assets/models/battle/summons/CornEyeBat.obj"
+dest_files=["res://.godot/imported/CornEyeBat.obj-bdaba40c7330383d5ea03d05664c6874.mesh", "res://.godot/imported/CornEyeBat.obj-bdaba40c7330383d5ea03d05664c6874.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

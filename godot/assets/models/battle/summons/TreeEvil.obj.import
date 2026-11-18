@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://jlo2aa0il8wg"
+path="res://.godot/imported/TreeEvil.obj-132a4ea143323a9b0d3389295f6dc394.mesh"
+
+[deps]
+
+files=["res://.godot/imported/TreeEvil.obj-132a4ea143323a9b0d3389295f6dc394.mesh"]
+
+source_file="res://assets/models/battle/summons/TreeEvil.obj"
+dest_files=["res://.godot/imported/TreeEvil.obj-132a4ea143323a9b0d3389295f6dc394.mesh", "res://.godot/imported/TreeEvil.obj-132a4ea143323a9b0d3389295f6dc394.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

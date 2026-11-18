@@ -167,12 +167,23 @@ const DEFAULT_PROFILE_PATH: String = "user://player_profile.json"
 
 
 func _ready() -> void:
+	if _is_running_test_cmdline():
+		suppress_profile_save = true
 	_init_settings()
 	_init_wallet()
 	_init_gacha()
 	_init_campaign()
 	load_profile()
 	_update_active_hero_hp()
+
+
+func _is_running_test_cmdline() -> bool:
+	var all_args: PackedStringArray = OS.get_cmdline_args() + OS.get_cmdline_user_args()
+	for arg in all_args:
+		var fname: String = str(arg).get_file().to_lower()
+		if fname.begins_with("test_") or fname.begins_with("testbed_"):
+			return true
+	return false
 
 
 func _init_settings() -> void:
@@ -489,6 +500,16 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"max_inventory": max_inventory,
 		"viewed_fusion_recipes": viewed_fusion_recipes
 	}
+
+	if save_path == DEFAULT_PROFILE_PATH and FileAccess.file_exists(save_path):
+		var existing := FileAccess.get_file_as_string(save_path)
+		if existing.strip_edges().length() > 2:
+			var bak_err := DirAccess.copy_absolute(
+				ProjectSettings.globalize_path(save_path),
+				ProjectSettings.globalize_path(save_path + ".bak")
+			)
+			if bak_err != OK:
+				push_warning("[GameManager] Could not write profile backup (err=%d)" % bak_err)
 
 	var file = FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
@@ -994,13 +1015,13 @@ func apply_remote_handshake(data: Dictionary) -> void:
 func _clear_cached_menu_scenes(except_node: Node = null) -> void:
 	if _cached_main_menu != null and is_instance_valid(_cached_main_menu) and _cached_main_menu != except_node:
 		_cached_main_menu.queue_free()
-	_cached_main_menu = null if _cached_main_menu != except_node else _cached_main_menu
+	_cached_main_menu = null
 	if _cached_main_map != null and is_instance_valid(_cached_main_map) and _cached_main_map != except_node:
 		_cached_main_map.queue_free()
-	_cached_main_map = null if _cached_main_map != except_node else _cached_main_map
+	_cached_main_map = null
 	if _cached_fc_map != null and is_instance_valid(_cached_fc_map) and _cached_fc_map != except_node:
 		_cached_fc_map.queue_free()
-	_cached_fc_map = null if _cached_fc_map != except_node else _cached_fc_map
+	_cached_fc_map = null
 
 
 func start_battle() -> void:
@@ -1262,6 +1283,14 @@ func launch_quest_battle(quest_id: String) -> bool:
 			for c in raw_deck:
 				typed_deck.append(str(c))
 			opponent_deck = typed_deck
+		var raw_lands = Database.preset_deck_landscapes_db.get(deck_id, [])
+		if not raw_lands.is_empty():
+			var typed_lands: Array[String] = []
+			for l in raw_lands:
+				typed_lands.append(str(l))
+			while typed_lands.size() < 4:
+				typed_lands.append(typed_lands[0])
+			opponent_landscapes = typed_lands.slice(0, 4)
 
 	start_battle()
 	return true
@@ -1274,34 +1303,41 @@ var _cached_main_map: Node = null
 var _cached_fc_map: Node = null
 
 
-func _open_cached_map(scene_path: String, cached_node: Node) -> Node:
+func _open_cached_map(scene_path: String, cached_node: Variant) -> Node:
+	if not is_instance_valid(cached_node):
+		cached_node = null
+	var valid_cached := cached_node as Node
 	var tree = get_tree()
 	var cur = tree.current_scene
 	if cur != null and cur.name == "MainMenu":
 		_cached_main_menu = cur
 		cur.visible = false
 		cur.process_mode = Node.PROCESS_MODE_DISABLED
-	elif cur != null and cur != cached_node:
-		if cur == _cached_fc_map or cur == _cached_main_map:
+	elif cur != null and cur != valid_cached:
+		if (is_instance_valid(_cached_fc_map) and cur == _cached_fc_map) or (is_instance_valid(_cached_main_map) and cur == _cached_main_map):
 			cur.visible = false
 			cur.process_mode = Node.PROCESS_MODE_DISABLED
 		else:
 			cur.queue_free()
 
-	if cached_node == null or not is_instance_valid(cached_node):
+	if valid_cached == null:
 		var packed = load(scene_path)
-		cached_node = packed.instantiate()
-		tree.root.add_child(cached_node)
+		valid_cached = packed.instantiate()
+		tree.root.add_child(valid_cached)
 	else:
-		cached_node.visible = true
-		cached_node.process_mode = Node.PROCESS_MODE_INHERIT
-		if cached_node.has_method("on_map_opened"):
-			cached_node.on_map_opened()
-	tree.current_scene = cached_node
-	return cached_node
+		valid_cached.visible = true
+		valid_cached.process_mode = Node.PROCESS_MODE_INHERIT
+		if valid_cached.has_method("on_map_opened"):
+			valid_cached.on_map_opened()
+	tree.current_scene = valid_cached
+	return valid_cached
 
 
 func open_campaign_map(world: int = -1) -> void:
+	if not is_instance_valid(_cached_main_map):
+		_cached_main_map = null
+	if not is_instance_valid(_cached_fc_map):
+		_cached_fc_map = null
 	if world < 0:
 		world = initial_campaign_world
 	initial_campaign_world = world
@@ -1419,6 +1455,14 @@ func launch_dungeon_stage(dungeon_name: String, stage_index: int, quest_id: Stri
 			for c in raw_deck:
 				typed_deck.append(str(c))
 			opponent_deck = typed_deck
+		var raw_lands = Database.preset_deck_landscapes_db.get(deck_id, [])
+		if not raw_lands.is_empty():
+			var typed_lands: Array[String] = []
+			for l in raw_lands:
+				typed_lands.append(str(l))
+			while typed_lands.size() < 4:
+				typed_lands.append(typed_lands[0])
+			opponent_landscapes = typed_lands.slice(0, 4)
 
 	save_profile()
 	start_battle()

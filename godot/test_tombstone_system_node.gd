@@ -5,6 +5,7 @@ const Tombstone = preload("res://src/battle/Tombstone.gd")
 const LootRoller = preload("res://src/battle/LootRoller.gd")
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("========================================")
 	print("🧪 RUNNING TOMBSTONE & LOOT DROP SYSTEM TESTS (TASK 2.7)")
 	print("========================================")

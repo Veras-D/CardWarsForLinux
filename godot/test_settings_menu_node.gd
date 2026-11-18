@@ -11,6 +11,7 @@ var _tests_failed: int = 0
 
 
 func _ready() -> void:
+	GameManager.suppress_profile_save = true
 	print("\n==================================================")
 	print("  RUNNING SETTINGS MENU & VAULT TEST SUITE (Task 9.1)")
 	print("==================================================\n")
