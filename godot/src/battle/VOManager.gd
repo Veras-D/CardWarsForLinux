@@ -25,6 +25,25 @@ signal vo_skipped(character: String, event: VOEvent, reason: String)
 
 @export var vo_enabled: bool = true
 
+const EXPLICIT_OPENING_CLIPS: Dictionary = {
+	"Jake": ["Jake_Opening_1.wav", "Jake_Opening_2.wav", "Jake_Opening_4.wav", "Jake_Opening_5.wav"],
+	"Finn": ["Finn_Opening_3.wav"],
+	"LordMonochromicorn": ["Finn_Opening_3.wav"],
+	"PrinceGumball": ["Finn_Opening_3.wav"],
+	"BMO": ["BMO_Opening_1.wav", "BMO_Opening_2.wav", "beemo_mode_bmocartridge_01.wav"],
+	"FP": ["FP_Opening_3.wav", "FP_Opening_4.wav"],
+	"Lemongrab": ["Lemongrab_Opening_3.wav", "lg_hub_01a_ALT03.wav"],
+	"LSP": ["LSP_Opening_3.wav", "lsp_upgrade.wav"],
+	"Marceline": ["Marceline_Opening_3.wav"],
+	"Ice King": ["Ice King_GAME STARTS_2.wav"],
+	"Lady Rainicorn": ["Lady Rainicorn_GAME STARTS_1.wav", "Lady Rainicorn_GAME STARTS_2.wav", "Lady Rainicorn_GAME STARTS_3.wav"],
+	"Magic Man": ["Magic Man_GAME STARTS_3.wav", "Magic Man_FIGHT START_9.wav"],
+	"Cinnamon Bun": ["Cinnamon Bun_GAME STARTS_1.wav", "Cinnamon Bun_GAME STARTS_3.wav"],
+	"PeppermintButler": ["Peppermint Butler_GAME STARTS_2.wav"],
+	"BananaGuard": ["Banana Guard_Character Select_13.wav", "Banana Guard_FIGHT START_7_ALT01.wav", "Banana Guard_GAME STARTS_2.wav"],
+	"PrincessCookie": ["Banana Guard_Character Select_13.wav", "Banana Guard_FIGHT START_7_ALT01.wav", "Banana Guard_GAME STARTS_2.wav"],
+}
+
 # Activation rules from db_CharacterVO.json:
 # key = event_string, value = { "chance": float, "player": bool, "opponent": bool }
 var _event_rules: Dictionary = {}
@@ -57,22 +76,32 @@ func _ready() -> void:
 func normalize_hero_name(char_name: String) -> String:
 	var clean = char_name.strip_edges()
 	match clean:
-		"PrincessBubblegum", "Princess Bubblegum", "PB", "Bubblegum":
+		"FinnDoctor", "FinnPajama", "FinnSweater":
+			return "Finn"
+		"GhostJake", "JakeGhost", "JakeSweater":
+			return "Jake"
+		"BMOSweater":
+			return "BMO"
+		"PrincessBubblegum", "Princess Bubblegum", "PrincessBubblegumSweater", "PB", "Bubblegum":
 			return "PBG"
 		"FlamePrincess", "Flame Princess":
 			return "FP"
 		"EarlOfLemongrab", "Earl of Lemongrab":
 			return "Lemongrab"
-		"LumpySpacePrincess", "LSP":
+		"LumpySpacePrincess", "LumpySpacePrincessSweater", "LSP":
 			return "LSP"
-		"IceKing":
+		"IceKing", "IceKingSweater", "IceKingValentine":
 			return "Ice King"
 		"LadyRainicorn":
 			return "Lady Rainicorn"
 		"MagicMan":
 			return "Magic Man"
-		"CinnamonBun":
+		"CinamonBunn", "CinnamonBun":
 			return "Cinnamon Bun"
+		"Banana Guard":
+			return "BananaGuard"
+		"Peppermint Butler":
+			return "PeppermintButler"
 		_:
 			return clean
 
@@ -175,8 +204,27 @@ func _build_clip_catalog() -> void:
 
 
 func get_candidate_clips(hero_name: String, event: VOEvent) -> Array[String]:
-	var norm_hero = normalize_hero_name(hero_name)
+	var clean_hero = hero_name.strip_edges()
+	var norm_hero = normalize_hero_name(clean_hero)
 	var evt_str = get_event_id_string(event)
+
+	if event == VOEvent.OPENING:
+		var clip_files: Array = []
+		if EXPLICIT_OPENING_CLIPS.has(clean_hero):
+			clip_files = EXPLICIT_OPENING_CLIPS[clean_hero]
+		elif EXPLICIT_OPENING_CLIPS.has(norm_hero):
+			clip_files = EXPLICIT_OPENING_CLIPS[norm_hero]
+		if not clip_files.is_empty():
+			var explicit_res: Array[String] = []
+			for fn in clip_files:
+				var fp := "res://assets/audio/vo/" + str(fn)
+				if ResourceLoader.exists(fp):
+					explicit_res.append(fp)
+			if not explicit_res.is_empty():
+				return explicit_res
+		# Characters with empty OpeningClips in Unity stay silent instead of borrowing Finn's voice
+		return []
+
 	var key = norm_hero + "_" + evt_str
 
 	if _clip_catalog.has(key) and not _clip_catalog[key].is_empty():

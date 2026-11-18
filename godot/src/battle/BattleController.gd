@@ -227,18 +227,30 @@ func _ready() -> void:
 		if q_lvl != "" and not q_lvl.begins_with("!!"):
 			arena_name = q_lvl
 
+	var p1_disp := GameManager.player_hero_name
+	var p2_disp := GameManager.opponent_hero_name
+	if Database:
+		var p1c := Database.get_character(p1_disp)
+		if not p1c.is_empty():
+			p1_disp = str(p1c.get("name", p1_disp))
+		var p2c := Database.get_character(p2_disp)
+		if not p2c.is_empty():
+			p2_disp = str(p2c.get("name", p2_disp))
+	call_deferred("_begin_battle_intro_after_render", arena_name, p1_disp, p2_disp)
+
+
+func _begin_battle_intro_after_render(arena_name: String, p1_disp: String, p2_disp: String) -> void:
+	if GameManager and GameManager.is_battle_loading_screen_active():
+		# Allow the 3D SubViewport to render at least two frames behind the loading artwork
+		# before revealing Cut 1 so no empty/unrendered viewport frame appears.
+		for _i in range(2):
+			if not is_inside_tree():
+				return
+			await get_tree().process_frame
+		GameManager.hide_battle_loading_screen()
 	if jukebox:
 		jukebox.play_intro_sequence()
 	if match_intro.has_method("play_intro"):
-		var p1_disp := GameManager.player_hero_name
-		var p2_disp := GameManager.opponent_hero_name
-		if Database:
-			var p1c := Database.get_character(p1_disp)
-			if not p1c.is_empty():
-				p1_disp = str(p1c.get("name", p1_disp))
-			var p2c := Database.get_character(p2_disp)
-			if not p2c.is_empty():
-				p2_disp = str(p2c.get("name", p2_disp))
 		match_intro.play_intro(
 			p1_disp,
 			p2_disp,
@@ -253,6 +265,9 @@ func _on_intro_completed() -> void:
 		if GameManager and GameManager.active_quest_id != "" and Database:
 			q_type = str(Database.get_quest(GameManager.active_quest_id).get("type", ""))
 		jukebox.play_battle_theme(GameManager.opponent_hero_name, q_type)
+
+	if vo_manager:
+		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.OPENING, true)
 
 	_set_gameplay_hud_visible(false)
 	if landscape_overlay:

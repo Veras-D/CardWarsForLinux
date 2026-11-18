@@ -4,6 +4,7 @@ class_name CampaignMapBase
 const NodeMapGraph = preload("res://src/systems/node_map_system/NodeMapGraph.gd")
 const BGM_MAIN_MENU = preload("res://assets/audio/bgm/MainMenu.wav")
 const SFX_CLICK = preload("res://assets/audio/sfx/Click.wav")
+const SFX_QUEST_GO = preload("res://assets/audio/sfx/Map_QuestGo.wav")
 
 @onready var sub_viewport: SubViewport = $ViewportContainer/SubViewport
 @onready var world_3d: Node3D = $ViewportContainer/SubViewport/World3D
@@ -110,6 +111,7 @@ var _modal_decks: Array[Dictionary] = []
 var _zoom_overlay: ColorRect = null
 var _zoom_card_holder: Control = null
 var _zoom_tween: Tween = null
+var _launching_quest: bool = false
 
 
 # ==============================================================================
@@ -743,6 +745,9 @@ func _refresh_hud() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if detail_modal and detail_modal.visible and event.is_action_pressed("ui_cancel"):
+		if _launching_quest:
+			get_viewport().set_input_as_handled()
+			return
 		if _zoom_overlay != null and _zoom_overlay.visible:
 			_close_zoom_card()
 		else:
@@ -751,6 +756,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _open_quest_modal(quest_id: String) -> void:
+	_launching_quest = false
+	if modal_play_btn:
+		modal_play_btn.disabled = false
+	if modal_close_btn:
+		modal_close_btn.disabled = false
 	_close_zoom_card(true)
 	_selected_quest_id = quest_id
 	var quest = Database.get_quest(quest_id)
@@ -854,9 +864,11 @@ func _open_quest_modal(quest_id: String) -> void:
 	detail_modal.visible = true
 
 
-func _close_quest_modal() -> void:
+func _close_quest_modal(silent: bool = false) -> void:
+	if _launching_quest and not silent:
+		return
 	_close_zoom_card(true)
-	if Audio and SFX_CLICK:
+	if not silent and Audio and SFX_CLICK:
 		Audio.play_sfx(SFX_CLICK)
 	if detail_modal:
 		detail_modal.visible = false
@@ -1386,12 +1398,44 @@ func _close_zoom_card(immediate: bool = false) -> void:
 
 
 func _on_battle_pressed() -> void:
-	if _selected_quest_id == "":
+	if _selected_quest_id == "" or _launching_quest:
 		return
-	if Audio and SFX_CLICK:
-		Audio.play_sfx(SFX_CLICK)
-	_close_quest_modal()
-	GameManager.launch_quest_battle(_selected_quest_id)
+	_launching_quest = true
+	if modal_play_btn:
+		modal_play_btn.disabled = true
+	if modal_close_btn:
+		modal_close_btn.disabled = true
+
+	var quest_id := _selected_quest_id
+	var quest = Database.get_quest(quest_id)
+	var opp_id := str(quest.get("opponent", "Finn"))
+
+	if Audio and SFX_QUEST_GO:
+		Audio.play_sfx(SFX_QUEST_GO)
+
+	var vo_wait := 0.25
+	if Audio:
+		Audio.stop_bgm(0.5)
+		await get_tree().create_timer(0.18).timeout
+		if not is_inside_tree():
+			return
+		var go_vo_path := Database.get_character_go_vo_path(opp_id)
+		if go_vo_path != "" and ResourceLoader.exists(go_vo_path):
+			var vo_stream := load(go_vo_path) as AudioStream
+			if vo_stream != null:
+				Audio.play_voice(vo_stream, 0.0)
+				vo_wait = clampf(vo_stream.get_length() + 0.12, 1.0, 1.7)
+
+	await get_tree().create_timer(vo_wait).timeout
+	if not is_inside_tree():
+		return
+
+	if not GameManager.launch_quest_battle(quest_id):
+		_launching_quest = false
+		if modal_play_btn:
+			modal_play_btn.disabled = false
+		if modal_close_btn:
+			modal_close_btn.disabled = false
 
 
 func _wire_hud_button_reaction(btn: TextureButton) -> void:

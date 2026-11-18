@@ -163,6 +163,7 @@ func _load_characters() -> void:
 			"portrait_round": portrait.replace("Frame", "Round"),
 			"portrait_hero": portrait.replace("Frame", "Hero"),
 			"battle_music": str(item.get("BattleMusic", "")),
+			"go_vo": str(item.get("GoVO", "")).strip_edges(),
 			"use_chair": str(item.get("UseChair", "True")).strip_edges().to_lower() == "true",
 			"chair_offset_x": float(item.get("ChairOffsetX", "0") if str(item.get("ChairOffsetX", "")).strip_edges() != "" else "0"),
 			"chair_offset_y": float(item.get("ChairOffsetY", "0") if str(item.get("ChairOffsetY", "")).strip_edges() != "" else "0"),
@@ -182,6 +183,22 @@ func _load_characters() -> void:
 
 func get_character(character_id: String) -> Dictionary:
 	return characters_db.get(character_id, {})
+
+
+func get_character_go_vo_path(character_id: String) -> String:
+	var char_info := get_character(character_id)
+	var go_vo := str(char_info.get("go_vo", "")).strip_edges()
+	if go_vo == "":
+		return ""
+	var aliases: Dictionary = {
+		"EarlOfLemongrab_Go": "Lemongrab_Go",
+		"Gunter_Go": "Gunther_Go",
+	}
+	var resolved := str(aliases.get(go_vo, go_vo))
+	var path := "res://assets/audio/vo/govo/%s.wav" % resolved
+	if ResourceLoader.exists(path):
+		return path
+	return ""
 
 func _load_creatures() -> void:
 	var path = "res://data/db_Creatures.json"

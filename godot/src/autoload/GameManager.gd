@@ -1024,13 +1024,131 @@ func _clear_cached_menu_scenes(except_node: Node = null) -> void:
 	_cached_fc_map = null
 
 
+const BATTLE_SCENE_PATH := "res://scenes/battle.tscn"
+const LOADING_TEXTURE_MAIN := "res://assets/textures/loading/Loading_Main_16_9.png"
+const LOADING_TEXTURE_FC := "res://assets/textures/loading/Loading_FC_16_9.png"
+const LOADING_BGM_PATH := "res://assets/audio/bgm/Loading.wav"
+
+var _loading_layer: CanvasLayer = null
+var _loading_fade_rect: ColorRect = null
+var _loading_tex_rect: TextureRect = null
+var _transitioning_to_battle: bool = false
+
+
+func _ensure_loading_overlay() -> void:
+	if _loading_layer != null and is_instance_valid(_loading_layer):
+		return
+	_loading_layer = CanvasLayer.new()
+	_loading_layer.name = "BattleLoadingOverlay"
+	_loading_layer.layer = 120
+	_loading_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	_loading_layer.visible = false
+	add_child(_loading_layer)
+
+	_loading_fade_rect = ColorRect.new()
+	_loading_fade_rect.name = "BlackBackdrop"
+	_loading_fade_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_loading_fade_rect.color = Color(0.0, 0.0, 0.0, 0.0)
+	_loading_fade_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+	_loading_layer.add_child(_loading_fade_rect)
+
+	_loading_tex_rect = TextureRect.new()
+	_loading_tex_rect.name = "LoadingArtwork"
+	_loading_tex_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_loading_tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_loading_tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_loading_tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_loading_tex_rect.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	_loading_layer.add_child(_loading_tex_rect)
+
+
+func _get_battle_loading_texture_path() -> String:
+	if active_quest_id != "" and Database:
+		var q_data := Database.get_quest(active_quest_id)
+		if str(q_data.get("type", "")) == "fc" and ResourceLoader.exists(LOADING_TEXTURE_FC):
+			return LOADING_TEXTURE_FC
+	return LOADING_TEXTURE_MAIN
+
+
+func is_battle_loading_screen_active() -> bool:
+	return _loading_layer != null and is_instance_valid(_loading_layer) and _loading_layer.visible
+
+
+func hide_battle_loading_screen() -> void:
+	_transitioning_to_battle = false
+	if _loading_layer != null and is_instance_valid(_loading_layer):
+		_loading_layer.visible = false
+	if _loading_fade_rect != null and is_instance_valid(_loading_fade_rect):
+		_loading_fade_rect.color = Color(0.0, 0.0, 0.0, 0.0)
+	if _loading_tex_rect != null and is_instance_valid(_loading_tex_rect):
+		_loading_tex_rect.modulate = Color(1.0, 1.0, 1.0, 0.0)
+
+
 func start_battle() -> void:
+	if _transitioning_to_battle:
+		return
+	_transitioning_to_battle = true
 	current_state = MatchState.BATTLE
+	_run_battle_transition()
+
+
+func _run_battle_transition() -> void:
+	_ensure_loading_overlay()
+	var tex_path := _get_battle_loading_texture_path()
+	if ResourceLoader.exists(tex_path):
+		_loading_tex_rect.texture = load(tex_path) as Texture2D
+	_loading_fade_rect.color = Color(0.0, 0.0, 0.0, 0.0)
+	_loading_tex_rect.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	_loading_layer.visible = true
+
+	var req_err := ResourceLoader.load_threaded_request(BATTLE_SCENE_PATH)
+
+	var fade_tw := create_tween()
+	fade_tw.tween_property(_loading_fade_rect, "color:a", 1.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	await fade_tw.finished
+	if not is_inside_tree() or not _transitioning_to_battle:
+		hide_battle_loading_screen()
+		return
+
+	_loading_tex_rect.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	if Audio and ResourceLoader.exists(LOADING_BGM_PATH):
+		Audio.play_bgm(load(LOADING_BGM_PATH), 0.1)
+
+	var elapsed := 0.0
+	const MIN_LOADING_DISPLAY_SEC := 0.45
+	var packed: PackedScene = null
+	while is_inside_tree() and _transitioning_to_battle:
+		var tree := get_tree()
+		if tree == null:
+			break
+		var t0 := Time.get_ticks_msec()
+		await tree.process_frame
+		elapsed += float(Time.get_ticks_msec() - t0) / 1000.0
+		if req_err == OK:
+			var status := ResourceLoader.load_threaded_get_status(BATTLE_SCENE_PATH)
+			if status == ResourceLoader.THREAD_LOAD_LOADED and elapsed >= MIN_LOADING_DISPLAY_SEC:
+				packed = ResourceLoader.load_threaded_get(BATTLE_SCENE_PATH) as PackedScene
+				break
+			elif status != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				break
+		elif elapsed >= MIN_LOADING_DISPLAY_SEC:
+			break
+
+	if not is_inside_tree() or not _transitioning_to_battle:
+		hide_battle_loading_screen()
+		return
+
 	_clear_cached_menu_scenes(get_tree().current_scene)
-	get_tree().call_deferred("change_scene_to_file", "res://scenes/battle.tscn")
+	if packed == null:
+		packed = ResourceLoader.load(BATTLE_SCENE_PATH) as PackedScene
+	if packed != null:
+		get_tree().change_scene_to_packed(packed)
+	else:
+		get_tree().change_scene_to_file(BATTLE_SCENE_PATH)
 
 
 func return_to_menu() -> void:
+	hide_battle_loading_screen()
 	is_local_versus = false
 	if is_network_match:
 		if network_discovery:
