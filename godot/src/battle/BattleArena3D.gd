@@ -76,11 +76,15 @@ const CAM_SETUP_LOOK := Vector3(-0.85, -0.019, 0.0)
 const CAM_LOOT_POS := Vector3(-1.05, 0.58, 0.0)
 const CAM_LOOT_LOOK := Vector3(0.25, -0.02, 0.0)
 
-# 4 lanes centered across the board width (Z in [-0.80 .. +0.86])
-const LANE_Z_CENTERS: Array[float] = [-0.74, -0.21, 0.33, 0.86]
-const PLAYER_LANE_X := -0.58
-const OPPONENT_LANE_X := 0.56
+# 4 lanes matching BattleScene.unity P1Lane1..4mass / P2Lane1..4mass (* 0.05, Z reflected)
+const LANE_Z_CENTERS: Array[float] = [-0.8045, -0.2975, 0.2914, 0.8140]
+const P1_LANDSCAPE_Z: Array[float] = [-0.8045, -0.2975, 0.2914, 0.8140]
+const P2_LANDSCAPE_Z: Array[float] = [-0.8162, -0.2936, 0.2953, 0.8023]
+const PLAYER_LANE_X := -0.5769
+const OPPONENT_LANE_X := 0.5769
 const BOARD_SURFACE_Y := -0.122
+# Matches BattleScene.unity local scale (0.994, 0.78, 1.0) in Maya -90X space * WORLD_SCALE (0.05)
+const LANDSCAPE_MESH_SCALE := Vector3(0.0497, 0.05, 0.039)
 
 var _cam_tween: Tween = null
 var _cam_pos: Vector3 = CAM_INTRO_WIDE_POS
@@ -232,13 +236,12 @@ func _build_lane_anchors() -> void:
 	_creature_heights.clear()
 
 	for i in range(4):
-		var z_pos := LANE_Z_CENTERS[i]
-		var p_slot := _create_lane_node("PlayerLane_%d" % i, Vector3(PLAYER_LANE_X, BOARD_SURFACE_Y, z_pos), true)
+		var p_slot := _create_lane_node("PlayerLane_%d" % i, Vector3(PLAYER_LANE_X, BOARD_SURFACE_Y, P1_LANDSCAPE_Z[i]), true)
 		slots_root.add_child(p_slot)
 		_player_lane_anchors.append(p_slot)
 		_player_lane_highlights.append(p_slot.get_node("Highlight") as MeshInstance3D)
 
-		var o_slot := _create_lane_node("OpponentLane_%d" % i, Vector3(OPPONENT_LANE_X, BOARD_SURFACE_Y, z_pos), false)
+		var o_slot := _create_lane_node("OpponentLane_%d" % i, Vector3(OPPONENT_LANE_X, BOARD_SURFACE_Y, P2_LANDSCAPE_Z[i]), false)
 		slots_root.add_child(o_slot)
 		_opponent_lane_anchors.append(o_slot)
 		_opponent_lane_highlights.append(o_slot.get_node("Highlight") as MeshInstance3D)
@@ -348,6 +351,23 @@ func _get_cached_mat(tex_path: String, alpha: bool = false) -> StandardMaterial3
 	return mat
 
 
+func _get_cached_detail_mat(tex_path: String) -> StandardMaterial3D:
+	var key := "%s|scissor" % tex_path
+	if _mat_cache.has(key):
+		return _mat_cache[key]
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.35
+	if tex_path != "" and ResourceLoader.exists(tex_path):
+		if not _tex_cache.has(tex_path):
+			_tex_cache[tex_path] = load(tex_path)
+		mat.albedo_texture = _tex_cache[tex_path]
+	_mat_cache[key] = mat
+	return mat
+
+
 func clear_lane_landscapes() -> void:
 	for anchor in _player_lane_anchors + _opponent_lane_anchors:
 		for holder_name in ["Terrain", "CreatureAnchor", "BuildingAnchor"]:
@@ -369,57 +389,91 @@ func set_lane_landscape(is_player: bool, lane_idx: int, faction: String, animate
 	var holder := anchor.get_node_or_null("Terrain")
 	if holder == null:
 		return
+
+	if faction == "" or faction == "None":
+		for c in holder.get_children():
+			holder.remove_child(c)
+			c.queue_free()
+		return
+
+	# Preserve already-spawned (or currently animating) landscape when BattleController finalizes non-animated layout.
+	if not animate and holder.get_node_or_null("Landscape_%s" % faction) != null:
+		return
+
 	for c in holder.get_children():
 		holder.remove_child(c)
 		c.queue_free()
-
-	if faction == "" or faction == "None":
-		return
 
 	var tile_root := Node3D.new()
 	tile_root.name = "Landscape_%s" % faction
 	tile_root.rotation_degrees = Vector3(0, 0.0 if is_player else 180.0, 0)
 	holder.add_child(tile_root)
 
+	# Opponent row is rotated 180Y, so P2 lane 0..3 (-Z..+Z) uses Land_4..1 so outer edges stay straight and curves interlock.
+	var variant_idx := lane_idx if is_player else (3 - lane_idx)
 	var mesh_info: Dictionary = {}
 	if Database and Database.has_method("get_landscape_mesh_info"):
-		mesh_info = Database.get_landscape_mesh_info(faction, lane_idx)
+		mesh_info = Database.get_landscape_mesh_info(faction, variant_idx)
 	var mesh_path := str(mesh_info.get("mesh", ""))
 	var tex_path := str(mesh_info.get("texture", ""))
+	var detail_mesh_path := str(mesh_info.get("detail_mesh", ""))
+	var detail_tex_path := str(mesh_info.get("detail_texture", ""))
 	var land_mesh := _get_cached_mesh(mesh_path)
 
+	var slab_mi: MeshInstance3D = null
+	var detail_mi: MeshInstance3D = null
+
 	if land_mesh != null:
-		var mi := MeshInstance3D.new()
-		mi.name = "TerrainMesh"
-		mi.mesh = land_mesh
-		mi.material_override = _get_cached_mat(tex_path)
-		var aabb := land_mesh.get_aabb()
-		var sx := 1.08 / maxf(0.001, aabb.size.x)
-		var sz := 0.51 / maxf(0.001, aabb.size.z)
-		var sy := 0.5 * (sx + sz)
-		var cx := aabb.position.x + aabb.size.x * 0.5
-		var cz := aabb.position.z + aabb.size.z * 0.5
-		mi.scale = Vector3(sx, sy, sz)
-		mi.position = Vector3(-cx * sx, -aabb.position.y * sy + 0.002, -cz * sz)
-		tile_root.add_child(mi)
+		slab_mi = MeshInstance3D.new()
+		slab_mi.name = "TerrainMesh"
+		slab_mi.mesh = land_mesh
+		slab_mi.material_override = _get_cached_mat(tex_path)
+		slab_mi.scale = LANDSCAPE_MESH_SCALE
+		slab_mi.position = Vector3(0.0, 0.003, 0.0)
+		tile_root.add_child(slab_mi)
 	else:
-		var base_mesh := MeshInstance3D.new()
+		slab_mi = MeshInstance3D.new()
+		slab_mi.name = "TerrainMesh"
 		var plane := PlaneMesh.new()
 		plane.size = Vector2(1.06, 0.50)
-		base_mesh.mesh = plane
-		base_mesh.position = Vector3(0, 0.005, 0)
+		slab_mi.mesh = plane
+		slab_mi.position = Vector3(0, 0.005, 0)
 		var base_mat := _get_cached_mat(tex_path)
 		if tex_path == "":
 			base_mat = StandardMaterial3D.new()
 			base_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			base_mat.albedo_color = LANDSCAPE_COLORS.get(faction, LANDSCAPE_COLORS["Plains"])
-		base_mesh.material_override = base_mat
-		tile_root.add_child(base_mesh)
+		slab_mi.material_override = base_mat
+		tile_root.add_child(slab_mi)
+
+	var detail_mesh := _get_cached_mesh(detail_mesh_path)
+	if detail_mesh != null:
+		detail_mi = MeshInstance3D.new()
+		detail_mi.name = "DetailMesh"
+		detail_mi.mesh = detail_mesh
+		detail_mi.material_override = _get_cached_detail_mat(detail_tex_path)
+		detail_mi.scale = LANDSCAPE_MESH_SCALE
+		detail_mi.position = Vector3(0.0, 0.004, 0.0)
+		tile_root.add_child(detail_mi)
 
 	if animate:
-		tile_root.scale = Vector3(1.0, 0.05, 1.0)
-		var tw := create_tween()
-		tw.tween_property(tile_root, "scale:y", 1.0, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		if slab_mi and slab_mi.material_override is StandardMaterial3D:
+			var final_mat := slab_mi.material_override as StandardMaterial3D
+			var fade_mat := final_mat.duplicate() as StandardMaterial3D
+			fade_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			fade_mat.albedo_color.a = 0.0
+			slab_mi.material_override = fade_mat
+			var fade_tw := create_tween()
+			fade_tw.tween_property(fade_mat, "albedo_color:a", 1.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			fade_tw.tween_callback(func():
+				if is_instance_valid(slab_mi):
+					slab_mi.material_override = final_mat
+			)
+		if detail_mi:
+			detail_mi.scale = Vector3(LANDSCAPE_MESH_SCALE.x, 0.0005, LANDSCAPE_MESH_SCALE.z)
+			var prop_tw := create_tween()
+			prop_tw.tween_interval(0.08)
+			prop_tw.tween_property(detail_mi, "scale", LANDSCAPE_MESH_SCALE, 0.75).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func spawn_lane_creature(is_player: bool, lane_idx: int, card_data: Dictionary, animate: bool = true) -> void:

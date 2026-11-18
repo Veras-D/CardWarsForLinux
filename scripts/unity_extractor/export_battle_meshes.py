@@ -245,21 +245,18 @@ def export_candidate(cand: dict, out_obj_path: str, guid_index: dict[str, str], 
     for v in verts:
         p = v
         for tr in cand["chain"]:
-            p = _apply_transform(p, tr)
+            if is_landscape and tr.get("father") == "0":
+                # Unity's LandscapeManagerScript overwrites the instantiated prefab root's localPosition to Vector3.zero.
+                root_tr = {"scale": tr["scale"], "rot": tr["rot"], "pos": (0.0, 0.0, 0.0)}
+                p = _apply_transform(p, root_tr)
+            else:
+                p = _apply_transform(p, tr)
         xformed.append(p)
 
-    # Landscapes in Land_*.prefab sit under P1Lane*mass which applies -90 deg around X in BattleScene.unity
+    # All Land_* prefabs (slabs and foliage/rocks/trees props) sit under P1Lane*mass which applies -90 deg around X in BattleScene.unity
     if is_landscape:
-        # Check if Z extent is thin compared to X/Y (Maya Z-up raw mesh)
-        xs = [p[0] for p in xformed]
-        ys = [p[1] for p in xformed]
-        zs = [p[2] for p in xformed]
-        rx = max(xs) - min(xs)
-        ry = max(ys) - min(ys)
-        rz = max(zs) - min(zs)
-        if rz < 0.35 * max(rx, ry):
-            rot_x_m90 = (-0.70710678, 0.0, 0.0, 0.70710678)
-            xformed = [_rot_quat(p, rot_x_m90) for p in xformed]
+        rot_x_m90 = (-0.70710678, 0.0, 0.0, 0.70710678)
+        xformed = [_rot_quat(p, rot_x_m90) for p in xformed]
     else:
         # Fallback: if prefab had identity rotation on a raw Maya Z-up mesh and SkinnedMeshRenderer had no -90X, check ratio
         # Wait: check if none of the chain had rotation and mesh Z range looks vertical
@@ -294,18 +291,7 @@ def find_prefab_case_insensitive(directory: str, obj_name: str) -> str:
     return ""
 
 
-def main() -> None:
-    print("Indexing Unity GUIDs...")
-    guid_index = build_guid_index()
-    print(f"Indexed {len(guid_index)} GUIDs.")
-
-    manifest = {
-        "landscapes": {},
-        "summons": {},
-        "buildings": {},
-    }
-
-    # 1. Landscapes
+def export_landscapes(manifest: dict, guid_index: dict[str, str]) -> None:
     os.makedirs(OUT_LAND, exist_ok=True)
     for faction in ("Corn", "Plain", "Cotton", "Sand", "Swamp"):
         entries = []
@@ -320,14 +306,50 @@ def main() -> None:
             out_name = f"Land_{faction}{idx}.obj"
             ok, tex_res = export_candidate(cand, os.path.join(OUT_LAND, out_name), guid_index, is_landscape=True)
             if ok:
-                entries.append({
+                entry = {
                     "mesh": f"res://assets/models/battle/landscapes/{out_name}",
                     "texture": tex_res,
-                })
-        # Also map Plains alias to Plain if needed cleanly in Godot; store faction key
+                }
+                detail_cands = [c for c in parsed["candidates"] if c is not cand and c["mesh_path"].endswith(".asset")]
+                if detail_cands:
+                    detail_cand = detail_cands[0]
+                    detail_out = f"Land_{faction}{idx}_Props.obj"
+                    d_ok, d_tex = export_candidate(detail_cand, os.path.join(OUT_LAND, detail_out), guid_index, is_landscape=True)
+                    if d_ok:
+                        entry["detail_mesh"] = f"res://assets/models/battle/landscapes/{detail_out}"
+                        entry["detail_texture"] = d_tex or "res://assets/models/battle/textures/Landscape_Props.png"
+                entries.append(entry)
         manifest["landscapes"][faction] = entries
     if "Plain" in manifest["landscapes"]:
         manifest["landscapes"]["Plains"] = manifest["landscapes"]["Plain"]
+
+
+def main() -> None:
+    landscapes_only = "--landscapes-only" in sys.argv[1:]
+    print("Indexing Unity GUIDs...")
+    guid_index = build_guid_index()
+    print(f"Indexed {len(guid_index)} GUIDs.")
+
+    manifest_path = os.path.join(GODOT_DATA, "battle_meshes.json")
+    if landscapes_only and os.path.exists(manifest_path):
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+        manifest["landscapes"] = {}
+    else:
+        manifest = {
+            "landscapes": {},
+            "summons": {},
+            "buildings": {},
+        }
+
+    # 1. Landscapes
+    export_landscapes(manifest, guid_index)
+
+    if landscapes_only:
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2)
+        print(f"Done (landscapes only)! Landscapes={sum(len(v) for k, v in manifest['landscapes'].items() if k != 'Plains')}")
+        return
 
     # 2. Creatures / Summons
     os.makedirs(OUT_SUMMON, exist_ok=True)

@@ -3,109 +3,157 @@
     "Corn": [
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Corn1.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Corn1_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Corn2.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Corn2_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Corn3.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Corn3_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Corn4.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Corn4_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       }
     ],
     "Plain": [
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Plain1.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Plain1_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Plain2.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Plain2_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Plain3.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Plain3_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Plain4.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Plain4_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       }
     ],
     "Cotton": [
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Cotton1.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png"
+        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Cotton1_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Cotton2.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png"
+        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Cotton2_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Cotton3.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png"
+        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Cotton3_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Cotton4.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png"
+        "texture": "res://assets/models/battle/textures/PlainsCotton_Sugar.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Cotton4_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       }
     ],
     "Sand": [
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Sand1.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Sand1_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Sand2.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Sand2_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Sand3.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Sand3_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Sand4.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Sand4_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       }
     ],
     "Swamp": [
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Swamp1.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Swamp1_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Swamp2.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Swamp2_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Swamp3.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Swamp3_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Swamp4.obj",
-        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png"
+        "texture": "res://assets/models/battle/textures/PlainsCorn_Swamp.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Swamp4_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       }
     ],
     "Plains": [
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Plain1.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Plain1_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Plain2.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Plain2_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Plain3.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Plain3_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       },
       {
         "mesh": "res://assets/models/battle/landscapes/Land_Plain4.obj",
-        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png"
+        "texture": "res://assets/models/battle/textures/PlainsDesert_Blue.png",
+        "detail_mesh": "res://assets/models/battle/landscapes/Land_Plain4_Props.obj",
+        "detail_texture": "res://assets/models/battle/textures/Landscape_Props.png"
       }
     ]
   },

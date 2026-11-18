@@ -7,14 +7,14 @@
 
 [sub_resource type="StyleBoxTexture" id="StyleBox_DarkPill"]
 texture = ExtResource("4_pill_bg")
-texture_margin_left = 20.0
-texture_margin_top = 20.0
-texture_margin_right = 20.0
-texture_margin_bottom = 20.0
-content_margin_left = 28.0
-content_margin_top = 10.0
-content_margin_right = 28.0
-content_margin_bottom = 10.0
+texture_margin_left = 22.0
+texture_margin_top = 18.0
+texture_margin_right = 22.0
+texture_margin_bottom = 18.0
+content_margin_left = 24.0
+content_margin_top = 8.0
+content_margin_right = 24.0
+content_margin_bottom = 8.0
 
 [node name="LandscapePlacementOverlay" type="Control"]
 layout_mode = 3
@@ -27,18 +27,19 @@ mouse_filter = 2
 script = ExtResource("1_script")
 
 [node name="PromptPill" type="PanelContainer" parent="."]
+self_modulate = Color(1, 1, 1, 0.88)
 layout_mode = 1
-anchors_preset = 7
+anchors_preset = 8
 anchor_left = 0.5
-anchor_top = 1.0
+anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -230.0
-offset_top = -318.0
-offset_right = 230.0
-offset_bottom = -256.0
+anchor_bottom = 0.5
+offset_left = -205.0
+offset_top = 6.0
+offset_right = 205.0
+offset_bottom = 64.0
 grow_horizontal = 2
-grow_vertical = 0
+grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_DarkPill")
 
@@ -46,9 +47,9 @@ theme_override_styles/panel = SubResource("StyleBox_DarkPill")
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 26
 text = "Place Your Landscapes"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -60,23 +61,24 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -310.0
-offset_top = -222.0
-offset_right = 310.0
-offset_bottom = -16.0
+offset_left = -354.0
+offset_top = -246.0
+offset_right = 354.0
+offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 4
 alignment = 1
 
 [node name="FingerHint" type="TextureRect" parent="."]
 visible = false
+z_index = 15
 layout_mode = 0
 offset_left = 360.0
-offset_top = 520.0
+offset_top = 410.0
 offset_right = 432.0
-offset_bottom = 668.0
+offset_bottom = 558.0
 mouse_filter = 2
 texture = ExtResource("3_finger")
 expand_mode = 1

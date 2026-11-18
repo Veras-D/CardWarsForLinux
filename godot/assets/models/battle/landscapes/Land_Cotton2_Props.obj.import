@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dja6vco60p8mu"
+path="res://.godot/imported/Land_Cotton2_Props.obj-2e9afb2881e33a551c0e88682220335f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Land_Cotton2_Props.obj-2e9afb2881e33a551c0e88682220335f.mesh"]
+
+source_file="res://assets/models/battle/landscapes/Land_Cotton2_Props.obj"
+dest_files=["res://.godot/imported/Land_Cotton2_Props.obj-2e9afb2881e33a551c0e88682220335f.mesh", "res://.godot/imported/Land_Cotton2_Props.obj-2e9afb2881e33a551c0e88682220335f.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
