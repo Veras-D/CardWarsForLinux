@@ -1,17 +1,18 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://src/battle/BattleModals.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
-[ext_resource type="Texture2D" path="res://assets/textures/battle/banners/banner_your_turn_ribbon.png" id="3_your_rib"]
-[ext_resource type="Texture2D" path="res://assets/textures/battle/banners/banner_your_turn_text.png" id="4_your_txt"]
-[ext_resource type="Texture2D" path="res://assets/textures/battle/banners/skull.png" id="5_skull"]
-[ext_resource type="Texture2D" path="res://assets/textures/battle/banners/crossbones.png" id="6_bones"]
-[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/FlyingCardBack.png" id="7_cardback"]
+[ext_resource type="PackedScene" path="res://assets/models/battle/banners/Battle_YourTurn.glb" id="3_your_turn_glb"]
+[ext_resource type="PackedScene" path="res://assets/models/battle/banners/Battle_OpponentsTurn.glb" id="4_opp_turn_glb"]
 [ext_resource type="Texture2D" path="res://assets/textures/battle/hud/GoldPlaque.png" id="8_plaque"]
 [ext_resource type="Texture2D" path="res://assets/textures/battle/hud/PopUpSprite_2.png" id="9_popup2"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/forge/uiButtonBlue.png" id="10_btn_blue"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonRed.png" id="11_btn_red"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="12_btn_green"]
+
+[sub_resource type="Environment" id="Env_TurnBannerUI"]
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StyleBoxTexture" id="SB_FrameBlue"]
 texture = ExtResource("9_popup2")
@@ -55,119 +56,40 @@ grow_vertical = 2
 mouse_filter = 0
 color = Color(0, 0, 0, 0.56)
 
-[node name="TurnBanner" type="Control" parent="."]
+[node name="TurnBannerViewportContainer" type="SubViewportContainer" parent="."]
 visible = false
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -330.0
-offset_top = -170.0
-offset_right = 330.0
-offset_bottom = 130.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+stretch = true
 
-[node name="SkullGroup" type="Control" parent="TurnBanner"]
+[node name="SubViewport" type="SubViewport" parent="TurnBannerViewportContainer"]
+own_world_3d = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="TurnBannerViewportContainer/SubViewport"]
+environment = SubResource("Env_TurnBannerUI")
+
+[node name="BannerCamera" type="Camera3D" parent="TurnBannerViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 110)
+projection = 1
+current = true
+size = 11.6
+near = 0.05
+far = 300.0
+
+[node name="Battle_YourTurn" parent="TurnBannerViewportContainer/SubViewport" instance=ExtResource("3_your_turn_glb")]
 visible = false
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -120.0
-offset_top = 4.0
-offset_right = 120.0
-offset_bottom = 150.0
-grow_horizontal = 2
-mouse_filter = 2
 
-[node name="Bones" type="TextureRect" parent="TurnBanner/SkullGroup"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -110.0
-offset_top = -34.0
-offset_right = 110.0
-offset_bottom = 44.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("6_bones")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Skull" type="TextureRect" parent="TurnBanner/SkullGroup"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -64.0
-offset_top = -72.0
-offset_right = 64.0
-offset_bottom = 52.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("5_skull")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Ribbon" type="TextureRect" parent="TurnBanner"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -54.0
-offset_right = 280.0
-offset_bottom = 96.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("3_your_rib")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="DrawCardFlip" type="TextureRect" parent="TurnBanner"]
+[node name="Battle_OpponentsTurn" parent="TurnBannerViewportContainer/SubViewport" instance=ExtResource("4_opp_turn_glb")]
 visible = false
-layout_mode = 0
-offset_left = 215.0
-offset_top = 22.0
-offset_right = 335.0
-offset_bottom = 188.0
-pivot_offset = Vector2(60, 83)
-mouse_filter = 2
-texture = ExtResource("7_cardback")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="BannerText" type="TextureRect" parent="TurnBanner"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -14.0
-offset_right = 220.0
-offset_bottom = 50.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("4_your_txt")
-expand_mode = 1
-stretch_mode = 5
 
 [node name="CurrentQuestModal" type="Control" parent="."]
 visible = false

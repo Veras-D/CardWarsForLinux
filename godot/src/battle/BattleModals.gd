@@ -2,7 +2,7 @@ extends Control
 class_name BattleModals
 
 ## Hosts in-match Card Wars modals & turn banners matching original screenshots:
-##   - TurnBanner ("Your Turn" w/ flying card flip & "Opponent's Turn" w/ skull)
+##   - TurnBanner ("Your Turn" 3D ribbon+burst+cards Take 001_18 & "Opponent's Turn" 3D skull Take 001_19)
 ##   - CurrentQuestModal (GoldPlaque, "Achievable" status, 3 stars, live counters)
 ##   - DiscardPileModal ("Player's Discard Pile" card grid)
 ##   - LeaveBattleModal ("Leave this Battle?" QUIT / DON'T QUIT)
@@ -19,10 +19,8 @@ const FONT_MAIN: FontFile = preload("res://assets/fonts/KBPlanetEarth.ttf")
 const CardViewScene: PackedScene = preload("res://scenes/components/CardView.tscn")
 const StarConditionEvaluator = preload("res://src/systems/node_map_system/StarConditionEvaluator.gd")
 
-const TEX_YOUR_RIBBON: Texture2D = preload("res://assets/textures/battle/banners/banner_your_turn_ribbon.png")
-const TEX_YOUR_TEXT: Texture2D = preload("res://assets/textures/battle/banners/banner_your_turn_text.png")
-const TEX_OPP_RIBBON: Texture2D = preload("res://assets/textures/battle/banners/banner_opponent_ribbon.png")
-const TEX_OPP_TEXT: Texture2D = preload("res://assets/textures/battle/banners/banner_opponent_text.png")
+const CLIP_YOUR_TURN: StringName = &"Take 001_18"
+const CLIP_OPP_TURN: StringName = &"Take 001_19"
 const TEX_STAR_FULL: Texture2D = preload("res://assets/textures/battle/FX_QuestStar_PNG.png")
 const TEX_ATK_ICON: Texture2D = preload("res://assets/textures/battle/hud/Combat_Icon_ATK.png")
 const TEX_DEF_ICON: Texture2D = preload("res://assets/textures/battle/hud/Combat_Icon_DEF.png")
@@ -52,11 +50,9 @@ const TEX_BOOK: Texture2D = preload("res://assets/textures/battle/hud/Book.png")
 
 @onready var dimmer: ColorRect = $Dimmer
 
-@onready var turn_banner: Control = $TurnBanner
-@onready var tb_skull_group: Control = $TurnBanner/SkullGroup
-@onready var tb_ribbon: TextureRect = $TurnBanner/Ribbon
-@onready var tb_text: TextureRect = $TurnBanner/BannerText
-@onready var tb_draw_card: TextureRect = $TurnBanner/DrawCardFlip
+@onready var turn_banner_viewport: SubViewportContainer = $TurnBannerViewportContainer
+@onready var your_turn_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_YourTurn
+@onready var opp_turn_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_OpponentsTurn
 
 @onready var quest_modal: Control = $CurrentQuestModal
 @onready var quest_rows_box: VBoxContainer = $CurrentQuestModal/Frame/VBox/ConditionsScroll/Rows
@@ -76,7 +72,9 @@ const TEX_BOOK: Texture2D = preload("res://assets/textures/battle/hud/Book.png")
 @onready var magic_yes_btn: Button = $UnusedMagicModal/Frame/Buttons/YesBtn
 @onready var magic_no_btn: Button = $UnusedMagicModal/Frame/Buttons/NoBtn
 
-var _turn_tween: Tween = null
+var _your_turn_anim: AnimationPlayer = null
+var _opp_turn_anim: AnimationPlayer = null
+var _turn_seq_id: int = 0
 
 var _info_backdrop: Control = null
 var _card_info_bar: PanelContainer = null
@@ -110,7 +108,9 @@ var _ac_cost_lbl: Label = null
 
 func _ready() -> void:
 	dimmer.visible = false
-	turn_banner.visible = false
+	_your_turn_anim = _setup_turn_banner_anim(your_turn_banner, CLIP_YOUR_TURN)
+	_opp_turn_anim = _setup_turn_banner_anim(opp_turn_banner, CLIP_OPP_TURN)
+	_stop_turn_banners()
 	quest_modal.visible = false
 	discard_modal.visible = false
 	leave_modal.visible = false
@@ -140,9 +140,7 @@ func is_inspection_open() -> bool:
 
 
 func close_all_modals() -> void:
-	if _turn_tween and _turn_tween.is_running():
-		_turn_tween.kill()
-	turn_banner.visible = false
+	_stop_turn_banners()
 	dimmer.visible = false
 	quest_modal.visible = false
 	discard_modal.visible = false
@@ -165,42 +163,66 @@ func dismiss_inspection(emit_signal: bool = true) -> void:
 		info_dismissed.emit()
 
 
-func play_turn_banner(is_player_turn: bool, include_draw_card: bool = true) -> void:
-	if _turn_tween and _turn_tween.is_running():
-		_turn_tween.kill()
+func _setup_turn_banner_anim(banner_root: Node3D, clip_name: StringName) -> AnimationPlayer:
+	if not banner_root:
+		return null
+	var anim_player := banner_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if not anim_player:
+		return null
+	var anim_res := anim_player.get_animation(clip_name)
+	if anim_res:
+		anim_res.loop_mode = Animation.LOOP_NONE
+	anim_player.animation_finished.connect(_on_turn_banner_anim_finished)
+	return anim_player
 
-	turn_banner.visible = true
-	turn_banner.modulate = Color(1, 1, 1, 0)
-	turn_banner.scale = Vector2(0.82, 0.82)
-	turn_banner.pivot_offset = turn_banner.size * 0.5
 
-	tb_skull_group.visible = not is_player_turn
-	tb_draw_card.visible = is_player_turn and include_draw_card
-	tb_ribbon.texture = TEX_YOUR_RIBBON if is_player_turn else TEX_OPP_RIBBON
-	tb_text.texture = TEX_YOUR_TEXT if is_player_turn else TEX_OPP_TEXT
+func _stop_turn_banners() -> void:
+	_turn_seq_id += 1
+	if _your_turn_anim:
+		_your_turn_anim.stop()
+	if _opp_turn_anim:
+		_opp_turn_anim.stop()
+	if your_turn_banner:
+		your_turn_banner.visible = false
+	if opp_turn_banner:
+		opp_turn_banner.visible = false
+	if turn_banner_viewport:
+		turn_banner_viewport.visible = false
+
+
+func _on_turn_banner_anim_finished(_anim_name: StringName) -> void:
+	_stop_turn_banners()
+
+
+func play_turn_banner(is_player_turn: bool, _include_draw_card: bool = true) -> void:
+	_stop_turn_banners()
+	var seq := _turn_seq_id
 
 	var sfx_path := "res://assets/audio/sfx/SFX_Banner_YourTurn.wav" if is_player_turn else "res://assets/audio/sfx/SFX_Banner_OpponentTurn.wav"
 	if Audio and ResourceLoader.exists(sfx_path):
 		Audio.play_sfx(load(sfx_path), -4.0)
 
-	if tb_draw_card.visible:
-		tb_draw_card.scale = Vector2(0.4, 0.4)
-		tb_draw_card.position = Vector2(120, 120)
-		tb_draw_card.rotation_degrees = -14.0
+	var active_banner: Node3D = your_turn_banner if is_player_turn else opp_turn_banner
+	var active_anim: AnimationPlayer = _your_turn_anim if is_player_turn else _opp_turn_anim
+	var clip_name: StringName = CLIP_YOUR_TURN if is_player_turn else CLIP_OPP_TURN
 
-	_turn_tween = create_tween()
-	_turn_tween.set_parallel(true)
-	_turn_tween.tween_property(turn_banner, "modulate:a", 1.0, 0.18)
-	_turn_tween.tween_property(turn_banner, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	if tb_draw_card.visible:
-		_turn_tween.tween_property(tb_draw_card, "position", Vector2(215, 22), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		_turn_tween.tween_property(tb_draw_card, "scale", Vector2(1.0, 1.0), 0.35)
-		_turn_tween.tween_property(tb_draw_card, "rotation_degrees", 8.0, 0.35)
-	_turn_tween.chain()
-	_turn_tween.set_parallel(false)
-	_turn_tween.tween_interval(0.72)
-	_turn_tween.tween_property(turn_banner, "modulate:a", 0.0, 0.22)
-	_turn_tween.tween_callback(func(): turn_banner.visible = false)
+	if turn_banner_viewport:
+		turn_banner_viewport.visible = true
+	if your_turn_banner:
+		your_turn_banner.visible = is_player_turn
+	if opp_turn_banner:
+		opp_turn_banner.visible = not is_player_turn
+
+	if active_banner and active_anim and active_anim.has_animation(clip_name):
+		active_anim.play(clip_name)
+		active_anim.seek(0.0, true)
+	else:
+		# Fallback hide if clip missing (never silently leave viewport blocking).
+		var t := get_tree().create_timer(1.1)
+		t.timeout.connect(func():
+			if seq == _turn_seq_id:
+				_stop_turn_banners()
+		)
 
 
 func open_current_quest(quest_id: String, live_stats: Dictionary) -> void:

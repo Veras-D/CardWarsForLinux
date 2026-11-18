@@ -24,18 +24,24 @@ from unity_anim import parse_clip, HERMITE_HELPERS_GD
 
 def export_battle_banner(guid_index: dict[str, str]) -> None:
     scene_path = os.path.join(REPO_ROOT, "Assets", "Scene", "_hirez", "Scenes", "BattleScene.unity")
-    out_path = os.path.join(REPO_ROOT, "godot", "assets", "models", "battle", "banners", "Battle_Battle.glb")
-    anim_path = os.path.join(REPO_ROOT, "Assets", "AnimationClip", "Take 001_15.anim")
-    ok = export_unity_subtree_to_glb(
-        yaml_path=scene_path,
-        out_glb_path=out_path,
-        guid_index=guid_index,
-        root_go_id="787",
-        scale_factor=1.0,
-        extra_clips=[("Take 001_15", anim_path)],
-        double_sided_mats=True,
-    )
-    print(f"[{'OK' if ok else 'FAIL'}] Battle_Battle.glb -> {out_path}")
+    banner_specs = [
+        ("Battle_Battle.glb", "787", "Take 001_15"),
+        ("Battle_YourTurn.glb", "9", "Take 001_18"),
+        ("Battle_OpponentsTurn.glb", "423", "Take 001_19"),
+    ]
+    for filename, go_id, clip_name in banner_specs:
+        out_path = os.path.join(REPO_ROOT, "godot", "assets", "models", "battle", "banners", filename)
+        anim_path = os.path.join(REPO_ROOT, "Assets", "AnimationClip", f"{clip_name}.anim")
+        ok = export_unity_subtree_to_glb(
+            yaml_path=scene_path,
+            out_glb_path=out_path,
+            guid_index=guid_index,
+            root_go_id=go_id,
+            scale_factor=1.0,
+            extra_clips=[(clip_name, anim_path)],
+            double_sided_mats=True,
+        )
+        print(f"[{'OK' if ok else 'FAIL'}] {filename} -> {out_path}")
 
 
 def export_props(guid_index: dict[str, str]) -> None:
@@ -200,11 +206,14 @@ def export_intro_camera_anims() -> None:
 
 
 def main() -> None:
+    banners_only = "--banners-only" in sys.argv[1:]
     print("Building Assets GUID index...")
     guid_index = build_guid_index(os.path.join(REPO_ROOT, "Assets"))
     print(f"Indexed {len(guid_index)} GUIDs.")
-    export_intro_camera_anims()
     export_battle_banner(guid_index)
+    if banners_only:
+        return
+    export_intro_camera_anims()
     export_props(guid_index)
     export_characters(guid_index)
     export_environments(guid_index)
