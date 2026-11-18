@@ -120,6 +120,7 @@ func start_placement(player_landscapes: Array[String], opponent_landscapes: Arra
 	if _arena:
 		_arena.clear_lane_landscapes()
 		_arena.clear_all_highlights()
+		_arena.set_hex_scan_fx_visible(true)
 		_arena.set_cards_in_hand_visible(true)
 		var cam_tw := _arena.focus_landscape_placement(0.85)
 		if cam_tw and cam_tw.is_running():
@@ -518,6 +519,7 @@ func _finish_placement() -> void:
 		prompt_pill.visible = false
 
 	if _arena:
+		_arena.set_hex_scan_fx_visible(false)
 		for i in range(4):
 			var o_fac := str(_opponent_factions[i]) if i < _opponent_factions.size() else "Plains"
 			_arena.set_lane_landscape(false, i, o_fac, true)

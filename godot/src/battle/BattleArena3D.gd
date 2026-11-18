@@ -18,6 +18,15 @@ const ResultChest04Scene: PackedScene = preload("res://assets/models/battle/prop
 const PrizeSpotlightTex: Texture2D = preload("res://assets/textures/battle/hud/Prize_Spotlight.png")
 const HexHighlightMesh: ArrayMesh = preload("res://assets/models/battle/GameBoardGrid_FX.obj")
 const HexHighlightTexPath: String = "res://assets/textures/battle/FX_Scan_Hex_Solid.png"
+const HexAnimTexPath: String = "res://assets/textures/battle/HexAnim.png"
+const HEX_SCAN_FX_POSITIONS: Array[Vector3] = [
+	Vector3(-1.226716 * 0.05, -2.699997 * 0.05 + 0.001, -14.7205 * 0.05),   # GameBoard_FX_A1
+	Vector3(-8.765346 * 0.05, -2.699997 * 0.05 + 0.001, -14.75634 * 0.05),  # GameBoard_FX_A2
+	Vector3(-16.28412 * 0.05, -2.699997 * 0.05 + 0.001, -14.75634 * 0.05),  # GameBoard_FX_A3
+	Vector3(-1.226716 * 0.05, -2.700000 * 0.05 + 0.001, 13.65900 * 0.05),   # GameBoard_FX_D1
+	Vector3(-8.765346 * 0.05, -2.700000 * 0.05 + 0.001, 13.62316 * 0.05),   # GameBoard_FX_D2
+	Vector3(-16.28412 * 0.05, -2.700000 * 0.05 + 0.001, 13.62316 * 0.05),   # GameBoard_FX_D3
+]
 
 # Unity BattleScene P1/P2CharacterPosition scaled by 0.05 (S_Z reflected)
 const P1_CHAR_POS := Vector3(-3.35, -2.55, 0.0)
@@ -112,6 +121,10 @@ var _player_lane_highlights: Array[MeshInstance3D] = []
 var _opponent_lane_highlights: Array[MeshInstance3D] = []
 var _highlight_pulse_time: float = 0.0
 var _active_highlights: Array[MeshInstance3D] = []
+var _hex_scan_root: Node3D = null
+var _hex_scan_mat: StandardMaterial3D = null
+var _hex_scan_active: bool = false
+var _hex_scan_time: float = 0.0
 
 var _mesh_cache: Dictionary = {}
 var _mat_cache: Dictionary = {}
@@ -131,8 +144,47 @@ var _orig_grid_blue_mat: Material = null
 
 func _ready() -> void:
 	_build_lane_anchors()
+	_build_hex_scan_fx()
 	_setup_split_duel_overlay()
 	set_camera_immediate(CAM_INTRO_WIDE_POS, CAM_INTRO_WIDE_LOOK, 60.0)
+
+
+func _build_hex_scan_fx() -> void:
+	_hex_scan_root = Node3D.new()
+	_hex_scan_root.name = "HexScanFX"
+	_hex_scan_root.visible = false
+	add_child(_hex_scan_root)
+
+	_hex_scan_mat = StandardMaterial3D.new()
+	_hex_scan_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_hex_scan_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_hex_scan_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	_hex_scan_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_hex_scan_mat.albedo_color = Color(1.0, 1.0, 1.0, 0.92)
+	if ResourceLoader.exists(HexAnimTexPath):
+		_hex_scan_mat.albedo_texture = load(HexAnimTexPath)
+	_hex_scan_mat.uv1_scale = Vector3(0.25, 0.25, 1.0)
+	_hex_scan_mat.uv1_offset = Vector3.ZERO
+
+	for i in range(HEX_SCAN_FX_POSITIONS.size()):
+		var mi := MeshInstance3D.new()
+		mi.name = "GameBoard_FX_%d" % i
+		mi.mesh = HexHighlightMesh
+		mi.material_override = _hex_scan_mat
+		mi.position = HEX_SCAN_FX_POSITIONS[i]
+		# GameBoardGrid_FX.obj has Godot Z reflected; +90 X places it flat in X/Z plane matching Unity -90 X
+		mi.rotation_degrees = Vector3(90.0, 0.0, 0.0)
+		mi.scale = Vector3(0.0125, 0.0125, 0.0125)
+		_hex_scan_root.add_child(mi)
+
+
+func set_hex_scan_fx_visible(enabled: bool) -> void:
+	_hex_scan_active = enabled
+	_hex_scan_time = 0.0
+	if _hex_scan_mat:
+		_hex_scan_mat.uv1_offset = Vector3.ZERO
+	if _hex_scan_root:
+		_hex_scan_root.visible = enabled
 
 
 func _setup_split_duel_overlay() -> void:
@@ -215,6 +267,12 @@ func _process(delta: float) -> void:
 			var mat := hi.material_override as StandardMaterial3D
 			if mat:
 				mat.albedo_color.a = pulse
+	if _hex_scan_active and _hex_scan_mat != null:
+		_hex_scan_time += delta
+		var frame := int(_hex_scan_time * 15.0) % 16
+		var col := frame % 4
+		var row := int(floor(float(frame) / 4.0))
+		_hex_scan_mat.uv1_offset = Vector3(float(col) * 0.25, float(row) * 0.25, 0.0)
 	_step_face_tracks(delta, true)
 	_step_face_tracks(delta, false)
 

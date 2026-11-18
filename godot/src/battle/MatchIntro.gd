@@ -124,11 +124,6 @@ func _begin_cut(cut_idx: int) -> void:
 		2:
 			phase1_banner.visible = false
 			_tween_banner_in(p1_banner, Vector2.ONE, 0.10)
-			var vo_path := "res://assets/audio/vo/%s_Opening.wav" % _player_name.replace(" ", "")
-			if audio_vo and ResourceLoader.exists(vo_path):
-				audio_vo.stream = load(vo_path)
-				audio_vo.volume_db = -6.0
-				audio_vo.play()
 		3:
 			p1_banner.visible = false
 			_tween_banner_in(p2_banner, Vector2.ONE, 0.10)
@@ -141,10 +136,6 @@ func _begin_cut(cut_idx: int) -> void:
 					anim_res.loop_mode = Animation.LOOP_NONE
 				_banner_anim_player.stop()
 				_banner_anim_player.play("Take 001_15")
-			if audio_sfx and ResourceLoader.exists("res://assets/audio/sfx/SFX_Banner_Battle.wav"):
-				audio_sfx.stream = load("res://assets/audio/sfx/SFX_Banner_Battle.wav")
-				audio_sfx.volume_db = -4.0
-				audio_sfx.play()
 
 
 func _tween_banner_in(banner: Control, target_scale: Vector2, dur: float) -> void:
