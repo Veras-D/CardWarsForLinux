@@ -1,6 +1,7 @@
 extends Control
 
 signal closed
+signal open_deck_menu_requested
 
 const FONT_MAIN: FontFile = preload("res://assets/fonts/KBPlanetEarth.ttf")
 const TEX_BTN_GREEN: Texture2D = preload("res://assets/textures/ui/store/uiButtonGreen.png")
@@ -61,13 +62,15 @@ func open_modal(force_unlocked_preview: bool = false) -> void:
 	_anim_tween = StoreModalAnimator.play_open(self, dimmer, frame, _anim_tween)
 
 
-func close_modal() -> void:
+func close_modal(on_done: Callable = Callable()) -> void:
 	if _is_closing or not visible:
 		return
 	_is_closing = true
 	_anim_tween = StoreModalAnimator.play_close(self, dimmer, frame, _anim_tween, func():
 		_is_closing = false
 		closed.emit()
+		if on_done.is_valid():
+			on_done.call()
 	)
 
 
@@ -83,8 +86,12 @@ func _on_close_pressed() -> void:
 
 func _on_deck_builder_pressed() -> void:
 	_play_sfx(SFX_SELECT)
-	visible = false
-	GameManager.open_deck_builder()
+	close_modal(func():
+		if open_deck_menu_requested.get_connections().size() > 0:
+			open_deck_menu_requested.emit()
+		else:
+			GameManager.open_deck_menu()
+	)
 
 
 func refresh_views() -> void:

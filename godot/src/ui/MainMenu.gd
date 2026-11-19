@@ -203,8 +203,11 @@ func _ready() -> void:
 			daily_gift_modal.reward_granted.connect(_update_player_stats)
 		if daily_gift_modal.has_signal("open_store_gems_requested"):
 			daily_gift_modal.open_store_gems_requested.connect(_on_daily_gift_request_store_gems)
-	if dungeon_modal and dungeon_modal.has_signal("closed"):
-		dungeon_modal.closed.connect(_update_player_stats)
+	if dungeon_modal:
+		if dungeon_modal.has_signal("closed"):
+			dungeon_modal.closed.connect(_update_player_stats)
+		if dungeon_modal.has_signal("open_deck_menu_requested"):
+			dungeon_modal.open_deck_menu_requested.connect(_transition_dungeons_to_deck)
 
 	# Deck Menu Overlay Buttons & Modals
 	if deck_back_btn:
@@ -848,13 +851,27 @@ func close_quest_mode_select(restore_dock: bool = true) -> void:
 		treehouse_3d.hide_quest_modes()
 
 
-func _transition_quest_to_deck() -> void:
-	_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars, quest_back_btn], true)
+func _transition_board_to_deck(buttons: Array, close_fn: Callable) -> void:
+	_set_buttons_disabled(buttons, true)
 	await get_tree().process_frame
-	close_quest_mode_select(false)
+	close_fn.call()
 	await get_tree().create_timer(0.52).timeout
-	_set_buttons_disabled([quad_quests, quad_fionna, quad_deck_wars, quest_back_btn], false)
+	_set_buttons_disabled(buttons, false)
 	open_deck()
+
+
+func _transition_quest_to_deck() -> void:
+	await _transition_board_to_deck(
+		[quad_quests, quad_fionna, quad_deck_wars, quest_back_btn],
+		func(): close_quest_mode_select(false)
+	)
+
+
+func _transition_dungeons_to_deck() -> void:
+	await _transition_board_to_deck(
+		[quad_dungeon_portal, quad_daily_gift, dungeons_back_btn],
+		func(): close_dungeons(false)
+	)
 
 func _on_quests_pressed() -> void:
 	_trigger_board_icon_activate([quad_quests, quad_fionna, quad_deck_wars], "play_quests_activate", func():
@@ -909,7 +926,7 @@ func _on_dungeons_back_pressed() -> void:
 	close_dungeons()
 
 
-func close_dungeons() -> void:
+func close_dungeons(restore_dock: bool = true) -> void:
 	if "menu_return_view" in GameManager:
 		GameManager.menu_return_view = "hub"
 	if dungeons_overlay:
@@ -917,7 +934,7 @@ func close_dungeons() -> void:
 		tw_o.tween_property(dungeons_overlay, "modulate:a", 0.0, 0.2)
 		tw_o.tween_callback(func(): dungeons_overlay.visible = false)
 
-	if bottom_dock:
+	if bottom_dock and restore_dock:
 		bottom_dock.visible = true
 		bottom_dock.modulate.a = 0.0
 		var tw = create_tween()
