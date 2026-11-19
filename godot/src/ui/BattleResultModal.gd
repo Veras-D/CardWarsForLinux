@@ -2,7 +2,7 @@ class_name BattleResultModal
 extends Control
 
 ## Authentic 4-Stage Card Wars Post-Match Result & Loot Flow:
-##   Persistent top PlayerStatsBar (Hero portrait/XP/Stamina/Trophies + Inventory/Gems/Coins)
+##   Persistent top PlayerStatsBar (Hero portrait/XP/Trophies + Inventory/Gems/Coins)
 ##   Stage 1 (optional): "You leveled up [Hero]"
 ##   Stage 2: "Quest Rewards" / "Defeat!" (Frame_Victory/Frame_Defeat + Win_Banner2 + XP + Stars + Loot/OK/Retry)
 ##   Stage 3 (if loot_cards > 0): 3D Chest Loot Floor ("TAP chests to unlock!")
@@ -62,8 +62,6 @@ var _sb_name_lbl: Label = null
 var _sb_lvl_lbl: Label = null
 var _sb_xp_bar: ProgressBar = null
 var _sb_xp_lbl: Label = null
-var _sb_stamina_lbl: Label = null
-var _sb_timer_lbl: Label = null
 var _sb_trophy_lbl: Label = null
 var _sb_inv_box: TextureRect = null
 var _sb_inv_lbl: Label = null
@@ -206,8 +204,6 @@ func _update_player_stats_bar() -> void:
 	var tracker := GameManager.get_hero_tracker(hero) if GameManager else null
 	var cur_xp := tracker.current_xp if tracker else 215
 	var next_xp := tracker.get_xp_for_next_level() if (tracker and tracker.has_method("get_xp_for_next_level")) else 595
-	var stamina := GameManager.get_stamina() if GameManager else 5
-	var max_st := GameManager.get_max_stamina() if GameManager else 5
 	var coins := GameManager.get_coins() if GameManager else 0
 	var gems := GameManager.get_gems() if GameManager else 0
 	var max_inv := GameManager.max_inventory if GameManager else 50
@@ -222,8 +218,6 @@ func _update_player_stats_bar() -> void:
 	_sb_xp_bar.max_value = maxf(1.0, float(next_xp))
 	_sb_xp_bar.value = float(cur_xp)
 	_sb_xp_lbl.text = "%d / %d" % [cur_xp, next_xp]
-	_sb_stamina_lbl.text = "%d/%d" % [stamina, max_st]
-	_sb_timer_lbl.text = "MAX" if stamina >= max_st else "5:00"
 	_sb_trophy_lbl.text = str(trophies)
 	_sb_inv_lbl.text = "%d/%d" % [_inv_count_displayed, max_inv]
 	_sb_gems_lbl.text = str(gems)
@@ -900,7 +894,7 @@ func _build_player_stats_bar() -> void:
 	p_bg.stretch_mode = TextureRect.STRETCH_SCALE
 	p_bg.texture = TEX_HUD_PLAYER
 	p_bg.position = Vector2(8, 6)
-	p_bg.size = Vector2(360, 70)
+	p_bg.size = Vector2(242, 70)
 	p_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_stats_bar.add_child(p_bg)
 
@@ -952,20 +946,6 @@ func _build_player_stats_bar() -> void:
 	_sb_xp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_sb_xp_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	p_bg.add_child(_sb_xp_lbl)
-
-	_sb_stamina_lbl = _make_label("5/5", 15, Color.WHITE)
-	_sb_stamina_lbl.position = Vector2(230, 10)
-	_sb_stamina_lbl.size = Vector2(50, 38)
-	_sb_stamina_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_sb_stamina_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	p_bg.add_child(_sb_stamina_lbl)
-
-	_sb_timer_lbl = _make_label("MAX", 14, Color.WHITE)
-	_sb_timer_lbl.position = Vector2(282, 10)
-	_sb_timer_lbl.size = Vector2(64, 38)
-	_sb_timer_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_sb_timer_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	p_bg.add_child(_sb_timer_lbl)
 
 	# Trophy Bar below top-left bar
 	var tr_bar := TextureRect.new()

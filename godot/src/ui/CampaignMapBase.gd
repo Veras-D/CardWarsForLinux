@@ -19,8 +19,6 @@ const SFX_QUEST_GO = preload("res://assets/audio/sfx/Map_QuestGo.wav")
 @onready var player_level_label: Label = $TopBar/PlayerBadge/LevelLabel
 @onready var xp_bar: ProgressBar = $TopBar/PlayerBadge/XPBar
 @onready var xp_label: Label = $TopBar/PlayerBadge/XPLabel
-@onready var stamina_value: Label = $TopBar/PlayerBadge/StaminaValue
-@onready var stamina_status: Label = $TopBar/PlayerBadge/StaminaStatus
 @onready var trophy_label: Label = $TopBar/TrophyBadge/TrophyLabel
 @onready var cards_label: Label = $TopBar/Currencies/InventoryBadge/CardsLabel
 @onready var gems_label: Label = $TopBar/Currencies/GemsBadge/GemsLabel
@@ -366,11 +364,7 @@ func _build_quest_nodes() -> void:
 		var unlocked_frame_tex = NODE_TEX_DIR + "QuestIconFrame_NormalQuest.png"
 		var locked_frame_tex = NODE_TEX_DIR + "QuestIconFrame_UnlockedQuest.png"
 
-		if prefab_type.ends_with("Node_Stamina"):
-			frame_size = Vector2(5.88, 5.88)
-			unlocked_frame_tex = NODE_TEX_DIR + "QuestIconFrame_HeartQuest.png"
-			locked_frame_tex = NODE_TEX_DIR + "QuestIconFrame_HeartQuest_Unlocked.png"
-		elif prefab_type.ends_with("Node_Hero"):
+		if prefab_type.ends_with("Node_Hero"):
 			frame_size = Vector2(6.66, 6.30)
 			unlocked_frame_tex = NODE_TEX_DIR + "QuestIcon_HeroBattle_Unlocked.png"
 			locked_frame_tex = NODE_TEX_DIR + "QuestIcon_HeroBattle.png"
@@ -715,8 +709,6 @@ func _refresh_hud() -> void:
 	var level: int = int(progress.get("level", 1))
 	var xp: int = int(progress.get("xp", 0))
 	var max_xp: int = maxi(1, int(progress.get("max_xp", 106)))
-	var stamina = GameManager.stamina if "stamina" in GameManager else 5
-	var max_stamina = GameManager.max_stamina if "max_stamina" in GameManager else 5
 	var gems = GameManager.get_gems() if GameManager.has_method("get_gems") else 50
 	var coins = GameManager.get_coins() if GameManager.has_method("get_coins") else 5000
 
@@ -732,10 +724,6 @@ func _refresh_hud() -> void:
 		xp_bar.value = float(xp)
 	if xp_label:
 		xp_label.text = "%d/%d" % [xp, max_xp]
-	if stamina_value:
-		stamina_value.text = "%d/%d" % [stamina, max_stamina]
-	if stamina_status:
-		stamina_status.text = "Full" if stamina >= max_stamina else "04:30"
 	if trophy_label:
 		trophy_label.text = "0"
 	if cards_label:

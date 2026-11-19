@@ -5,7 +5,6 @@ signal closed
 const FONT_MAIN: FontFile = preload("res://assets/fonts/KBPlanetEarth.ttf")
 const TEX_BTN_GREEN: Texture2D = preload("res://assets/textures/ui/store/uiButtonGreen.png")
 const TEX_BTN_BLUE: Texture2D = preload("res://assets/textures/ui/store/uiButtonBlue.png")
-const TEX_HEART: Texture2D = preload("res://assets/textures/ui/heart.png")
 const SFX_SELECT: AudioStream = preload("res://assets/audio/sfx/UI_Select.wav")
 const SFX_BACK: AudioStream = preload("res://assets/audio/sfx/UI_Back.wav")
 
@@ -24,7 +23,6 @@ const DUNGEON_INFO_TEXT: Dictionary = {
 @onready var close_btn: BaseButton = $Center/Frame/TitleBar/CloseBtn
 @onready var dungeon_name_lbl: Label = $Center/Frame/Body/DungeonBanner/HBox/TextVBox/DungeonName
 @onready var dungeon_desc_lbl: Label = $Center/Frame/Body/DungeonBanner/HBox/TextVBox/DungeonDesc
-@onready var stamina_lbl: Label = $Center/Frame/Body/DungeonBanner/HBox/HeartBadge/StaminaLabel
 
 @onready var locked_gate_panel: Control = $Center/Frame/Body/LockedGatePanel
 @onready var gate_msg_lbl: Label = $Center/Frame/Body/LockedGatePanel/VBox/GateMsg
@@ -35,7 +33,6 @@ const DUNGEON_INFO_TEXT: Dictionary = {
 @onready var stages_panel: Control = $Center/Frame/Body/StagesPanel
 @onready var stages_list: VBoxContainer = $Center/Frame/Body/StagesPanel/StagesList
 @onready var status_label: Label = $Center/Frame/Body/StagesPanel/StatusRow/StatusLabel
-@onready var refill_btn: Button = $Center/Frame/Body/StagesPanel/StatusRow/RefillBtn
 
 var _anim_tween: Tween = null
 var _is_closing: bool = false
@@ -52,8 +49,6 @@ func _ready() -> void:
 	if gate_deck_btn:
 		gate_deck_btn.pressed.connect(_on_deck_builder_pressed)
 		StoreModalAnimator.attach_button_reaction(gate_deck_btn)
-	if refill_btn:
-		refill_btn.pressed.connect(_on_refill_stamina_pressed)
 
 
 func open_modal(force_unlocked_preview: bool = false) -> void:
@@ -61,8 +56,6 @@ func open_modal(force_unlocked_preview: bool = false) -> void:
 	_force_unlocked_preview = force_unlocked_preview
 	if status_label:
 		status_label.text = ""
-	if refill_btn:
-		refill_btn.visible = false
 	refresh_views()
 	visible = true
 	_anim_tween = StoreModalAnimator.play_open(self, dimmer, frame, _anim_tween)
@@ -94,22 +87,6 @@ func _on_deck_builder_pressed() -> void:
 	GameManager.open_deck_builder()
 
 
-func _on_refill_stamina_pressed() -> void:
-	_play_sfx(SFX_SELECT)
-	var res := GameManager.refill_stamina_with_gems()
-	if bool(res.get("ok", false)):
-		if status_label:
-			status_label.text = "Hearts refilled to %d!" % int(res.get("stamina", 100))
-			status_label.add_theme_color_override("font_color", Color(0.45, 0.95, 0.55))
-		if refill_btn:
-			refill_btn.visible = false
-		refresh_views()
-	else:
-		if status_label:
-			status_label.text = str(res.get("reason", "Not enough Gems!"))
-			status_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
-
-
 func refresh_views() -> void:
 	var dt := Time.get_date_dict_from_system()
 	var today_weekday := int(dt.get("weekday", 1))
@@ -121,8 +98,6 @@ func refresh_views() -> void:
 		dungeon_name_lbl.text = d_name.to_upper()
 	if dungeon_desc_lbl:
 		dungeon_desc_lbl.text = DUNGEON_INFO_TEXT.get(raw_info, "Complete today's stages to earn special cards & rewards!")
-	if stamina_lbl:
-		stamina_lbl.text = "%d / %d" % [GameManager.get_stamina(), GameManager.get_max_stamina()]
 
 	var gate := GameManager.validate_dungeon_entry()
 	var entry_ok := bool(gate.get("ok", false)) or _force_unlocked_preview
@@ -157,7 +132,6 @@ func _populate_stages(d_name: String) -> void:
 	for i in range(stages.size()):
 		var s: Dictionary = stages[i]
 		var qid := str(s.get("quest_id", ""))
-		var h_cost := int(s.get("heart_cost", 5))
 		var quest := Database.get_quest(qid)
 		var is_unlocked := GameManager.is_dungeon_stage_unlocked(d_name, i)
 		var is_cleared := i < max_cleared
@@ -194,28 +168,9 @@ func _populate_stages(d_name: String) -> void:
 		lbl.text = "%sStage %d — vs %s (Lv. %d)" % [prefix, i + 1, opp_name, lv]
 		hbox.add_child(lbl)
 
-		var cost_box := HBoxContainer.new()
-		cost_box.add_theme_constant_override("separation", 4)
-		var h_icon := TextureRect.new()
-		h_icon.custom_minimum_size = Vector2(24, 24)
-		h_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		h_icon.texture = TEX_HEART
-		h_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		h_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		cost_box.add_child(h_icon)
-
-		var cost_lbl := Label.new()
-		cost_lbl.add_theme_font_override("font", FONT_MAIN)
-		cost_lbl.add_theme_font_size_override("font_size", 20)
-		cost_lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-		cost_lbl.add_theme_constant_override("outline_size", 4)
-		cost_lbl.text = str(h_cost)
-		cost_box.add_child(cost_lbl)
-		hbox.add_child(cost_box)
-
 		var play_btn := _make_stage_btn(is_unlocked, is_cleared)
 		if is_unlocked:
-			play_btn.pressed.connect(func(): _on_launch_stage(d_name, i, qid, h_cost))
+			play_btn.pressed.connect(func(): _on_launch_stage(d_name, i, qid))
 			StoreModalAnimator.attach_button_reaction(play_btn)
 		hbox.add_child(play_btn)
 
@@ -257,15 +212,12 @@ func _make_stage_btn(is_unlocked: bool, is_cleared: bool) -> TextureButton:
 	return btn
 
 
-func _on_launch_stage(dungeon_name: String, stage_index: int, quest_id: String, heart_cost: int) -> void:
+func _on_launch_stage(dungeon_name: String, stage_index: int, quest_id: String) -> void:
 	_play_sfx(SFX_SELECT)
-	var res := GameManager.launch_dungeon_stage(dungeon_name, stage_index, quest_id, heart_cost)
+	var res := GameManager.launch_dungeon_stage(dungeon_name, stage_index, quest_id)
 	if not bool(res.get("ok", false)):
-		var ftype := str(res.get("fail_type", ""))
 		if status_label:
 			status_label.text = str(res.get("reason", "Cannot start stage."))
 			status_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
-		if refill_btn:
-			refill_btn.visible = (ftype == "stamina")
 		return
 	visible = false

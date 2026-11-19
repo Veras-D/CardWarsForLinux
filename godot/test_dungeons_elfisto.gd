@@ -47,13 +47,6 @@ func _ready() -> void:
 		printerr("  [FAIL] Expected 5 stages, got %d" % mon_stages.size())
 		failed += 1
 
-	if int(mon_stages[0].get("heart_cost")) == 5 and int(mon_stages[4].get("heart_cost")) == 25:
-		print("  [PASS] Stage stamina costs scale from 5 to 25")
-		passed += 1
-	else:
-		printerr("  [FAIL] Stage costs mismatch")
-		failed += 1
-
 	# -------------------------------------------------------------
 	# Test 2: Dungeon Stage Unlocking & Progression
 	# -------------------------------------------------------------

@@ -137,10 +137,6 @@ func _test_quest_battle_launch_setup() -> void:
 	GameManager._init_campaign()
 	var q1 = Database.get_quest("1")
 
-	# Ensure sufficient energy
-	GameManager.wallet.deposit("energy", 10)
-	var prev_energy = GameManager.wallet.get_balance("energy")
-
 	# Prepare mock to avoid changing full tree in test
 	GameManager.active_quest_id = "1"
 	GameManager.opponent_hero_name = q1.get("opponent", "Finn")

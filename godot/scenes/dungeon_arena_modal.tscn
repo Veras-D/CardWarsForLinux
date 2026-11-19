@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiCancel.png" id="4_cancel"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="5_btngreen"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonBlue.png" id="6_btnblue"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/heart.png" id="7_heart"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/btn_dungeons.png" id="8_portal"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bodyfill"]
@@ -220,28 +219,6 @@ theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 18
 text = "Get your Plains Cards here!"
 
-[node name="HeartBadge" type="HBoxContainer" parent="Center/Frame/Body/DungeonBanner/HBox"]
-layout_mode = 2
-size_flags_vertical = 4
-theme_override_constants/separation = 6
-
-[node name="HeartIcon" type="TextureRect" parent="Center/Frame/Body/DungeonBanner/HBox/HeartBadge"]
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("7_heart")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="StaminaLabel" type="Label" parent="Center/Frame/Body/DungeonBanner/HBox/HeartBadge"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 22
-text = "100 / 100"
-
 [node name="LockedGatePanel" type="Control" parent="Center/Frame/Body"]
 visible = false
 layout_mode = 1
@@ -408,12 +385,3 @@ theme_override_font_sizes/font_size = 18
 text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="RefillBtn" type="Button" parent="Center/Frame/Body/StagesPanel/StatusRow"]
-visible = false
-custom_minimum_size = Vector2(180, 34)
-layout_mode = 2
-focus_mode = 0
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
-text = "Refill (1 Gem)"

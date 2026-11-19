@@ -90,7 +90,7 @@ var opponent_landscapes: Array[String] = ["Corn", "Corn", "Sand", "Corn"]
 # Wheel mode: "NORMAL" (interactive roulette), "QUICK" (auto quick-resolve)
 var wheel_mode: String = "NORMAL"
 
-# Session & persistent rewards (Unity db_Parameters: New_Player_Coins = 0, New_Player_Gems = 5, New_Player_Max_Stamina = 5)
+# Session & persistent rewards (Unity db_Parameters: New_Player_Coins = 0, New_Player_Gems = 5)
 var _raw_player_coins: int = 0
 var player_coins: int:
 	get:
@@ -149,10 +149,6 @@ var claimed_star_milestones: Array[int] = []
 # Daily Dungeons & El Fisto Arena (Task 7.4)
 const MIN_DUNGEON_LEVEL: int = 5
 const DAILY_GIFT_REFRESH_SEC: int = 86400
-var max_stamina: int = 5
-var stamina: int:
-	get:
-		return wallet.get_balance("energy") if wallet else 5
 var dungeon_stage_clears: Dictionary = {}
 var active_dungeon_name: String = ""
 var active_dungeon_stage_index: int = -1
@@ -205,7 +201,6 @@ func _init_wallet() -> void:
 		wallet = CurrencyWallet.new()
 		wallet.register_currency("coins", _raw_player_coins, 99999999)
 		wallet.register_currency("gems", 5, 999999)
-		wallet.register_currency("energy", 5, 9999)
 
 		wallet.balance_changed.connect(func(cid, _old, new_bal):
 			if cid == "coins":
@@ -493,7 +488,6 @@ func save_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		"claimed_star_milestones": claimed_star_milestones,
 		"dungeon_stage_clears": dungeon_stage_clears,
 		"last_daily_gift_timestamp": last_daily_gift_timestamp,
-		"max_stamina": max_stamina,
 		"elfisto": {
 			"current_round": elfisto_current_round,
 			"highest_round": elfisto_highest_round,
@@ -626,8 +620,6 @@ func load_profile(save_path: String = DEFAULT_PROFILE_PATH) -> bool:
 		dungeon_stage_clears = data["dungeon_stage_clears"].duplicate(true)
 	if data.has("last_daily_gift_timestamp"):
 		last_daily_gift_timestamp = int(data["last_daily_gift_timestamp"])
-	if data.has("max_stamina"):
-		max_stamina = maxi(5, int(data["max_stamina"]))
 	if data.has("elfisto") and typeof(data["elfisto"]) == TYPE_DICTIONARY:
 		var ef = data["elfisto"]
 		elfisto_current_round = int(ef.get("current_round", 1))
@@ -1369,13 +1361,6 @@ func launch_quest_battle(quest_id: String) -> bool:
 	if node_data.is_empty() or int(node_data.get("state", 0)) == NodeMapGraph.NodeState.LOCKED:
 		return false
 
-	# Deduct stamina
-	var stamina_cost = int(quest.get("stamina", 1))
-	if wallet and not wallet.withdraw("energy", stamina_cost):
-		# If out of energy, refill to min 10 for test/offline convenience
-		wallet.deposit("energy", stamina_cost)
-		wallet.withdraw("energy", stamina_cost)
-
 	active_quest_id = quest_id
 	if quest.get("type") == "fc":
 		ensure_fc_leaders_unlocked()
@@ -1502,28 +1487,6 @@ func complete_dungeon_stage(dungeon_name: String, stage_index: int) -> void:
 	save_profile()
 
 
-func get_stamina() -> int:
-	if wallet == null:
-		_init_wallet()
-	return wallet.get_balance("energy")
-
-
-func get_max_stamina() -> int:
-	return max_stamina
-
-
-func refill_stamina_with_gems() -> Dictionary:
-	_init_wallet()
-	if not spend_gems(1):
-		return {"ok": false, "reason": "Not enough Gems!", "not_enough_gems": true}
-	var cur := get_stamina()
-	if cur < max_stamina:
-		wallet.deposit("energy", max_stamina - cur)
-	save_profile()
-	player_currencies_updated.emit(get_coins(), get_gems())
-	return {"ok": true, "stamina": get_stamina()}
-
-
 func validate_dungeon_entry() -> Dictionary:
 	var cur_lvl := get_hero_level(player_hero_name)
 	var is_fc := Database.is_leader_fc(player_hero_name)
@@ -1544,7 +1507,7 @@ func validate_dungeon_entry() -> Dictionary:
 	return {"ok": true, "level": cur_lvl}
 
 
-func launch_dungeon_stage(dungeon_name: String, stage_index: int, quest_id: String, heart_cost: int) -> Dictionary:
+func launch_dungeon_stage(dungeon_name: String, stage_index: int, quest_id: String) -> Dictionary:
 	var entry_chk := validate_dungeon_entry()
 	if not bool(entry_chk.get("ok", false)):
 		return entry_chk
@@ -1556,11 +1519,6 @@ func launch_dungeon_stage(dungeon_name: String, stage_index: int, quest_id: Stri
 	if quest.is_empty():
 		return {"ok": false, "reason": "Dungeon quest not found.", "fail_type": "missing"}
 	_init_wallet()
-	var cost := maxi(1, heart_cost)
-	if get_stamina() < cost:
-		return {"ok": false, "reason": "Not enough Hearts! Spend 1 Gem to refill?", "fail_type": "stamina", "needed": cost}
-	wallet.withdraw("energy", cost)
-	player_currencies_updated.emit(get_coins(), get_gems())
 
 	active_quest_id = quest_id
 	active_dungeon_name = dungeon_name
@@ -1602,11 +1560,7 @@ func launch_dungeon_stage(dungeon_name: String, stage_index: int, quest_id: Stri
 func retry_active_dungeon() -> bool:
 	if active_dungeon_name == "" or active_dungeon_stage_index < 0 or active_quest_id == "":
 		return false
-	var stages := Database.get_dungeon_stages(active_dungeon_name)
-	var h_cost := 5
-	if active_dungeon_stage_index < stages.size():
-		h_cost = int(stages[active_dungeon_stage_index].get("heart_cost", 5))
-	var res := launch_dungeon_stage(active_dungeon_name, active_dungeon_stage_index, active_quest_id, h_cost)
+	var res := launch_dungeon_stage(active_dungeon_name, active_dungeon_stage_index, active_quest_id)
 	return bool(res.get("ok", false))
 
 
@@ -1636,12 +1590,6 @@ func complete_dungeon_quest(quest_id: String, match_stats: Dictionary) -> Dictio
 	if newly_cleared and leader_awarded != "" and unlock_leader(leader_awarded):
 		newly_unlocked_leader = leader_awarded
 
-	var stamina_award := int(quest.get("stamina_awarded", 0)) if newly_cleared else 0
-	if stamina_award > 0:
-		max_stamina += stamina_award
-		if wallet:
-			wallet.deposit("energy", stamina_award)
-
 	add_rewards(awarded_coins, card_drops, awarded_xp)
 	save_profile()
 	player_currencies_updated.emit(get_coins(), get_gems())
@@ -1653,8 +1601,7 @@ func complete_dungeon_quest(quest_id: String, match_stats: Dictionary) -> Dictio
 			"coins": awarded_coins,
 			"xp": awarded_xp,
 			"cards": card_drops,
-			"leader_awarded": newly_unlocked_leader,
-			"stamina_awarded": stamina_award
+			"leader_awarded": newly_unlocked_leader
 		}
 	}
 
@@ -1728,8 +1675,6 @@ func grant_daily_gift_reward(spin_res: Dictionary) -> Dictionary:
 			add_coins(qty)
 		"Gems":
 			add_gems(qty)
-		"Hearts":
-			wallet.deposit("energy", qty)
 		"Card normal", "Card gold", "Card obsidian":
 			if card_id != "":
 				add_card_to_inventory(card_id)

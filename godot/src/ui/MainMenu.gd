@@ -30,9 +30,6 @@ var _start_pulse_tween: Tween = null
 @onready var level_label: Label = $TopBar/PlayerBadge/LevelLabel
 @onready var xp_bar: ProgressBar = $TopBar/PlayerBadge/XPBar
 @onready var xp_label: Label = $TopBar/PlayerBadge/XPLabel
-@onready var stamina_label: Label = $TopBar/PlayerBadge/StaminaValue
-@onready var stamina_value_label: Label = $TopBar/PlayerBadge/StaminaValue
-@onready var stamina_status_label: Label = $TopBar/PlayerBadge/StaminaStatus
 @onready var cards_label: Label = $TopBar/Currencies/InventoryBadge/CardsLabel
 @onready var gems_label: Label = $TopBar/Currencies/GemsBadge/GemsLabel
 @onready var coins_label: Label = $TopBar/Currencies/CoinsBadge/CoinsLabel
@@ -716,8 +713,6 @@ func _update_player_stats() -> void:
 	var level: int = int(progress.get("level", 1))
 	var xp: int = int(progress.get("xp", 0))
 	var max_xp: int = maxi(1, int(progress.get("max_xp", 106)))
-	var stamina = GameManager.stamina if "stamina" in GameManager else 5
-	var max_stamina = GameManager.max_stamina if "max_stamina" in GameManager else 5
 	var gems: int = GameManager.get_gems() if GameManager.has_method("get_gems") else 5
 	var coins: int = GameManager.get_coins() if GameManager.has_method("get_coins") else 143
 	var total_cards: int = GameManager.get_total_card_count() if GameManager.has_method("get_total_card_count") else 14
@@ -730,13 +725,6 @@ func _update_player_stats() -> void:
 		xp_bar.value = xp
 	if xp_label:
 		xp_label.text = "%d/%d" % [xp, max_xp]
-	if stamina_value_label:
-		var stam_str := "%d/%d" % [stamina, max_stamina]
-		stamina_value_label.text = stam_str
-		var stam_font_sz := 24 if stam_str.length() <= 3 else (18 if stam_str.length() <= 5 else 14)
-		stamina_value_label.add_theme_font_size_override("font_size", stam_font_sz)
-	if stamina_status_label:
-		stamina_status_label.text = "Full" if stamina >= max_stamina else "04:30"
 	if cards_label:
 		cards_label.text = "%d/%d" % [total_cards, max_inv]
 	if gems_label:

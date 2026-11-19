@@ -841,8 +841,6 @@ func _load_quests() -> void:
 			"deck_id": str(item.get("Deck", "")).strip_edges(),
 			"leader_id": str(item.get("LeaderID", "")).strip_edges(),
 			"leader_level": int(item.get("LeaderLevel", "1")),
-			"stamina": int(item.get("Stamina", "1")),
-			"stamina_awarded": int(item.get("StaminaAwarded", "0")),
 			"leader_awarded": str(item.get("LeaderAwarded", "")).strip_edges(),
 			"leader_rules": str(item.get("LeaderRules", "")).strip_edges().to_lower(),
 			"restricted_leaders": restricted_leaders,
@@ -959,8 +957,7 @@ func _load_dungeons() -> void:
 					dungeon_stages_db[d_name] = []
 				dungeon_stages_db[d_name].append({
 					"dungeon": d_name,
-					"quest_id": str(item.get("questID", "")).strip_edges(),
-					"heart_cost": int(item.get("heartCost", "5"))
+					"quest_id": str(item.get("questID", "")).strip_edges()
 				})
 
 func _load_elfisto() -> void:
