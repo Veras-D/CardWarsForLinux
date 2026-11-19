@@ -31,6 +31,8 @@ const TEX_FX_FLARE: Texture2D = preload("res://assets/textures/battle/fx/Flare1_
 const TEX_FX_GLOW: Texture2D = preload("res://assets/textures/battle/fx/FX_Glow_ball3_grey_TGA.png")
 const TEX_FX_SKULL: Texture2D = preload("res://assets/textures/battle/fx/FX_Skull2_PNG.png")
 const TEX_FX_STARBURST: Texture2D = preload("res://assets/textures/battle/fx/FX_StarBurst4_PNG.png")
+const TEX_BOTTLE_FULL: Texture2D = preload("res://assets/textures/battle/hud/Bottle_Full.png")
+const SHADER_MAGIC_ORB_LIQUID: Shader = preload("res://assets/shaders/magic_orb_liquid.gdshader")
 const SFX_DAMAGE_BURST_PATH := "res://assets/audio/sfx/SFX_DamageBurst.wav"
 
 @onready var opponent_hp_damage_bar: ProgressBar = $Header/OpponentInfo/HBox/StatsCol/HpDamageBar
@@ -88,7 +90,21 @@ const SFX_DAMAGE_BURST_PATH := "res://assets/audio/sfx/SFX_DamageBurst.wav"
 
 const FONT_BATTLE_HUD: FontFile = preload("res://assets/fonts/KBPlanetEarth.ttf")
 
+const MP_LABEL_OPTICAL_DX := {
+	"0": -0.5,
+	"1": -2.0,
+	"2": -1.2,
+	"3": -1.5,
+	"4": -1.0,
+	"5": -1.0,
+	"6": -0.5,
+	"7": -1.0,
+	"8": 0.0,
+	"9": -1.0,
+}
+
 var _stat_badges: Array[Dictionary] = []
+var _mp_label_base_x: Dictionary = {}
 var _pending_confirm_mode: String = ""
 var _pending_confirm_lane: LaneSlot = null
 var _pending_confirm_leader: String = ""
@@ -126,6 +142,8 @@ var _game_turn_count: int = 1
 var _prev_player_mp: int = -1
 var _prev_opponent_mp: int = -1
 var _mp_bar_tweens: Dictionary = {}
+var _mp_liquid_mats: Dictionary = {}
+var _mp_slosh_tweens: Dictionary = {}
 var _hp_anim_state: Dictionary = {
 	"player": {"prev": -1.0, "pulse": 0.0, "last": -1},
 	"opponent": {"prev": -1.0, "pulse": 0.0, "last": -1},
@@ -191,6 +209,14 @@ func _ready() -> void:
 	var match_cfg = GameManager.match_rules if (GameManager and GameManager.is_local_versus) else MatchRulesConfig.new(MatchRulesConfig.MatchMode.SOLO_VS_AI)
 	input_router = PlayerInputRouter.new(match_cfg)
 	gamepad_navigator = GamepadNavigator.new()
+
+	_setup_mp_orb_liquid(player_mp_orb_bar, 0.0)
+	_setup_mp_orb_liquid(opponent_mp_orb_bar, 2.1)
+	_setup_mp_orb_liquid(magic_orb_bar, 4.2)
+	if player_mp_label:
+		_mp_label_base_x[player_mp_label.get_instance_id()] = player_mp_label.position.x
+	if opponent_mp_label:
+		_mp_label_base_x[opponent_mp_label.get_instance_id()] = opponent_mp_label.position.x
 
 	turn_btn.pressed.connect(_on_turn_button_pressed)
 	dialog_btn.pressed.connect(_on_menu_button_pressed)
@@ -1762,35 +1788,35 @@ func _update_ui() -> void:
 	_step_hp_bar_anim("player", player_hp, player_max_hp, player_hp_bar, player_hp_damage_bar, player_hp_label, 0.0)
 	_step_hp_bar_anim("opponent", opponent_hp, opponent_max_hp, opponent_hp_bar, opponent_hp_damage_bar, opponent_hp_label, 0.0)
 
-	if player_mp_label:
-		player_mp_label.text = str(player_mp)
-	if opponent_mp_label:
-		opponent_mp_label.text = str(opponent_mp)
+	_set_mp_label_text(player_mp_label, player_mp)
+	_set_mp_label_text(opponent_mp_label, opponent_mp)
 	if magic_orb_label:
 		magic_orb_label.text = str(player_mp)
 	var p_mp_cap := float(maxi(1, maxi(player_max_mp, player_mp)))
-	# Top corner portrait orbs stay visually full (only numbers change);
-	# only the bottom tray orb drains/fills liquid and plays the smoke puff VFX.
-	if player_mp_orb_bar:
-		player_mp_orb_bar.max_value = 1.0
-		player_mp_orb_bar.value = 1.0
-	if opponent_mp_orb_bar:
-		opponent_mp_orb_bar.max_value = 1.0
-		opponent_mp_orb_bar.value = 1.0
-
 	if _prev_player_mp < 0:
 		_prev_player_mp = player_mp
-		if magic_orb_bar:
-			magic_orb_bar.max_value = p_mp_cap
-			magic_orb_bar.value = clampf(float(player_mp), 0.0, p_mp_cap)
+		_set_mp_orbs_immediate([player_mp_orb_bar, magic_orb_bar], p_mp_cap, float(player_mp))
 	elif player_mp != _prev_player_mp:
-		var is_gain := player_mp > _prev_player_mp
+		var is_p_gain := player_mp > _prev_player_mp
 		_prev_player_mp = player_mp
+		_tween_mp_orb_bar(player_mp_orb_bar, p_mp_cap, float(player_mp))
 		_tween_mp_orb_bar(magic_orb_bar, p_mp_cap, float(player_mp))
+		_pulse_mp_label(player_mp_label)
 		_pulse_mp_label(magic_orb_label)
-		_spawn_magic_orb_vfx(magic_orb_bar, is_gain, 1.0)
+		_spawn_magic_orb_vfx(magic_orb_bar, is_p_gain, 1.0)
+	else:
+		_sync_mp_orb_cap([player_mp_orb_bar, magic_orb_bar], p_mp_cap, float(player_mp))
 
-	_prev_opponent_mp = opponent_mp
+	var o_mp_cap := float(maxi(1, maxi(_round_magic_cap, opponent_mp)))
+	if _prev_opponent_mp < 0:
+		_prev_opponent_mp = opponent_mp
+		_set_mp_orbs_immediate([opponent_mp_orb_bar], o_mp_cap, float(opponent_mp))
+	elif opponent_mp != _prev_opponent_mp:
+		_prev_opponent_mp = opponent_mp
+		_tween_mp_orb_bar(opponent_mp_orb_bar, o_mp_cap, float(opponent_mp))
+		_pulse_mp_label(opponent_mp_label)
+	else:
+		_sync_mp_orb_cap([opponent_mp_orb_bar], o_mp_cap, float(opponent_mp))
 	if draw_count_label:
 		draw_count_label.text = str(player_draw_pile.size())
 	if discard_count_label:
@@ -1799,6 +1825,84 @@ func _update_ui() -> void:
 		loot_count_label.text = str(loot_drops_count)
 	if coins_count_label:
 		coins_count_label.text = str(session_gold)
+
+
+func _setup_mp_orb_liquid(bar: TextureProgressBar, phase: float) -> void:
+	## Adds an animated liquid wave overlay shader on top of Bottle_Empty while keeping TextureProgressBar value.
+	if bar == null:
+		return
+	bar.step = 0.0
+	bar.texture_progress = null
+	var mat := ShaderMaterial.new()
+	mat.shader = SHADER_MAGIC_ORB_LIQUID
+	mat.set_shader_parameter("wave_phase", phase)
+	mat.set_shader_parameter("fill_level", 1.0)
+	mat.set_shader_parameter("slosh_amp", 0.0)
+	var overlay := TextureRect.new()
+	overlay.name = "LiquidOverlay"
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.texture = TEX_BOTTLE_FULL
+	overlay.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	overlay.stretch_mode = TextureRect.STRETCH_SCALE
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.material = mat
+	bar.add_child(overlay)
+	_mp_liquid_mats[bar.get_instance_id()] = mat
+
+
+func _set_mp_orbs_immediate(bars: Array, cap: float, val: float) -> void:
+	for b in bars:
+		var bar := b as TextureProgressBar
+		if bar == null:
+			continue
+		bar.max_value = cap
+		bar.value = clampf(val, 0.0, cap)
+		_sync_one_mp_liquid(bar)
+
+
+func _sync_mp_orb_cap(bars: Array, cap: float, val: float) -> void:
+	for b in bars:
+		var bar := b as TextureProgressBar
+		if bar == null:
+			continue
+		bar.max_value = cap
+		var key: int = bar.get_instance_id()
+		var tw := _mp_bar_tweens.get(key) as Tween
+		if tw == null or not tw.is_valid() or not tw.is_running():
+			bar.value = clampf(val, 0.0, cap)
+		_sync_one_mp_liquid(bar)
+
+
+func _sync_one_mp_liquid(bar: TextureProgressBar) -> void:
+	if bar == null:
+		return
+	var mat := _mp_liquid_mats.get(bar.get_instance_id()) as ShaderMaterial
+	if mat:
+		mat.set_shader_parameter("fill_level", clampf(bar.value / maxf(1.0, bar.max_value), 0.0, 1.0))
+
+
+func _trigger_mp_liquid_slosh(bar: TextureProgressBar, drain_dur: float = 0.9) -> void:
+	if bar == null:
+		return
+	var key := bar.get_instance_id()
+	var mat := _mp_liquid_mats.get(key) as ShaderMaterial
+	if mat == null:
+		return
+	if _mp_slosh_tweens.has(key):
+		var old_tw := _mp_slosh_tweens[key] as Tween
+		if old_tw and old_tw.is_valid():
+			old_tw.kill()
+	var peak := 0.044
+	var tw := create_tween()
+	tw.tween_method(func(v: float):
+		if is_instance_valid(bar) and mat:
+			mat.set_shader_parameter("slosh_amp", v)
+	, float(mat.get_shader_parameter("slosh_amp")), peak, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_method(func(v: float):
+		if is_instance_valid(bar) and mat:
+			mat.set_shader_parameter("slosh_amp", v)
+	, peak, 0.0, drain_dur + 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_mp_slosh_tweens[key] = tw
 
 
 func _tween_mp_orb_bar(bar: TextureProgressBar, cap: float, target_val: float) -> void:
@@ -1810,9 +1914,24 @@ func _tween_mp_orb_bar(bar: TextureProgressBar, cap: float, target_val: float) -
 		var old_tw := _mp_bar_tweens[key] as Tween
 		if old_tw and old_tw.is_valid():
 			old_tw.kill()
+	var clamped := clampf(target_val, 0.0, cap)
+	var delta_ratio := absf(clamped - bar.value) / maxf(1.0, cap)
+	var dur := lerpf(0.85, 1.45, clampf(delta_ratio, 0.0, 1.0))
 	var tw := create_tween()
-	tw.tween_property(bar, "value", clampf(target_val, 0.0, cap), 0.40).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(bar, "value", clamped, dur).set_trans(Tween.TRANS_LINEAR)
 	_mp_bar_tweens[key] = tw
+	_trigger_mp_liquid_slosh(bar, dur)
+
+
+func _set_mp_label_text(lbl: Label, mp_val: int) -> void:
+	## Sets the MP count and applies per-digit optical horizontal centering for proportional glyph widths.
+	if lbl == null:
+		return
+	var text_str := str(mp_val)
+	lbl.text = text_str
+	var key := lbl.get_instance_id()
+	if _mp_label_base_x.has(key):
+		lbl.position.x = float(_mp_label_base_x[key]) + float(MP_LABEL_OPTICAL_DX.get(text_str, 0.0))
 
 
 func _pulse_mp_label(lbl: Label) -> void:
@@ -1933,6 +2052,9 @@ func _on_menu_button_pressed() -> void:
 func _process(delta: float) -> void:
 	_step_hp_bar_anim("player", player_hp, player_max_hp, player_hp_bar, player_hp_damage_bar, player_hp_label, delta)
 	_step_hp_bar_anim("opponent", opponent_hp, opponent_max_hp, opponent_hp_bar, opponent_hp_damage_bar, opponent_hp_label, delta)
+	_sync_one_mp_liquid(player_mp_orb_bar)
+	_sync_one_mp_liquid(opponent_mp_orb_bar)
+	_sync_one_mp_liquid(magic_orb_bar)
 	_update_creature_stat_badges()
 
 
