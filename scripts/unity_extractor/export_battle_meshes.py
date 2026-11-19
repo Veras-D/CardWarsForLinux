@@ -7,9 +7,11 @@ export_battle_meshes.py — Batch extract 3D meshes & diffuse textures for Card 
 
 Outputs:
   - godot/assets/models/battle/landscapes/*.obj
-  - godot/assets/models/battle/summons/*.obj
-  - godot/assets/models/battle/buildings/*.obj
+  - godot/assets/models/battle/summons/*.glb
+  - godot/assets/models/battle/buildings/*.glb
   - godot/assets/models/battle/textures/*.png
+  - godot/assets/audio/sfx/*.wav (SummonScript SpawnAudio)
+  - godot/assets/textures/fx/*.png (Summon / Building FX textures)
   - godot/data/battle_meshes.json
 """
 
@@ -24,6 +26,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
 sys.path.insert(0, SCRIPT_DIR)
 
+from unity_glb import build_guid_index as build_glb_guid_index
+from unity_glb import _parse_unity_yaml_objects, export_unity_subtree_to_glb
 from unity_mesh import parse_unity_mesh, write_obj
 
 GODOT_DATA = os.path.join(REPO_ROOT, "godot", "data")
@@ -32,6 +36,8 @@ OUT_LAND = os.path.join(OUT_BASE, "landscapes")
 OUT_SUMMON = os.path.join(OUT_BASE, "summons")
 OUT_BUILD = os.path.join(OUT_BASE, "buildings")
 OUT_TEX = os.path.join(OUT_BASE, "textures")
+OUT_SFX = os.path.join(REPO_ROOT, "godot", "assets", "audio", "sfx")
+OUT_FX_TEX = os.path.join(REPO_ROOT, "godot", "assets", "textures", "fx")
 
 SKIP_MESH_TOKENS = ("outline", "0utline", "shadow", "blast", "halo", "alpha", "facez_")
 
@@ -351,61 +357,138 @@ def main() -> None:
         print(f"Done (landscapes only)! Landscapes={sum(len(v) for k, v in manifest['landscapes'].items() if k != 'Plains')}")
         return
 
-    # 2. Creatures / Summons
+    # 2. Creatures / Summons (animated GLBs + SummonScript metadata)
     os.makedirs(OUT_SUMMON, exist_ok=True)
     creatures_json = os.path.join(GODOT_DATA, "db_Creatures.json")
     summon_dir = os.path.join(REPO_ROOT, "Assets", "Resources", "summons")
     with open(creatures_json, "r", encoding="utf-8") as f:
         creatures = json.load(f)
     obj_names_c = sorted({str(r.get("ObjectName", "")).strip() for r in creatures if isinstance(r, dict) and r.get("ObjectName")})
-    for oname in obj_names_c:
-        pref = find_prefab_case_insensitive(summon_dir, oname)
-        if not pref:
-            print(f"[WARN] Missing summon prefab for ObjectName={oname}")
-            continue
-        parsed = parse_prefab_components(pref, guid_index)
-        cand = choose_primary_candidate(parsed["candidates"], oname)
-        if not cand:
-            print(f"[WARN] No mesh candidate in {pref}")
-            continue
-        out_name = f"{oname}.obj"
-        ok, tex_res = export_candidate(cand, os.path.join(OUT_SUMMON, out_name), guid_index, is_landscape=False)
-        if ok:
-            manifest["summons"][oname] = {
-                "mesh": f"res://assets/models/battle/summons/{out_name}",
-                "texture": tex_res,
-            }
+    _export_entity_group("summons", summon_dir, OUT_SUMMON, obj_names_c, manifest["summons"], guid_index)
 
-    # 3. Buildings
+    # 3. Buildings (animated GLBs + SummonScript metadata)
     os.makedirs(OUT_BUILD, exist_ok=True)
     buildings_json = os.path.join(GODOT_DATA, "db_Buildings.json")
     build_dir = os.path.join(REPO_ROOT, "Assets", "Resources", "building")
     with open(buildings_json, "r", encoding="utf-8") as f:
         buildings = json.load(f)
     obj_names_b = sorted({str(r.get("ObjectName", "")).strip() for r in buildings if isinstance(r, dict) and r.get("ObjectName")})
-    for oname in obj_names_b:
-        pref = find_prefab_case_insensitive(build_dir, oname)
-        if not pref:
-            print(f"[WARN] Missing building prefab for ObjectName={oname}")
-            continue
-        parsed = parse_prefab_components(pref, guid_index)
-        cand = choose_primary_candidate(parsed["candidates"], oname)
-        if not cand:
-            print(f"[WARN] No mesh candidate in {pref}")
-            continue
-        out_name = f"{oname}.obj"
-        ok, tex_res = export_candidate(cand, os.path.join(OUT_BUILD, out_name), guid_index, is_landscape=False)
-        if ok:
-            manifest["buildings"][oname] = {
-                "mesh": f"res://assets/models/battle/buildings/{out_name}",
-                "texture": tex_res,
-            }
+    _export_entity_group("buildings", build_dir, OUT_BUILD, obj_names_b, manifest["buildings"], guid_index)
+
+    # 4. Copy original Summon/Building VFX textures if present in Unity Assets/Texture2D
+    os.makedirs(OUT_FX_TEX, exist_ok=True)
+    for fx_tex in (
+        "FX_Scan_Hex_Outline.png",
+        "FX_BurstBubble_NoGlow_PNG.png",
+        "FX_Scan.png",
+        "FX_Flare3_TGA.png",
+        "FX_Battle_ExclamationMark_PNG.png",
+    ):
+        src_fx = os.path.join(REPO_ROOT, "Assets", "Texture2D", fx_tex)
+        dst_fx = os.path.join(OUT_FX_TEX, fx_tex)
+        if os.path.exists(src_fx) and not os.path.exists(dst_fx):
+            shutil.copy2(src_fx, dst_fx)
 
     manifest_path = os.path.join(GODOT_DATA, "battle_meshes.json")
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
     print(f"Done! Landscapes={sum(len(v) for k, v in manifest['landscapes'].items() if k != 'Plains')}, Summons={len(manifest['summons'])}, Buildings={len(manifest['buildings'])}")
     print(f"Manifest written to {manifest_path}")
+
+
+def _extract_summon_meta(prefab_path: str, guid_index: dict[str, str], is_building: bool) -> dict:
+    with open(prefab_path, "r", encoding="utf-8", errors="replace") as f:
+        txt = f.read()
+    _, comp_map, _, _ = _parse_unity_yaml_objects(txt)
+    meta: dict = {
+        "intro": "",
+        "idle": "",
+        "intro_length": 2.0 if is_building else 1.5,
+        "ambient": "",
+        "spawn_audio": "",
+        "spawn_audio_delay": 0.0,
+    }
+    os.makedirs(OUT_SFX, exist_ok=True)
+    all_clips: list[str] = []
+    play_auto_clips: list[str] = []
+    for _, (ctype, blk) in comp_map.items():
+        if ctype == "111":
+            m_auto = re.search(r"m_PlayAutomatically:\s*(\d+)", blk)
+            auto = bool(m_auto and m_auto.group(1) == "1")
+            for g in re.findall(r"guid:\s*([0-9a-fA-F]+)", blk):
+                cp = guid_index.get(g, "")
+                if cp.endswith(".anim"):
+                    cname = os.path.splitext(os.path.basename(cp))[0]
+                    all_clips.append(cname)
+                    if auto:
+                        play_auto_clips.append(cname)
+        elif ctype == "114" and "IntroLength:" in blk:
+            mi = re.search(r"(?m)^[ \t]*Intro:[ \t]*(.*)$", blk)
+            md = re.search(r"(?m)^[ \t]*Idle:[ \t]*(.*)$", blk)
+            mil = re.search(r"(?m)^[ \t]*IntroLength:[ \t]*([0-9.eE+\-]+)", blk)
+            msd = re.search(r"(?m)^[ \t]*SpawnAudioDelaySecs:[ \t]*([0-9.eE+\-]+)", blk)
+            msa = re.search(r"SpawnAudio:.*guid:\s*([0-9a-fA-F]+)", blk)
+            if mi:
+                meta["intro"] = mi.group(1).strip()
+            if md:
+                meta["idle"] = md.group(1).strip()
+            if mil:
+                meta["intro_length"] = float(mil.group(1))
+            if msd:
+                meta["spawn_audio_delay"] = float(msd.group(1))
+            if msa:
+                ap = guid_index.get(msa.group(1), "")
+                if ap and os.path.exists(ap):
+                    bname = os.path.basename(ap)
+                    dst = os.path.join(OUT_SFX, bname)
+                    if not os.path.exists(dst):
+                        shutil.copy2(ap, dst)
+                    meta["spawn_audio"] = f"res://assets/audio/sfx/{bname}"
+
+    if is_building:
+        # Buildings like GhostWindmill ('Take 001_21') & SpiritTower ('SpiritTower') loop an idle clip automatically.
+        for cname in play_auto_clips + all_clips:
+            if cname not in ("Floop", "Derez", "Death", "Crash", "Hammer"):
+                meta["ambient"] = cname
+                break
+    return meta
+
+
+def _export_entity_group(
+    bucket_name: str,
+    src_dir: str,
+    out_dir: str,
+    obj_names: list[str],
+    out_manifest: dict,
+    guid_index: dict[str, str],
+) -> None:
+    is_building = (bucket_name == "buildings")
+    # Remove legacy static .obj files (and their .obj.import sidecars) now replaced by animated .glb
+    for old_obj in glob.glob(os.path.join(out_dir, "*.obj*")):
+        os.remove(old_obj)
+
+    for oname in obj_names:
+        pref = find_prefab_case_insensitive(src_dir, oname)
+        if not pref:
+            print(f"[WARN] Missing {bucket_name} prefab for ObjectName={oname}")
+            continue
+        out_name = f"{oname}.glb"
+        out_path = os.path.join(out_dir, out_name)
+        ok = export_unity_subtree_to_glb(
+            pref,
+            out_path,
+            guid_index,
+            scale_factor=0.05,
+            skip_name_tokens=("outline", "0utline"),
+            bake_uv_mat_transforms=True,
+            zero_root_pos=True,
+        )
+        if ok:
+            entry = {
+                "scene": f"res://assets/models/battle/{bucket_name}/{out_name}",
+            }
+            entry.update(_extract_summon_meta(pref, guid_index, is_building))
+            out_manifest[oname] = entry
 
 
 if __name__ == "__main__":

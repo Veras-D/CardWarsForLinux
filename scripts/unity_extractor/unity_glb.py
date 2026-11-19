@@ -102,16 +102,22 @@ def _parse_material(mat_path: str, guid_index: dict[str, str]) -> dict:
         return info
     with open(mat_path, "r", encoding="utf-8", errors="replace") as f:
         txt = f.read()
-    m_sh = re.search(r"m_Shader:\s*\{fileID:\s*(\d+)", txt)
+    m_sh = re.search(r"m_Shader:\s*\{fileID:\s*(\d+)(?:,\s*guid:\s*([0-9a-fA-F]+))?", txt)
     if m_sh:
         sid = m_sh.group(1)
-        if sid == "10750":
+        sguid = m_sh.group(2) or ""
+        if sid in ("10750", "10512") or sguid in ("7567d051d579bf24a80e47a1b2e37eb4", "451606381668ffe4886a4874a7cc0ea5"):
             info["transparent"] = True
         elif sid == "10752":
             info["cutout"] = True
     m_tex = re.search(r"_MainTex:[\s\S]*?guid:\s*([0-9a-fA-F]+)", txt)
     if m_tex and m_tex.group(1) in guid_index:
         tp = guid_index[m_tex.group(1)]
+        bname = os.path.basename(tp)
+        if bname.startswith("low_"):
+            hires = os.path.join(os.path.dirname(tp), bname[4:])
+            if os.path.exists(hires):
+                tp = hires
         if os.path.exists(tp):
             info["tex_path"] = tp
     mt_block = txt[txt.find("_MainTex:"):] if "_MainTex:" in txt else ""
@@ -356,6 +362,7 @@ def export_unity_subtree_to_glb(
     bake_uv_mat_transforms: bool = False,
     double_sided_mats: bool = False,
     wrap_root_name: str | None = None,
+    zero_root_pos: bool = False,
 ) -> bool:
     """
     Exports a Unity .prefab (root_go_id=None) or subtree of a .unity scene (root_go_id set)
@@ -392,7 +399,7 @@ def export_unity_subtree_to_glb(
         gname = go["name"]
 
         node_idx = len(builder.nodes)
-        px, py, pz = tr["pos"]
+        px, py, pz = (0.0, 0.0, 0.0) if (zero_root_pos and parent_is_root) else tr["pos"]
         # Scale positions only at root or uniformly everywhere? Best: keep local positions unscaled, put scale_factor on wrapper root!
         nd: dict = {
             "name": gname,

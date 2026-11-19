@@ -159,878 +159,1968 @@
   },
   "summons": {
     "AncientScholar": {
-      "mesh": "res://assets/models/battle/summons/AncientScholar.obj",
-      "texture": "res://assets/models/battle/textures/AncientScholar.png"
+      "scene": "res://assets/models/battle/summons/AncientScholar.glb",
+      "intro": "Scholar_Intro",
+      "idle": "Scholar_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "AngelEye": {
-      "mesh": "res://assets/models/battle/summons/AngelEye.obj",
-      "texture": "res://assets/models/battle/textures/AngelBall.png"
+      "scene": "res://assets/models/battle/summons/AngelEye.glb",
+      "intro": "AngelBall_Intro",
+      "idle": "AngelBall_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "AngelHeart": {
-      "mesh": "res://assets/models/battle/summons/AngelHeart.obj",
-      "texture": "res://assets/models/battle/textures/HeartAngel.png"
+      "scene": "res://assets/models/battle/summons/AngelHeart.glb",
+      "intro": "HeartAngel_Intro",
+      "idle": "HeartAngel_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "AngelOfSand": {
-      "mesh": "res://assets/models/battle/summons/AngelOfSand.obj",
-      "texture": "res://assets/models/battle/textures/AngelOfSand.png"
+      "scene": "res://assets/models/battle/summons/AngelOfSand.glb",
+      "intro": "Angel_Intro",
+      "idle": "Angel_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Angel.wav",
+      "spawn_audio_delay": 0.0
     },
     "AngelOfVanilla": {
-      "mesh": "res://assets/models/battle/summons/AngelOfVanilla.obj",
-      "texture": "res://assets/models/battle/textures/AngelOfVanilla.png"
+      "scene": "res://assets/models/battle/summons/AngelOfVanilla.glb",
+      "intro": "Angel_Intro",
+      "idle": "Angel_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Angel.wav",
+      "spawn_audio_delay": 0.0
     },
     "ArcherDan": {
-      "mesh": "res://assets/models/battle/summons/ArcherDan.obj",
-      "texture": "res://assets/models/battle/textures/ArcherDan.png"
+      "scene": "res://assets/models/battle/summons/ArcherDan.glb",
+      "intro": "Archer_Intro",
+      "idle": "Archer_Idle",
+      "intro_length": 1.916667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/ArcherDan.wav",
+      "spawn_audio_delay": 0.0
     },
     "Axey": {
-      "mesh": "res://assets/models/battle/summons/Axey.obj",
-      "texture": "res://assets/models/battle/textures/AxeTree.png"
+      "scene": "res://assets/models/battle/summons/Axey.glb",
+      "intro": "AxeTree_Intro",
+      "idle": "AxeTree_Idle",
+      "intro_length": 2.4,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Axe.wav",
+      "spawn_audio_delay": 0.0
     },
     "BadRose": {
-      "mesh": "res://assets/models/battle/summons/BadRose.obj",
-      "texture": "res://assets/models/battle/textures/BadRose.png"
+      "scene": "res://assets/models/battle/summons/BadRose.glb",
+      "intro": "BadRose_Intro",
+      "idle": "BadRose_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "BaldMansThrone": {
-      "mesh": "res://assets/models/battle/summons/BaldMansThrone.obj",
-      "texture": "res://assets/models/battle/textures/BaldMansThrone.png"
+      "scene": "res://assets/models/battle/summons/BaldMansThrone.glb",
+      "intro": "BaldManThrone_Intro",
+      "idle": "BaldManThrone_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "BanshePrincess": {
-      "mesh": "res://assets/models/battle/summons/BanshePrincess.obj",
-      "texture": "res://assets/models/battle/textures/BanshePrincess.png"
+      "scene": "res://assets/models/battle/summons/BanshePrincess.glb",
+      "intro": "BanshePrincess_Intro",
+      "idle": "BanshePrincess_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Shriek.wav",
+      "spawn_audio_delay": 0.0
     },
     "BansheQueen": {
-      "mesh": "res://assets/models/battle/summons/BansheQueen.obj",
-      "texture": "res://assets/models/battle/textures/BansheQueen.png"
+      "scene": "res://assets/models/battle/summons/BansheQueen.glb",
+      "intro": "BansheQueen_Intro",
+      "idle": "BansheQueen_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Shriek.wav",
+      "spawn_audio_delay": 1.0
     },
     "BeachMum": {
-      "mesh": "res://assets/models/battle/summons/BeachMum.obj",
-      "texture": "res://assets/models/battle/textures/Mummy.png"
+      "scene": "res://assets/models/battle/summons/BeachMum.glb",
+      "intro": "Mummy_Intro",
+      "idle": "Mummy_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/BeachMum.wav",
+      "spawn_audio_delay": 0.0
     },
     "BearonSkates": {
-      "mesh": "res://assets/models/battle/summons/BearonSkates.obj",
-      "texture": "res://assets/models/battle/textures/BearonSkates.png"
+      "scene": "res://assets/models/battle/summons/BearonSkates.glb",
+      "intro": "BearonSkates_Intro",
+      "idle": "BearonSkates_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "BespectacledOgre": {
-      "mesh": "res://assets/models/battle/summons/BespectacledOgre.obj",
-      "texture": "res://assets/models/battle/textures/BespectacledOgre.png"
+      "scene": "res://assets/models/battle/summons/BespectacledOgre.glb",
+      "intro": "BespectacledOgre_Intro",
+      "idle": "BespectacledOgre_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "BlackCat": {
-      "mesh": "res://assets/models/battle/summons/BlackCat.obj",
-      "texture": "res://assets/models/battle/textures/BlackCat.png"
+      "scene": "res://assets/models/battle/summons/BlackCat.glb",
+      "intro": "BlackCat_Intro",
+      "idle": "BlackCat_Idle",
+      "intro_length": 2.4,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/PunkCat.wav",
+      "spawn_audio_delay": 0.0
     },
     "BlueSlimey": {
-      "mesh": "res://assets/models/battle/summons/BlueSlimey.obj",
-      "texture": "res://assets/models/battle/textures/BlueSlimey.png"
+      "scene": "res://assets/models/battle/summons/BlueSlimey.glb",
+      "intro": "GelatinousCube_Intro",
+      "idle": "GelatinousCube_Idle",
+      "intro_length": 1.766667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Slimey.wav",
+      "spawn_audio_delay": 0.0
     },
     "BlueberryDjini": {
-      "mesh": "res://assets/models/battle/summons/BlueberryDjini.obj",
-      "texture": "res://assets/models/battle/textures/BlueberryDjini.png"
+      "scene": "res://assets/models/battle/summons/BlueberryDjini.glb",
+      "intro": "BlueberryDjini_Intro",
+      "idle": "BlueberryDjini_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Djini.wav",
+      "spawn_audio_delay": 0.0
     },
     "BogBansheAngel": {
-      "mesh": "res://assets/models/battle/summons/BogBansheAngel.obj",
-      "texture": "res://assets/models/battle/textures/BogBansheAngel.png"
+      "scene": "res://assets/models/battle/summons/BogBansheAngel.glb",
+      "intro": "BogBansheAngel_Intro",
+      "idle": "BogBansheAngel_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Shriek.wav",
+      "spawn_audio_delay": 0.0
     },
     "BogBum": {
-      "mesh": "res://assets/models/battle/summons/BogBum.obj",
-      "texture": "res://assets/models/battle/textures/BogBum.png"
+      "scene": "res://assets/models/battle/summons/BogBum.glb",
+      "intro": "BogBum_Intro",
+      "idle": "BogBum_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "BogFrogBomb": {
-      "mesh": "res://assets/models/battle/summons/BogFrogBomb.obj",
-      "texture": "res://assets/models/battle/textures/BogFrogBomb.png"
+      "scene": "res://assets/models/battle/summons/BogFrogBomb.glb",
+      "intro": "BogFrogBomb_Intro",
+      "idle": "BogFrogBomb_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Frog.wav",
+      "spawn_audio_delay": 0.0
     },
     "BrainBall": {
-      "mesh": "res://assets/models/battle/summons/BrainBall.obj",
-      "texture": "res://assets/models/battle/textures/BrainBall.png"
+      "scene": "res://assets/models/battle/summons/BrainBall.glb",
+      "intro": "BrainGooey_Intro",
+      "idle": "BrainGooey_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "BurningBush": {
-      "mesh": "res://assets/models/battle/summons/BurningBush.obj",
-      "texture": "res://assets/models/battle/textures/BurninBush.png"
+      "scene": "res://assets/models/battle/summons/BurningBush.glb",
+      "intro": "BurningBush_Intro",
+      "idle": "BurningBush_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/BurningBush.wav",
+      "spawn_audio_delay": 0.0
     },
     "CactusBall": {
-      "mesh": "res://assets/models/battle/summons/CactusBall.obj",
-      "texture": "res://assets/models/battle/textures/CactusBall.png"
+      "scene": "res://assets/models/battle/summons/CactusBall.glb",
+      "intro": "CactusBall_Intro",
+      "idle": "CactusBall_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Eye.wav",
+      "spawn_audio_delay": 0.0
     },
     "CactusThug": {
-      "mesh": "res://assets/models/battle/summons/CactusThug.obj",
-      "texture": "res://assets/models/battle/textures/CactusThug.png"
+      "scene": "res://assets/models/battle/summons/CactusThug.glb",
+      "intro": "CactusThug_Intro",
+      "idle": "CactusThug_Idle",
+      "intro_length": 2.467,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/KnightOfObesity.wav",
+      "spawn_audio_delay": 0.0
     },
     "CameraDude": {
-      "mesh": "res://assets/models/battle/summons/CameraDude.obj",
-      "texture": "res://assets/models/battle/textures/CameraDude.png"
+      "scene": "res://assets/models/battle/summons/CameraDude.glb",
+      "intro": "CameraDude_Intro",
+      "idle": "CameraDude_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "CaptainTaco": {
-      "mesh": "res://assets/models/battle/summons/CaptainTaco.obj",
-      "texture": "res://assets/models/battle/textures/CaptainTaco.png"
+      "scene": "res://assets/models/battle/summons/CaptainTaco.glb",
+      "intro": "CaptainTaco_Intro",
+      "idle": "CaptainTaco_Idle",
+      "intro_length": 2.46666,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "CareCrow": {
-      "mesh": "res://assets/models/battle/summons/CareCrow.obj",
-      "texture": "res://assets/models/battle/textures/CareCrow.png"
+      "scene": "res://assets/models/battle/summons/CareCrow.glb",
+      "intro": "CareCrow_Intro",
+      "idle": "CareCrow_Idle",
+      "intro_length": 1.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CareCrow.wav",
+      "spawn_audio_delay": 0.0
     },
     "ChestBurster": {
-      "mesh": "res://assets/models/battle/summons/ChestBurster.obj",
-      "texture": "res://assets/models/battle/textures/ChestBurster.png"
+      "scene": "res://assets/models/battle/summons/ChestBurster.glb",
+      "intro": "ChestBurster_Intro",
+      "idle": "ChestBurster_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/ChestBurster.wav",
+      "spawn_audio_delay": 0.0
     },
     "CoolDog": {
-      "mesh": "res://assets/models/battle/summons/CoolDog.obj",
-      "texture": "res://assets/models/battle/textures/CoolDog.png"
+      "scene": "res://assets/models/battle/summons/CoolDog.glb",
+      "intro": "Cool_Intro",
+      "idle": "Cool_Idle",
+      "intro_length": 2.533333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Dog.wav",
+      "spawn_audio_delay": 0.0
     },
     "CornDog": {
-      "mesh": "res://assets/models/battle/summons/CornDog.obj",
-      "texture": "res://assets/models/battle/textures/CornDog.png"
+      "scene": "res://assets/models/battle/summons/CornDog.glb",
+      "intro": "Corndog_Intro",
+      "idle": "Corndog_Idle",
+      "intro_length": 2.2,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Dog.wav",
+      "spawn_audio_delay": 0.0
     },
     "CornEyeBat": {
-      "mesh": "res://assets/models/battle/summons/CornEyeBat.obj",
-      "texture": "res://assets/models/battle/textures/CornEyeBat.png"
+      "scene": "res://assets/models/battle/summons/CornEyeBat.glb",
+      "intro": "CornBat_Intro",
+      "idle": "CornBat_Idle",
+      "intro_length": 1.7,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CottonEyeBat.wav",
+      "spawn_audio_delay": 0.0
     },
     "CornLord": {
-      "mesh": "res://assets/models/battle/summons/CornLord.obj",
-      "texture": "res://assets/models/battle/textures/CornLord_D.png"
+      "scene": "res://assets/models/battle/summons/CornLord.glb",
+      "intro": "CornLord_Intro",
+      "idle": "CornLord_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CornLord.wav",
+      "spawn_audio_delay": 0.0
     },
     "CornRonin": {
-      "mesh": "res://assets/models/battle/summons/CornRonin.obj",
-      "texture": "res://assets/models/battle/textures/CornRonin.png"
+      "scene": "res://assets/models/battle/summons/CornRonin.glb",
+      "intro": "CornRonin_Intro",
+      "idle": "CornRonin_Idle",
+      "intro_length": 2.133333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Ronin.wav",
+      "spawn_audio_delay": 0.0
     },
     "CornWall": {
-      "mesh": "res://assets/models/battle/summons/CornWall.obj",
-      "texture": "res://assets/models/battle/textures/CornWall.png"
+      "scene": "res://assets/models/battle/summons/CornWall.glb",
+      "intro": "Wall_Intro",
+      "idle": "Wall_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CornWall.wav",
+      "spawn_audio_delay": 0.0
     },
     "CornWorm": {
-      "mesh": "res://assets/models/battle/summons/CornWorm.obj",
-      "texture": "res://assets/models/battle/textures/HuskerWorm.png"
+      "scene": "res://assets/models/battle/summons/CornWorm.glb",
+      "intro": "HuskerWorm_Intro",
+      "idle": "HuskerWorm_Idle",
+      "intro_length": 2.666667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CornWorm.wav",
+      "spawn_audio_delay": 0.0
     },
     "Cornataur": {
-      "mesh": "res://assets/models/battle/summons/Cornataur.obj",
-      "texture": "res://assets/models/battle/textures/Cornataur.png"
+      "scene": "res://assets/models/battle/summons/Cornataur.glb",
+      "intro": "Cornataur_Intro",
+      "idle": "Cornataur_Idle",
+      "intro_length": 2.633333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Horse.wav",
+      "spawn_audio_delay": 0.0
     },
     "Cornball": {
-      "mesh": "res://assets/models/battle/summons/Cornball.obj",
-      "texture": "res://assets/models/battle/textures/CornBall.png"
+      "scene": "res://assets/models/battle/summons/Cornball.glb",
+      "intro": "CornBall_Intro",
+      "idle": "CornBall_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Eye.wav",
+      "spawn_audio_delay": 0.0
     },
     "CottonCutie": {
-      "mesh": "res://assets/models/battle/summons/CottonCutie.obj",
-      "texture": "res://assets/models/battle/textures/CottonCutie.png"
+      "scene": "res://assets/models/battle/summons/CottonCutie.glb",
+      "intro": "CottonCutie_Intro",
+      "idle": "CottonCutie_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "CottonEyeBat": {
-      "mesh": "res://assets/models/battle/summons/CottonEyeBat.obj",
-      "texture": "res://assets/models/battle/textures/CottonEyeBat.png"
+      "scene": "res://assets/models/battle/summons/CottonEyeBat.glb",
+      "intro": "CottonBat_Intro",
+      "idle": "CottonBat_Idle",
+      "intro_length": 1.7333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CottonEyeBat.wav",
+      "spawn_audio_delay": 0.0
     },
     "Cottonpult": {
-      "mesh": "res://assets/models/battle/summons/Cottonpult.obj",
-      "texture": "res://assets/models/battle/textures/Cottonpult.png"
+      "scene": "res://assets/models/battle/summons/Cottonpult.glb",
+      "intro": "Cottonpult_Intro",
+      "idle": "Cottonpult_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "CottonsaurusRex": {
-      "mesh": "res://assets/models/battle/summons/CottonsaurusRex.obj",
-      "texture": "res://assets/models/battle/textures/CottonsaurusRex.png"
+      "scene": "res://assets/models/battle/summons/CottonsaurusRex.glb",
+      "intro": "CottonsaurusRex_Intro",
+      "idle": "CottonsaurusRex_Idle",
+      "intro_length": 1.8,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "Cow": {
-      "mesh": "res://assets/models/battle/summons/Cow.obj",
-      "texture": "res://assets/models/battle/textures/Cow.png"
+      "scene": "res://assets/models/battle/summons/Cow.glb",
+      "intro": "Cow_Intro",
+      "idle": "Cow_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Cow.wav",
+      "spawn_audio_delay": 0.0
     },
     "CowPurple": {
-      "mesh": "res://assets/models/battle/summons/CowPurple.obj",
-      "texture": "res://assets/models/battle/textures/CowPurple.png"
+      "scene": "res://assets/models/battle/summons/CowPurple.glb",
+      "intro": "Cow_Intro",
+      "idle": "Cow_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Cow.wav",
+      "spawn_audio_delay": 0.0
     },
     "DarkAngel": {
-      "mesh": "res://assets/models/battle/summons/DarkAngel.obj",
-      "texture": "res://assets/models/battle/textures/BlackAngel.png"
+      "scene": "res://assets/models/battle/summons/DarkAngel.glb",
+      "intro": "BlackAngel_Intro",
+      "idle": "BlackAngel_Idle",
+      "intro_length": 2.466667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Angel.wav",
+      "spawn_audio_delay": 0.0
     },
     "DevilEye": {
-      "mesh": "res://assets/models/battle/summons/DevilEye.obj",
-      "texture": "res://assets/models/battle/textures/DevilEye.png"
+      "scene": "res://assets/models/battle/summons/DevilEye.glb",
+      "intro": "DevilEye_Intro",
+      "idle": "DevilEye_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Eye.wav",
+      "spawn_audio_delay": 0.0
     },
     "DiamondDan": {
-      "mesh": "res://assets/models/battle/summons/DiamondDan.obj",
-      "texture": "res://assets/models/battle/textures/DiamondDan.png"
+      "scene": "res://assets/models/battle/summons/DiamondDan.glb",
+      "intro": "DiamondDan_Intro",
+      "idle": "DiamondDan_Idle",
+      "intro_length": 2.7,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Wizard.wav",
+      "spawn_audio_delay": 0.0
     },
     "DjiniGhost": {
-      "mesh": "res://assets/models/battle/summons/DjiniGhost.obj",
-      "texture": "res://assets/models/battle/textures/DjiniGhost.png"
+      "scene": "res://assets/models/battle/summons/DjiniGhost.glb",
+      "intro": "BlueberryDjini_Intro",
+      "idle": "BlueberryDjini_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Djini.wav",
+      "spawn_audio_delay": 0.0
     },
     "DogBoy": {
-      "mesh": "res://assets/models/battle/summons/DogBoy.obj",
-      "texture": "res://assets/models/battle/textures/DogBoy.png"
+      "scene": "res://assets/models/battle/summons/DogBoy.glb",
+      "intro": "DogBoy_Intro",
+      "idle": "DogBoy_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Dogboy.wav",
+      "spawn_audio_delay": 0.0
     },
     "DrDeath": {
-      "mesh": "res://assets/models/battle/summons/DrDeath.obj",
-      "texture": "res://assets/models/battle/textures/DrDeath.png"
+      "scene": "res://assets/models/battle/summons/DrDeath.glb",
+      "intro": "DrDeath_Intro",
+      "idle": "DrDeath_Idle",
+      "intro_length": 2.366667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/DrDeath.wav",
+      "spawn_audio_delay": 0.0
     },
     "DrStuffenstein": {
-      "mesh": "res://assets/models/battle/summons/DrStuffenstein.obj",
-      "texture": "res://assets/models/battle/textures/DrStuffenstein.png"
+      "scene": "res://assets/models/battle/summons/DrStuffenstein.glb",
+      "intro": "DrStuffenstein_Intro",
+      "idle": "DrStuffenstein_Idle",
+      "intro_length": 2.166667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/WanderingBaldMan.wav",
+      "spawn_audio_delay": 0.0
     },
     "DragonClaw": {
-      "mesh": "res://assets/models/battle/summons/DragonClaw.obj",
-      "texture": "res://assets/models/battle/textures/DragonClaw.png"
+      "scene": "res://assets/models/battle/summons/DragonClaw.glb",
+      "intro": "Claw_Intro",
+      "idle": "Claw_Idle",
+      "intro_length": 1.766667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Claw.wav",
+      "spawn_audio_delay": 0.0
     },
     "DragonFoot": {
-      "mesh": "res://assets/models/battle/summons/DragonFoot.obj",
-      "texture": "res://assets/models/battle/textures/DragonFoot.png"
+      "scene": "res://assets/models/battle/summons/DragonFoot.glb",
+      "intro": "GiantFoot_Intro",
+      "idle": "GiantFoot_Idle",
+      "intro_length": 1.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Foot.wav",
+      "spawn_audio_delay": 0.0
     },
     "Earl": {
-      "mesh": "res://assets/models/battle/summons/Earl.obj",
-      "texture": "res://assets/models/battle/textures/SmolderingElder.png"
+      "scene": "res://assets/models/battle/summons/Earl.glb",
+      "intro": "Elder_Intro",
+      "idle": "Elder_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Sword.wav",
+      "spawn_audio_delay": 0.0
     },
     "ElfChief": {
-      "mesh": "res://assets/models/battle/summons/ElfChief.obj",
-      "texture": "res://assets/models/battle/textures/ChiefElf.png"
+      "scene": "res://assets/models/battle/summons/ElfChief.glb",
+      "intro": "ElfChief_Intro",
+      "idle": "ElfChief_Idle",
+      "intro_length": 1.566667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/ElfChief.wav",
+      "spawn_audio_delay": 0.0
     },
     "ElfMarauder": {
-      "mesh": "res://assets/models/battle/summons/ElfMarauder.obj",
-      "texture": "res://assets/models/battle/textures/ElfDualKnife.png"
+      "scene": "res://assets/models/battle/summons/ElfMarauder.glb",
+      "intro": "ElfMarauder_Intro",
+      "idle": "ElfMarauder_Idle",
+      "intro_length": 1.933333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/ElfMarauder.wav",
+      "spawn_audio_delay": 0.0
     },
     "EmbarrassingBard": {
-      "mesh": "res://assets/models/battle/summons/EmbarrassingBard.obj",
-      "texture": "res://assets/models/battle/textures/TheBard.png"
+      "scene": "res://assets/models/battle/summons/EmbarrassingBard.glb",
+      "intro": "Bard_Intro",
+      "idle": "Bard_Idle",
+      "intro_length": 1.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/EmbarrassingBard.wav",
+      "spawn_audio_delay": 0.0
     },
     "ExtraordinarySpider": {
-      "mesh": "res://assets/models/battle/summons/ExtraordinarySpider.obj",
-      "texture": "res://assets/models/battle/textures/ExtraordinarySpider.png"
+      "scene": "res://assets/models/battle/summons/ExtraordinarySpider.glb",
+      "intro": "ExtraordinarySpider_Intro",
+      "idle": "ExtraordinarySpider_Idle",
+      "intro_length": 1.566667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CareCrow.wav",
+      "spawn_audio_delay": 0.0
     },
     "EyeGuy": {
-      "mesh": "res://assets/models/battle/summons/EyeGuy.obj",
-      "texture": "res://assets/models/battle/textures/EyeGuy.png"
+      "scene": "res://assets/models/battle/summons/EyeGuy.glb",
+      "intro": "EyeGuy_Intro",
+      "idle": "EyeGuy_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "FairyShepard": {
-      "mesh": "res://assets/models/battle/summons/FairyShepard.obj",
-      "texture": "res://assets/models/battle/textures/Shepard.png"
+      "scene": "res://assets/models/battle/summons/FairyShepard.glb",
+      "intro": "Shepard_Intro",
+      "idle": "Shepard_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "FarmerTom": {
-      "mesh": "res://assets/models/battle/summons/FarmerTom.obj",
-      "texture": "res://assets/models/battle/textures/Farmer.png"
+      "scene": "res://assets/models/battle/summons/FarmerTom.glb",
+      "intro": "Farmer_Intro",
+      "idle": "Farmer_Idle",
+      "intro_length": 2.3,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "FatGoat": {
-      "mesh": "res://assets/models/battle/summons/FatGoat.obj",
-      "texture": "res://assets/models/battle/textures/Goat.png"
+      "scene": "res://assets/models/battle/summons/FatGoat.glb",
+      "intro": "Goat_Intro",
+      "idle": "Goat_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "FieldReaper": {
-      "mesh": "res://assets/models/battle/summons/FieldReaper.obj",
-      "texture": "res://assets/models/battle/textures/FieldReaper.png"
+      "scene": "res://assets/models/battle/summons/FieldReaper.glb",
+      "intro": "Reaper_Intro",
+      "idle": "Reaper_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/FieldReaper.wav",
+      "spawn_audio_delay": 0.0
     },
     "FisherFish": {
-      "mesh": "res://assets/models/battle/summons/FisherFish.obj",
-      "texture": "res://assets/models/battle/textures/FisherFish.png"
+      "scene": "res://assets/models/battle/summons/FisherFish.glb",
+      "intro": "FigherFish_Intro",
+      "idle": "FigherFish_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "Fluffantry": {
-      "mesh": "res://assets/models/battle/summons/Fluffantry.obj",
-      "texture": "res://assets/models/battle/textures/Fluffantry.png"
+      "scene": "res://assets/models/battle/summons/Fluffantry.glb",
+      "intro": "Fluffantry_Intro",
+      "idle": "Fluffantry_Idle",
+      "intro_length": 2.2667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "Flufflapillar": {
-      "mesh": "res://assets/models/battle/summons/Flufflapillar.obj",
-      "texture": "res://assets/models/battle/textures/FlufflapillarHappy.png"
+      "scene": "res://assets/models/battle/summons/Flufflapillar.glb",
+      "intro": "FlufflapillarHappy_Intro",
+      "idle": "FlufflapillarHappy_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Fluffapillar.wav",
+      "spawn_audio_delay": 0.0
     },
     "FlufflapillarSad": {
-      "mesh": "res://assets/models/battle/summons/FlufflapillarSad.obj",
-      "texture": "res://assets/models/battle/textures/FlufflapillarSad.png"
+      "scene": "res://assets/models/battle/summons/FlufflapillarSad.glb",
+      "intro": "FlufflapillarSad_Intro",
+      "idle": "FlufflapillarSad_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "FlySwatter": {
-      "mesh": "res://assets/models/battle/summons/FlySwatter.obj",
-      "texture": "res://assets/models/battle/textures/FlySwatter.png"
+      "scene": "res://assets/models/battle/summons/FlySwatter.glb",
+      "intro": "FlySwatter_Intro",
+      "idle": "FlySwatter_Idle",
+      "intro_length": 2.166667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/WanderingBaldMan.wav",
+      "spawn_audio_delay": 0.0
     },
     "FreezyJ": {
-      "mesh": "res://assets/models/battle/summons/FreezyJ.obj",
-      "texture": "res://assets/models/battle/textures/IceBush.png"
+      "scene": "res://assets/models/battle/summons/FreezyJ.glb",
+      "intro": "IceBush_Intro",
+      "idle": "IceBush_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/BurningBush.wav",
+      "spawn_audio_delay": 0.0
     },
     "Fummy": {
-      "mesh": "res://assets/models/battle/summons/Fummy.obj",
-      "texture": "res://assets/models/battle/textures/LittleMummy.png"
+      "scene": "res://assets/models/battle/summons/Fummy.glb",
+      "intro": "LittleMummy_Intro",
+      "idle": "LittleMummy_Idle",
+      "intro_length": 1.833333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Fummy.wav",
+      "spawn_audio_delay": 0.0
     },
     "FuriousChick": {
-      "mesh": "res://assets/models/battle/summons/FuriousChick.obj",
-      "texture": "res://assets/models/battle/textures/FuriousChick.png"
+      "scene": "res://assets/models/battle/summons/FuriousChick.glb",
+      "intro": "FuriousChick_Intro",
+      "idle": "FuriousChick_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "FuriousHen": {
-      "mesh": "res://assets/models/battle/summons/FuriousHen.obj",
-      "texture": "res://assets/models/battle/textures/FuriousHen.png"
+      "scene": "res://assets/models/battle/summons/FuriousHen.glb",
+      "intro": "FuriousHen_Intro",
+      "idle": "FuriousHen_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Chicken.wav",
+      "spawn_audio_delay": 0.0
     },
     "FuriousRooster": {
-      "mesh": "res://assets/models/battle/summons/FuriousRooster.obj",
-      "texture": "res://assets/models/battle/textures/FuriousRooster.png"
+      "scene": "res://assets/models/battle/summons/FuriousRooster.glb",
+      "intro": "FuriousRooster_Intro",
+      "idle": "FuriousRooster_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Chicken.wav",
+      "spawn_audio_delay": 0.0
     },
     "FutureScholar": {
-      "mesh": "res://assets/models/battle/summons/FutureScholar.obj",
-      "texture": "res://assets/models/battle/textures/FutureScholar.png"
+      "scene": "res://assets/models/battle/summons/FutureScholar.glb",
+      "intro": "FutureScholar_Intro",
+      "idle": "FutureScholar_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "Ghost": {
-      "mesh": "res://assets/models/battle/summons/Ghost.obj",
-      "texture": "res://assets/models/battle/textures/Ghost.png"
+      "scene": "res://assets/models/battle/summons/Ghost.glb",
+      "intro": "Ghost_Intro",
+      "idle": "Ghost_Idle",
+      "intro_length": 2.133333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Ghost.wav",
+      "spawn_audio_delay": 0.0
     },
     "GhostBull": {
-      "mesh": "res://assets/models/battle/summons/GhostBull.obj",
-      "texture": "res://assets/models/battle/textures/GhostBull.png"
+      "scene": "res://assets/models/battle/summons/GhostBull.glb",
+      "intro": "Bull_Intro",
+      "idle": "Bull_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Cow.wav",
+      "spawn_audio_delay": 0.0
     },
     "GhostCow": {
-      "mesh": "res://assets/models/battle/summons/GhostCow.obj",
-      "texture": "res://assets/models/battle/textures/GhostCow.png"
+      "scene": "res://assets/models/battle/summons/GhostCow.glb",
+      "intro": "Cow_Intro",
+      "idle": "Cow_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Ghost.wav",
+      "spawn_audio_delay": 0.0
     },
     "GhostEye": {
-      "mesh": "res://assets/models/battle/summons/GhostEye.obj",
-      "texture": "res://assets/models/battle/textures/GhostEye.png"
+      "scene": "res://assets/models/battle/summons/GhostEye.glb",
+      "intro": "Ghosteye_Intro",
+      "idle": "Ghosteye_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "GhostHag": {
-      "mesh": "res://assets/models/battle/summons/GhostHag.obj",
-      "texture": "res://assets/models/battle/textures/GhostHag.png"
+      "scene": "res://assets/models/battle/summons/GhostHag.glb",
+      "intro": "GhostHag_Intro",
+      "idle": "GhostHag_Idle",
+      "intro_length": 1.7333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Ghost.wav",
+      "spawn_audio_delay": 0.0
     },
     "GhostNinja": {
-      "mesh": "res://assets/models/battle/summons/GhostNinja.obj",
-      "texture": "res://assets/models/battle/textures/GhostNinja.png"
+      "scene": "res://assets/models/battle/summons/GhostNinja.glb",
+      "intro": "GhostNinja_Intro",
+      "idle": "GhostNinja_Idle",
+      "intro_length": 1.7,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Bat.wav",
+      "spawn_audio_delay": 0.0
     },
     "GhostSludger": {
-      "mesh": "res://assets/models/battle/summons/GhostSludger.obj",
-      "texture": "res://assets/models/battle/textures/GhostSludger.png"
+      "scene": "res://assets/models/battle/summons/GhostSludger.glb",
+      "intro": "GhostSludger_Intro",
+      "idle": "GhostSludger_Idle",
+      "intro_length": 2.166667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Sludger.wav",
+      "spawn_audio_delay": 0.0
     },
     "GhostStalker": {
-      "mesh": "res://assets/models/battle/summons/GhostStalker.obj",
-      "texture": "res://assets/models/battle/textures/GhostStalker.png"
+      "scene": "res://assets/models/battle/summons/GhostStalker.glb",
+      "intro": "GhostStalker_Intro",
+      "idle": "GhostStalker_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/GhostStalker.wav",
+      "spawn_audio_delay": 0.0
     },
     "GhostlyTree": {
-      "mesh": "res://assets/models/battle/summons/GhostlyTree.obj",
-      "texture": "res://assets/models/battle/textures/GhostlyTree.png"
+      "scene": "res://assets/models/battle/summons/GhostlyTree.glb",
+      "intro": "GhostlyTree_Intro",
+      "idle": "GhostlyTree_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/TreeEvil.wav",
+      "spawn_audio_delay": 0.0
     },
     "GiantFoot": {
-      "mesh": "res://assets/models/battle/summons/GiantFoot.obj",
-      "texture": "res://assets/models/battle/textures/GiantFoot.png"
+      "scene": "res://assets/models/battle/summons/GiantFoot.glb",
+      "intro": "GiantFoot_Intro",
+      "idle": "GiantFoot_Idle",
+      "intro_length": 1.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Foot.wav",
+      "spawn_audio_delay": 0.0
     },
     "GiantMummyHand": {
-      "mesh": "res://assets/models/battle/summons/GiantMummyHand.obj",
-      "texture": "res://assets/models/battle/textures/MummyHand.png"
+      "scene": "res://assets/models/battle/summons/GiantMummyHand.glb",
+      "intro": "MummyHand_Intro",
+      "idle": "MummyHand_Idle",
+      "intro_length": 2.4,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/SkeletalHand.wav",
+      "spawn_audio_delay": 0.0
     },
     "Gnome": {
-      "mesh": "res://assets/models/battle/summons/Gnome.obj",
-      "texture": "res://assets/models/battle/textures/GnomeYellow.png"
+      "scene": "res://assets/models/battle/summons/Gnome.glb",
+      "intro": "Gnome_Intro",
+      "idle": "Gnome_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "GnomeRainbow": {
-      "mesh": "res://assets/models/battle/summons/GnomeRainbow.obj",
-      "texture": "res://assets/models/battle/textures/GnomeRainbow.png"
+      "scene": "res://assets/models/battle/summons/GnomeRainbow.glb",
+      "intro": "Gnome_Intro",
+      "idle": "Gnome_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "GrapeSlimey": {
-      "mesh": "res://assets/models/battle/summons/GrapeSlimey.obj",
-      "texture": "res://assets/models/battle/textures/GelatinousCube.png"
+      "scene": "res://assets/models/battle/summons/GrapeSlimey.glb",
+      "intro": "GelatinousCube_Intro",
+      "idle": "GelatinousCube_Idle",
+      "intro_length": 1.766667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Slimey.wav",
+      "spawn_audio_delay": 0.0
     },
     "GrayEyeBat": {
-      "mesh": "res://assets/models/battle/summons/GrayEyeBat.obj",
-      "texture": "res://assets/models/battle/textures/EyeBat.png"
+      "scene": "res://assets/models/battle/summons/GrayEyeBat.glb",
+      "intro": "EyeBat_Intro",
+      "idle": "EyeBat_Idle",
+      "intro_length": 1.7,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Bat.wav",
+      "spawn_audio_delay": 0.0
     },
     "GreenMermaid": {
-      "mesh": "res://assets/models/battle/summons/GreenMermaid.obj",
-      "texture": "res://assets/models/battle/textures/Mermaid.png"
+      "scene": "res://assets/models/battle/summons/GreenMermaid.glb",
+      "intro": "Mermaid_Intro",
+      "idle": "Mermaid_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Mermaid.wav",
+      "spawn_audio_delay": 0.0
     },
     "GreenMerman": {
-      "mesh": "res://assets/models/battle/summons/GreenMerman.obj",
-      "texture": "res://assets/models/battle/textures/Merman.png"
+      "scene": "res://assets/models/battle/summons/GreenMerman.glb",
+      "intro": "Merman_Intro",
+      "idle": "Merman_Idle",
+      "intro_length": 2.3,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Mermaid.wav",
+      "spawn_audio_delay": 0.0
     },
     "GreenPartyOgre": {
-      "mesh": "res://assets/models/battle/summons/GreenPartyOgre.obj",
-      "texture": "res://assets/models/battle/textures/GreenPartyOgre.png"
+      "scene": "res://assets/models/battle/summons/GreenPartyOgre.glb",
+      "intro": "GreenPartyOgre_Intro",
+      "idle": "GreenPartyOgre_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "GreenSnakey": {
-      "mesh": "res://assets/models/battle/summons/GreenSnakey.obj",
-      "texture": "res://assets/models/battle/textures/SneakySnake.png"
+      "scene": "res://assets/models/battle/summons/GreenSnakey.glb",
+      "intro": "SneakySnake_Intro",
+      "idle": "SneakySnake_Idle",
+      "intro_length": 1.866667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Snake.wav",
+      "spawn_audio_delay": 0.0
     },
     "HailBall": {
-      "mesh": "res://assets/models/battle/summons/HailBall.obj",
-      "texture": "res://assets/models/battle/textures/HailBall.png"
+      "scene": "res://assets/models/battle/summons/HailBall.glb",
+      "intro": "HailBall_Intro",
+      "idle": "HailBall_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "HateBird": {
-      "mesh": "res://assets/models/battle/summons/HateBird.obj",
-      "texture": "res://assets/models/battle/textures/HateBird.png"
+      "scene": "res://assets/models/battle/summons/HateBird.glb",
+      "intro": "HateBird_Intro",
+      "idle": "HateBird_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "HeadphoneJerk": {
-      "mesh": "res://assets/models/battle/summons/HeadphoneJerk.obj",
-      "texture": "res://assets/models/battle/textures/HeadphoneJerk.png"
+      "scene": "res://assets/models/battle/summons/HeadphoneJerk.glb",
+      "intro": "HeadphoneJerk_Intro",
+      "idle": "HeadphoneJerk_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/HeadphoneJerk.wav",
+      "spawn_audio_delay": 0.0
     },
     "Herculeye": {
-      "mesh": "res://assets/models/battle/summons/Herculeye.obj",
-      "texture": "res://assets/models/battle/textures/Herculeye.png"
+      "scene": "res://assets/models/battle/summons/Herculeye.glb",
+      "intro": "Herculeye_Intro",
+      "idle": "Herculeye_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "HotEyeBat": {
-      "mesh": "res://assets/models/battle/summons/HotEyeBat.obj",
-      "texture": "res://assets/models/battle/textures/FireEyeBat.png"
+      "scene": "res://assets/models/battle/summons/HotEyeBat.glb",
+      "intro": "FireBat_Intro",
+      "idle": "FireBat_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CottonEyeBat.wav",
+      "spawn_audio_delay": 0.0
     },
     "HuskerGiant": {
-      "mesh": "res://assets/models/battle/summons/HuskerGiant.obj",
-      "texture": "res://assets/models/battle/textures/HuskerGiant.png"
+      "scene": "res://assets/models/battle/summons/HuskerGiant.glb",
+      "intro": "HuskerGiant_Intro",
+      "idle": "HuskerGiant_Idle",
+      "intro_length": 2.666667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/HuskerGiant.wav",
+      "spawn_audio_delay": 0.0
     },
     "HuskerKnight": {
-      "mesh": "res://assets/models/battle/summons/HuskerKnight.obj",
-      "texture": "res://assets/models/battle/textures/HuskerKnight_D.png"
+      "scene": "res://assets/models/battle/summons/HuskerKnight.glb",
+      "intro": "Husker_Intro",
+      "idle": "Husker_Idle",
+      "intro_length": 2.6,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Horse.wav",
+      "spawn_audio_delay": 0.0
     },
     "IceIceBaby": {
-      "mesh": "res://assets/models/battle/summons/IceIceBaby.obj",
-      "texture": "res://assets/models/battle/textures/IceBaby_D.png"
+      "scene": "res://assets/models/battle/summons/IceIceBaby.glb",
+      "intro": "IceBaby_Intro",
+      "idle": "IceBaby_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/IceIcebaby.wav",
+      "spawn_audio_delay": 0.0
     },
     "IceKnight": {
-      "mesh": "res://assets/models/battle/summons/IceKnight.obj",
-      "texture": "res://assets/models/battle/textures/IceKnight.png"
+      "scene": "res://assets/models/battle/summons/IceKnight.glb",
+      "intro": "IceKnight_Intro",
+      "idle": "IceKnight_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Knight.wav",
+      "spawn_audio_delay": 0.0
     },
     "InfiniteFigure": {
-      "mesh": "res://assets/models/battle/summons/InfiniteFigure.obj",
-      "texture": "res://assets/models/battle/textures/InfiniteFigure.png"
+      "scene": "res://assets/models/battle/summons/InfiniteFigure.glb",
+      "intro": "InfiniteFigure_Intro",
+      "idle": "InfiniteFigure_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "KingFluff": {
-      "mesh": "res://assets/models/battle/summons/KingFluff.obj",
-      "texture": "res://assets/models/battle/textures/KingFluff.png"
+      "scene": "res://assets/models/battle/summons/KingFluff.glb",
+      "intro": "KingFluff_Intro",
+      "idle": "KingFluff_Idle",
+      "intro_length": 2.3,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/KingFluff.wav",
+      "spawn_audio_delay": 0.0
     },
     "KnightOfObesity": {
-      "mesh": "res://assets/models/battle/summons/KnightOfObesity.obj",
-      "texture": "res://assets/models/battle/textures/FatKnight.png"
+      "scene": "res://assets/models/battle/summons/KnightOfObesity.glb",
+      "intro": "FatKnight_Intro",
+      "idle": "FatKnight_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/KnightOfObesity.wav",
+      "spawn_audio_delay": 0.0
     },
     "LadyScarab": {
-      "mesh": "res://assets/models/battle/summons/LadyScarab.obj",
-      "texture": "res://assets/models/battle/textures/LadyScarab.png"
+      "scene": "res://assets/models/battle/summons/LadyScarab.glb",
+      "intro": "LadyScarab_Intro",
+      "idle": "LadyScarab_Idle",
+      "intro_length": 1.7,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "LegionOfEarlings": {
-      "mesh": "res://assets/models/battle/summons/LegionOfEarlings.obj",
-      "texture": "res://assets/models/battle/textures/Earling.png"
+      "scene": "res://assets/models/battle/summons/LegionOfEarlings.glb",
+      "intro": "Earling_Intro",
+      "idle": "Earling_Idle",
+      "intro_length": 1.666667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/LegionOfEarlings.wav",
+      "spawn_audio_delay": 0.0
     },
     "LimeSlimey": {
-      "mesh": "res://assets/models/battle/summons/LimeSlimey.obj",
-      "texture": "res://assets/models/battle/textures/LimeSlimey.png"
+      "scene": "res://assets/models/battle/summons/LimeSlimey.glb",
+      "intro": "GelatinousCube_Intro",
+      "idle": "GelatinousCube_Idle",
+      "intro_length": 1.766667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Slimey.wav",
+      "spawn_audio_delay": 0.0
     },
     "LogKnight": {
-      "mesh": "res://assets/models/battle/summons/LogKnight.obj",
-      "texture": "res://assets/models/battle/textures/LogKnight.png"
+      "scene": "res://assets/models/battle/summons/LogKnight.glb",
+      "intro": "LogKnight_Intro",
+      "idle": "LogKnight_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CornWall.wav",
+      "spawn_audio_delay": 0.0
     },
     "LostGolem": {
-      "mesh": "res://assets/models/battle/summons/LostGolem.obj",
-      "texture": "res://assets/models/battle/textures/LostGolem.png"
+      "scene": "res://assets/models/battle/summons/LostGolem.glb",
+      "intro": "LostGolem_Intro",
+      "idle": "LostGolem_Idle",
+      "intro_length": 1.8,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/LostGolem.wav",
+      "spawn_audio_delay": 0.0
     },
     "LoveBird": {
-      "mesh": "res://assets/models/battle/summons/LoveBird.obj",
-      "texture": "res://assets/models/battle/textures/LoveBird.png"
+      "scene": "res://assets/models/battle/summons/LoveBird.glb",
+      "intro": "LoveBird_Intro",
+      "idle": "LoveBird_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "LtMushroom": {
-      "mesh": "res://assets/models/battle/summons/LtMushroom.obj",
-      "texture": "res://assets/models/battle/textures/LtMushroom.png"
+      "scene": "res://assets/models/battle/summons/LtMushroom.glb",
+      "intro": "LtMushroom_Intro",
+      "idle": "LtMushroom_Idle",
+      "intro_length": 2.3,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/SgtMushroom.wav",
+      "spawn_audio_delay": 0.0
     },
     "MadameSeota": {
-      "mesh": "res://assets/models/battle/summons/MadameSeota.obj",
-      "texture": "res://assets/models/battle/textures/MadameSeota.png"
+      "scene": "res://assets/models/battle/summons/MadameSeota.glb",
+      "intro": "MadameSeota_Intro",
+      "idle": "MadameSeota_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Ghost.wav",
+      "spawn_audio_delay": 0.0
     },
     "MaizeWalker": {
-      "mesh": "res://assets/models/battle/summons/MaizeWalker.obj",
-      "texture": "res://assets/models/battle/textures/MortalMaiseWalker.png"
+      "scene": "res://assets/models/battle/summons/MaizeWalker.glb",
+      "intro": "Maise_Intro",
+      "idle": "Maise_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/MaizeWalker.wav",
+      "spawn_audio_delay": 0.0
     },
     "ManWitch": {
-      "mesh": "res://assets/models/battle/summons/ManWitch.obj",
-      "texture": "res://assets/models/battle/textures/ManWitch.png"
+      "scene": "res://assets/models/battle/summons/ManWitch.glb",
+      "intro": "ManWitch_Intro",
+      "idle": "ManWitch_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Wizard.wav",
+      "spawn_audio_delay": 0.0
     },
     "ManowarElf": {
-      "mesh": "res://assets/models/battle/summons/ManowarElf.obj",
-      "texture": "res://assets/models/battle/textures/ManowarElf.png"
+      "scene": "res://assets/models/battle/summons/ManowarElf.glb",
+      "intro": "ManOWar_Intro",
+      "idle": "ManOWar_Idle",
+      "intro_length": 2.133333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/ManowarElf.wav",
+      "spawn_audio_delay": 0.0
     },
     "MermaidYellow": {
-      "mesh": "res://assets/models/battle/summons/MermaidYellow.obj",
-      "texture": "res://assets/models/battle/textures/MermaidYellow.png"
+      "scene": "res://assets/models/battle/summons/MermaidYellow.glb",
+      "intro": "Mermaid_Intro",
+      "idle": "Mermaid_Idle",
+      "intro_length": 1.8,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Mermaid.wav",
+      "spawn_audio_delay": 0.0
     },
     "MotherFluffBucket": {
-      "mesh": "res://assets/models/battle/summons/MotherFluffBucket.obj",
-      "texture": "res://assets/models/battle/textures/MotherFluffBucket.png"
+      "scene": "res://assets/models/battle/summons/MotherFluffBucket.glb",
+      "intro": "MotherFluffBucket_Intro",
+      "idle": "MotherFluffBucket_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "Mouthball": {
-      "mesh": "res://assets/models/battle/summons/Mouthball.obj",
-      "texture": "res://assets/models/battle/textures/MouthMonster.png"
+      "scene": "res://assets/models/battle/summons/Mouthball.glb",
+      "intro": "MouthMonster_Intro",
+      "idle": "MouthMonster_Idle",
+      "intro_length": 1.666667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Eye.wav",
+      "spawn_audio_delay": 0.0
     },
     "MsMummy": {
-      "mesh": "res://assets/models/battle/summons/MsMummy.obj",
-      "texture": "res://assets/models/battle/textures/MummyBall.png"
+      "scene": "res://assets/models/battle/summons/MsMummy.glb",
+      "intro": "MummyBall_Intro",
+      "idle": "MummyBall_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Eye.wav",
+      "spawn_audio_delay": 0.0
     },
     "MudAngel": {
-      "mesh": "res://assets/models/battle/summons/MudAngel.obj",
-      "texture": "res://assets/models/battle/textures/AngelOfChocolate.png"
+      "scene": "res://assets/models/battle/summons/MudAngel.glb",
+      "intro": "Angel_Intro",
+      "idle": "Angel_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Angel.wav",
+      "spawn_audio_delay": 0.0
     },
     "MusicMallard": {
-      "mesh": "res://assets/models/battle/summons/MusicMallard.obj",
-      "texture": "res://assets/models/battle/textures/MusicMallard.png"
+      "scene": "res://assets/models/battle/summons/MusicMallard.glb",
+      "intro": "MusicMallard_Intro",
+      "idle": "MusicMallard_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/EmbarrassingBard.wav",
+      "spawn_audio_delay": 0.0
     },
     "NiceTree": {
-      "mesh": "res://assets/models/battle/summons/NiceTree.obj",
-      "texture": "res://assets/models/battle/textures/NiceTree.png"
+      "scene": "res://assets/models/battle/summons/NiceTree.glb",
+      "intro": "NiceTree_Intro",
+      "idle": "NiceTree_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "Ninja": {
-      "mesh": "res://assets/models/battle/summons/Ninja.obj",
-      "texture": "res://assets/models/battle/textures/Ninja.png"
+      "scene": "res://assets/models/battle/summons/Ninja.glb",
+      "intro": "Ninja_Intro",
+      "idle": "Ninja_Idle",
+      "intro_length": 2.533333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Ninja.wav",
+      "spawn_audio_delay": 0.0
     },
     "OrangeSlimey": {
-      "mesh": "res://assets/models/battle/summons/OrangeSlimey.obj",
-      "texture": "res://assets/models/battle/textures/OrangeSlimey.png"
+      "scene": "res://assets/models/battle/summons/OrangeSlimey.glb",
+      "intro": "GelatinousCube_Intro",
+      "idle": "GelatinousCube_Idle",
+      "intro_length": 1.766667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Slimey.wav",
+      "spawn_audio_delay": 0.0
     },
     "Paladim": {
-      "mesh": "res://assets/models/battle/summons/Paladim.obj",
-      "texture": "res://assets/models/battle/textures/Paladim.png"
+      "scene": "res://assets/models/battle/summons/Paladim.glb",
+      "intro": "Paladim_Intro",
+      "idle": "Paladim_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Sword.wav",
+      "spawn_audio_delay": 0.0
     },
     "PapercutTiger": {
-      "mesh": "res://assets/models/battle/summons/PapercutTiger.obj",
-      "texture": "res://assets/models/battle/textures/PapercutTiger.png"
+      "scene": "res://assets/models/battle/summons/PapercutTiger.glb",
+      "intro": "PapercutTiger_Intro",
+      "idle": "PapercutTiger_Idle",
+      "intro_length": 2.166667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/WanderingBaldMan.wav",
+      "spawn_audio_delay": 0.0
     },
     "PatchyThePumpkin": {
-      "mesh": "res://assets/models/battle/summons/PatchyThePumpkin.obj",
-      "texture": "res://assets/models/battle/textures/PatchyThePumpkin.png"
+      "scene": "res://assets/models/battle/summons/PatchyThePumpkin.glb",
+      "intro": "Patchy_Intro",
+      "idle": "Patchy_Idle",
+      "intro_length": 1.8,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/PatchyThePumpkin.wav",
+      "spawn_audio_delay": 0.0
     },
     "PeaSoupBarfer": {
-      "mesh": "res://assets/models/battle/summons/PeaSoupBarfer.obj",
-      "texture": "res://assets/models/battle/textures/PeaSoupBarfer.png"
+      "scene": "res://assets/models/battle/summons/PeaSoupBarfer.glb",
+      "intro": "PeaSoupBarfer_Intro",
+      "idle": "PeaSoupBarfer_Idle",
+      "intro_length": 2.4,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "PeachDjini": {
-      "mesh": "res://assets/models/battle/summons/PeachDjini.obj",
-      "texture": "res://assets/models/battle/textures/PeachDjini.png"
+      "scene": "res://assets/models/battle/summons/PeachDjini.glb",
+      "intro": "PeachDjini_Intro",
+      "idle": "PeachDjini_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Djini.wav",
+      "spawn_audio_delay": 0.0
     },
     "Pentacutie": {
-      "mesh": "res://assets/models/battle/summons/Pentacutie.obj",
-      "texture": "res://assets/models/battle/textures/Pentacutie.png"
+      "scene": "res://assets/models/battle/summons/Pentacutie.glb",
+      "intro": "Pentacutie_Intro",
+      "idle": "Pentacutie_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Pentacutie.wav",
+      "spawn_audio_delay": 0.0
     },
     "Phyllis": {
-      "mesh": "res://assets/models/battle/summons/Phyllis.obj",
-      "texture": "res://assets/models/battle/textures/SmolderingElderess.png"
+      "scene": "res://assets/models/battle/summons/Phyllis.glb",
+      "intro": "Elderess_Intro",
+      "idle": "Elderess_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Sword.wav",
+      "spawn_audio_delay": 0.0
     },
     "Pickler": {
-      "mesh": "res://assets/models/battle/summons/Pickler.obj",
-      "texture": "res://assets/models/battle/textures/Pickler.png"
+      "scene": "res://assets/models/battle/summons/Pickler.glb",
+      "intro": "Pickler_Intro",
+      "idle": "Pickler_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Pickler.wav",
+      "spawn_audio_delay": 0.0
     },
     "Pieclops": {
-      "mesh": "res://assets/models/battle/summons/Pieclops.obj",
-      "texture": "res://assets/models/battle/textures/Pieclops.png"
+      "scene": "res://assets/models/battle/summons/Pieclops.glb",
+      "intro": "Pieclops_Intro",
+      "idle": "Pieclops_Idle",
+      "intro_length": 1.666667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Pieclops.wav",
+      "spawn_audio_delay": 0.0
     },
     "Pig": {
-      "mesh": "res://assets/models/battle/summons/Pig.obj",
-      "texture": "res://assets/models/battle/textures/Pig.png"
+      "scene": "res://assets/models/battle/summons/Pig.glb",
+      "intro": "Pig_Intro",
+      "idle": "Pig_Idle",
+      "intro_length": 1.666667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Pig.wav",
+      "spawn_audio_delay": 0.0
     },
     "PirateBear": {
-      "mesh": "res://assets/models/battle/summons/PirateBear.obj",
-      "texture": "res://assets/models/battle/textures/PirateBear.png"
+      "scene": "res://assets/models/battle/summons/PirateBear.glb",
+      "intro": "PirateBear_Intro",
+      "idle": "PirateBear_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Sword.wav",
+      "spawn_audio_delay": 0.0
     },
     "PorcelainGuardian": {
-      "mesh": "res://assets/models/battle/summons/PorcelainGuardian.obj",
-      "texture": "res://assets/models/battle/textures/ToiletChomper.png"
+      "scene": "res://assets/models/battle/summons/PorcelainGuardian.glb",
+      "intro": "ToiletChomper_Intro",
+      "idle": "ToiletChomper_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/PorcelainGuardian.wav",
+      "spawn_audio_delay": 0.0
     },
     "Poultrygeist": {
-      "mesh": "res://assets/models/battle/summons/Poultrygeist.obj",
-      "texture": "res://assets/models/battle/textures/Poultergeist.png"
+      "scene": "res://assets/models/battle/summons/Poultrygeist.glb",
+      "intro": "Poultrygeist_Intro",
+      "idle": "Poultrygeist_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Chicken.wav",
+      "spawn_audio_delay": 0.0
     },
     "PunkCat": {
-      "mesh": "res://assets/models/battle/summons/PunkCat.obj",
-      "texture": "res://assets/models/battle/textures/PunkCat.png"
+      "scene": "res://assets/models/battle/summons/PunkCat.glb",
+      "intro": "PunkCat_Intro",
+      "idle": "PunkCat_Idle",
+      "intro_length": 1.466667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/PunkCat.wav",
+      "spawn_audio_delay": 0.0
     },
     "Quadurai": {
-      "mesh": "res://assets/models/battle/summons/Quadurai.obj",
-      "texture": "res://assets/models/battle/textures/Quadurai.png"
+      "scene": "res://assets/models/battle/summons/Quadurai.glb",
+      "intro": "Quadurai_Intro",
+      "idle": "Quadurai_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Ronin.wav",
+      "spawn_audio_delay": 0.0
     },
     "RainbowBarfer": {
-      "mesh": "res://assets/models/battle/summons/RainbowBarfer.obj",
-      "texture": "res://assets/models/battle/textures/RainbowBarfer.png"
+      "scene": "res://assets/models/battle/summons/RainbowBarfer.glb",
+      "intro": "RainbowBarfer_Intro",
+      "idle": "RainbowBarfer_Idle",
+      "intro_length": 2.4,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Sludger.wav",
+      "spawn_audio_delay": 0.0
     },
     "RecordThug": {
-      "mesh": "res://assets/models/battle/summons/RecordThug.obj",
-      "texture": "res://assets/models/battle/textures/RecordThug.png"
+      "scene": "res://assets/models/battle/summons/RecordThug.glb",
+      "intro": "RecordThug_Intro",
+      "idle": "RecordThug_Idle",
+      "intro_length": 2.4666,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "RedEyeling": {
-      "mesh": "res://assets/models/battle/summons/RedEyeling.obj",
-      "texture": "res://assets/models/battle/textures/EyeFootDevil.png"
+      "scene": "res://assets/models/battle/summons/RedEyeling.glb",
+      "intro": "EyeFootDevil_Intro",
+      "idle": "EyeFootDevil_Idle",
+      "intro_length": 1.8,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "Rocktopus": {
-      "mesh": "res://assets/models/battle/summons/Rocktopus.obj",
-      "texture": "res://assets/models/battle/textures/Rockopus.png"
+      "scene": "res://assets/models/battle/summons/Rocktopus.glb",
+      "intro": "Rockopus_Intro",
+      "idle": "Rockopus_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Rocktopus.wav",
+      "spawn_audio_delay": 0.0
     },
     "SackOfPain": {
-      "mesh": "res://assets/models/battle/summons/SackOfPain.obj",
-      "texture": "res://assets/models/battle/textures/SackOfPain.png"
+      "scene": "res://assets/models/battle/summons/SackOfPain.glb",
+      "intro": "SackOfPain_Intro",
+      "idle": "SackOfPain_Idle",
+      "intro_length": 2.43333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "SandEyeBat": {
-      "mesh": "res://assets/models/battle/summons/SandEyeBat.obj",
-      "texture": "res://assets/models/battle/textures/SandEyeBat.png"
+      "scene": "res://assets/models/battle/summons/SandEyeBat.glb",
+      "intro": "SandBat_Intro",
+      "idle": "SandBat_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CottonEyeBat.wav",
+      "spawn_audio_delay": 0.0
     },
     "SandJackal": {
-      "mesh": "res://assets/models/battle/summons/SandJackal.obj",
-      "texture": "res://assets/models/battle/textures/SandJackal.png"
+      "scene": "res://assets/models/battle/summons/SandJackal.glb",
+      "intro": "JackalGlob_Intro",
+      "idle": "JackalGlob_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "SandKnight": {
-      "mesh": "res://assets/models/battle/summons/SandKnight.obj",
-      "texture": "res://assets/models/battle/textures/SandKnight.png"
+      "scene": "res://assets/models/battle/summons/SandKnight.glb",
+      "intro": "SandKnights_Intro",
+      "idle": "SandKnights_Idle",
+      "intro_length": 2.666667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Horse.wav",
+      "spawn_audio_delay": 0.0
     },
     "SandShark": {
-      "mesh": "res://assets/models/battle/summons/SandShark.obj",
-      "texture": "res://assets/models/battle/textures/SandShark.png"
+      "scene": "res://assets/models/battle/summons/SandShark.glb",
+      "intro": "SandShark_Intro",
+      "idle": "SandShark_Idle",
+      "intro_length": 1.866667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "SandSnake": {
-      "mesh": "res://assets/models/battle/summons/SandSnake.obj",
-      "texture": "res://assets/models/battle/textures/SandWorm.png"
+      "scene": "res://assets/models/battle/summons/SandSnake.glb",
+      "intro": "SandWorm_Intro",
+      "idle": "SandWorm_Idle",
+      "intro_length": 1.966667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Snake.wav",
+      "spawn_audio_delay": 0.0
     },
     "SandasaurusRex": {
-      "mesh": "res://assets/models/battle/summons/SandasaurusRex.obj",
-      "texture": "res://assets/models/battle/textures/SandasaurusRex.png"
+      "scene": "res://assets/models/battle/summons/SandasaurusRex.glb",
+      "intro": "SandasaurusRex_Intro",
+      "idle": "SandasaurusRex_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "Sandfoot": {
-      "mesh": "res://assets/models/battle/summons/Sandfoot.obj",
-      "texture": "res://assets/models/battle/textures/SandFoot.png"
+      "scene": "res://assets/models/battle/summons/Sandfoot.glb",
+      "intro": "Sandfoot_Intro",
+      "idle": "Sandfoot_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Foot.wav",
+      "spawn_audio_delay": 0.0
     },
     "Sandwitch": {
-      "mesh": "res://assets/models/battle/summons/Sandwitch.obj",
-      "texture": "res://assets/models/battle/textures/SandwichWitch.png"
+      "scene": "res://assets/models/battle/summons/Sandwitch.glb",
+      "intro": "Sandwitch_Intro",
+      "idle": "Sandwitch_Idle",
+      "intro_length": 1.733333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Djini.wav",
+      "spawn_audio_delay": 0.0
     },
     "SgtMushroom": {
-      "mesh": "res://assets/models/battle/summons/SgtMushroom.obj",
-      "texture": "res://assets/models/battle/textures/MushroomSoldier.png"
+      "scene": "res://assets/models/battle/summons/SgtMushroom.glb",
+      "intro": "Mushroom_Intro",
+      "idle": "Mushroom_Idle",
+      "intro_length": 2.3,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/SgtMushroom.wav",
+      "spawn_audio_delay": 0.0
     },
     "SkeletalHand": {
-      "mesh": "res://assets/models/battle/summons/SkeletalHand.obj",
-      "texture": "res://assets/models/battle/textures/SkeletalGrasp.png"
+      "scene": "res://assets/models/battle/summons/SkeletalHand.glb",
+      "intro": "Skeletal_Intro",
+      "idle": "Skeletal_Idle",
+      "intro_length": 1.666667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/SkeletalHand.wav",
+      "spawn_audio_delay": 0.0
     },
     "Sludger": {
-      "mesh": "res://assets/models/battle/summons/Sludger.obj",
-      "texture": "res://assets/models/battle/textures/Sludger.png"
+      "scene": "res://assets/models/battle/summons/Sludger.glb",
+      "intro": "Sludger_Intro",
+      "idle": "Sludger_Idle",
+      "intro_length": 2.166667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Sludger.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnakeMint": {
-      "mesh": "res://assets/models/battle/summons/SnakeMint.obj",
-      "texture": "res://assets/models/battle/textures/CandyStripeWorm.png"
+      "scene": "res://assets/models/battle/summons/SnakeMint.glb",
+      "intro": "CandyStripeWorm_Intro",
+      "idle": "CandyStripeWorm_Idle",
+      "intro_length": 1.966667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Snake.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnappyDresser": {
-      "mesh": "res://assets/models/battle/summons/SnappyDresser.obj",
-      "texture": "res://assets/models/battle/textures/HandsomeMan.png"
+      "scene": "res://assets/models/battle/summons/SnappyDresser.glb",
+      "intro": "Handsome_Intro",
+      "idle": "Handsome_Idle",
+      "intro_length": 2.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnowBall": {
-      "mesh": "res://assets/models/battle/summons/SnowBall.obj",
-      "texture": "res://assets/models/battle/textures/SnowBall.png"
+      "scene": "res://assets/models/battle/summons/SnowBall.glb",
+      "intro": "SnowBall_Intro",
+      "idle": "SnowBall_Idle",
+      "intro_length": 1.7,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Eye.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnowCorn": {
-      "mesh": "res://assets/models/battle/summons/SnowCorn.obj",
-      "texture": "res://assets/models/battle/textures/SnowCorn.png"
+      "scene": "res://assets/models/battle/summons/SnowCorn.glb",
+      "intro": "SnowCorn_Intro",
+      "idle": "SnowCorn_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnowNice": {
-      "mesh": "res://assets/models/battle/summons/SnowNice.obj",
-      "texture": "res://assets/models/battle/textures/SnowNice.png"
+      "scene": "res://assets/models/battle/summons/SnowNice.glb",
+      "intro": "SnowNice_Intro",
+      "idle": "SnowNice_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnowPlains": {
-      "mesh": "res://assets/models/battle/summons/SnowPlains.obj",
-      "texture": "res://assets/models/battle/textures/Snowplains.png"
+      "scene": "res://assets/models/battle/summons/SnowPlains.glb",
+      "intro": "SnowPlains_Intro",
+      "idle": "SnowPlains_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnowSand": {
-      "mesh": "res://assets/models/battle/summons/SnowSand.obj",
-      "texture": "res://assets/models/battle/textures/SnowSand.png"
+      "scene": "res://assets/models/battle/summons/SnowSand.glb",
+      "intro": "SnowSand_Intro",
+      "idle": "SnowSand_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnowSwamp": {
-      "mesh": "res://assets/models/battle/summons/SnowSwamp.obj",
-      "texture": "res://assets/models/battle/textures/SnowSwamp.png"
+      "scene": "res://assets/models/battle/summons/SnowSwamp.glb",
+      "intro": "SnowSwamp_Intro",
+      "idle": "SnowSwamp_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "SnuggleTree": {
-      "mesh": "res://assets/models/battle/summons/SnuggleTree.obj",
-      "texture": "res://assets/models/battle/textures/CottonBully.png"
+      "scene": "res://assets/models/battle/summons/SnuggleTree.glb",
+      "intro": "CottonBully_Intro",
+      "idle": "CottonBully_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/TreeEvil.wav",
+      "spawn_audio_delay": 0.0
     },
     "SoftEyeling": {
-      "mesh": "res://assets/models/battle/summons/SoftEyeling.obj",
-      "texture": "res://assets/models/battle/textures/CottonEyeFoot.png"
+      "scene": "res://assets/models/battle/summons/SoftEyeling.glb",
+      "intro": "CottonDevil_Intro",
+      "idle": "CottonDevil_Idle",
+      "intro_length": 1.766667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "SpikedMaceStump": {
-      "mesh": "res://assets/models/battle/summons/SpikedMaceStump.obj",
-      "texture": "res://assets/models/battle/textures/SpikedMaceStump.png"
+      "scene": "res://assets/models/battle/summons/SpikedMaceStump.glb",
+      "intro": "SpikedMace_Intro",
+      "idle": "SpikedMace_Idle",
+      "intro_length": 2.4,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Axe.wav",
+      "spawn_audio_delay": 0.0
     },
     "SteakChop": {
-      "mesh": "res://assets/models/battle/summons/SteakChop.obj",
-      "texture": "res://assets/models/battle/textures/SteakChop.png"
+      "scene": "res://assets/models/battle/summons/SteakChop.glb",
+      "intro": "SteakChop_Intro",
+      "idle": "SteakChop_Idle",
+      "intro_length": 2.5333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "StruzanJinn": {
-      "mesh": "res://assets/models/battle/summons/StruzanJinn.obj",
-      "texture": "res://assets/models/battle/textures/StruzanJinn.png"
+      "scene": "res://assets/models/battle/summons/StruzanJinn.glb",
+      "intro": "Jinn_Intro",
+      "idle": "Jinn_Idle",
+      "intro_length": 2.233333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/StrunzanJinn.wav",
+      "spawn_audio_delay": 0.0
     },
     "SugarImp": {
-      "mesh": "res://assets/models/battle/summons/SugarImp.obj",
-      "texture": "res://assets/models/battle/textures/SugarImp.png"
+      "scene": "res://assets/models/battle/summons/SugarImp.glb",
+      "intro": "SugarImp_Intro",
+      "idle": "SugarImp_Idle",
+      "intro_length": 1.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/AngelEye.wav",
+      "spawn_audio_delay": 0.0
     },
     "SunKing": {
-      "mesh": "res://assets/models/battle/summons/SunKing.obj",
-      "texture": "res://assets/models/battle/textures/SunKing.png"
+      "scene": "res://assets/models/battle/summons/SunKing.glb",
+      "intro": "SunKing_Intro",
+      "idle": "SunKing_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "TeethLeaf": {
-      "mesh": "res://assets/models/battle/summons/TeethLeaf.obj",
-      "texture": "res://assets/models/battle/textures/TeethLeaf.png"
+      "scene": "res://assets/models/battle/summons/TeethLeaf.glb",
+      "intro": "TeethLeaf_Intro",
+      "idle": "TeethLeaf_Idle",
+      "intro_length": 1.833333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/TeethLeaf.wav",
+      "spawn_audio_delay": 0.0
     },
     "TheDrooler": {
-      "mesh": "res://assets/models/battle/summons/TheDrooler.obj",
-      "texture": "res://assets/models/battle/textures/TheDrooler.png"
+      "scene": "res://assets/models/battle/summons/TheDrooler.glb",
+      "intro": "Drooler_Intro",
+      "idle": "Drooler_Idle",
+      "intro_length": 2.166667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/TheDrooler.wav",
+      "spawn_audio_delay": 0.0
     },
     "TheMariachi": {
-      "mesh": "res://assets/models/battle/summons/TheMariachi.obj",
-      "texture": "res://assets/models/battle/textures/TheMariachi.png"
+      "scene": "res://assets/models/battle/summons/TheMariachi.glb",
+      "intro": "Mariachi_Intro",
+      "idle": "Mariachi_Idle",
+      "intro_length": 1.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/TheMariachi.wav",
+      "spawn_audio_delay": 0.0
     },
     "TravelinSkeleton": {
-      "mesh": "res://assets/models/battle/summons/TravelinSkeleton.obj",
-      "texture": "res://assets/models/battle/textures/TravelingSkeleton.png"
+      "scene": "res://assets/models/battle/summons/TravelinSkeleton.glb",
+      "intro": "TravelingSkeleton_Intro",
+      "idle": "TravelingSkeleton_Idle",
+      "intro_length": 1.466667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CareCrow.wav",
+      "spawn_audio_delay": 0.0
     },
     "TravelinWizard": {
-      "mesh": "res://assets/models/battle/summons/TravelinWizard.obj",
-      "texture": "res://assets/models/battle/textures/UnicycleWizard.png"
+      "scene": "res://assets/models/battle/summons/TravelinWizard.glb",
+      "intro": "UnicycleWizard_Intro",
+      "idle": "UnicycleWizard_Idle",
+      "intro_length": 1.466667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CareCrow.wav",
+      "spawn_audio_delay": 0.0
     },
     "TreeEvil": {
-      "mesh": "res://assets/models/battle/summons/TreeEvil.obj",
-      "texture": "res://assets/models/battle/textures/TreeEvil.png"
+      "scene": "res://assets/models/battle/summons/TreeEvil.glb",
+      "intro": "EvilTree_Intro",
+      "idle": "EvilTree_Idle",
+      "intro_length": 1.966667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/TreeEvil.wav",
+      "spawn_audio_delay": 0.0
     },
     "TreeOfUgliness": {
-      "mesh": "res://assets/models/battle/summons/TreeOfUgliness.obj",
-      "texture": "res://assets/models/battle/textures/TreeOfUgliness.png"
+      "scene": "res://assets/models/battle/summons/TreeOfUgliness.glb",
+      "intro": "TreeOfUgliness_Intro",
+      "idle": "TreeOfUgliness_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/TreeEvil.wav",
+      "spawn_audio_delay": 0.0
     },
     "UniKnight": {
-      "mesh": "res://assets/models/battle/summons/UniKnight.obj",
-      "texture": "res://assets/models/battle/textures/UnicycleKnight.png"
+      "scene": "res://assets/models/battle/summons/UniKnight.glb",
+      "intro": "UniKnight_Intro",
+      "idle": "UniKnight_Idle",
+      "intro_length": 1.766667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CareCrow.wav",
+      "spawn_audio_delay": 0.0
     },
     "Unicyclops": {
-      "mesh": "res://assets/models/battle/summons/Unicyclops.obj",
-      "texture": "res://assets/models/battle/textures/Unicyclops.png"
+      "scene": "res://assets/models/battle/summons/Unicyclops.glb",
+      "intro": "Unicyclops_Intro",
+      "idle": "Unicyclops_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/CareCrow.wav",
+      "spawn_audio_delay": 0.0
     },
     "VampBaldMan": {
-      "mesh": "res://assets/models/battle/summons/VampBaldMan.obj",
-      "texture": "res://assets/models/battle/textures/VampBaldMan.png"
+      "scene": "res://assets/models/battle/summons/VampBaldMan.glb",
+      "intro": "VampBaldMan_Intro",
+      "idle": "VampBaldMan_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "VampCactus": {
-      "mesh": "res://assets/models/battle/summons/VampCactus.obj",
-      "texture": "res://assets/models/battle/textures/VampCactus.png"
+      "scene": "res://assets/models/battle/summons/VampCactus.glb",
+      "intro": "VampCactus_Intro",
+      "idle": "VampCactus_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "VampCorn": {
-      "mesh": "res://assets/models/battle/summons/VampCorn.obj",
-      "texture": "res://assets/models/battle/textures/VampCorn.png"
+      "scene": "res://assets/models/battle/summons/VampCorn.glb",
+      "intro": "VampCorn_Intro",
+      "idle": "VampCorn_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "VampGhost": {
-      "mesh": "res://assets/models/battle/summons/VampGhost.obj",
-      "texture": "res://assets/models/battle/textures/VampGhost.png"
+      "scene": "res://assets/models/battle/summons/VampGhost.glb",
+      "intro": "VampGhost_Intro",
+      "idle": "VampGhost_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "VampMarshmallow": {
-      "mesh": "res://assets/models/battle/summons/VampMarshmallow.obj",
-      "texture": "res://assets/models/battle/textures/VampMarshmallow.png"
+      "scene": "res://assets/models/battle/summons/VampMarshmallow.glb",
+      "intro": "VampMarshmallow_Intro",
+      "idle": "VampMarshmallow_Idle",
+      "intro_length": 2.5,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Scholar.wav",
+      "spawn_audio_delay": 0.0
     },
     "WallOfChocolate": {
-      "mesh": "res://assets/models/battle/summons/WallOfChocolate.obj",
-      "texture": "res://assets/models/battle/textures/WallOfChocolate.png"
+      "scene": "res://assets/models/battle/summons/WallOfChocolate.glb",
+      "intro": "Wall_Intro",
+      "idle": "Wall_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Slimey.wav",
+      "spawn_audio_delay": 0.0
     },
     "WallOfSand": {
-      "mesh": "res://assets/models/battle/summons/WallOfSand.obj",
-      "texture": "res://assets/models/battle/textures/WallOfSand.png"
+      "scene": "res://assets/models/battle/summons/WallOfSand.glb",
+      "intro": "SandWall_Intro",
+      "idle": "SandWall_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Wall.wav",
+      "spawn_audio_delay": 0.0
     },
     "WanderingBaldMan": {
-      "mesh": "res://assets/models/battle/summons/WanderingBaldMan.obj",
-      "texture": "res://assets/models/battle/textures/BaldingMan.png"
+      "scene": "res://assets/models/battle/summons/WanderingBaldMan.glb",
+      "intro": "Bald_Intro",
+      "idle": "Bald_Idle",
+      "intro_length": 2.166667,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/WanderingBaldMan.wav",
+      "spawn_audio_delay": 0.0
     },
     "WellDressedWolf": {
-      "mesh": "res://assets/models/battle/summons/WellDressedWolf.obj",
-      "texture": "res://assets/models/battle/textures/WellDressedWolf_D.png"
+      "scene": "res://assets/models/battle/summons/WellDressedWolf.glb",
+      "intro": "Wolf_Intro",
+      "idle": "Wolf_Idle",
+      "intro_length": 1.9333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Angel.wav",
+      "spawn_audio_delay": 0.0
     },
     "WhiteNinja": {
-      "mesh": "res://assets/models/battle/summons/WhiteNinja.obj",
-      "texture": "res://assets/models/battle/textures/WhiteNinja.png"
+      "scene": "res://assets/models/battle/summons/WhiteNinja.glb",
+      "intro": "Ninja_Intro",
+      "idle": "Ninja_Idle",
+      "intro_length": 0.0,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Ninja.wav",
+      "spawn_audio_delay": 0.0
     },
     "WizardElf": {
-      "mesh": "res://assets/models/battle/summons/WizardElf.obj",
-      "texture": "res://assets/models/battle/textures/WizardDevil.png"
+      "scene": "res://assets/models/battle/summons/WizardElf.glb",
+      "intro": "WizardDevil_Intro",
+      "idle": "WizardDevil_Idle",
+      "intro_length": 2.333333,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Generic_Wizard.wav",
+      "spawn_audio_delay": 0.0
     },
     "WizardOfPoo": {
-      "mesh": "res://assets/models/battle/summons/WizardOfPoo.obj",
-      "texture": "res://assets/models/battle/textures/WizardOfPoo.png"
+      "scene": "res://assets/models/battle/summons/WizardOfPoo.glb",
+      "intro": "WizardOfPoo_Intro",
+      "idle": "WizardOfPoo_Idle",
+      "intro_length": 1.9,
+      "ambient": "",
+      "spawn_audio": "res://assets/audio/sfx/Ghost.wav",
+      "spawn_audio_delay": 0.0
     }
   },
   "buildings": {
     "Autoplucker": {
-      "mesh": "res://assets/models/battle/buildings/Autoplucker.obj",
-      "texture": "res://assets/models/battle/textures/Autoplucker.png"
+      "scene": "res://assets/models/battle/buildings/Autoplucker.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "BlueCastle": {
-      "mesh": "res://assets/models/battle/buildings/BlueCastle.obj",
-      "texture": "res://assets/models/battle/textures/BlueCastle_D.png"
+      "scene": "res://assets/models/battle/buildings/BlueCastle.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "CaveOfSolitude": {
-      "mesh": "res://assets/models/battle/buildings/CaveOfSolitude.obj",
-      "texture": "res://assets/models/battle/textures/CaveOfSolitude.png"
+      "scene": "res://assets/models/battle/buildings/CaveOfSolitude.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "ComfyCave": {
-      "mesh": "res://assets/models/battle/buildings/ComfyCave.obj",
-      "texture": "res://assets/models/battle/textures/CottonCave.png"
+      "scene": "res://assets/models/battle/buildings/ComfyCave.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "ElfTeePee": {
-      "mesh": "res://assets/models/battle/buildings/ElfTeePee.obj",
-      "texture": "res://assets/models/battle/textures/ElfTeepee.png"
+      "scene": "res://assets/models/battle/buildings/ElfTeePee.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "FruitCakeBuilding": {
-      "mesh": "res://assets/models/battle/buildings/FruitCakeBuilding.obj",
-      "texture": "res://assets/models/battle/textures/FruitCakeBuilding.png"
+      "scene": "res://assets/models/battle/buildings/FruitCakeBuilding.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "GhostWindmill": {
-      "mesh": "res://assets/models/battle/buildings/GhostWindmill.obj",
-      "texture": "res://assets/models/battle/textures/GhostWindmill.png"
+      "scene": "res://assets/models/battle/buildings/GhostWindmill.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "Take 001_21",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "GhostlyCastle": {
-      "mesh": "res://assets/models/battle/buildings/GhostlyCastle.obj",
-      "texture": "res://assets/models/battle/textures/GhostlyCastle.png"
+      "scene": "res://assets/models/battle/buildings/GhostlyCastle.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "Igloo": {
-      "mesh": "res://assets/models/battle/buildings/Igloo.obj",
-      "texture": "res://assets/models/battle/textures/Igloo.png"
+      "scene": "res://assets/models/battle/buildings/Igloo.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "Mausoleum": {
-      "mesh": "res://assets/models/battle/buildings/Mausoleum.obj",
-      "texture": "res://assets/models/battle/textures/Mausoleum.png"
+      "scene": "res://assets/models/battle/buildings/Mausoleum.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "NicelandsTower": {
-      "mesh": "res://assets/models/battle/buildings/NicelandsTower.obj",
-      "texture": "res://assets/models/battle/textures/ClockTower.png"
+      "scene": "res://assets/models/battle/buildings/NicelandsTower.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "ObeliskOfVengeance": {
-      "mesh": "res://assets/models/battle/buildings/ObeliskOfVengeance.obj",
-      "texture": "res://assets/models/battle/textures/ObelisxOfVengeance.png"
+      "scene": "res://assets/models/battle/buildings/ObeliskOfVengeance.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "PalaceOfBone": {
-      "mesh": "res://assets/models/battle/buildings/PalaceOfBone.obj",
-      "texture": "res://assets/models/battle/textures/PalaceOfBone.png"
+      "scene": "res://assets/models/battle/buildings/PalaceOfBone.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "PuffyCastle": {
-      "mesh": "res://assets/models/battle/buildings/PuffyCastle.obj",
-      "texture": "res://assets/models/battle/textures/PuffyCastle.png"
+      "scene": "res://assets/models/battle/buildings/PuffyCastle.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "Pyramidia": {
-      "mesh": "res://assets/models/battle/buildings/Pyramidia.obj",
-      "texture": "res://assets/models/battle/textures/Pyramidia.png"
+      "scene": "res://assets/models/battle/buildings/Pyramidia.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "RedCastle": {
-      "mesh": "res://assets/models/battle/buildings/RedCastle.obj",
-      "texture": "res://assets/models/battle/textures/RedCastle_D.png"
+      "scene": "res://assets/models/battle/buildings/RedCastle.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "RedDome": {
-      "mesh": "res://assets/models/battle/buildings/RedDome.obj",
-      "texture": "res://assets/models/battle/textures/RedRotunda.png"
+      "scene": "res://assets/models/battle/buildings/RedDome.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "RedParthenon": {
-      "mesh": "res://assets/models/battle/buildings/RedParthenon.obj",
-      "texture": "res://assets/models/battle/textures/RedParthenon.png"
+      "scene": "res://assets/models/battle/buildings/RedParthenon.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "SandCastle": {
-      "mesh": "res://assets/models/battle/buildings/SandCastle.obj",
-      "texture": "res://assets/models/battle/textures/SandCastle.png"
+      "scene": "res://assets/models/battle/buildings/SandCastle.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "SandPyramid": {
-      "mesh": "res://assets/models/battle/buildings/SandPyramid.obj",
-      "texture": "res://assets/models/battle/textures/SandPyrimid.png"
+      "scene": "res://assets/models/battle/buildings/SandPyramid.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "SandSphinx": {
-      "mesh": "res://assets/models/battle/buildings/SandSphinx.obj",
-      "texture": "res://assets/models/battle/textures/Sphinx.png"
+      "scene": "res://assets/models/battle/buildings/SandSphinx.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "SchoolHouse": {
-      "mesh": "res://assets/models/battle/buildings/SchoolHouse.obj",
-      "texture": "res://assets/models/battle/textures/BlueHouse.png"
+      "scene": "res://assets/models/battle/buildings/SchoolHouse.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "ShadowPyramid": {
-      "mesh": "res://assets/models/battle/buildings/ShadowPyramid.obj",
-      "texture": "res://assets/models/battle/textures/ShadowPyramid.png"
+      "scene": "res://assets/models/battle/buildings/ShadowPyramid.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "SiloOfTruth": {
-      "mesh": "res://assets/models/battle/buildings/SiloOfTruth.obj",
-      "texture": "res://assets/models/battle/textures/SiloOfTruth.png"
+      "scene": "res://assets/models/battle/buildings/SiloOfTruth.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "SpiritTower": {
-      "mesh": "res://assets/models/battle/buildings/SpiritTower.obj",
-      "texture": "res://assets/models/battle/textures/SpiritTower.png"
+      "scene": "res://assets/models/battle/buildings/SpiritTower.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "SpiritTower",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "Stonehenge": {
-      "mesh": "res://assets/models/battle/buildings/Stonehenge.obj",
-      "texture": "res://assets/models/battle/textures/Stonehenge.png"
+      "scene": "res://assets/models/battle/buildings/Stonehenge.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     },
     "SunPyramid": {
-      "mesh": "res://assets/models/battle/buildings/SunPyramid.obj",
-      "texture": "res://assets/models/battle/textures/SunPyramid.png"
+      "scene": "res://assets/models/battle/buildings/SunPyramid.glb",
+      "intro": "",
+      "idle": "",
+      "intro_length": 3.0,
+      "ambient": "",
+      "spawn_audio": "",
+      "spawn_audio_delay": 0.0
     }
   }
 }

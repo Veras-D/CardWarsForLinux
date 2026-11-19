@@ -144,6 +144,8 @@ var _prev_opponent_mp: int = -1
 var _mp_bar_tweens: Dictionary = {}
 var _mp_liquid_mats: Dictionary = {}
 var _mp_slosh_tweens: Dictionary = {}
+var _already_summoned_cards: Dictionary = {}
+var _is_summon_cinematic_active: bool = false
 var _hp_anim_state: Dictionary = {
 	"player": {"prev": -1.0, "pulse": 0.0, "last": -1},
 	"opponent": {"prev": -1.0, "pulse": 0.0, "last": -1},
@@ -417,6 +419,8 @@ func setup_match() -> void:
 			match_factions_played.append(str(l))
 	match_floops_used = 0
 	match_total_mp_spent = 0
+	_already_summoned_cards.clear()
+	_is_summon_cinematic_active = false
 
 	# Initialize Leaders & Cooldowns
 	var p_leader = Database.get_leader(GameManager.player_hero_name)
@@ -449,6 +453,8 @@ func setup_match() -> void:
 			p_lane.floop_requested.connect(_on_floop_requested)
 		if not p_lane.creature_destroyed.is_connected(_on_creature_destroyed):
 			p_lane.creature_destroyed.connect(_on_creature_destroyed)
+		if not p_lane.building_destroyed.is_connected(_on_building_destroyed):
+			p_lane.building_destroyed.connect(_on_building_destroyed)
 		if not p_lane.loot_collected.is_connected(_on_loot_collected):
 			p_lane.loot_collected.connect(_on_loot_collected)
 		player_lanes.append(p_lane)
@@ -461,6 +467,8 @@ func setup_match() -> void:
 			o_lane.slot_clicked.connect(_on_lane_clicked)
 		if not o_lane.creature_destroyed.is_connected(_on_creature_destroyed):
 			o_lane.creature_destroyed.connect(_on_creature_destroyed)
+		if not o_lane.building_destroyed.is_connected(_on_building_destroyed):
+			o_lane.building_destroyed.connect(_on_building_destroyed)
 		if not o_lane.loot_collected.is_connected(_on_loot_collected):
 			o_lane.loot_collected.connect(_on_loot_collected)
 		opponent_lanes.append(o_lane)
@@ -490,6 +498,8 @@ func setup_match() -> void:
 		draw_player_card()
 
 func is_action_allowed() -> bool:
+	if _is_summon_cinematic_active:
+		return false
 	if phase_manager != null and phase_manager.get_current_phase() != BattlePhaseManager.Phase.NONE:
 		return phase_manager.is_action_allowed(0)
 	return is_player_turn
@@ -715,6 +725,7 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 
 		_consume_selected_hand_card()
 		_update_ui()
+		await _run_summon_presentation(true, lane.lane_index, card_data, true, lane.has_creature)
 		return
 
 	if not lane.is_player:
@@ -757,6 +768,36 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 	# Remove from hand and reset selection
 	_consume_selected_hand_card()
 	_update_ui()
+	await _run_summon_presentation(true, lane.lane_index, card_data, false, lane.has_building)
+
+
+func _run_summon_presentation(is_player: bool, lane_idx: int, card_data: Dictionary, is_building: bool, trigger_building_fx: bool = false) -> void:
+	if arena_3d == null or card_data.is_empty():
+		return
+	var cid := str(card_data.get("id", card_data.get("object_name", "")))
+	var first_time := not _already_summoned_cards.has(cid)
+	if first_time:
+		_already_summoned_cards[cid] = true
+		_is_summon_cinematic_active = true
+		arena_3d.focus_summon_camera(is_player, lane_idx, is_building, 0.50)
+		var mesh_info: Dictionary = Database.get_entity_mesh_info(card_data) if Database else {}
+		var intro_len := float(mesh_info.get("intro_length", 2.0 if is_building else 1.5))
+		var wait_dur := clampf(intro_len + 0.35, 1.55, 2.35)
+		await get_tree().create_timer(wait_dur).timeout
+		if not is_inside_tree():
+			_is_summon_cinematic_active = false
+			return
+		if trigger_building_fx and arena_3d:
+			arena_3d.play_entity_floop(is_player, lane_idx, true)
+		if arena_3d:
+			arena_3d.focus_setup_board(0.45)
+		_is_summon_cinematic_active = false
+	elif trigger_building_fx:
+		var t_b := get_tree().create_timer(0.40)
+		t_b.timeout.connect(func():
+			if is_inside_tree() and arena_3d:
+				arena_3d.play_entity_floop(is_player, lane_idx, true)
+		)
 
 func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 	if selected_card_view == null or not is_action_allowed():
@@ -865,6 +906,10 @@ func _execute_floop_confirmed(lane: LaneSlot) -> void:
 	lane.set_flooped(true)
 	if arena_3d:
 		arena_3d.set_lane_flooped(lane.is_player, lane.lane_index, true, true)
+		arena_3d.focus_floop_action(lane.is_player, lane.lane_index, false, 0.22)
+		arena_3d.play_entity_floop(lane.is_player, lane.lane_index, false)
+		if lane.has_building:
+			arena_3d.play_entity_floop(lane.is_player, lane.lane_index, true)
 	if GameManager and GameManager.is_network_match and GameManager.network_protocol:
 		GameManager.network_protocol.send_floop(lane.lane_index)
 	log_message("Flooped %s!" % data.get("name", "Creature"))
@@ -876,6 +921,12 @@ func _execute_floop_confirmed(lane: LaneSlot) -> void:
 
 	_execute_floop_ability(lane)
 	_update_ui()
+	if arena_3d:
+		var t_ret := get_tree().create_timer(0.85)
+		t_ret.timeout.connect(func():
+			if is_inside_tree() and arena_3d and _pending_confirm_mode == "":
+				arena_3d.focus_setup_board(0.45)
+		)
 
 func _execute_floop_ability(source_lane: LaneSlot) -> void:
 	if ability_system:
@@ -1096,7 +1147,7 @@ func execute_battle_phase() -> void:
 				if o_lane.has_creature:
 					var target_creature_name = o_lane.creature_data.get("name", "Creature")
 					if arena_3d:
-						arena_3d.animate_creature_hit(false, i)
+						arena_3d.animate_creature_hit(false, i, clash_res.id == "crit")
 					_spawn_floating_damage(false, i, final_damage)
 					var destroyed = o_lane.apply_damage(final_damage)
 					if destroyed:
@@ -1217,6 +1268,9 @@ func _on_network_action_executed(sender_id: int, action_type: String, payload: D
 					o_lane.set_flooped(true)
 					if arena_3d:
 						arena_3d.set_lane_flooped(false, slot_idx, true, true)
+						arena_3d.play_entity_floop(false, slot_idx, false)
+						if o_lane.has_building:
+							arena_3d.play_entity_floop(false, slot_idx, true)
 					_execute_floop_ability(o_lane)
 					log_message("%s flooped %s on Lane %d!" % [GameManager.remote_player_name, o_lane.creature_data.get("name", "Creature"), slot_idx + 1])
 					_update_ui()
@@ -1382,7 +1436,8 @@ func execute_opponent_turn() -> void:
 						ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, target_lane)
 					_update_ui()
 					played_any = true
-					await get_tree().create_timer(0.35).timeout
+					await _run_summon_presentation(false, target_lane.lane_index, c_data, false, target_lane.has_building)
+					await get_tree().create_timer(0.25).timeout
 					break
 			elif c_type == "BUILDING":
 				var target_lane: LaneSlot = null
@@ -1405,7 +1460,8 @@ func execute_opponent_turn() -> void:
 						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.PLAY_BUILDING, false)
 					_update_ui()
 					played_any = true
-					await get_tree().create_timer(0.35).timeout
+					await _run_summon_presentation(false, target_lane.lane_index, c_data, true, target_lane.has_creature)
+					await get_tree().create_timer(0.25).timeout
 					break
 			elif c_type == "SPELL" and spell_resolver != null:
 				var check = spell_resolver.can_cast(c_data, opponent_mp, false)
@@ -1689,7 +1745,7 @@ func _on_retry_match_pressed() -> void:
 
 func _on_creature_destroyed(lane: LaneSlot, dead_data: Dictionary) -> void:
 	if arena_3d:
-		arena_3d.spawn_lane_creature(lane.is_player, lane.lane_index, {}, false)
+		arena_3d.despawn_lane_entity_animated(lane.is_player, lane.lane_index, false)
 	var creature_name = dead_data.get("name", "Creature")
 	if not lane.is_player:
 		match_enemy_creatures_defeated += 1
@@ -1734,6 +1790,11 @@ func _on_creature_destroyed(lane: LaneSlot, dead_data: Dictionary) -> void:
 			"label": "R.I.P."
 		})
 		log_message("Your %s was destroyed!" % creature_name)
+
+func _on_building_destroyed(lane: LaneSlot, _dead_data: Dictionary) -> void:
+	if arena_3d:
+		arena_3d.despawn_lane_entity_animated(lane.is_player, lane.lane_index, true)
+
 
 func _on_loot_collected(lane: LaneSlot, loot_type: String, drop_data: Dictionary) -> void:
 	if loot_type == "GOLD":
@@ -2431,7 +2492,7 @@ func _inspect_or_floop_lane(lane: LaneSlot, zone: String) -> void:
 		if footer_bar:
 			footer_bar.visible = false
 		if arena_3d:
-			arena_3d.focus_lane_zoom(lane.is_player, lane.lane_index, 0.40)
+			arena_3d.focus_lane_zoom(lane.is_player, lane.lane_index, 0.30, true)
 		if battle_modals:
 			battle_modals.show_card_info(lane.building_data)
 		return
@@ -2440,7 +2501,7 @@ func _inspect_or_floop_lane(lane: LaneSlot, zone: String) -> void:
 			footer_bar.visible = false
 		var lane_max_def: int = maxi(lane.current_def, int(lane.creature_data.get("def", lane.current_def)))
 		if arena_3d:
-			arena_3d.focus_lane_zoom(lane.is_player, lane.lane_index, 0.40)
+			arena_3d.focus_lane_zoom(lane.is_player, lane.lane_index, 0.30, false)
 		if battle_modals:
 			battle_modals.show_card_info(lane.creature_data, lane.current_atk, lane.current_def, lane_max_def, lane.is_flooped)
 		return
@@ -2448,7 +2509,7 @@ func _inspect_or_floop_lane(lane: LaneSlot, zone: String) -> void:
 		if footer_bar:
 			footer_bar.visible = false
 		if arena_3d:
-			arena_3d.focus_lane_zoom(lane.is_player, lane.lane_index, 0.40)
+			arena_3d.focus_lane_zoom(lane.is_player, lane.lane_index, 0.30, true)
 		if battle_modals:
 			battle_modals.show_card_info(lane.building_data)
 

@@ -131,9 +131,34 @@ var _hex_scan_active: bool = false
 var _hex_scan_time: float = 0.0
 
 var _mesh_cache: Dictionary = {}
+var _scene_cache: Dictionary = {}
 var _mat_cache: Dictionary = {}
 var _tex_cache: Dictionary = {}
 var _creature_heights: Dictionary = {} # key: "p_0" / "o_0" -> float height
+var _entity_meta: Dictionary = {} # key: "p_0_c" / "p_0_b" / "o_0_c" / "o_0_b" -> Dictionary
+
+# Unity BattleScene.unity CWiTweenVantageCam vantage points (* 0.05, S_Z reflected)
+const CREATURE_VANTAGE_POINTS: Array[Vector3] = [
+	Vector3(0.0, 0.05, -0.50),
+	Vector3(0.0, 0.05, 0.00),
+	Vector3(0.0, 0.05, 0.60),
+	Vector3(0.0, 0.05, 1.20),
+]
+const BUILDING_VANTAGE_POINTS: Array[Vector3] = [
+	Vector3(0.0, 0.45, -0.25),
+	Vector3(0.0, 0.45, 0.35),
+	Vector3(0.0, 0.45, 0.95),
+	Vector3(0.0, 0.45, 1.55),
+]
+const DETAIL_CAMERA_OFFSET := Vector3(-0.75, 0.75, 0.0) # CWCommandCardSet detailCameraOffsetX/Y = 15 * 0.05
+const FLOOP_CAMERA_OFFSET := Vector3(-0.65, 1.00, 0.0)  # CWFloopActionManager floopCameraOffsetX=13, Y=20 * 0.05
+const SUMMON_UNDERGROUND_Y := -0.50                     # SummonScript -10f * 0.05
+
+const FX_SCAN_HEX_SOLID_TEX: String = "res://assets/textures/battle/FX_Scan_Hex_Solid.png"
+const FX_REZIN_PARTICLE_TEX: String = "res://assets/textures/fx/FX_RezInParticle2_PNG.png"
+const FX_EXCLAMATION_TEX: String = "res://assets/textures/fx/FX_Battle_ExclamationMark_PNG.png"
+const SFX_REZIN_PATH: String = "res://assets/audio/sfx/FX_RezInParticle.wav"
+const SFX_DEREZ_PATH: String = "res://assets/audio/sfx/SFX_Derez.wav"
 
 var _split_overlay: Control = null
 var _split_svp_p1: SubViewport = null
@@ -259,8 +284,10 @@ func _exit_tree() -> void:
 	clear_loot_chests()
 	_active_highlights.clear()
 	_mesh_cache.clear()
+	_scene_cache.clear()
 	_mat_cache.clear()
 	_tex_cache.clear()
+	_entity_meta.clear()
 
 
 func _process(delta: float) -> void:
@@ -296,6 +323,7 @@ func _build_lane_anchors() -> void:
 	_player_lane_highlights.clear()
 	_opponent_lane_highlights.clear()
 	_creature_heights.clear()
+	_entity_meta.clear()
 
 	for i in range(4):
 		var p_slot := _create_lane_node("PlayerLane_%d" % i, Vector3(PLAYER_LANE_X, BOARD_SURFACE_Y, P1_LANDSCAPE_Z[i]), true)
@@ -442,6 +470,7 @@ func clear_lane_landscapes() -> void:
 		if pad:
 			pad.visible = false
 	_creature_heights.clear()
+	_entity_meta.clear()
 
 
 func set_lane_landscape(is_player: bool, lane_idx: int, faction: String, animate: bool = true) -> void:
@@ -538,6 +567,161 @@ func set_lane_landscape(is_player: bool, lane_idx: int, faction: String, animate
 			prop_tw.tween_property(detail_mi, "scale", LANDSCAPE_MESH_SCALE, 0.75).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
+func _get_cached_scene(scene_path: String) -> PackedScene:
+	if scene_path == "":
+		return null
+	if _scene_cache.has(scene_path):
+		return _scene_cache[scene_path] as PackedScene
+	if not ResourceLoader.exists(scene_path):
+		return null
+	var sc := load(scene_path) as PackedScene
+	if sc:
+		_scene_cache[scene_path] = sc
+	return sc
+
+
+func _compute_hierarchy_aabb(node: Node3D) -> AABB:
+	var combined := AABB()
+	var has_box := false
+	var root_inv := node.global_transform.affine_inverse() if node.is_inside_tree() else Transform3D.IDENTITY
+	var stack: Array[Node] = [node]
+	while not stack.is_empty():
+		var cur := stack.pop_back() as Node
+		for ch in cur.get_children():
+			stack.append(ch)
+		if cur is MeshInstance3D:
+			var mi := cur as MeshInstance3D
+			if mi.mesh:
+				var a := mi.mesh.get_aabb()
+				var xf := (root_inv * mi.global_transform) if node.is_inside_tree() else mi.transform
+				var b := xf * a
+				if not has_box:
+					combined = b
+					has_box = true
+				else:
+					combined = combined.merge(b)
+	return combined if has_box else AABB(Vector3(-0.15, 0.0, -0.15), Vector3(0.3, 0.34, 0.3))
+
+
+func _play_ap_clip(ap: AnimationPlayer, clip_name: String, loop: bool = false, start_time: float = -1.0, speed: float = 1.0) -> bool:
+	if ap == null or clip_name == "":
+		return false
+	var resolved := clip_name
+	if not ap.has_animation(resolved):
+		for an in ap.get_animation_list():
+			if str(an).to_lower() == clip_name.to_lower() or str(an).ends_with("_" + clip_name):
+				resolved = str(an)
+				break
+	if not ap.has_animation(resolved):
+		return false
+	var anim := ap.get_animation(resolved)
+	if anim:
+		anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+	ap.speed_scale = speed
+	ap.play(resolved)
+	if start_time >= 0.0:
+		ap.seek(start_time, true)
+	return true
+
+
+func _queue_ap_clip(ap: AnimationPlayer, clip_name: String, loop: bool = true) -> void:
+	if ap == null or clip_name == "":
+		return
+	var resolved := clip_name
+	if not ap.has_animation(resolved):
+		for an in ap.get_animation_list():
+			if str(an).to_lower() == clip_name.to_lower():
+				resolved = str(an)
+				break
+	if not ap.has_animation(resolved):
+		return
+	var anim := ap.get_animation(resolved)
+	if anim:
+		anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+	ap.queue(resolved)
+
+
+func _get_entity_body(is_player: bool, lane_idx: int, is_building: bool) -> Node3D:
+	var anchor := get_lane_anchor(is_player, lane_idx)
+	if anchor == null:
+		return null
+	var holder := anchor.get_node_or_null("BuildingAnchor" if is_building else "CreatureAnchor") as Node3D
+	if holder == null:
+		return null
+	return holder.get_node_or_null("BuildingBody" if is_building else "EntityBody") as Node3D
+
+
+func _spawn_summon_vfx(parent_anchor: Node3D, is_building: bool) -> void:
+	if parent_anchor == null:
+		return
+	var fx_root := Node3D.new()
+	fx_root.name = "SummonFX"
+	parent_anchor.add_child(fx_root)
+
+	# Hex glow pad matching FX_RezIn_Creature / FX_RezInParticle_Building
+	if ResourceLoader.exists(FX_SCAN_HEX_SOLID_TEX):
+		var hex_mi := MeshInstance3D.new()
+		var plane := PlaneMesh.new()
+		plane.size = Vector2(0.46, 0.46) if is_building else Vector2(0.54, 0.54)
+		hex_mi.mesh = plane
+		var hmat := StandardMaterial3D.new()
+		hmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		hmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		hmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		hmat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+		hmat.albedo_texture = load(FX_SCAN_HEX_SOLID_TEX)
+		hmat.albedo_color = Color(0.35, 0.92, 1.0, 0.95)
+		hex_mi.material_override = hmat
+		hex_mi.position = Vector3(0.0, 0.008, 0.0)
+		fx_root.add_child(hex_mi)
+		var tw_h := create_tween()
+		tw_h.tween_property(hex_mi, "scale", Vector3(1.25, 1.0, 1.25), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw_h.parallel().tween_property(hmat, "albedo_color:a", 0.0, 0.85).set_delay(0.25)
+
+	# Rising RezIn particles using original FX_RezInParticle2_PNG.png
+	if ResourceLoader.exists(FX_REZIN_PARTICLE_TEX):
+		var ptex := load(FX_REZIN_PARTICLE_TEX) as Texture2D
+		var p_px := 0.10 / maxf(1.0, float(ptex.get_height())) if ptex else 0.0012
+		for i in range(6):
+			var sp := Sprite3D.new()
+			sp.texture = ptex
+			sp.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			sp.pixel_size = p_px
+			sp.modulate = Color(0.45, 0.95, 1.0, 0.9)
+			var ang := (TAU / 6.0) * float(i)
+			var rad := 0.14 if is_building else 0.17
+			sp.position = Vector3(cos(ang) * rad, 0.02, sin(ang) * rad)
+			fx_root.add_child(sp)
+			var tw_p := create_tween()
+			tw_p.tween_interval(0.04 * float(i))
+			tw_p.tween_property(sp, "position:y", 0.42, 0.65).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tw_p.parallel().tween_property(sp, "modulate:a", 0.0, 0.55).set_delay(0.15)
+
+	if ResourceLoader.exists(SFX_REZIN_PATH):
+		Audio.play_sfx_with_variation(load(SFX_REZIN_PATH), -4.0, 0.04)
+
+	var fx_id := fx_root.get_instance_id()
+	var clean_timer := get_tree().create_timer(1.4)
+	clean_timer.timeout.connect(func():
+		var fx := instance_from_id(fx_id) as Node
+		if is_instance_valid(fx):
+			fx.queue_free()
+	)
+
+
+func _play_delayed_spawn_audio(wav_path: String, delay_secs: float) -> void:
+	if wav_path == "" or not ResourceLoader.exists(wav_path):
+		return
+	if delay_secs > 0.01:
+		var t := get_tree().create_timer(delay_secs)
+		t.timeout.connect(func():
+			if is_inside_tree() and ResourceLoader.exists(wav_path):
+				Audio.play_sfx_with_variation(load(wav_path), -3.0, 0.04)
+		)
+	else:
+		Audio.play_sfx_with_variation(load(wav_path), -3.0, 0.04)
+
+
 func spawn_lane_creature(is_player: bool, lane_idx: int, card_data: Dictionary, animate: bool = true) -> void:
 	var anchor := get_lane_anchor(is_player, lane_idx)
 	if anchor == null:
@@ -553,34 +737,36 @@ func spawn_lane_creature(is_player: bool, lane_idx: int, card_data: Dictionary, 
 		_clear_node_children(drop_holder)
 
 	var key := "%s_%d" % ["p" if is_player else "o", lane_idx]
+	var meta_key := "%s_c" % key
 	if card_data.is_empty():
 		_creature_heights.erase(key)
+		_entity_meta.erase(meta_key)
 		set_lane_flooped(is_player, lane_idx, false, false)
 		return
 
 	var mesh_info: Dictionary = Database.get_entity_mesh_info(card_data) if Database else {}
-	var ent_mesh := _get_cached_mesh(str(mesh_info.get("mesh", "")))
-	var ent_tex := str(mesh_info.get("texture", ""))
+	var ent_scene := _get_cached_scene(str(mesh_info.get("scene", "")))
+	var intro_clip := str(mesh_info.get("intro", ""))
+	var idle_clip := str(mesh_info.get("idle", ""))
+	var ambient_clip := str(mesh_info.get("ambient", ""))
+	var spawn_audio := str(mesh_info.get("spawn_audio", ""))
+	var spawn_delay := float(mesh_info.get("spawn_audio_delay", 0.0))
+
 	var body := Node3D.new()
 	body.name = "EntityBody"
 	body.rotation_degrees = Vector3(0, -90.0 if is_player else 90.0, 0)
 	holder.add_child(body)
 
-	var h_world := 0.36
-	if ent_mesh != null:
-		var mi := MeshInstance3D.new()
-		mi.name = "Mesh"
-		mi.mesh = ent_mesh
-		mi.material_override = _get_cached_mat(ent_tex)
-		var aabb := ent_mesh.get_aabb()
-		var max_dim := maxf(aabb.size.x, maxf(aabb.size.y, aabb.size.z))
-		var s := 0.40 / maxf(0.001, max_dim)
-		var cx := aabb.position.x + aabb.size.x * 0.5
-		var cz := aabb.position.z + aabb.size.z * 0.5
-		mi.scale = Vector3(s, s, s)
-		mi.position = Vector3(-cx * s, -aabb.position.y * s, -cz * s)
-		body.add_child(mi)
-		h_world = clampf(aabb.size.y * s, 0.22, 0.46)
+	var ap: AnimationPlayer = null
+	var h_world := 0.34
+	if ent_scene != null:
+		var inst := ent_scene.instantiate() as Node3D
+		if inst:
+			inst.name = "Model"
+			body.add_child(inst)
+			ap = inst.find_child("AnimationPlayer", true, false) as AnimationPlayer
+			var aabb := _compute_hierarchy_aabb(inst)
+			h_world = clampf(aabb.size.y, 0.20, 0.52)
 	else:
 		var fallback := Sprite3D.new()
 		fallback.pixel_size = 0.0018
@@ -592,13 +778,44 @@ func spawn_lane_creature(is_player: bool, lane_idx: int, card_data: Dictionary, 
 		body.add_child(fallback)
 
 	_creature_heights[key] = h_world
+	_entity_meta[meta_key] = {
+		"intro": intro_clip,
+		"idle": idle_clip if idle_clip != "" else ambient_clip,
+		"intro_length": float(mesh_info.get("intro_length", 1.5)),
+	}
 	set_lane_flooped(is_player, lane_idx, false, true)
 
 	if animate:
-		body.scale = Vector3(0.08, 0.08, 0.08)
-		var tw := create_tween()
-		tw.tween_property(body, "scale", Vector3(1.12, 1.12, 1.12), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tw.tween_property(body, "scale", Vector3.ONE, 0.10)
+		# Matches SummonScript.SummonAction: start underground -10f, brief delay, SpawnFX/SFX -> Intro -> Idle
+		body.position.y = SUMMON_UNDERGROUND_Y
+		var body_id := body.get_instance_id()
+		var holder_id := holder.get_instance_id()
+		var ap_id := ap.get_instance_id() if ap else 0
+		var t_fx := get_tree().create_timer(0.32)
+		t_fx.timeout.connect(func():
+			var b := instance_from_id(body_id) as Node3D
+			var h := instance_from_id(holder_id) as Node3D
+			if not is_inside_tree() or b == null or h == null:
+				return
+			b.position.y = 0.0
+			_spawn_summon_vfx(h, false)
+			_play_delayed_spawn_audio(spawn_audio, spawn_delay)
+			var ap_node := instance_from_id(ap_id) as AnimationPlayer if ap_id != 0 else null
+			if ap_node:
+				if not _play_ap_clip(ap_node, intro_clip, false):
+					_play_ap_clip(ap_node, idle_clip, true)
+				if idle_clip != "":
+					_queue_ap_clip(ap_node, idle_clip, true)
+			else:
+				b.scale = Vector3(0.08, 0.08, 0.08)
+				var tw := create_tween()
+				tw.tween_property(b, "scale", Vector3(1.12, 1.12, 1.12), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				tw.tween_property(b, "scale", Vector3.ONE, 0.10)
+		)
+	else:
+		body.position.y = 0.0
+		if ap:
+			_play_ap_clip(ap, idle_clip if idle_clip != "" else ambient_clip, true)
 
 
 func spawn_lane_building(is_player: bool, lane_idx: int, card_data: Dictionary, animate: bool = true) -> void:
@@ -612,35 +829,58 @@ func spawn_lane_building(is_player: bool, lane_idx: int, card_data: Dictionary, 
 		holder.remove_child(c)
 		c.queue_free()
 
+	var key := "%s_%d" % ["p" if is_player else "o", lane_idx]
+	var meta_key := "%s_b" % key
 	if card_data.is_empty():
+		_entity_meta.erase(meta_key)
 		return
 
 	var mesh_info: Dictionary = Database.get_entity_mesh_info(card_data) if Database else {}
-	var b_mesh := _get_cached_mesh(str(mesh_info.get("mesh", "")))
-	var b_tex := str(mesh_info.get("texture", ""))
+	var b_scene := _get_cached_scene(str(mesh_info.get("scene", "")))
+	var ambient_clip := str(mesh_info.get("ambient", ""))
+	var spawn_audio := str(mesh_info.get("spawn_audio", ""))
+	var spawn_delay := float(mesh_info.get("spawn_audio_delay", 0.0))
+
 	var body := Node3D.new()
 	body.name = "BuildingBody"
 	body.rotation_degrees = Vector3(0, -90.0 if is_player else 90.0, 0)
 	holder.add_child(body)
 
-	if b_mesh != null:
-		var mi := MeshInstance3D.new()
-		mi.name = "Mesh"
-		mi.mesh = b_mesh
-		mi.material_override = _get_cached_mat(b_tex)
-		var aabb := b_mesh.get_aabb()
-		var max_dim := maxf(aabb.size.x, maxf(aabb.size.y, aabb.size.z))
-		var s := 0.34 / maxf(0.001, max_dim)
-		var cx := aabb.position.x + aabb.size.x * 0.5
-		var cz := aabb.position.z + aabb.size.z * 0.5
-		mi.scale = Vector3(s, s, s)
-		mi.position = Vector3(-cx * s, -aabb.position.y * s, -cz * s)
-		body.add_child(mi)
+	var ap: AnimationPlayer = null
+	if b_scene != null:
+		var inst := b_scene.instantiate() as Node3D
+		if inst:
+			inst.name = "Model"
+			body.add_child(inst)
+			ap = inst.find_child("AnimationPlayer", true, false) as AnimationPlayer
+
+	_entity_meta[meta_key] = {
+		"intro": "",
+		"idle": ambient_clip,
+		"intro_length": float(mesh_info.get("intro_length", 2.0)),
+	}
+
+	if ap and ambient_clip != "":
+		_play_ap_clip(ap, ambient_clip, true)
 
 	if animate:
-		body.scale = Vector3(1.0, 0.05, 1.0)
-		var tw := create_tween()
-		tw.tween_property(body, "scale:y", 1.0, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		# Matches SummonScript.SummonAction for buildings: start at -10f underground -> VFX -> iTween.MoveTo 2.0s rise
+		body.position.y = SUMMON_UNDERGROUND_Y
+		var body_id := body.get_instance_id()
+		var holder_id := holder.get_instance_id()
+		var t_fx := get_tree().create_timer(0.32)
+		t_fx.timeout.connect(func():
+			var b := instance_from_id(body_id) as Node3D
+			var h := instance_from_id(holder_id) as Node3D
+			if not is_inside_tree() or b == null or h == null:
+				return
+			_spawn_summon_vfx(h, true)
+			_play_delayed_spawn_audio(spawn_audio, spawn_delay)
+			var tw := create_tween()
+			tw.tween_property(b, "position:y", 0.0, 1.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		)
+	else:
+		body.position.y = 0.0
 
 
 func set_lane_flooped(is_player: bool, lane_idx: int, is_flooped: bool, has_creature: bool = true) -> void:
@@ -662,7 +902,46 @@ func set_lane_flooped(is_player: bool, lane_idx: int, is_flooped: bool, has_crea
 			body.rotation_degrees = Vector3(0, target_rot_y, 0)
 
 
+func play_entity_floop(is_player: bool, lane_idx: int, is_building: bool = false) -> void:
+	var body := _get_entity_body(is_player, lane_idx, is_building)
+	if body == null:
+		return
+	var ap := body.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	var meta_key := "%s_%d_%s" % ["p" if is_player else "o", lane_idx, "b" if is_building else "c"]
+	var idle_clip := str(_entity_meta.get(meta_key, {}).get("idle", ""))
+	if ap:
+		if _play_ap_clip(ap, "Floop", false) and idle_clip != "":
+			_queue_ap_clip(ap, idle_clip, true)
+	if is_building and ResourceLoader.exists(FX_EXCLAMATION_TEX):
+		var etex := load(FX_EXCLAMATION_TEX) as Texture2D
+		var sp := Sprite3D.new()
+		sp.texture = etex
+		sp.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		sp.pixel_size = 0.20 / maxf(1.0, float(etex.get_height())) if etex else 0.0008
+		sp.modulate = Color(1.0, 0.94, 0.35, 1.0)
+		sp.position = Vector3(0.0, 0.34, 0.0)
+		body.add_child(sp)
+		var sp_id := sp.get_instance_id()
+		var tw := create_tween()
+		tw.tween_property(sp, "position:y", 0.56, 0.55).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(sp, "modulate:a", 0.0, 0.45).set_delay(0.35)
+		tw.tween_callback(func():
+			var sp_n := instance_from_id(sp_id) as Node
+			if is_instance_valid(sp_n):
+				sp_n.queue_free()
+		)
+
+
 func animate_creature_lunge(is_player: bool, lane_idx: int) -> void:
+	var body := _get_entity_body(is_player, lane_idx, false)
+	if body:
+		var ap := body.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		var meta_key := "%s_%d_c" % ["p" if is_player else "o", lane_idx]
+		var idle_clip := str(_entity_meta.get(meta_key, {}).get("idle", ""))
+		if ap and _play_ap_clip(ap, "Crash", false):
+			if idle_clip != "":
+				_queue_ap_clip(ap, idle_clip, true)
+			return
 	var anchor := get_lane_anchor(is_player, lane_idx)
 	if anchor == null:
 		return
@@ -676,7 +955,21 @@ func animate_creature_lunge(is_player: bool, lane_idx: int) -> void:
 	tw.tween_property(holder, "position:x", base_x, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 
-func animate_creature_hit(is_player: bool, lane_idx: int) -> void:
+func animate_creature_hit(is_player: bool, lane_idx: int, is_crit: bool = false) -> void:
+	var body := _get_entity_body(is_player, lane_idx, false)
+	if body:
+		var ap := body.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		var meta_key := "%s_%d_c" % ["p" if is_player else "o", lane_idx]
+		var idle_clip := str(_entity_meta.get(meta_key, {}).get("idle", ""))
+		if ap:
+			if is_crit and _play_ap_clip(ap, "Hammer", false, 0.96, 1.35):
+				if idle_clip != "":
+					_queue_ap_clip(ap, idle_clip, true)
+				return
+			elif _play_ap_clip(ap, "Crash", false, 0.0, 1.25):
+				if idle_clip != "":
+					_queue_ap_clip(ap, idle_clip, true)
+				return
 	var anchor := get_lane_anchor(is_player, lane_idx)
 	if anchor == null:
 		return
@@ -687,6 +980,39 @@ func animate_creature_hit(is_player: bool, lane_idx: int) -> void:
 	var tw := create_tween()
 	tw.tween_property(holder, "position:x", base_x + (-0.08 if is_player else 0.08), 0.08)
 	tw.tween_property(holder, "position:x", base_x, 0.12)
+
+
+func despawn_lane_entity_animated(is_player: bool, lane_idx: int, is_building: bool = false) -> void:
+	var key := "%s_%d" % ["p" if is_player else "o", lane_idx]
+	if not is_building:
+		_creature_heights.erase(key)
+		set_lane_flooped(is_player, lane_idx, false, false)
+	_entity_meta.erase("%s_%s" % [key, "b" if is_building else "c"])
+
+	var body := _get_entity_body(is_player, lane_idx, is_building)
+	if body == null:
+		return
+	# Rename immediately so any follow-up summon in the same frame won't collide
+	body.name = "DyingEntity"
+	if ResourceLoader.exists(SFX_DEREZ_PATH):
+		Audio.play_sfx_with_variation(load(SFX_DEREZ_PATH), -3.0, 0.04)
+	var ap := body.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	var clip_name := "Derez" if is_building else "Death"
+	var wait_secs := 0.95 if is_building else 0.30
+	if ap and _play_ap_clip(ap, clip_name, false):
+		var a := ap.get_animation(clip_name)
+		if a:
+			wait_secs = maxf(wait_secs, a.length)
+	else:
+		var tw := create_tween()
+		tw.tween_property(body, "position:y", SUMMON_UNDERGROUND_Y, 0.25)
+	var body_id := body.get_instance_id()
+	var t := get_tree().create_timer(wait_secs)
+	t.timeout.connect(func():
+		var b := instance_from_id(body_id) as Node
+		if is_instance_valid(b):
+			b.queue_free()
+	)
 
 
 func spawn_lane_drop_prop(is_player: bool, lane_idx: int, drop_type: String) -> void:
@@ -1341,24 +1667,61 @@ func focus_setup_board(duration: float = 0.65) -> Tween:
 	return tween_camera(CAM_SETUP_POS, CAM_SETUP_LOOK, duration, 60.0)
 
 
-func focus_lane_zoom(is_player: bool, lane_idx: int, duration: float = 0.45) -> Tween:
+func focus_summon_camera(is_player: bool, lane_idx: int, is_building: bool = false, duration: float = 0.50) -> Tween:
+	_disable_split_duel()
+	var li := clampi(lane_idx, 0, 3)
+	var anchor := get_lane_anchor(is_player, li)
+	if anchor == null:
+		return focus_setup_board(duration)
+	var sub := anchor.get_node_or_null("BuildingAnchor" if is_building else "CreatureAnchor") as Node3D
+	var target_pos := sub.global_position if sub else anchor.global_position
+
+	# CWiTweenVantageCam: Lane{1..4}{Creature,Building}VantagePoint scaled by bounds height
+	var vantage := BUILDING_VANTAGE_POINTS[li] if is_building else CREATURE_VANTAGE_POINTS[li]
+	var key := "%s_%d" % ["p" if is_player else "o", li]
+	var h := float(_creature_heights.get(key, 0.25))
+	if not is_building:
+		vantage.y += h * 0.5 + 0.025
+		var dir_out := Vector3(vantage.x - target_pos.x, 0.0, vantage.z - target_pos.z).normalized()
+		vantage += dir_out * (h * 0.4 + 0.08)
+	var look_pos := target_pos + Vector3(0.0, 0.10 if is_building else (h * 0.45), 0.0)
+	return tween_camera(vantage, look_pos, duration, 60.0)
+
+
+func focus_lane_zoom(is_player: bool, lane_idx: int, duration: float = 0.30, is_building: bool = false) -> Tween:
 	_disable_split_duel()
 	var anchor := get_lane_anchor(is_player, lane_idx)
 	if anchor == null:
 		return focus_setup_board(duration)
-	var p := anchor.global_position
-	var cam_pos := Vector3(p.x - 0.85, 0.72, p.z + (0.28 if p.z < 0.0 else -0.28))
-	var look_pos := Vector3(p.x + 0.15, p.y + 0.22, p.z)
-	return tween_camera(cam_pos, look_pos, duration, 40.0)
+	var sub := anchor.get_node_or_null("BuildingAnchor" if is_building else "CreatureAnchor") as Node3D
+	var p := sub.global_position if sub else anchor.global_position
+	# CWCommandCardSet OnClick: detailCameraOffsetX/Y = 15 * 0.05 = 0.75
+	var cam_pos := p + DETAIL_CAMERA_OFFSET
+	var look_pos := p + Vector3(0.0, 0.14, 0.0)
+	return tween_camera(cam_pos, look_pos, duration, 56.0)
+
+
+func focus_floop_action(is_player: bool, lane_idx: int, is_building: bool = false, duration: float = 0.20) -> Tween:
+	_disable_split_duel()
+	var anchor := get_lane_anchor(is_player, lane_idx)
+	if anchor == null:
+		return focus_setup_board(duration)
+	var sub := anchor.get_node_or_null("BuildingAnchor" if is_building else "CreatureAnchor") as Node3D
+	var p := sub.global_position if sub else anchor.global_position
+	# CWFloopActionManager FloopCameraTrigger: offsetX = -0.65, offsetY = 1.00, targetOffsetY = 0.415 (0.28 for small units)
+	var cam_pos := p + FLOOP_CAMERA_OFFSET
+	var look_pos := p + Vector3(0.0, 0.28, 0.0)
+	return tween_camera(cam_pos, look_pos, duration, 58.0)
 
 
 func focus_duel_lane(lane_idx: int, _player_attacking: bool, duration: float = 0.40) -> Tween:
 	_active_duel_lane_idx = clampi(lane_idx, 0, 3)
 	var z := LANE_Z_CENTERS[_active_duel_lane_idx]
-	var p1_pos := Vector3(-0.04, 0.42, z + 1.08)
-	var p1_look := Vector3(-0.62, 0.10, z - 0.10)
-	var p2_pos := Vector3(0.04, 0.42, z + 1.08)
-	var p2_look := Vector3(0.60, 0.10, z - 0.10)
+	# Matched to BattleScene.unity P1_Lane*BattleCamera / P2_Lane*BattleCamera relative to center & creatures
+	var p1_pos := Vector3(-0.04, 0.14, z + 0.62)
+	var p1_look := Vector3(-0.48, 0.06, z)
+	var p2_pos := Vector3(0.04, 0.14, z + 0.62)
+	var p2_look := Vector3(0.48, 0.06, z)
 
 	var was_active := _duel_split_active
 	_duel_split_active = true
@@ -1503,6 +1866,7 @@ func clear_all_entities() -> void:
 		if pad:
 			pad.visible = false
 	_creature_heights.clear()
+	_entity_meta.clear()
 
 
 var _loot_chests: Array[Dictionary] = []
