@@ -858,10 +858,10 @@ mouse_filter = 2
 
 [node name="MagicOrbLabel" type="Label" parent="Footer/RightControls"]
 layout_mode = 0
-offset_left = 12.0
-offset_top = 21.0
-offset_right = 105.0
-offset_bottom = 114.0
+offset_left = 8.5
+offset_top = 24.7
+offset_right = 101.5
+offset_bottom = 117.7
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 7
