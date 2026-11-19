@@ -712,12 +712,10 @@ func _trigger_board_icon_activate(buttons: Array, activate_method: String, on_do
 		on_done.call()
 
 func _update_player_stats() -> void:
-	var hero_id: String = GameManager.player_hero_name if "player_hero_name" in GameManager else "Jake"
-	var level: int = GameManager.get_hero_level(hero_id) if GameManager.has_method("get_hero_level") else 1
-	var xp: int = GameManager.get_hero_xp(hero_id) if GameManager.has_method("get_hero_xp") else 0
-	var max_xp: int = GameManager.get_hero_tracker(hero_id).get_xp_for_next_level() if GameManager.has_method("get_hero_tracker") else 106
-	if max_xp <= 0:
-		max_xp = 1
+	var progress: Dictionary = GameManager.get_hero_level_progress() if GameManager.has_method("get_hero_level_progress") else {"level": 1, "xp": 0, "max_xp": 106}
+	var level: int = int(progress.get("level", 1))
+	var xp: int = int(progress.get("xp", 0))
+	var max_xp: int = maxi(1, int(progress.get("max_xp", 106)))
 	var stamina = GameManager.stamina if "stamina" in GameManager else 5
 	var max_stamina = GameManager.max_stamina if "max_stamina" in GameManager else 5
 	var gems: int = GameManager.get_gems() if GameManager.has_method("get_gems") else 5

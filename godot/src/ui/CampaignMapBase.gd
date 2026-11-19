@@ -709,9 +709,10 @@ func _refresh_hud() -> void:
 		_player_icon_leader_mat.albedo_texture = load(portrait_path)
 
 	# Use identical TopBar stat resolution as MainMenu._update_player_stats() so HUD never changes between scenes
-	var level = GameManager.player_level if "player_level" in GameManager else 1
-	var xp = GameManager.player_xp if "player_xp" in GameManager else 56
-	var max_xp = GameManager.xp_to_next_level if "xp_to_next_level" in GameManager else 106
+	var progress: Dictionary = GameManager.get_hero_level_progress() if GameManager.has_method("get_hero_level_progress") else {"level": 1, "xp": 0, "max_xp": 106}
+	var level: int = int(progress.get("level", 1))
+	var xp: int = int(progress.get("xp", 0))
+	var max_xp: int = maxi(1, int(progress.get("max_xp", 106)))
 	var stamina = GameManager.stamina if "stamina" in GameManager else 5
 	var max_stamina = GameManager.max_stamina if "max_stamina" in GameManager else 5
 	var gems = GameManager.get_gems() if GameManager.has_method("get_gems") else 50

@@ -303,6 +303,18 @@ func get_hero_xp(hero_id: String) -> int:
 	return get_hero_tracker(hero_id).current_xp
 
 
+## Returns current level and XP bar progress for a hero (defaults to active player_hero_name).
+func get_hero_level_progress(hero_id: String = "") -> Dictionary:
+	var hid := hero_id if hero_id != "" else player_hero_name
+	var tracker = get_hero_tracker(hid)
+	return {
+		"hero_id": hid,
+		"level": int(tracker.current_level),
+		"xp": int(tracker.current_xp),
+		"max_xp": maxi(1, int(tracker.get_xp_for_next_level())),
+	}
+
+
 ## Awards XP to a hero. Returns progress telemetry dictionary.
 func add_hero_xp(hero_id: String, amount: int) -> Dictionary:
 	var tracker = get_hero_tracker(hero_id)
