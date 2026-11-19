@@ -186,8 +186,10 @@ func _ready() -> void:
 		_wire_hud_button_reaction(deck_btn)
 		deck_btn.pressed.connect(_on_deck_pressed)
 	if modal_close_btn:
+		_wire_hud_button_reaction(modal_close_btn)
 		modal_close_btn.pressed.connect(_close_quest_modal)
 	if modal_play_btn:
+		_wire_hud_button_reaction(modal_play_btn)
 		modal_play_btn.pressed.connect(_on_battle_pressed)
 	if modal_leader_left_btn:
 		modal_leader_left_btn.pressed.connect(func(): _cycle_leader(-1))
@@ -760,6 +762,8 @@ func _open_quest_modal(quest_id: String) -> void:
 	_launching_quest = false
 	if modal_play_btn:
 		modal_play_btn.disabled = false
+		modal_play_btn.scale = Vector2.ONE
+		modal_play_btn.modulate = Color.WHITE
 	if modal_close_btn:
 		modal_close_btn.disabled = false
 	_close_zoom_card(true)
@@ -1403,6 +1407,8 @@ func _on_battle_pressed() -> void:
 		return
 	_launching_quest = true
 	if modal_play_btn:
+		if not _is_button_release_tween_active(modal_play_btn):
+			_play_button_release_bounce(modal_play_btn)
 		modal_play_btn.disabled = true
 	if modal_close_btn:
 		modal_close_btn.disabled = true
@@ -1439,20 +1445,51 @@ func _on_battle_pressed() -> void:
 			modal_close_btn.disabled = false
 
 
-func _wire_hud_button_reaction(btn: TextureButton) -> void:
+func _kill_button_reaction_tween(btn: BaseButton) -> void:
+	if btn and btn.has_meta("_reaction_tween"):
+		var prev = btn.get_meta("_reaction_tween")
+		if prev is Tween and prev.is_valid():
+			prev.kill()
+
+
+func _is_button_release_tween_active(btn: BaseButton) -> bool:
+	if btn and btn.has_meta("_reaction_release_tween"):
+		var prev = btn.get_meta("_reaction_release_tween")
+		return prev is Tween and prev.is_valid() and prev.is_running()
+	return false
+
+
+func _play_button_release_bounce(btn: BaseButton) -> void:
 	if not btn:
 		return
+	_kill_button_reaction_tween(btn)
+	btn.pivot_offset = btn.size * 0.5
+	var tw := create_tween()
+	if btn.scale.x > 0.94:
+		tw.tween_property(btn, "scale", Vector2(0.86, 0.86), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(btn, "modulate", Color(0.82, 0.82, 0.82, 1.0), 0.05)
+	tw.tween_property(btn, "scale", Vector2(1.08, 1.08), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(btn, "modulate", Color.WHITE, 0.08)
+	tw.tween_property(btn, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	btn.set_meta("_reaction_tween", tw)
+	btn.set_meta("_reaction_release_tween", tw)
+
+
+func _wire_hud_button_reaction(btn: BaseButton) -> void:
+	if not btn or btn.has_meta("_hud_reaction_wired"):
+		return
+	btn.set_meta("_hud_reaction_wired", true)
 	btn.button_down.connect(func():
+		_kill_button_reaction_tween(btn)
+		btn.set_meta("_reaction_release_tween", null)
 		btn.pivot_offset = btn.size * 0.5
 		var tw := create_tween().set_parallel(true)
-		tw.tween_property(btn, "scale", Vector2(0.8, 0.8), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tw.tween_property(btn, "modulate", Color(0.5, 0.5, 0.5, 1.0), 0.05)
+		tw.tween_property(btn, "scale", Vector2(0.86, 0.86), 0.06).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn, "modulate", Color(0.82, 0.82, 0.82, 1.0), 0.06)
+		btn.set_meta("_reaction_tween", tw)
 	)
 	btn.button_up.connect(func():
-		btn.pivot_offset = btn.size * 0.5
-		var tw := create_tween().set_parallel(true)
-		tw.tween_property(btn, "scale", Vector2.ONE, 0.05).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tw.tween_property(btn, "modulate", Color.WHITE, 0.05)
+		_play_button_release_bounce(btn)
 	)
 
 
