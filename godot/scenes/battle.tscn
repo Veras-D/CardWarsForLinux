@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://dmj6kvn8bqp4a"]
+[gd_scene load_steps=41 format=3 uid="uid://dmj6kvn8bqp4a"]
 
 [ext_resource type="Script" path="res://src/battle/BattleController.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://c34e8kfy7m2w8" path="res://scenes/components/LaneSlot.tscn" id="2_lane"]
@@ -25,47 +25,24 @@
 [ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_PlayerPortrait_MP.png" id="23_tray_mp_ring"]
 [ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_HealthBart.png" id="24_hp_frame"]
 [ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Tray_HealthBar.png" id="25_hp_fill"]
-[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/UI_MagicPoints.png" id="26_magic_orb"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Bottle_Empty.png" id="26_bottle_empty"]
 [ext_resource type="Texture2D" path="res://assets/textures/battle/hud/FloopPanel_BG.png" id="27_floop_bg"]
 [ext_resource type="Texture2D" path="res://assets/textures/battle/hud/PopUpSprite_2.png" id="28_popup_bg"]
 [ext_resource type="Texture2D" path="res://assets/textures/battle/hud/CW_White.png" id="29_cw_white"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/Bottle_Full.png" id="30_bottle_full"]
+[ext_resource type="Texture2D" path="res://assets/textures/battle/hud/PlayerData_XPBar.png" id="31_xpbar"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_Clear"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_HpOppBg"]
-content_margin_left = 10.0
-content_margin_top = 6.0
-content_margin_right = 4.0
-content_margin_bottom = 6.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxEmpty_HpBg"]
+bg_color = Color(0, 0, 0, 0.482353)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_HpFrameOpp"]
-atlas = ExtResource("24_hp_frame")
-region = Rect2(76, 8, 126, 56)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_HpBarFrame"]
-content_margin_left = 4.0
-content_margin_top = 6.0
-content_margin_right = 10.0
-content_margin_bottom = 6.0
-texture = ExtResource("24_hp_frame")
-texture_margin_left = 10.0
-texture_margin_right = 16.0
-region_rect = Rect2(76, 8, 126, 56)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_HpDamageFill"]
+bg_color = Color(1, 0, 0, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_HpFill"]
-texture = ExtResource("29_cw_white")
-expand_margin_left = -3.0
-expand_margin_top = -5.0
-expand_margin_right = -6.0
-expand_margin_bottom = -5.0
-modulate_color = Color(0.14, 0.72, 1, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_MagicOrb"]
-content_margin_left = 4.0
-content_margin_top = 18.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-texture = ExtResource("26_magic_orb")
+texture = ExtResource("31_xpbar")
+modulate_color = Color(0, 0.941176, 1, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_BattleBtn"]
 texture = ExtResource("18_battle_btn")
@@ -201,14 +178,14 @@ layout_mode = 2
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 200.0
+offset_bottom = 220.0
 grow_horizontal = 2
 mouse_filter = 2
 
 [node name="PlayerCornerHud" type="Control" parent="Header"]
 layout_mode = 1
-offset_right = 230.0
-offset_bottom = 190.0
+offset_right = 240.0
+offset_bottom = 215.0
 mouse_filter = 2
 
 [node name="HBox" type="Control" parent="Header/PlayerCornerHud"]
@@ -230,51 +207,56 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="PlayerFaceRig" parent="Header/PlayerCornerHud/HBox/PortraitCol" instance=ExtResource("7_face")]
-custom_minimum_size = Vector2(70, 68)
-offset_left = 15.0
-offset_top = 34.0
-offset_right = 85.0
-offset_bottom = 102.0
+custom_minimum_size = Vector2(89, 89)
+offset_left = 19.0
+offset_top = 52.0
+offset_right = 108.0
+offset_bottom = 141.0
 character_id = "Jake"
+enable_breathing = false
+
+[node name="PlayerLeaderPower" parent="Header/PlayerCornerHud/HBox/PortraitCol" instance=ExtResource("6_leader")]
+offset_left = 4.0
+offset_top = 123.0
+offset_right = 140.0
+offset_bottom = 200.0
 
 [node name="PortraitFrame" type="TextureRect" parent="Header/PlayerCornerHud/HBox/PortraitCol"]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 98.0
-offset_bottom = 117.0
+offset_left = 7.0
+offset_top = 5.0
+offset_right = 133.0
+offset_bottom = 156.0
 mouse_filter = 2
 texture = ExtResource("22_tray_portrait")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="MpOrbIcon" type="TextureRect" parent="Header/PlayerCornerHud/HBox/PortraitCol"]
+[node name="MpOrbIcon" type="TextureProgressBar" parent="Header/PlayerCornerHud/HBox/PortraitCol"]
 layout_mode = 0
-offset_left = 78.0
-offset_top = 73.0
-offset_right = 114.0
-offset_bottom = 114.0
+offset_left = 109.0
+offset_top = 54.0
+offset_right = 146.0
+offset_bottom = 91.0
 mouse_filter = 2
-texture = ExtResource("26_magic_orb")
-expand_mode = 1
-stretch_mode = 5
+max_value = 1.0
+value = 1.0
+fill_mode = 3
+nine_patch_stretch = true
+texture_under = ExtResource("26_bottle_empty")
+texture_progress = ExtResource("30_bottle_full")
 
 [node name="MpRing" type="TextureRect" parent="Header/PlayerCornerHud/HBox/PortraitCol"]
 layout_mode = 0
-offset_left = 71.0
-offset_top = 71.0
-offset_right = 121.0
-offset_bottom = 125.0
+offset_left = 102.0
+offset_top = 46.0
+offset_right = 150.0
+offset_bottom = 99.0
 mouse_filter = 2
 texture = ExtResource("23_tray_mp_ring")
 expand_mode = 1
 stretch_mode = 5
-
-[node name="PlayerLeaderPower" parent="Header/PlayerCornerHud/HBox/PortraitCol" instance=ExtResource("6_leader")]
-offset_left = 2.0
-offset_top = 118.0
-offset_right = 116.0
-offset_bottom = 182.0
+flip_h = true
 
 [node name="StatsCol" type="Control" parent="Header/PlayerCornerHud/HBox"]
 layout_mode = 1
@@ -299,45 +281,71 @@ theme_override_fonts/font = ExtResource("13_font")
 theme_override_font_sizes/font_size = 13
 text = "JAKE"
 
-[node name="HpBar" type="ProgressBar" parent="Header/PlayerCornerHud/HBox/StatsCol"]
-custom_minimum_size = Vector2(154, 28)
+[node name="HpFrameBg" type="NinePatchRect" parent="Header/PlayerCornerHud/HBox/StatsCol"]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 5.0
-offset_right = 196.0
-offset_bottom = 33.0
+offset_left = 8.0
+offset_top = 5.4
+offset_right = 338.0
+offset_bottom = 77.4
+scale = Vector2(0.6207, 0.6207)
 mouse_filter = 2
-theme_override_styles/background = SubResource("StyleBoxTexture_HpBarFrame")
+texture = ExtResource("24_hp_frame")
+region_rect = Rect2(0, 0, 202, 72)
+patch_margin_left = 110
+patch_margin_right = 70
+
+[node name="HpDamageBar" type="ProgressBar" parent="Header/PlayerCornerHud/HBox/StatsCol"]
+custom_minimum_size = Vector2(152, 23)
+layout_mode = 0
+offset_left = 55.0
+offset_top = 15.0
+offset_right = 207.0
+offset_bottom = 38.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxEmpty_HpBg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_HpDamageFill")
+value = 100.0
+show_percentage = false
+
+[node name="HpBar" type="ProgressBar" parent="Header/PlayerCornerHud/HBox/StatsCol"]
+custom_minimum_size = Vector2(152, 23)
+layout_mode = 0
+offset_left = 55.0
+offset_top = 15.0
+offset_right = 207.0
+offset_bottom = 38.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxEmpty_Clear")
 theme_override_styles/fill = SubResource("StyleBoxTexture_HpFill")
 value = 100.0
 show_percentage = false
 
 [node name="HpLabel" type="Label" parent="Header/PlayerCornerHud/HBox/StatsCol/HpBar"]
 layout_mode = 0
-offset_left = -38.0
-offset_top = -3.0
-offset_right = -2.0
-offset_bottom = 30.0
+offset_left = -42.0
+offset_top = -4.5
+offset_right = -8.0
+offset_bottom = 26.5
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "20"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="MpLabel" type="Label" parent="Header/PlayerCornerHud/HBox/StatsCol"]
 layout_mode = 0
-offset_left = 74.0
-offset_top = 75.0
-offset_right = 118.0
-offset_bottom = 119.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+offset_left = 109.0
+offset_top = 50.0
+offset_right = 146.0
+offset_bottom = 91.0
+theme_override_colors/font_color = Color(0.976471, 0.831373, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 24
 text = "2"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -347,8 +355,8 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -230.0
-offset_bottom = 190.0
+offset_left = -240.0
+offset_bottom = 215.0
 grow_horizontal = 0
 mouse_filter = 2
 
@@ -371,53 +379,56 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="OpponentFaceRig" parent="Header/OpponentInfo/HBox/PortraitCol" instance=ExtResource("7_face")]
-custom_minimum_size = Vector2(70, 68)
-offset_left = 145.0
-offset_top = 34.0
-offset_right = 215.0
-offset_bottom = 102.0
+custom_minimum_size = Vector2(89, 89)
+offset_left = 132.0
+offset_top = 52.0
+offset_right = 221.0
+offset_bottom = 141.0
 character_id = "Finn"
+enable_breathing = false
+
+[node name="OpponentLeaderPower" parent="Header/OpponentInfo/HBox/PortraitCol" instance=ExtResource("6_leader")]
+offset_left = 114.0
+offset_top = 123.0
+offset_right = 250.0
+offset_bottom = 200.0
 
 [node name="PortraitFrame" type="TextureRect" parent="Header/OpponentInfo/HBox/PortraitCol"]
 layout_mode = 0
-offset_left = 132.0
-offset_top = 2.0
-offset_right = 228.0
-offset_bottom = 117.0
+offset_left = 107.0
+offset_top = 5.0
+offset_right = 233.0
+offset_bottom = 156.0
 mouse_filter = 2
 texture = ExtResource("22_tray_portrait")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-[node name="OppMpOrbIcon" type="TextureRect" parent="Header/OpponentInfo/HBox/PortraitCol"]
+[node name="OppMpOrbIcon" type="TextureProgressBar" parent="Header/OpponentInfo/HBox/PortraitCol"]
 layout_mode = 0
-offset_left = 116.0
-offset_top = 73.0
-offset_right = 152.0
-offset_bottom = 114.0
+offset_left = 94.0
+offset_top = 54.0
+offset_right = 131.0
+offset_bottom = 91.0
 mouse_filter = 2
-texture = ExtResource("26_magic_orb")
-expand_mode = 1
-stretch_mode = 5
+max_value = 1.0
+value = 1.0
+fill_mode = 3
+nine_patch_stretch = true
+texture_under = ExtResource("26_bottle_empty")
+texture_progress = ExtResource("30_bottle_full")
 
 [node name="OppMpRing" type="TextureRect" parent="Header/OpponentInfo/HBox/PortraitCol"]
 layout_mode = 0
-offset_left = 109.0
-offset_top = 71.0
-offset_right = 159.0
-offset_bottom = 125.0
+offset_left = 90.0
+offset_top = 46.0
+offset_right = 138.0
+offset_bottom = 99.0
 mouse_filter = 2
 texture = ExtResource("23_tray_mp_ring")
 expand_mode = 1
 stretch_mode = 5
-flip_h = true
-
-[node name="OpponentLeaderPower" parent="Header/OpponentInfo/HBox/PortraitCol" instance=ExtResource("6_leader")]
-offset_left = 114.0
-offset_top = 118.0
-offset_right = 228.0
-offset_bottom = 182.0
 
 [node name="StatsCol" type="Control" parent="Header/OpponentInfo/HBox"]
 layout_mode = 1
@@ -443,27 +454,42 @@ theme_override_font_sizes/font_size = 13
 text = "FINN"
 horizontal_alignment = 2
 
-[node name="HpFrameBg" type="TextureRect" parent="Header/OpponentInfo/HBox/StatsCol"]
+[node name="HpFrameBg" type="NinePatchRect" parent="Header/OpponentInfo/HBox/StatsCol"]
 layout_mode = 0
-offset_left = 34.0
-offset_top = 5.0
-offset_right = 188.0
-offset_bottom = 33.0
+offset_left = 232.0
+offset_top = 5.4
+offset_right = 562.0
+offset_bottom = 77.4
+scale = Vector2(-0.6207, 0.6207)
 mouse_filter = 2
-texture = SubResource("AtlasTexture_HpFrameOpp")
-expand_mode = 1
-stretch_mode = 0
-flip_h = true
+texture = ExtResource("24_hp_frame")
+region_rect = Rect2(0, 0, 202, 72)
+patch_margin_left = 110
+patch_margin_right = 70
+
+[node name="HpDamageBar" type="ProgressBar" parent="Header/OpponentInfo/HBox/StatsCol"]
+custom_minimum_size = Vector2(152, 23)
+layout_mode = 0
+offset_left = 33.0
+offset_top = 15.0
+offset_right = 185.0
+offset_bottom = 38.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxEmpty_HpBg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_HpDamageFill")
+value = 100.0
+fill_mode = 1
+show_percentage = false
 
 [node name="HpBar" type="ProgressBar" parent="Header/OpponentInfo/HBox/StatsCol"]
-custom_minimum_size = Vector2(154, 28)
+custom_minimum_size = Vector2(152, 23)
 layout_mode = 0
-offset_left = 34.0
-offset_top = 5.0
-offset_right = 188.0
-offset_bottom = 33.0
+offset_left = 33.0
+offset_top = 15.0
+offset_right = 185.0
+offset_bottom = 38.0
 mouse_filter = 2
-theme_override_styles/background = SubResource("StyleBoxEmpty_HpOppBg")
+theme_override_styles/background = SubResource("StyleBoxEmpty_Clear")
 theme_override_styles/fill = SubResource("StyleBoxTexture_HpFill")
 value = 100.0
 fill_mode = 1
@@ -471,35 +497,36 @@ show_percentage = false
 
 [node name="HpLabel" type="Label" parent="Header/OpponentInfo/HBox/StatsCol/HpBar"]
 layout_mode = 0
-offset_left = 156.0
-offset_top = -3.0
-offset_right = 192.0
-offset_bottom = 30.0
+offset_left = 160.0
+offset_top = -4.5
+offset_right = 194.0
+offset_bottom = 26.5
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "15"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppMpLabel" type="Label" parent="Header/OpponentInfo/HBox/StatsCol"]
 layout_mode = 0
-offset_left = 112.0
-offset_top = 75.0
-offset_right = 156.0
-offset_bottom = 119.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+offset_left = 94.0
+offset_top = 50.0
+offset_right = 131.0
+offset_bottom = 91.0
+theme_override_colors/font_color = Color(0.976471, 0.831373, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 24
 text = "2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BattleLog" type="PanelContainer" parent="."]
+visible = false
 modulate = Color(1, 1, 1, 0.94)
 layout_mode = 1
 anchors_preset = 5
@@ -562,10 +589,31 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -260.0
+offset_top = -280.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
+
+[node name="MagicOrb" type="TextureProgressBar" parent="Footer"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 342.0
+offset_top = -249.0
+offset_right = 435.0
+offset_bottom = -156.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+max_value = 2.0
+value = 2.0
+fill_mode = 3
+nine_patch_stretch = true
+texture_under = ExtResource("26_bottle_empty")
+texture_progress = ExtResource("30_bottle_full")
 
 [node name="TrayPlayerBg" type="TextureRect" parent="Footer"]
 layout_mode = 1
@@ -574,9 +622,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -460.0
-offset_top = -256.0
-offset_right = 460.0
+offset_left = -474.0
+offset_top = -270.0
+offset_right = 474.0
+offset_bottom = 9.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
@@ -591,10 +640,9 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -450.0
-offset_top = -205.0
-offset_right = -268.0
-offset_bottom = -4.0
+offset_left = -474.0
+offset_top = -270.0
+offset_right = -265.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
@@ -608,79 +656,104 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="LootBadge" type="PanelContainer" parent="Footer/LeftCounters/LootCoinRow"]
+[node name="LootBadge" type="Control" parent="Footer/LeftCounters/LootCoinRow"]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 6.0
-offset_right = 158.0
-offset_bottom = 58.0
-theme_override_styles/panel = SubResource("StyleBoxEmpty_Clear")
+offset_left = 34.0
+offset_top = 66.0
+offset_right = 162.0
+offset_bottom = 136.0
+mouse_filter = 2
 
-[node name="HBox" type="HBoxContainer" parent="Footer/LeftCounters/LootCoinRow/LootBadge"]
-layout_mode = 2
-theme_override_constants/separation = 12
+[node name="HBox" type="Control" parent="Footer/LeftCounters/LootCoinRow/LootBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="Footer/LeftCounters/LootCoinRow/LootBadge/HBox"]
-custom_minimum_size = Vector2(54, 48)
-layout_mode = 2
+layout_mode = 0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 63.0
+offset_bottom = 60.0
+mouse_filter = 2
 texture = ExtResource("14_icon_loot")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="LootCountLabel" type="Label" parent="Footer/LeftCounters/LootCoinRow/LootBadge/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
+layout_mode = 0
+offset_left = 68.0
+offset_top = 2.0
+offset_right = 128.0
+offset_bottom = 64.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_constants/outline_size = 6
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 38
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CoinsBadge" type="PanelContainer" parent="Footer/LeftCounters/LootCoinRow"]
+[node name="CoinsBadge" type="Control" parent="Footer/LeftCounters/LootCoinRow"]
 layout_mode = 0
-offset_left = 22.0
-offset_top = 78.0
-offset_right = 156.0
-offset_bottom = 126.0
-theme_override_styles/panel = SubResource("StyleBoxEmpty_Clear")
+offset_left = 18.0
+offset_top = 150.0
+offset_right = 160.0
+offset_bottom = 204.0
+mouse_filter = 2
 
-[node name="HBox" type="HBoxContainer" parent="Footer/LeftCounters/LootCoinRow/CoinsBadge"]
-layout_mode = 2
-theme_override_constants/separation = 10
+[node name="HBox" type="Control" parent="Footer/LeftCounters/LootCoinRow/CoinsBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="Footer/LeftCounters/LootCoinRow/CoinsBadge/HBox"]
-custom_minimum_size = Vector2(36, 36)
-layout_mode = 2
+layout_mode = 0
+offset_left = 2.0
+offset_top = 8.0
+offset_right = 42.0
+offset_bottom = 44.0
+mouse_filter = 2
 texture = ExtResource("15_icon_coins")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="CoinsCountLabel" type="Label" parent="Footer/LeftCounters/LootCoinRow/CoinsBadge/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
+layout_mode = 0
+offset_left = 70.0
+offset_top = 2.0
+offset_right = 134.0
+offset_bottom = 52.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_constants/outline_size = 6
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 32
 text = "0"
-horizontal_alignment = 1
+horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="PilesRow" type="HBoxContainer" parent="Footer/LeftCounters"]
+[node name="PilesRow" type="Control" parent="Footer/LeftCounters"]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 136.0
-offset_right = 176.0
-offset_bottom = 194.0
-theme_override_constants/separation = 6
+offset_left = 3.0
+offset_top = 199.0
+offset_right = 166.0
+offset_bottom = 259.0
+mouse_filter = 2
 
 [node name="DrawPileBox" type="Control" parent="Footer/LeftCounters/PilesRow"]
-custom_minimum_size = Vector2(78, 56)
-layout_mode = 2
+layout_mode = 0
+offset_right = 78.0
+offset_bottom = 58.0
 
 [node name="Icon" type="TextureRect" parent="Footer/LeftCounters/PilesRow/DrawPileBox"]
 layout_mode = 1
@@ -695,22 +768,24 @@ stretch_mode = 5
 
 [node name="DrawCountLabel" type="Label" parent="Footer/LeftCounters/PilesRow/DrawPileBox"]
 layout_mode = 1
-offset_left = 4.0
-offset_top = 10.0
-offset_right = 44.0
-offset_bottom = 44.0
+offset_left = 6.0
+offset_top = 11.0
+offset_right = 43.0
+offset_bottom = 47.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "10"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DiscardPileBtn" type="Button" parent="Footer/LeftCounters/PilesRow"]
-custom_minimum_size = Vector2(78, 56)
-layout_mode = 2
+layout_mode = 0
+offset_left = 68.0
+offset_right = 146.0
+offset_bottom = 58.0
 flat = true
 
 [node name="Icon" type="TextureRect" parent="Footer/LeftCounters/PilesRow/DiscardPileBtn"]
@@ -727,40 +802,33 @@ stretch_mode = 5
 
 [node name="DiscardCountLabel" type="Label" parent="Footer/LeftCounters/PilesRow/DiscardPileBtn"]
 layout_mode = 1
-offset_left = 34.0
-offset_top = 10.0
+offset_left = 36.0
+offset_top = 12.0
 offset_right = 74.0
-offset_bottom = 44.0
+offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HandScroll" type="ScrollContainer" parent="Footer"]
+[node name="HandContainer" type="Control" parent="Footer"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -256.0
-offset_top = -218.0
-offset_right = 296.0
-offset_bottom = -12.0
+offset_left = -265.0
+offset_top = -221.0
+offset_right = 327.0
+offset_bottom = -17.0
 grow_horizontal = 2
 grow_vertical = 0
-vertical_scroll_mode = 0
-
-[node name="HandContainer" type="HBoxContainer" parent="Footer/HandScroll"]
-layout_mode = 2
-size_flags_horizontal = 6
-size_flags_vertical = 3
-theme_override_constants/separation = -8
-alignment = 1
+mouse_filter = 2
 
 [node name="RightControls" type="Control" parent="Footer"]
 layout_mode = 1
@@ -769,39 +837,34 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 312.0
-offset_top = -250.0
-offset_right = 456.0
-offset_bottom = -4.0
+offset_left = 330.0
+offset_top = -270.0
+offset_right = 474.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 
-[node name="MagicOrb" type="PanelContainer" parent="Footer/RightControls"]
+[node name="MagicOrbLabel" type="Label" parent="Footer/RightControls"]
 layout_mode = 0
-offset_left = 31.0
-offset_top = 8.0
-offset_right = 109.0
-offset_bottom = 100.0
-theme_override_styles/panel = SubResource("StyleBoxTexture_MagicOrb")
-
-[node name="MagicOrbLabel" type="Label" parent="Footer/RightControls/MagicOrb"]
-layout_mode = 2
+offset_left = 12.0
+offset_top = 21.0
+offset_right = 105.0
+offset_bottom = 114.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_override_constants/outline_size = 7
 theme_override_fonts/font = ExtResource("13_font")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 52
 text = "2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="TurnBtn" type="Button" parent="Footer/RightControls"]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 122.0
-offset_right = 132.0
-offset_bottom = 244.0
+offset_left = 16.0
+offset_top = 126.0
+offset_right = 144.0
+offset_bottom = 271.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5

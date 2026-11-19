@@ -18,7 +18,7 @@ signal emote_changed(new_emote: EmoteState)
 
 @export var character_id: String = "Finn"
 @export var auto_start_idle: bool = true
-@export var enable_breathing: bool = true
+@export var enable_breathing: bool = false
 
 var current_emote: EmoteState = EmoteState.IDLE
 var current_anim_name: String = ""
@@ -118,17 +118,24 @@ func setup(char_id: String) -> void:
 	if e_rect and face_tex:
 		e_rect.texture = face_tex
 
-	# 2. Base Portrait (Leader round avatar / body texture)
-	var round_portrait_path = "res://assets/textures/leaders/%s_Round.png" % char_id
-	var leader_portrait_path = "res://assets/textures/leaders/%s.png" % char_id
+	# 2. Base Portrait (Square Portrait_*_Frame matching BattleScene, fallback to Round/Leader)
 	var b_portrait = _get_base_portrait()
 	if b_portrait:
-		if ResourceLoader.exists(round_portrait_path):
-			b_portrait.texture = load(round_portrait_path)
-		elif ResourceLoader.exists(leader_portrait_path):
-			b_portrait.texture = load(leader_portrait_path)
-		elif ResourceLoader.exists("res://assets/textures/leaders/Finn_Round.png"):
-			b_portrait.texture = load("res://assets/textures/leaders/Finn_Round.png")
+		var portrait_candidates: Array[String] = []
+		var db = get_node_or_null("/root/Database")
+		if db and db.has_method("get_character"):
+			var cdata: Dictionary = db.get_character(char_id)
+			var pname := str(cdata.get("Portrait", "")).strip_edges()
+			if pname != "":
+				portrait_candidates.append("res://assets/textures/questmap/portraits/%s.png" % pname)
+		portrait_candidates.append("res://assets/textures/questmap/portraits/Portrait_%s_Frame.png" % char_id)
+		portrait_candidates.append("res://assets/textures/leaders/%s_Round.png" % char_id)
+		portrait_candidates.append("res://assets/textures/leaders/%s.png" % char_id)
+		portrait_candidates.append("res://assets/textures/leaders/Finn_Round.png")
+		for ppath in portrait_candidates:
+			if ResourceLoader.exists(ppath):
+				b_portrait.texture = load(ppath)
+				break
 
 
 func play_emote(state: EmoteState, return_to_idle: bool = true) -> void:

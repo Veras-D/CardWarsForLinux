@@ -8,6 +8,7 @@ const TEX_READY: Texture2D = preload("res://assets/textures/battle/hud/uiTurnsRe
 
 @onready var main_button: Button = $Button
 @onready var portrait_rect: TextureRect = $Button/HBox/Portrait
+@onready var count_label: Label = $Button/HBox/CountLabel
 @onready var title_label: Label = $Button/HBox/VBox/TitleLabel
 @onready var status_label: Label = $Button/HBox/VBox/StatusLabel
 @onready var glow_rect: Control = $GlowPanel
@@ -72,6 +73,8 @@ func update_cooldown(cooldown: int) -> void:
 	var sb := StyleBoxTexture.new()
 	if current_cooldown <= 0:
 		sb.texture = TEX_READY
+		if count_label:
+			count_label.visible = false
 		status_label.text = ""
 		status_label.visible = false
 		main_button.disabled = !is_interactive
@@ -79,8 +82,11 @@ func update_cooldown(cooldown: int) -> void:
 		tooltip_text = "READY! Click to activate:\n%s" % hero_desc
 	else:
 		sb.texture = TEX_TURNS
+		if count_label:
+			count_label.visible = true
+			count_label.text = str(current_cooldown)
 		status_label.visible = true
-		status_label.text = "%d %s" % [current_cooldown, "TURNS" if current_cooldown != 1 else "TURN"]
+		status_label.text = "TURNS" if current_cooldown != 1 else "TURN"
 		status_label.modulate = Color.WHITE
 		main_button.disabled = true
 		_stop_ready_pulse()

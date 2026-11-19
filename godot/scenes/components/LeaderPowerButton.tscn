@@ -12,12 +12,12 @@ texture = ExtResource("2_turns")
 texture = ExtResource("3_ready")
 
 [node name="LeaderPowerButton" type="Control"]
-custom_minimum_size = Vector2(118, 66)
+custom_minimum_size = Vector2(144, 81)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 118.0
-offset_bottom = 66.0
-pivot_offset = Vector2(59, 33)
+offset_right = 144.0
+offset_bottom = 81.0
+pivot_offset = Vector2(72, 40.5)
 script = ExtResource("1_script")
 
 [node name="GlowPanel" type="TextureRect" parent="."]
@@ -47,49 +47,70 @@ theme_override_styles/hover = SubResource("SB_Turns")
 theme_override_styles/pressed = SubResource("SB_Turns")
 theme_override_styles/disabled = SubResource("SB_Turns")
 
-[node name="HBox" type="HBoxContainer" parent="Button"]
+[node name="HBox" type="Control" parent="Button"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 40.0
-offset_top = 18.0
-offset_right = -10.0
-offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
 [node name="Portrait" type="TextureRect" parent="Button/HBox"]
 visible = false
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-size_flags_vertical = 4
+layout_mode = 0
+offset_right = 24.0
+offset_bottom = 24.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="VBox" type="VBoxContainer" parent="Button/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
+[node name="CountLabel" type="Label" parent="Button/HBox"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 30.0
+offset_right = 36.0
+offset_bottom = 70.0
 mouse_filter = 2
-theme_override_constants/separation = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 18
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBox" type="Control" parent="Button/HBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="TitleLabel" type="Label" parent="Button/HBox/VBox"]
 visible = false
-layout_mode = 2
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 16.0
 theme_override_font_sizes/font_size = 10
 text = "Leader Power"
 text_overrun_behavior = 3
 
 [node name="StatusLabel" type="Label" parent="Button/HBox/VBox"]
-layout_mode = 2
+layout_mode = 0
+offset_left = 38.0
+offset_top = 35.0
+offset_right = 113.0
+offset_bottom = 67.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 14
-text = "3 TURNS"
+text = "TURNS"
 horizontal_alignment = 1
 vertical_alignment = 1

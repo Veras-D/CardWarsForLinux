@@ -25,26 +25,38 @@ const TEX_CREATURE_HP_BG = preload("res://assets/textures/battle/hud/HealthBar_C
 const TEX_CREATURE_HP_FILL = preload("res://assets/textures/battle/hud/CW_White.png")
 const TEX_CREATURE_ARROW = preload("res://assets/textures/battle/hud/HealthBar_UpDown_Arrow.png")
 const TEX_FLOOP_PANEL_BG = preload("res://assets/textures/battle/hud/FloopPanel_BG.png")
+const TEX_FX_SMOKE: Texture2D = preload("res://assets/textures/battle/fx/FX_Smoke_Grey_PNG.png")
+const TEX_FX_BUBBLES: Texture2D = preload("res://assets/textures/battle/fx/FX_Bubbles2x2_PNG.png")
+const TEX_FX_FLARE: Texture2D = preload("res://assets/textures/battle/fx/Flare1_PNG.png")
+const TEX_FX_GLOW: Texture2D = preload("res://assets/textures/battle/fx/FX_Glow_ball3_grey_TGA.png")
+const TEX_FX_SKULL: Texture2D = preload("res://assets/textures/battle/fx/FX_Skull2_PNG.png")
+const TEX_FX_STARBURST: Texture2D = preload("res://assets/textures/battle/fx/FX_StarBurst4_PNG.png")
+const SFX_DAMAGE_BURST_PATH := "res://assets/audio/sfx/SFX_DamageBurst.wav"
 
+@onready var opponent_hp_damage_bar: ProgressBar = $Header/OpponentInfo/HBox/StatsCol/HpDamageBar
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HBox/StatsCol/HpBar
 @onready var opponent_hp_label: Label = $Header/OpponentInfo/HBox/StatsCol/HpBar/HpLabel
 @onready var opponent_name_label: Label = $Header/OpponentInfo/HBox/StatsCol/NameLabel
 @onready var opponent_mp_label: Label = $Header/OpponentInfo/HBox/StatsCol/OppMpLabel
 @onready var opponent_leader_btn: LeaderPowerButton = $Header/OpponentInfo/HBox/PortraitCol/OpponentLeaderPower
 @onready var opponent_face_rig: CharacterFaceRig = $Header/OpponentInfo/HBox/PortraitCol/OpponentFaceRig
+@onready var opponent_mp_orb_bar: TextureProgressBar = $Header/OpponentInfo/HBox/PortraitCol/OppMpOrbIcon
 
+@onready var player_hp_damage_bar: ProgressBar = $Header/PlayerCornerHud/HBox/StatsCol/HpDamageBar
 @onready var player_hp_bar: ProgressBar = $Header/PlayerCornerHud/HBox/StatsCol/HpBar
 @onready var player_hp_label: Label = $Header/PlayerCornerHud/HBox/StatsCol/HpBar/HpLabel
 @onready var player_name_label: Label = $Header/PlayerCornerHud/HBox/StatsCol/NameLabel
 @onready var player_leader_btn: LeaderPowerButton = $Header/PlayerCornerHud/HBox/PortraitCol/PlayerLeaderPower
 @onready var player_face_rig: CharacterFaceRig = $Header/PlayerCornerHud/HBox/PortraitCol/PlayerFaceRig
 @onready var player_mp_label: Label = $Header/PlayerCornerHud/HBox/StatsCol/MpLabel
+@onready var player_mp_orb_bar: TextureProgressBar = $Header/PlayerCornerHud/HBox/PortraitCol/MpOrbIcon
 
 @onready var opponent_lanes_box: HBoxContainer = $Field/OpponentLanes
 @onready var player_lanes_box: HBoxContainer = $Field/PlayerLanes
-@onready var hand_container: HBoxContainer = $Footer/HandScroll/HandContainer
+@onready var hand_container: Control = $Footer/HandContainer
 
-@onready var magic_orb_label: Label = $Footer/RightControls/MagicOrb/MagicOrbLabel
+@onready var magic_orb_bar: TextureProgressBar = $Footer/MagicOrb
+@onready var magic_orb_label: Label = $Footer/RightControls/MagicOrbLabel
 @onready var turn_btn: Button = $Footer/RightControls/TurnBtn
 @onready var draw_count_label: Label = $Footer/LeftCounters/PilesRow/DrawPileBox/DrawCountLabel
 @onready var discard_btn: Button = $Footer/LeftCounters/PilesRow/DiscardPileBtn
@@ -111,6 +123,13 @@ var opponent_hand: Array[Dictionary] = []
 var _first_player_idx: int = 0
 var _round_magic_cap: int = 2
 var _game_turn_count: int = 1
+var _prev_player_mp: int = -1
+var _prev_opponent_mp: int = -1
+var _mp_bar_tweens: Dictionary = {}
+var _hp_anim_state: Dictionary = {
+	"player": {"prev": -1.0, "pulse": 0.0, "last": -1},
+	"opponent": {"prev": -1.0, "pulse": 0.0, "last": -1},
+}
 
 var player_draw_pile: Array[String] = []
 var opponent_draw_pile: Array[String] = []
@@ -150,7 +169,7 @@ func _set_gameplay_hud_visible(show_hud: bool) -> void:
 	if footer_bar:
 		footer_bar.visible = show_hud
 	if battle_log_box:
-		battle_log_box.visible = show_hud
+		battle_log_box.visible = false
 	if turn_btn:
 		turn_btn.visible = show_hud
 	if quest_quick_btn:
@@ -336,6 +355,8 @@ func setup_match() -> void:
 	opponent_name_label.text = GameManager.opponent_hero_name.to_upper()
 	opponent_max_hp = GameManager.opponent_hero_max_hp
 	opponent_hp = opponent_max_hp
+	_reset_hp_anim_state("player", player_hp, player_max_hp, player_hp_bar, player_hp_damage_bar, player_hp_label)
+	_reset_hp_anim_state("opponent", opponent_hp, opponent_max_hp, opponent_hp_bar, opponent_hp_damage_bar, opponent_hp_label)
 
 	player_draw_pile = GameManager.player_deck.duplicate()
 	player_draw_pile.shuffle()
@@ -348,6 +369,8 @@ func setup_match() -> void:
 
 	player_lanes.clear()
 	opponent_lanes.clear()
+	_prev_player_mp = -1
+	_prev_opponent_mp = -1
 	player_discard_pile.clear()
 	opponent_discard_pile.clear()
 	session_gold = 0
@@ -490,6 +513,49 @@ func add_card_to_hand(card_data: Dictionary) -> void:
 	hand_container.add_child(card_scene)
 	card_scene.render_card(card_data)
 	card_scene.card_clicked.connect(_on_hand_card_clicked)
+	_layout_hand_cards()
+
+
+func _layout_hand_cards() -> void:
+	if hand_container == null:
+		return
+	var cards: Array[Control] = []
+	for c in hand_container.get_children():
+		if c is Control and not c.is_queued_for_deletion():
+			cards.append(c)
+	var count := cards.size()
+	if count == 0:
+		return
+	const CARD_SCALE := 1.10
+	const CARD_W := 130.0 * CARD_SCALE
+	const MAX_STEP := 74.0
+	var container_w := hand_container.size.x if hand_container.size.x > 0.0 else 592.0
+	var step := MAX_STEP
+	if count > 1:
+		step = minf(MAX_STEP, maxf(24.0, (container_w - CARD_W) / float(count - 1)))
+	var selected_idx := -1
+	for i in range(count):
+		var card := cards[i]
+		card.pivot_offset = Vector2.ZERO
+		card.scale = Vector2(CARD_SCALE, CARD_SCALE)
+		card.position = Vector2(float(i) * step, 1.0)
+		card.z_index = i
+		if card == selected_card_view:
+			selected_idx = i
+	if selected_idx >= 0:
+		var sel := cards[selected_idx]
+		sel.position.y = -14.0
+		sel.z_index = count + 4
+
+
+func _consume_selected_hand_card() -> void:
+	var to_free := selected_card_view
+	_deselect_card()
+	if to_free:
+		if to_free.get_parent() == hand_container:
+			hand_container.remove_child(to_free)
+		to_free.queue_free()
+	_layout_hand_cards()
 
 func draw_player_card() -> void:
 	if player_draw_pile.is_empty():
@@ -516,6 +582,7 @@ func _select_card(card_view: CardView) -> void:
 		Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Click.wav"), -6.0, 0.08)
 	selected_card_view = card_view
 	selected_card_view.modulate = Color(1.2, 1.2, 0.8, 1.0)
+	_layout_hand_cards()
 	var card_data = selected_card_view.card_data
 	var card_name = card_data.get("name", "Card")
 	var cost = card_data.get("cost", 0)
@@ -563,6 +630,7 @@ func _deselect_card() -> void:
 	if selected_card_view:
 		selected_card_view.modulate = Color.WHITE
 		selected_card_view = null
+	_layout_hand_cards()
 	for lane in player_lanes:
 		lane.set_highlight(false)
 	for lane in opponent_lanes:
@@ -617,9 +685,7 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 		if ResourceLoader.exists("res://assets/audio/sfx/Click.wav"):
 			Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Click.wav"), -4.0, 0.05)
 
-		var to_free = selected_card_view
-		_deselect_card()
-		to_free.queue_free()
+		_consume_selected_hand_card()
 		_update_ui()
 		return
 
@@ -661,9 +727,7 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, lane)
 
 	# Remove from hand and reset selection
-	var to_free = selected_card_view
-	_deselect_card()
-	to_free.queue_free()
+	_consume_selected_hand_card()
 	_update_ui()
 
 func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
@@ -717,9 +781,7 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 	player_discard_pile.append(card_data.get("id", ""))
 
 	# Remove from hand and reset selection
-	var to_free = selected_card_view
-	_deselect_card()
-	to_free.queue_free()
+	_consume_selected_hand_card()
 	_update_ui()
 	return true
 
@@ -937,102 +999,101 @@ func execute_battle_phase() -> void:
 		log_message("Turn 1 complete — passing turn!")
 		if ability_system:
 			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
-		if phase_manager != null:
-			phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
-			phase_manager.transition_to(BattlePhaseManager.Phase.END_TURN)
+		_end_turn_phase()
 		_advance_turn_counter(0)
 		var timer1 = get_tree().create_timer(0.8)
 		await timer1.timeout
 		execute_opponent_turn()
 		return
 
-	if phase_manager != null:
-		phase_manager.transition_to(BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE)
-	_set_battle_phase_hud(true)
-	log_message("=== BATTLE PHASE! ===")
-
-	# Player attacks
-	for i in range(4):
-		var p_lane = player_lanes[i]
-		if not p_lane.has_creature:
-			continue
-
+	if _has_lane_creature(player_lanes):
 		if phase_manager != null:
-			phase_manager.start_combat_lane(i)
+			phase_manager.transition_to(BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE)
+		_set_battle_phase_hud(true)
+		log_message("=== BATTLE PHASE! ===")
 
-		if ability_system:
-			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, p_lane)
+		# Player attacks
+		for i in range(4):
+			var p_lane = player_lanes[i]
+			if not p_lane.has_creature:
+				continue
 
-		if arena_3d:
-			arena_3d.focus_duel_lane(i, true, 0.36)
-			await get_tree().create_timer(0.28).timeout
+			if phase_manager != null:
+				phase_manager.start_combat_lane(i)
 
-		var attacker_name = p_lane.creature_data.get("name", "Creature")
-		var atk = p_lane.current_atk
-		var o_lane = opponent_lanes[i]
-		var target_name = o_lane.creature_data.get("name", "Creature") if o_lane.has_creature else GameManager.opponent_hero_name
+			if ability_system:
+				ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, p_lane)
 
-		# Trigger Card Wars Battle Wheel (leader & quest hit/crit params)
-		wheel_modal.start_attack_clash(
-			attacker_name,
-			target_name,
-			atk,
-			true,
-			-1.0,
-			-1.0,
-			false,
-			o_lane.has_creature
-		)
-		var clash_res = await wheel_modal.clash_resolved
-		var final_damage: int = int(clash_res.get("final_damage", atk))
-
-		if phase_manager != null:
-			phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
-			phase_manager.resolve_combat_lane(i, clash_res)
-
-		if clash_res.id == "crit":
-			log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [attacker_name, final_damage])
-			_spawn_combat_callout("CRIT x2!", Color(0.22, 1.0, 0.32))
-		elif clash_res.id == "miss":
-			log_message("❌ MISSED! %s's attack missed completely!" % attacker_name)
-			_spawn_combat_callout("MISS!", Color(0.98, 0.32, 0.28))
-		else:
-			log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
-			_spawn_combat_callout("ATTACK x1", Color(1.0, 0.90, 0.18))
-
-		if final_damage > 0:
 			if arena_3d:
-				arena_3d.animate_creature_lunge(true, i)
-			await get_tree().create_timer(0.14).timeout
-			if o_lane.has_creature:
-				var target_creature_name = o_lane.creature_data.get("name", "Creature")
+				arena_3d.focus_duel_lane(i, true, 0.36)
+				await get_tree().create_timer(0.28).timeout
+
+			var attacker_name = p_lane.creature_data.get("name", "Creature")
+			var atk = p_lane.current_atk
+			var o_lane = opponent_lanes[i]
+			var target_name = o_lane.creature_data.get("name", "Creature") if o_lane.has_creature else GameManager.opponent_hero_name
+
+			# Trigger Card Wars Battle Wheel (leader & quest hit/crit params)
+			wheel_modal.start_attack_clash(
+				attacker_name,
+				target_name,
+				atk,
+				true,
+				-1.0,
+				-1.0,
+				false,
+				o_lane.has_creature
+			)
+			var clash_res = await wheel_modal.clash_resolved
+			var final_damage: int = int(clash_res.get("final_damage", atk))
+
+			if phase_manager != null:
+				phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
+				phase_manager.resolve_combat_lane(i, clash_res)
+
+			if clash_res.id == "crit":
+				log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [attacker_name, final_damage])
+				_spawn_combat_callout("CRIT x2!", Color(0.22, 1.0, 0.32))
+			elif clash_res.id == "miss":
+				log_message("❌ MISSED! %s's attack missed completely!" % attacker_name)
+				_spawn_combat_callout("MISS!", Color(0.98, 0.32, 0.28))
+			else:
+				log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
+				_spawn_combat_callout("ATTACK x1", Color(1.0, 0.90, 0.18))
+
+			if final_damage > 0:
 				if arena_3d:
-					arena_3d.animate_creature_hit(false, i)
-				_spawn_floating_damage(false, i, final_damage)
-				var destroyed = o_lane.apply_damage(final_damage)
-				if destroyed:
-					log_message("Opponent's %s was destroyed!" % target_creature_name)
+					arena_3d.animate_creature_lunge(true, i)
+				await get_tree().create_timer(0.14).timeout
+				if o_lane.has_creature:
+					var target_creature_name = o_lane.creature_data.get("name", "Creature")
+					if arena_3d:
+						arena_3d.animate_creature_hit(false, i)
+					_spawn_floating_damage(false, i, final_damage)
+					var destroyed = o_lane.apply_damage(final_damage)
+					if destroyed:
+						log_message("Opponent's %s was destroyed!" % target_creature_name)
+						if opponent_face_rig:
+							opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+						if vo_manager:
+							vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.DESTROY_CREATURE, true)
+							vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, false)
+				else:
+					if arena_3d:
+						arena_3d.play_lane_direct_hit_vfx(false, i)
+					_spawn_floating_damage(false, i, final_damage)
+					opponent_hp = max(0, opponent_hp - final_damage)
 					if opponent_face_rig:
 						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
 					if vo_manager:
-						vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.DESTROY_CREATURE, true)
-						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, false)
-			else:
-				if arena_3d:
-					arena_3d.play_lane_direct_hit_vfx(false, i)
-				_spawn_floating_damage(false, i, final_damage)
-				opponent_hp = max(0, opponent_hp - final_damage)
-				if opponent_face_rig:
-					opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
-				if vo_manager:
-					vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.HERO_DAMAGED, false)
-		await get_tree().create_timer(0.32).timeout
+						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.HERO_DAMAGED, false)
+			await get_tree().create_timer(0.32).timeout
 
-		_update_ui()
-		if opponent_hp <= 0:
-			_set_battle_phase_hud(false)
-			end_match(true)
-			return
+			_update_ui()
+			if opponent_hp <= 0:
+				_set_battle_phase_hud(false)
+				end_match(true)
+				return
 
 	_set_battle_phase_hud(false)
 	if arena_3d:
@@ -1041,8 +1102,7 @@ func execute_battle_phase() -> void:
 	if ability_system:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
 
-	if phase_manager != null:
-		phase_manager.transition_to(BattlePhaseManager.Phase.END_TURN)
+	_end_turn_phase()
 
 	_advance_turn_counter(0)
 
@@ -1349,110 +1409,109 @@ func execute_opponent_turn() -> void:
 		log_message("%s ended Turn 1!" % GameManager.opponent_hero_name)
 		if ability_system:
 			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
-		if phase_manager != null:
-			phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
-			phase_manager.transition_to(BattlePhaseManager.Phase.END_TURN)
+		_end_turn_phase()
 		_advance_turn_counter(1)
 		await get_tree().create_timer(0.6).timeout
 		start_player_turn()
 		return
 
 	# Opponent attacks
-	if phase_manager != null:
-		phase_manager.transition_to(BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE)
-	_set_battle_phase_hud(true)
-
-	for i in range(4):
-		var o_lane = opponent_lanes[i]
-		if not o_lane.has_creature:
-			continue
-
+	if _has_lane_creature(opponent_lanes):
 		if phase_manager != null:
-			phase_manager.start_combat_lane(i)
+			phase_manager.transition_to(BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE)
+		_set_battle_phase_hud(true)
 
-		if ability_system:
-			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, o_lane)
-
-		if arena_3d:
-			arena_3d.focus_duel_lane(i, false, 0.36)
-			await get_tree().create_timer(0.28).timeout
-
-		var attacker_name = o_lane.creature_data.get("name", "Creature")
-		var atk = o_lane.current_atk
-		var p_lane = player_lanes[i]
-		var target_name = p_lane.creature_data.get("name", "Creature") if p_lane.has_creature else GameManager.player_hero_name
-
-		if p_lane.has_creature:
-			# Player gets interactive Defend Wheel!
-			wheel_modal.start_defend_clash(attacker_name, target_name, atk, p_lane.current_atk, false)
-			var clash_res = await wheel_modal.clash_resolved
-			var final_damage: int = int(clash_res.get("final_damage", atk))
-			var counter_damage: int = int(clash_res.get("counter_damage", 0))
+		for i in range(4):
+			var o_lane = opponent_lanes[i]
+			if not o_lane.has_creature:
+				continue
 
 			if phase_manager != null:
-				phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
-				phase_manager.resolve_combat_lane(i, clash_res)
+				phase_manager.start_combat_lane(i)
 
-			if bool(clash_res.get("is_counter", false)):
-				_spawn_combat_callout("COUNTER!", Color(0.18, 0.98, 0.35))
-				log_message("⚡ COUNTER! %s blocked and struck back for %d DMG!" % [target_name, counter_damage])
-				if arena_3d:
-					arena_3d.animate_creature_lunge(true, i)
-				await get_tree().create_timer(0.14).timeout
-				if counter_damage > 0:
+			if ability_system:
+				ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, o_lane)
+
+			if arena_3d:
+				arena_3d.focus_duel_lane(i, false, 0.36)
+				await get_tree().create_timer(0.28).timeout
+
+			var attacker_name = o_lane.creature_data.get("name", "Creature")
+			var atk = o_lane.current_atk
+			var p_lane = player_lanes[i]
+			var target_name = p_lane.creature_data.get("name", "Creature") if p_lane.has_creature else GameManager.player_hero_name
+
+			if p_lane.has_creature:
+				# Player gets interactive Defend Wheel!
+				wheel_modal.start_defend_clash(attacker_name, target_name, atk, p_lane.current_atk, false)
+				var clash_res = await wheel_modal.clash_resolved
+				var final_damage: int = int(clash_res.get("final_damage", atk))
+				var counter_damage: int = int(clash_res.get("counter_damage", 0))
+
+				if phase_manager != null:
+					phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
+					phase_manager.resolve_combat_lane(i, clash_res)
+
+				if bool(clash_res.get("is_counter", false)):
+					_spawn_combat_callout("COUNTER!", Color(0.18, 0.98, 0.35))
+					log_message("⚡ COUNTER! %s blocked and struck back for %d DMG!" % [target_name, counter_damage])
 					if arena_3d:
-						arena_3d.animate_creature_hit(false, i)
-					_spawn_floating_damage(false, i, counter_damage)
-					var o_dead = o_lane.apply_damage(counter_damage)
-					if o_dead and opponent_face_rig:
-						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
-			elif bool(clash_res.get("is_blocked", false)):
-				_spawn_combat_callout("BLOCK!", Color(0.32, 0.88, 1.0))
-				log_message("🛡️ BLOCKED! %s blocked %s's attack!" % [target_name, attacker_name])
+						arena_3d.animate_creature_lunge(true, i)
+					await get_tree().create_timer(0.14).timeout
+					if counter_damage > 0:
+						if arena_3d:
+							arena_3d.animate_creature_hit(false, i)
+						_spawn_floating_damage(false, i, counter_damage)
+						var o_dead = o_lane.apply_damage(counter_damage)
+						if o_dead and opponent_face_rig:
+							opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+				elif bool(clash_res.get("is_blocked", false)):
+					_spawn_combat_callout("BLOCK!", Color(0.32, 0.88, 1.0))
+					log_message("🛡️ BLOCKED! %s blocked %s's attack!" % [target_name, attacker_name])
+				else:
+					_spawn_combat_callout("ATTACK x1", Color(1.0, 0.88, 0.22))
+					log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
+					if arena_3d:
+						arena_3d.animate_creature_lunge(false, i)
+					await get_tree().create_timer(0.14).timeout
+					if arena_3d:
+						arena_3d.animate_creature_hit(true, i)
+					_spawn_floating_damage(true, i, final_damage)
+					var destroyed = p_lane.apply_damage(final_damage)
+					if destroyed:
+						log_message("Your %s was destroyed!" % target_name)
+						if player_face_rig:
+							player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+						if vo_manager:
+							vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.DESTROY_CREATURE, false)
+							vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, true)
 			else:
-				_spawn_combat_callout("ATTACK x1", Color(1.0, 0.88, 0.22))
-				log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
+				# Undefended Player lane -> direct Hero damage + Jake warning banner (Screenshot 10)
+				if phase_manager != null:
+					phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
+				_show_undefended_warning()
 				if arena_3d:
 					arena_3d.animate_creature_lunge(false, i)
-				await get_tree().create_timer(0.14).timeout
-				if arena_3d:
-					arena_3d.animate_creature_hit(true, i)
-				_spawn_floating_damage(true, i, final_damage)
-				var destroyed = p_lane.apply_damage(final_damage)
-				if destroyed:
-					log_message("Your %s was destroyed!" % target_name)
-					if player_face_rig:
-						player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
-					if vo_manager:
-						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.DESTROY_CREATURE, false)
-						vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, true)
-		else:
-			# Undefended Player lane -> direct Hero damage + Jake warning banner (Screenshot 10)
-			if phase_manager != null:
-				phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
-			_show_undefended_warning()
-			if arena_3d:
-				arena_3d.animate_creature_lunge(false, i)
-				arena_3d.play_lane_direct_hit_vfx(true, i)
-			if ResourceLoader.exists("res://assets/audio/sfx/Ring_Hit.wav"):
-				Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Ring_Hit.wav"))
-			await get_tree().create_timer(0.15).timeout
-			_spawn_floating_damage(true, i, atk)
-			player_hp = max(0, player_hp - atk)
-			match_player_hp_lost += atk
-			if player_face_rig:
-				player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
-			if vo_manager:
-				vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.HERO_DAMAGED, true)
-			log_message("💥 %s attacked undefended Hero for %d damage!" % [attacker_name, atk])
-			await get_tree().create_timer(0.60).timeout
+					arena_3d.play_lane_direct_hit_vfx(true, i)
+				if ResourceLoader.exists("res://assets/audio/sfx/Ring_Hit.wav"):
+					Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Ring_Hit.wav"))
+				await get_tree().create_timer(0.15).timeout
+				_spawn_floating_damage(true, i, atk)
+				player_hp = max(0, player_hp - atk)
+				match_player_hp_lost += atk
+				if player_face_rig:
+					player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+				if vo_manager:
+					vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.HERO_DAMAGED, true)
+				log_message("💥 %s attacked undefended Hero for %d damage!" % [attacker_name, atk])
+				await get_tree().create_timer(0.60).timeout
 
-		await get_tree().create_timer(0.32).timeout
-		_update_ui()
-		if player_hp <= 0:
-			_set_battle_phase_hud(false)
-			end_match(false)
-			return
+			await get_tree().create_timer(0.32).timeout
+			_update_ui()
+			if player_hp <= 0:
+				_set_battle_phase_hud(false)
+				end_match(false)
+				return
 
 	_set_battle_phase_hud(false)
 	if arena_3d:
@@ -1461,14 +1520,31 @@ func execute_opponent_turn() -> void:
 	if ability_system:
 		ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
 
-	if phase_manager != null:
-		phase_manager.transition_to(BattlePhaseManager.Phase.END_TURN)
+	_end_turn_phase()
 
 	_advance_turn_counter(1)
 
 	var timer = get_tree().create_timer(1.0)
 	await timer.timeout
 	start_player_turn()
+
+
+func _has_lane_creature(lanes: Array[LaneSlot]) -> bool:
+	for l in lanes:
+		if l != null and l.has_creature:
+			return true
+	return false
+
+
+func _end_turn_phase() -> void:
+	## Ensures legal state progression through COMBAT_RESOLUTION into END_TURN even with 0 attackers.
+	if phase_manager == null:
+		return
+	var cur := phase_manager.get_current_phase()
+	if cur == BattlePhaseManager.Phase.ACTION_PHASE or cur == BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE:
+		phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
+	if phase_manager.get_current_phase() != BattlePhaseManager.Phase.MATCH_OVER:
+		phase_manager.transition_to(BattlePhaseManager.Phase.END_TURN)
 
 func get_match_stats(victory: bool) -> Dictionary:
 	var distinct_types: Array[String] = []
@@ -1683,13 +1759,8 @@ func log_message(text: String) -> void:
 		log_label.text = text
 
 func _update_ui() -> void:
-	player_hp_bar.max_value = player_max_hp
-	player_hp_bar.value = player_hp
-	player_hp_label.text = str(player_hp)
-
-	opponent_hp_bar.max_value = opponent_max_hp
-	opponent_hp_bar.value = opponent_hp
-	opponent_hp_label.text = str(opponent_hp)
+	_step_hp_bar_anim("player", player_hp, player_max_hp, player_hp_bar, player_hp_damage_bar, player_hp_label, 0.0)
+	_step_hp_bar_anim("opponent", opponent_hp, opponent_max_hp, opponent_hp_bar, opponent_hp_damage_bar, opponent_hp_label, 0.0)
 
 	if player_mp_label:
 		player_mp_label.text = str(player_mp)
@@ -1697,6 +1768,29 @@ func _update_ui() -> void:
 		opponent_mp_label.text = str(opponent_mp)
 	if magic_orb_label:
 		magic_orb_label.text = str(player_mp)
+	var p_mp_cap := float(maxi(1, maxi(player_max_mp, player_mp)))
+	# Top corner portrait orbs stay visually full (only numbers change);
+	# only the bottom tray orb drains/fills liquid and plays the smoke puff VFX.
+	if player_mp_orb_bar:
+		player_mp_orb_bar.max_value = 1.0
+		player_mp_orb_bar.value = 1.0
+	if opponent_mp_orb_bar:
+		opponent_mp_orb_bar.max_value = 1.0
+		opponent_mp_orb_bar.value = 1.0
+
+	if _prev_player_mp < 0:
+		_prev_player_mp = player_mp
+		if magic_orb_bar:
+			magic_orb_bar.max_value = p_mp_cap
+			magic_orb_bar.value = clampf(float(player_mp), 0.0, p_mp_cap)
+	elif player_mp != _prev_player_mp:
+		var is_gain := player_mp > _prev_player_mp
+		_prev_player_mp = player_mp
+		_tween_mp_orb_bar(magic_orb_bar, p_mp_cap, float(player_mp))
+		_pulse_mp_label(magic_orb_label)
+		_spawn_magic_orb_vfx(magic_orb_bar, is_gain, 1.0)
+
+	_prev_opponent_mp = opponent_mp
 	if draw_count_label:
 		draw_count_label.text = str(player_draw_pile.size())
 	if discard_count_label:
@@ -1706,12 +1800,331 @@ func _update_ui() -> void:
 	if coins_count_label:
 		coins_count_label.text = str(session_gold)
 
+
+func _tween_mp_orb_bar(bar: TextureProgressBar, cap: float, target_val: float) -> void:
+	if bar == null:
+		return
+	bar.max_value = cap
+	var key := bar.get_instance_id()
+	if _mp_bar_tweens.has(key):
+		var old_tw := _mp_bar_tweens[key] as Tween
+		if old_tw and old_tw.is_valid():
+			old_tw.kill()
+	var tw := create_tween()
+	tw.tween_property(bar, "value", clampf(target_val, 0.0, cap), 0.40).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_mp_bar_tweens[key] = tw
+
+
+func _pulse_mp_label(lbl: Label) -> void:
+	if lbl == null:
+		return
+	lbl.pivot_offset = lbl.size * 0.5
+	lbl.scale = Vector2(1.28, 1.28)
+	var tw := create_tween()
+	tw.tween_property(lbl, "scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _spawn_magic_orb_vfx(orb: Control, is_gain: bool, scale_mult: float = 1.0) -> void:
+	if orb == null or not orb.is_visible_in_tree():
+		return
+	var host := Control.new()
+	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	host.z_index = 40
+	add_child(host)
+	var center := orb.get_global_rect().get_center()
+	host.global_position = center
+
+	var dur := 0.78 if is_gain else 0.72
+	# Additive purple glow pulse on gain (FX_GUI_ActionPointUp FX_Glow)
+	if is_gain:
+		var glow := TextureRect.new()
+		glow.texture = TEX_FX_GLOW
+		glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		glow.stretch_mode = TextureRect.STRETCH_SCALE
+		var g_sz := 128.0 * scale_mult
+		glow.size = Vector2(g_sz, g_sz)
+		glow.position = -glow.size * 0.5
+		glow.pivot_offset = glow.size * 0.5
+		var mat_add := CanvasItemMaterial.new()
+		mat_add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		glow.material = mat_add
+		glow.modulate = Color(0.75, 0.25, 0.92, 0.85)
+		host.add_child(glow)
+		var g_tw := glow.create_tween()
+		g_tw.set_parallel(true)
+		g_tw.tween_property(glow, "scale", Vector2(1.35, 1.35), 0.28).set_ease(Tween.EASE_OUT)
+		g_tw.tween_property(glow, "modulate:a", 0.0, 0.32)
+
+	# Radial purple/lavender smoke cloud burst (FX_SmokeBurst with FX_Smoke_Grey_PNG)
+	var puff_count := 8 if is_gain else 7
+	var base_r := 36.0 * scale_mult
+	var travel_r := (34.0 if is_gain else 22.0) * scale_mult
+	for i in range(puff_count):
+		var ang := (TAU * float(i) / float(puff_count)) + randf_range(-0.24, 0.24)
+		var puff := TextureRect.new()
+		puff.texture = TEX_FX_SMOKE
+		puff.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		puff.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		var p_sz := randf_range(38.0, 52.0) * scale_mult * (1.25 if is_gain else 1.0)
+		puff.size = Vector2(p_sz, p_sz)
+		puff.pivot_offset = puff.size * 0.5
+		var start_pos := Vector2(cos(ang), sin(ang)) * base_r - puff.pivot_offset
+		var end_pos := Vector2(cos(ang), sin(ang)) * (base_r + travel_r) - puff.pivot_offset
+		puff.position = start_pos
+		puff.rotation = randf_range(-0.6, 0.6)
+		puff.scale = Vector2(0.45, 0.45)
+		puff.modulate = Color(0.95, 0.77, 1.0, 0.94)
+		host.add_child(puff)
+		var p_tw := puff.create_tween()
+		p_tw.set_parallel(true)
+		p_tw.tween_property(puff, "position", end_pos, dur).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		p_tw.tween_property(puff, "scale", Vector2(1.12, 1.12), dur * 0.65).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		p_tw.tween_property(puff, "modulate:a", 0.0, dur * 0.55).set_delay(dur * 0.45)
+
+	# Rising pastel purple bubbles (FX_CardArt_Bubbles1) + light flare glints
+	var bubble_atlas := AtlasTexture.new()
+	bubble_atlas.atlas = TEX_FX_BUBBLES
+	bubble_atlas.region = Rect2(0, 0, 64, 64)
+	for j in range(5):
+		var bub := TextureRect.new()
+		bub.texture = bubble_atlas
+		bub.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		var b_sz := randf_range(12.0, 20.0) * scale_mult
+		bub.size = Vector2(b_sz, b_sz)
+		var bx := randf_range(-34.0, 34.0) * scale_mult - b_sz * 0.5
+		var by := randf_range(-16.0, 24.0) * scale_mult - b_sz * 0.5
+		bub.position = Vector2(bx, by)
+		bub.modulate = Color(0.93, 0.68, 1.0, 0.85)
+		host.add_child(bub)
+		var b_tw := bub.create_tween()
+		b_tw.set_parallel(true)
+		b_tw.tween_property(bub, "position:y", by - randf_range(28.0, 52.0) * scale_mult, 0.72)
+		b_tw.tween_property(bub, "modulate:a", 0.0, 0.45).set_delay(0.28)
+
+	for k in range(3):
+		var flare := TextureRect.new()
+		flare.texture = TEX_FX_FLARE
+		flare.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		var f_sz := randf_range(22.0, 34.0) * scale_mult
+		flare.size = Vector2(f_sz, f_sz)
+		flare.pivot_offset = flare.size * 0.5
+		var fa := randf_range(0.0, TAU)
+		flare.position = Vector2(cos(fa), sin(fa)) * randf_range(14.0, 38.0) * scale_mult - flare.pivot_offset
+		var f_mat := CanvasItemMaterial.new()
+		f_mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		flare.material = f_mat
+		flare.modulate = Color(0.85, 0.65, 1.0, 0.95)
+		flare.scale = Vector2(0.3, 0.3)
+		host.add_child(flare)
+		var f_tw := flare.create_tween()
+		f_tw.set_parallel(true)
+		f_tw.tween_property(flare, "scale", Vector2(1.1, 1.1), 0.18)
+		f_tw.tween_property(flare, "modulate:a", 0.0, 0.35).set_delay(0.12)
+
+	get_tree().create_timer(dur + 0.12).timeout.connect(func():
+		if is_instance_valid(host):
+			host.queue_free()
+	)
+
 func _on_menu_button_pressed() -> void:
 	GameManager.return_to_menu()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_step_hp_bar_anim("player", player_hp, player_max_hp, player_hp_bar, player_hp_damage_bar, player_hp_label, delta)
+	_step_hp_bar_anim("opponent", opponent_hp, opponent_max_hp, opponent_hp_bar, opponent_hp_damage_bar, opponent_hp_label, delta)
 	_update_creature_stat_badges()
+
+
+func _reset_hp_anim_state(
+	key: String,
+	current_hp: int,
+	max_hp: int,
+	hp_bar: ProgressBar,
+	dmg_bar: ProgressBar,
+	hp_label: Label
+) -> void:
+	## Resets trailing damage interpolation and low-HP pulse for a hero corner bar.
+	var state: Dictionary = _hp_anim_state[key]
+	state["prev"] = float(current_hp)
+	state["last"] = current_hp
+	state["pulse"] = 0.0
+	var cap := float(maxi(1, max_hp))
+	if hp_bar:
+		hp_bar.max_value = cap
+		hp_bar.value = float(current_hp)
+		hp_bar.modulate.a = 1.0
+	if dmg_bar:
+		dmg_bar.max_value = cap
+		dmg_bar.value = float(current_hp)
+	if hp_label:
+		hp_label.text = str(current_hp)
+
+
+func _step_hp_bar_anim(
+	key: String,
+	current_hp: int,
+	max_hp: int,
+	hp_bar: ProgressBar,
+	dmg_bar: ProgressBar,
+	hp_label: Label,
+	delta: float
+) -> void:
+	## Mirrors CWUpdatePlayerData: cyan snaps on damage while red trails smoothly; heals slide up.
+	var state: Dictionary = _hp_anim_state[key]
+	var prev_hp: float = float(state.get("prev", -1.0))
+	if prev_hp < 0.0:
+		_reset_hp_anim_state(key, current_hp, max_hp, hp_bar, dmg_bar, hp_label)
+		return
+	var last_hp: int = int(state.get("last", current_hp))
+	if current_hp < last_hp:
+		_play_hero_damage_portrait_fx(key == "player")
+	state["last"] = current_hp
+	var cap := float(maxi(1, max_hp))
+	var target := float(current_hp)
+	if hp_bar:
+		hp_bar.max_value = cap
+	if dmg_bar:
+		dmg_bar.max_value = cap
+
+	if absf(target - prev_hp) >= 0.01:
+		if delta > 0.0:
+			prev_hp = lerpf(prev_hp, target, minf(1.0, delta * 2.0))
+			if absf(target - prev_hp) < 0.01:
+				prev_hp = target
+			state["prev"] = prev_hp
+		if dmg_bar:
+			dmg_bar.value = prev_hp
+		if prev_hp < target:
+			if hp_bar:
+				hp_bar.value = prev_hp
+			if hp_label:
+				hp_label.text = str(int(prev_hp))
+		else:
+			if hp_bar:
+				hp_bar.value = target
+			if hp_label:
+				hp_label.text = str(current_hp)
+	else:
+		state["prev"] = target
+		if dmg_bar:
+			dmg_bar.value = target
+		if hp_bar:
+			hp_bar.value = target
+		if hp_label:
+			hp_label.text = str(current_hp)
+
+	# Low-HP alpha pulse matching Unity TweenAlpha (PingPong 1.0 <-> 0.2 every 0.5s <= 25% HP)
+	if hp_bar:
+		if current_hp > 0 and float(current_hp) <= cap * 0.25:
+			state["pulse"] = float(state.get("pulse", 0.0)) + delta
+			hp_bar.modulate.a = lerpf(1.0, 0.2, pingpong(float(state["pulse"]) / 0.5, 1.0))
+		else:
+			state["pulse"] = 0.0
+			hp_bar.modulate.a = 1.0
+
+
+func _play_hero_damage_portrait_fx(is_player: bool) -> void:
+	## Plays Unity FX_GUI_Land_Damage_Portrait (StarBurst + Skull), portrait shake, SFX, and P1 red flash.
+	if ResourceLoader.exists(SFX_DAMAGE_BURST_PATH):
+		Audio.play_sfx(load(SFX_DAMAGE_BURST_PATH))
+
+	var face_rig: CharacterFaceRig = player_face_rig if is_player else opponent_face_rig
+	var hp_bar: ProgressBar = player_hp_bar if is_player else opponent_hp_bar
+	var fx_parent: Control = hp_bar.get_parent() if hp_bar else null
+	if fx_parent == null:
+		return
+
+	var base_pos := Vector2(19.0 if is_player else 132.0, 52.0)
+	var rig_size := Vector2(89.0, 89.0)
+	if face_rig:
+		if not face_rig.has_meta("base_portrait_pos"):
+			face_rig.set_meta("base_portrait_pos", face_rig.position)
+		base_pos = face_rig.get_meta("base_portrait_pos")
+		rig_size = face_rig.size
+		var shake_tw := face_rig.create_tween()
+		shake_tw.tween_method(func(t: float):
+			if not is_instance_valid(face_rig):
+				return
+			var amp := (1.0 - t) * 10.0
+			face_rig.position = base_pos + Vector2(randf_range(-amp, amp), randf_range(-amp, amp))
+		, 0.0, 1.0, 0.45)
+		shake_tw.tween_callback(func():
+			if is_instance_valid(face_rig):
+				face_rig.position = base_pos
+		)
+
+	if is_player:
+		var red_flash := ColorRect.new()
+		red_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+		red_flash.color = Color(1.0, 0.0, 0.0, 0.40)
+		red_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(red_flash)
+		move_child(red_flash, 0)
+		var r_tw := red_flash.create_tween()
+		r_tw.tween_property(red_flash, "color:a", 0.0, 0.50)
+		r_tw.tween_callback(red_flash.queue_free)
+
+	var host := Control.new()
+	host.position = base_pos + rig_size * 0.5 + Vector2(0.0, 4.0)
+	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fx_parent.add_child(host)
+
+	# Unity Layer 23 camera (ortho 5.76 -> 11.52 units @ 720px = 62.5 px/unit) with scalingMode=Hierarchy @ world scale 1:
+	# FX_StarBurst startSize=5.0 -> 312.5px; FX_StarBurst_Skull startSize=2.5 -> 156.25px
+	var burst := TextureRect.new()
+	burst.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	burst.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	burst.texture = TEX_FX_STARBURST
+	burst.size = Vector2(312.0, 312.0)
+	burst.position = Vector2(-156.0, -156.0)
+	burst.pivot_offset = Vector2(156.0, 156.0)
+	burst.rotation = PI
+	burst.scale = Vector2(0.2545, 0.2545)
+	burst.modulate.a = 0.0
+	burst.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	host.add_child(burst)
+
+	# Unity FX_StarBurst: startDelay=0.10s, startLifetime=0.25s, Hermite ease-out 0.2545 -> 1.0
+	var b_tw := burst.create_tween()
+	b_tw.tween_interval(0.10)
+	b_tw.tween_method(func(t: float):
+		if not is_instance_valid(burst):
+			return
+		var s := _eval_unity_damage_curve(t)
+		burst.scale = Vector2(s, s)
+		burst.modulate.a = clampf(1.8 * (1.0 - t), 0.0, 1.0)
+	, 0.0, 1.0, 0.25)
+
+	var skull := TextureRect.new()
+	skull.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	skull.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	skull.texture = TEX_FX_SKULL
+	skull.size = Vector2(156.0, 156.0)
+	skull.position = Vector2(-78.0, -78.0)
+	skull.pivot_offset = Vector2(78.0, 78.0)
+	skull.scale = Vector2(0.2545, 0.2545)
+	skull.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	host.add_child(skull)
+
+	# Unity FX_StarBurst_Skull: 0.50s Hermite ease-out 0.2545 -> 1.0; opaque first half (2x Alpha Blended)
+	var s_tw := skull.create_tween()
+	s_tw.tween_method(func(t: float):
+		if not is_instance_valid(skull):
+			return
+		var s := _eval_unity_damage_curve(t)
+		skull.scale = Vector2(s, s)
+		skull.modulate.a = clampf(2.0 * (1.0 - t), 0.0, 1.0)
+	, 0.0, 1.0, 0.50)
+	s_tw.tween_callback(host.queue_free)
+
+
+func _eval_unity_damage_curve(t: float) -> float:
+	## Evaluates Unity FX_GUI_Land_Damage_Portrait SizeModule Hermite spline (0.2545 -> 1.0, slope 1.77 -> 0).
+	var u := clampf(t, 0.0, 1.0)
+	var u2 := u * u
+	var u3 := u2 * u
+	return (2.0 * u3 - 3.0 * u2 + 1.0) * 0.2545454 + (u3 - 2.0 * u2 + u) * 1.769944 + (-2.0 * u3 + 3.0 * u2) * 1.0
 
 
 func _build_creature_stat_badges() -> void:
@@ -1917,7 +2330,7 @@ func _restore_hud_after_inspect() -> void:
 	if footer_bar:
 		footer_bar.visible = true
 	if battle_log_box:
-		battle_log_box.visible = true
+		battle_log_box.visible = false
 	if arena_3d:
 		arena_3d.focus_setup_board(0.35)
 
@@ -1958,7 +2371,7 @@ func _set_battle_phase_hud(active_combat: bool) -> void:
 	if pause_quick_btn:
 		pause_quick_btn.visible = not active_combat
 	if battle_log_box:
-		battle_log_box.visible = not active_combat
+		battle_log_box.visible = false
 
 
 func _spawn_combat_callout(text: String, col: Color = Color(1.0, 0.90, 0.22)) -> void:
