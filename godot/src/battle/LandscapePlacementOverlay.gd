@@ -73,6 +73,7 @@ var _card_nodes: Array[Control] = []
 var _selected_card_idx: int = -1
 var _dragging_card_idx: int = -1
 var _drag_ghost: Control = null
+var _retract_tween: Tween = null
 var _drag_start_pos: Vector2 = Vector2.ZERO
 var _is_dragging_motion: bool = false
 var _hovered_lane: int = -1
@@ -113,6 +114,9 @@ func start_placement(player_landscapes: Array[String], opponent_landscapes: Arra
 	_hovered_lane = -1
 	_free_drag_ghost()
 
+	if _retract_tween and _retract_tween.is_running():
+		_retract_tween.kill()
+
 	_rebuild_cards()
 	cards_row.offset_top = CARDS_START_TOP
 	cards_row.offset_bottom = CARDS_START_BOTTOM
@@ -122,6 +126,14 @@ func start_placement(player_landscapes: Array[String], opponent_landscapes: Arra
 		_arena.clear_all_highlights()
 		_arena.set_hex_scan_fx_visible(true)
 		_arena.set_cards_in_hand_visible(true)
+		# Keep heroes' hands resting beside their table cards during camera pan + 1.0s hold, then retract smoothly.
+		_arena.set_heroes_card_on_table(true, false)
+		_retract_tween = create_tween()
+		_retract_tween.tween_interval(1.85)
+		_retract_tween.tween_callback(func():
+			if is_inside_tree() and visible and _arena:
+				_arena.set_heroes_card_on_table(true, true, 0.45)
+		)
 		var cam_tw := _arena.focus_landscape_placement(0.85)
 		if cam_tw and cam_tw.is_running():
 			await cam_tw.finished
@@ -528,10 +540,14 @@ func _finish_placement() -> void:
 	for l in _placed_lanes:
 		final_order.append(l if l != "" else "Corn")
 
+	if _retract_tween and _retract_tween.is_running():
+		_retract_tween.kill()
 	var tw := create_tween()
 	tw.tween_interval(0.35)
 	tw.tween_property(self, "modulate:a", 0.0, 0.25)
 	tw.tween_callback(func():
 		visible = false
+		if _arena:
+			_arena.set_heroes_card_on_table(false)
 		landscapes_placed.emit(final_order)
 	)

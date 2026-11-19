@@ -44,6 +44,10 @@ var player_cards_hand: Node3D = null
 var opponent_cards_hand: Node3D = null
 var player_playing_card: Node3D = null
 var opponent_playing_card: Node3D = null
+var _p1_table_card: Node3D = null
+var _p2_table_card: Node3D = null
+var _p1_table_card_ready: bool = false
+var _p2_table_card_ready: bool = false
 var _p1_anim_player: AnimationPlayer = null
 var _p2_anim_player: AnimationPlayer = null
 var _p1_char_info: Dictionary = {}
@@ -987,9 +991,12 @@ func _spawn_hero_seat(is_player: bool, hero_id: String, chair_prefab: String) ->
 			var pc := PlayingCardScene.instantiate() as Node3D
 			if pc:
 				pc.name = "PlayingCardInstance"
-				pc.rotation_degrees = Vector3.ZERO
+				# Lies flat face-up on the table at the end of IntroP1/P2 (matches PlayingCard.prefab -90 X).
+				pc.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+				pc.visible = false
 				play_hand_bone.add_child(pc)
 				play_card_node = pc
+	_reset_table_card(is_player)
 
 	# Configure M_MOUTH & M_EYES 4x4 UV atlas tiling
 	var mouth_mat := _setup_face_uv_mat(hero_inst.find_child("M_MOUTH", true, false) as MeshInstance3D)
@@ -1027,7 +1034,104 @@ func _setup_face_uv_mat(face_mesh: MeshInstance3D) -> StandardMaterial3D:
 	return null
 
 
-func play_hero_anim(is_player: bool, anim_slot: String, next_slot: String = "anim_card_idle") -> void:
+func _reset_table_card(is_player: bool) -> void:
+	var existing := _p1_table_card if is_player else _p2_table_card
+	if existing and is_instance_valid(existing):
+		if existing.get_parent():
+			existing.get_parent().remove_child(existing)
+		existing.queue_free()
+	var spawned: Node3D = null
+	if PlayingCardScene != null:
+		spawned = PlayingCardScene.instantiate() as Node3D
+		if spawned:
+			spawned.name = "P1TableCard" if is_player else "P2TableCard"
+			spawned.visible = false
+			add_child(spawned)
+	if is_player:
+		_p1_table_card = spawned
+		_p1_table_card_ready = false
+	else:
+		_p2_table_card = spawned
+		_p2_table_card_ready = false
+
+
+func _find_bone_attachment_ancestor(node: Node, stop_at: Node) -> BoneAttachment3D:
+	var cur := node.get_parent() if node else null
+	while cur != null and cur != stop_at:
+		if cur is BoneAttachment3D:
+			return cur as BoneAttachment3D
+		cur = cur.get_parent()
+	return null
+
+
+func _capture_table_card_transform(is_player: bool) -> void:
+	var hero := player_hero_root if is_player else opponent_hero_root
+	var pc := player_playing_card if is_player else opponent_playing_card
+	var table_card := _p1_table_card if is_player else _p2_table_card
+	var ap := _p1_anim_player if is_player else _p2_anim_player
+	var info := _p1_char_info if is_player else _p2_char_info
+	if hero == null or pc == null or table_card == null or ap == null or info.is_empty():
+		return
+	var clip := str(info.get("anim_intro_p1" if is_player else "anim_intro_p2", ""))
+	if clip == "" or not ap.has_animation(clip):
+		return
+	var res := ap.get_animation(clip)
+	if res:
+		res.loop_mode = Animation.LOOP_NONE
+	ap.play(clip)
+	ap.seek(res.length if res else 0.0, true)
+	ap.advance(0.0)
+	ap.pause()
+	_start_face_track(is_player, clip)
+	var skel := hero.find_child("Skeleton3D", true, false) as Skeleton3D
+	if skel:
+		skel.force_update_all_bone_transforms()
+	var ba := _find_bone_attachment_ancestor(pc, hero)
+	if ba:
+		ba.on_skeleton_update()
+	table_card.global_transform = pc.global_transform
+	if is_player:
+		_p1_table_card_ready = true
+	else:
+		_p2_table_card_ready = true
+
+
+func set_heroes_card_on_table(on_table: bool, retract_hands: bool = true, blend_sec: float = 0.45) -> void:
+	## Places separate cards on the table at each hero's end-of-intro spot;
+	## set retract_hands = false to keep hands resting beside the cards before smoothly blending back to idle.
+	for is_player in [true, false]:
+		var pc := player_playing_card if is_player else opponent_playing_card
+		if pc:
+			pc.visible = false
+		var table_card := _p1_table_card if is_player else _p2_table_card
+		if on_table:
+			var ready := _p1_table_card_ready if is_player else _p2_table_card_ready
+			if not ready:
+				_capture_table_card_transform(is_player)
+			if table_card:
+				table_card.visible = true
+			if retract_hands:
+				play_hero_anim(is_player, "anim_card_idle", "", blend_sec)
+		else:
+			if table_card:
+				table_card.visible = false
+			if retract_hands:
+				play_hero_anim(is_player, "anim_card_idle", "", blend_sec)
+
+
+func update_holding_cards_count(is_player: bool, count: int) -> void:
+	## Mirrors CWPlayCardsController.SetHoldingCardsVisibility: show Card_1..Card_N matching hand size.
+	var hand_node := player_cards_hand if is_player else opponent_cards_hand
+	if hand_node == null:
+		return
+	var clamped := clampi(count, 0, 7)
+	for i in range(7):
+		var card_mesh := hand_node.find_child("Card_%d" % (i + 1), true, false) as Node3D
+		if card_mesh:
+			card_mesh.visible = (i < clamped)
+
+
+func play_hero_anim(is_player: bool, anim_slot: String, next_slot: String = "anim_card_idle", blend_sec: float = -1.0) -> void:
 	var ap := _p1_anim_player if is_player else _p2_anim_player
 	var info := _p1_char_info if is_player else _p2_char_info
 	if ap == null or info.is_empty():
@@ -1042,7 +1146,7 @@ func play_hero_anim(is_player: bool, anim_slot: String, next_slot: String = "ani
 	var is_idle_loop := (anim_slot == "anim_card_idle" or anim_slot == "anim_idle")
 	if anim_res:
 		anim_res.loop_mode = Animation.LOOP_LINEAR if is_idle_loop else Animation.LOOP_NONE
-	ap.play(clip_name)
+	ap.play(clip_name, blend_sec)
 	_start_face_track(is_player, clip_name)
 
 	if not is_idle_loop and next_slot != "":
@@ -1146,15 +1250,15 @@ func set_camera_transform(xform: Transform3D, fov_deg: float = 60.0) -> void:
 		_cam_look = _cam_pos - camera.global_transform.basis.z * 4.0
 
 
-func set_cards_in_hand_visible(visible_flag: bool) -> void:
+func set_cards_in_hand_visible(visible_flag: bool, include_play_cards: bool = false) -> void:
 	if player_cards_hand:
 		player_cards_hand.visible = visible_flag
 	if opponent_cards_hand:
 		opponent_cards_hand.visible = visible_flag
 	if player_playing_card:
-		player_playing_card.visible = visible_flag
+		player_playing_card.visible = visible_flag and include_play_cards
 	if opponent_playing_card:
-		opponent_playing_card.visible = visible_flag
+		opponent_playing_card.visible = visible_flag and include_play_cards
 
 
 func set_lane_highlight(is_player: bool, lane_idx: int, enabled: bool, color: Color = Color(0.98, 0.88, 0.15, 0.45)) -> void:
@@ -1385,6 +1489,7 @@ func clear_all_entities() -> void:
 		player_seat.visible = true
 	if opponent_seat:
 		opponent_seat.visible = true
+	set_heroes_card_on_table(false)
 	set_cards_in_hand_visible(true)
 	set_board_postmatch_green(false)
 	for anchor in _player_lane_anchors + _opponent_lane_anchors:

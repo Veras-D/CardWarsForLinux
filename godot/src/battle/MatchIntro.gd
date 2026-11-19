@@ -78,9 +78,10 @@ func play_intro(player_name: String, opponent_name: String, _p1_max_hp: int, _p2
 	skip_hint.visible = false
 
 	if _arena:
-		_arena.set_cards_in_hand_visible(true)
-		_arena.play_hero_anim(true, "anim_intro_p1", "anim_card_idle")
-		_arena.play_hero_anim(false, "anim_intro_p2", "anim_card_idle")
+		_arena.set_heroes_card_on_table(false)
+		_arena.set_cards_in_hand_visible(true, true)
+		_arena.play_hero_anim(true, "anim_intro_p1", "")
+		_arena.play_hero_anim(false, "anim_intro_p2", "")
 
 	# Allow silent click/key skip after 0.65s (original shows no skip caption)
 	get_tree().create_timer(0.65).timeout.connect(func():
@@ -210,4 +211,6 @@ func _finish_intro() -> void:
 	p1_banner.visible = false
 	p2_banner.visible = false
 	visible = false
+	if _arena and _arena.has_method("set_heroes_card_on_table"):
+		_arena.set_heroes_card_on_table(true, false)
 	intro_completed.emit()

@@ -250,6 +250,8 @@ func _ready() -> void:
 
 	if arena_3d:
 		arena_3d.setup_heroes(GameManager.player_hero_name, GameManager.opponent_hero_name)
+		arena_3d.update_holding_cards_count(true, hand_container.get_child_count() if hand_container else 0)
+		arena_3d.update_holding_cards_count(false, opponent_hand.size())
 		if match_intro.has_method("bind_arena"):
 			match_intro.bind_arena(arena_3d)
 		if landscape_overlay:
@@ -1825,6 +1827,9 @@ func _update_ui() -> void:
 		loot_count_label.text = str(loot_drops_count)
 	if coins_count_label:
 		coins_count_label.text = str(session_gold)
+	if arena_3d:
+		arena_3d.update_holding_cards_count(true, hand_container.get_child_count() if hand_container else 0)
+		arena_3d.update_holding_cards_count(false, opponent_hand.size())
 
 
 func _setup_mp_orb_liquid(bar: TextureProgressBar, phase: float) -> void:
