@@ -67,10 +67,10 @@ stretch_mode = 5
 
 [node name="CountLabel" type="Label" parent="Button/HBox"]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 30.0
-offset_right = 36.0
-offset_bottom = 70.0
+offset_left = 11.0
+offset_top = 35.0
+offset_right = 43.0
+offset_bottom = 64.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
@@ -101,10 +101,10 @@ text_overrun_behavior = 3
 
 [node name="StatusLabel" type="Label" parent="Button/HBox/VBox"]
 layout_mode = 0
-offset_left = 38.0
-offset_top = 35.0
-offset_right = 113.0
-offset_bottom = 67.0
+offset_left = 49.0
+offset_top = 36.0
+offset_right = 111.0
+offset_bottom = 63.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
