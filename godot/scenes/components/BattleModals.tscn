@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://src/battle/BattleModals.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/KBPlanetEarth.ttf" id="2_font"]
@@ -9,6 +9,8 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ui/forge/uiButtonBlue.png" id="10_btn_blue"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/deck/uiButtonRed.png" id="11_btn_red"]
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="12_btn_green"]
+[ext_resource type="PackedScene" path="res://assets/models/battle/banners/Battle_Attack.glb" id="13_attack_glb"]
+[ext_resource type="PackedScene" path="res://assets/models/battle/banners/Battle_Defend.glb" id="14_defend_glb"]
 
 [sub_resource type="Environment" id="Env_TurnBannerUI"]
 ambient_light_source = 2
@@ -78,7 +80,7 @@ render_target_update_mode = 4
 environment = SubResource("Env_TurnBannerUI")
 
 [node name="BannerCamera" type="Camera3D" parent="TurnBannerViewportContainer/SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 110)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 160)
 projection = 1
 current = true
 size = 11.6
@@ -89,6 +91,12 @@ far = 300.0
 visible = false
 
 [node name="Battle_OpponentsTurn" parent="TurnBannerViewportContainer/SubViewport" instance=ExtResource("4_opp_turn_glb")]
+visible = false
+
+[node name="Battle_Attack" parent="TurnBannerViewportContainer/SubViewport" instance=ExtResource("13_attack_glb")]
+visible = false
+
+[node name="Battle_Defend" parent="TurnBannerViewportContainer/SubViewport" instance=ExtResource("14_defend_glb")]
 visible = false
 
 [node name="CurrentQuestModal" type="Control" parent="."]

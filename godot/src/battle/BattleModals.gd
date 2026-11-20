@@ -21,6 +21,8 @@ const StarConditionEvaluator = preload("res://src/systems/node_map_system/StarCo
 
 const CLIP_YOUR_TURN: StringName = &"Take 001_18"
 const CLIP_OPP_TURN: StringName = &"Take 001_19"
+const CLIP_ATTACK: StringName = &"Battle_Attack"
+const CLIP_DEFEND: StringName = &"Battle_Defend"
 const TEX_STAR_FULL: Texture2D = preload("res://assets/textures/battle/FX_QuestStar_PNG.png")
 const TEX_ATK_ICON: Texture2D = preload("res://assets/textures/battle/hud/Combat_Icon_ATK.png")
 const TEX_DEF_ICON: Texture2D = preload("res://assets/textures/battle/hud/Combat_Icon_DEF.png")
@@ -53,6 +55,8 @@ const TEX_BOOK: Texture2D = preload("res://assets/textures/battle/hud/Book.png")
 @onready var turn_banner_viewport: SubViewportContainer = $TurnBannerViewportContainer
 @onready var your_turn_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_YourTurn
 @onready var opp_turn_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_OpponentsTurn
+@onready var attack_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_Attack
+@onready var defend_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_Defend
 
 @onready var quest_modal: Control = $CurrentQuestModal
 @onready var quest_rows_box: VBoxContainer = $CurrentQuestModal/Frame/VBox/ConditionsScroll/Rows
@@ -74,7 +78,12 @@ const TEX_BOOK: Texture2D = preload("res://assets/textures/battle/hud/Book.png")
 
 var _your_turn_anim: AnimationPlayer = null
 var _opp_turn_anim: AnimationPlayer = null
+var _attack_anim: AnimationPlayer = null
+var _defend_anim: AnimationPlayer = null
 var _turn_seq_id: int = 0
+var _waiting_banner_seq: int = -1
+
+signal battle_banner_finished
 
 var _info_backdrop: Control = null
 var _card_info_bar: PanelContainer = null
@@ -110,6 +119,8 @@ func _ready() -> void:
 	dimmer.visible = false
 	_your_turn_anim = _setup_turn_banner_anim(your_turn_banner, CLIP_YOUR_TURN)
 	_opp_turn_anim = _setup_turn_banner_anim(opp_turn_banner, CLIP_OPP_TURN)
+	_attack_anim = _setup_turn_banner_anim(attack_banner, CLIP_ATTACK, true)
+	_defend_anim = _setup_turn_banner_anim(defend_banner, CLIP_DEFEND, true)
 	_stop_turn_banners()
 	quest_modal.visible = false
 	discard_modal.visible = false
@@ -163,9 +174,20 @@ func dismiss_inspection(emit_signal: bool = true) -> void:
 		info_dismissed.emit()
 
 
-func _setup_turn_banner_anim(banner_root: Node3D, clip_name: StringName) -> AnimationPlayer:
+func _setup_turn_banner_anim(banner_root: Node3D, clip_name: StringName, use_alpha_scissor: bool = false) -> AnimationPlayer:
 	if not banner_root:
 		return null
+	if use_alpha_scissor:
+		# Battle_Banners_Atlas.png stores 4-bit alpha (max 240/255 = 0.94), which glTF's default
+		# ALPHA_DEPTH_PRE_PASS treats as translucent and fails to depth-cull behind text/sparks.
+		for child in banner_root.find_children("*", "MeshInstance3D", true, false):
+			var mi := child as MeshInstance3D
+			var base_mat := mi.get_active_material(0) as StandardMaterial3D
+			if base_mat:
+				var mat := base_mat.duplicate() as StandardMaterial3D
+				mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+				mat.alpha_scissor_threshold = 0.35
+				mi.material_override = mat
 	var anim_player := banner_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if not anim_player:
 		return null
@@ -178,51 +200,63 @@ func _setup_turn_banner_anim(banner_root: Node3D, clip_name: StringName) -> Anim
 
 func _stop_turn_banners() -> void:
 	_turn_seq_id += 1
-	if _your_turn_anim:
-		_your_turn_anim.stop()
-	if _opp_turn_anim:
-		_opp_turn_anim.stop()
-	if your_turn_banner:
-		your_turn_banner.visible = false
-	if opp_turn_banner:
-		opp_turn_banner.visible = false
+	for ap in [_your_turn_anim, _opp_turn_anim, _attack_anim, _defend_anim]:
+		if ap:
+			ap.stop()
+	for bn in [your_turn_banner, opp_turn_banner, attack_banner, defend_banner]:
+		if bn:
+			bn.visible = false
 	if turn_banner_viewport:
 		turn_banner_viewport.visible = false
+	if _waiting_banner_seq != -1:
+		_waiting_banner_seq = -1
+		battle_banner_finished.emit()
 
 
 func _on_turn_banner_anim_finished(_anim_name: StringName) -> void:
 	_stop_turn_banners()
 
 
-func play_turn_banner(is_player_turn: bool, _include_draw_card: bool = true) -> void:
+func _play_overlay_banner(banner_node: Node3D, anim_player: AnimationPlayer, clip_name: StringName, sfx_path: String, fallback_secs: float) -> int:
 	_stop_turn_banners()
 	var seq := _turn_seq_id
 
-	var sfx_path := "res://assets/audio/sfx/SFX_Banner_YourTurn.wav" if is_player_turn else "res://assets/audio/sfx/SFX_Banner_OpponentTurn.wav"
 	if Audio and ResourceLoader.exists(sfx_path):
 		Audio.play_sfx(load(sfx_path), -4.0)
 
-	var active_banner: Node3D = your_turn_banner if is_player_turn else opp_turn_banner
-	var active_anim: AnimationPlayer = _your_turn_anim if is_player_turn else _opp_turn_anim
-	var clip_name: StringName = CLIP_YOUR_TURN if is_player_turn else CLIP_OPP_TURN
-
 	if turn_banner_viewport:
 		turn_banner_viewport.visible = true
-	if your_turn_banner:
-		your_turn_banner.visible = is_player_turn
-	if opp_turn_banner:
-		opp_turn_banner.visible = not is_player_turn
+	if banner_node:
+		banner_node.visible = true
 
-	if active_banner and active_anim and active_anim.has_animation(clip_name):
-		active_anim.play(clip_name)
-		active_anim.seek(0.0, true)
+	if banner_node and anim_player and anim_player.has_animation(clip_name):
+		anim_player.play(clip_name)
+		anim_player.seek(0.0, true)
 	else:
-		# Fallback hide if clip missing (never silently leave viewport blocking).
-		var t := get_tree().create_timer(1.1)
+		var t := get_tree().create_timer(fallback_secs)
 		t.timeout.connect(func():
 			if seq == _turn_seq_id:
 				_stop_turn_banners()
 		)
+	return seq
+
+
+func play_turn_banner(is_player_turn: bool, _include_draw_card: bool = true) -> void:
+	var sfx_path := "res://assets/audio/sfx/SFX_Banner_YourTurn.wav" if is_player_turn else "res://assets/audio/sfx/SFX_Banner_OpponentTurn.wav"
+	var active_banner: Node3D = your_turn_banner if is_player_turn else opp_turn_banner
+	var active_anim: AnimationPlayer = _your_turn_anim if is_player_turn else _opp_turn_anim
+	var clip_name: StringName = CLIP_YOUR_TURN if is_player_turn else CLIP_OPP_TURN
+	_play_overlay_banner(active_banner, active_anim, clip_name, sfx_path, 1.1)
+
+
+func play_battle_banner(is_attack: bool) -> void:
+	## Plays the authentic Card Wars 3D/atlas ATTACK! (P1BattleBanner) or DEFEND! (P2BattleBanner) banner + SFX and waits until finished.
+	var active_banner: Node3D = attack_banner if is_attack else defend_banner
+	var active_anim: AnimationPlayer = _attack_anim if is_attack else _defend_anim
+	var clip_name: StringName = CLIP_ATTACK if is_attack else CLIP_DEFEND
+	var seq := _play_overlay_banner(active_banner, active_anim, clip_name, "res://assets/audio/sfx/SFX_Banner_Battle.wav", 1.0)
+	_waiting_banner_seq = seq
+	await battle_banner_finished
 
 
 func open_current_quest(quest_id: String, live_stats: Dictionary) -> void:

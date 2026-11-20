@@ -28,6 +28,8 @@ def export_battle_banner(guid_index: dict[str, str]) -> None:
         ("Battle_Battle.glb", "787", "Take 001_15"),
         ("Battle_YourTurn.glb", "9", "Take 001_18"),
         ("Battle_OpponentsTurn.glb", "423", "Take 001_19"),
+        ("Battle_Attack.glb", "2008", "Battle_Attack"),
+        ("Battle_Defend.glb", "1916", "Battle_Defend"),
     ]
     for filename, go_id, clip_name in banner_specs:
         out_path = os.path.join(REPO_ROOT, "godot", "assets", "models", "battle", "banners", filename)

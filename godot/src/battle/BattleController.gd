@@ -1091,6 +1091,10 @@ func execute_battle_phase() -> void:
 			phase_manager.transition_to(BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE)
 		_set_battle_phase_hud(true)
 		log_message("=== BATTLE PHASE! ===")
+		if battle_modals:
+			await battle_modals.play_battle_banner(true)
+		if not is_inside_tree():
+			return
 
 		# Player attacks
 		for i in range(4):
@@ -1505,6 +1509,10 @@ func execute_opponent_turn() -> void:
 		if phase_manager != null:
 			phase_manager.transition_to(BattlePhaseManager.Phase.BATTLE_WHEEL_PHASE)
 		_set_battle_phase_hud(true)
+		if battle_modals:
+			await battle_modals.play_battle_banner(false)
+		if not is_inside_tree():
+			return
 
 		for i in range(4):
 			var o_lane = opponent_lanes[i]
