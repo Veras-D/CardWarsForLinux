@@ -1109,8 +1109,11 @@ func execute_battle_phase() -> void:
 				ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, p_lane)
 
 			if arena_3d:
-				arena_3d.focus_duel_lane(i, true, 0.36)
-				await get_tree().create_timer(0.28).timeout
+				var duel_tw: Tween = arena_3d.focus_duel_lane(i, true, 1.0)
+				if duel_tw:
+					await duel_tw.finished
+				else:
+					await get_tree().create_timer(1.0).timeout
 
 			var attacker_name = p_lane.creature_data.get("name", "Creature")
 			var atk = p_lane.current_atk
@@ -1526,8 +1529,11 @@ func execute_opponent_turn() -> void:
 				ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_ATTACK, o_lane)
 
 			if arena_3d:
-				arena_3d.focus_duel_lane(i, false, 0.36)
-				await get_tree().create_timer(0.28).timeout
+				var duel_tw: Tween = arena_3d.focus_duel_lane(i, false, 1.0)
+				if duel_tw:
+					await duel_tw.finished
+				else:
+					await get_tree().create_timer(1.0).timeout
 
 			var attacker_name = o_lane.creature_data.get("name", "Creature")
 			var atk = o_lane.current_atk

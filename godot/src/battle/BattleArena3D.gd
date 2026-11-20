@@ -167,11 +167,41 @@ const FX_EXCLAMATION_TEX: String = "res://assets/textures/fx/FX_Battle_Exclamati
 const SFX_REZIN_PATH: String = "res://assets/audio/sfx/FX_RezInParticle.wav"
 const SFX_DEREZ_PATH: String = "res://assets/audio/sfx/SFX_Derez.wav"
 
+const P1_DUEL_RESET_POS := Vector3(-2.50, 1.10, 0.0)
+const P2_DUEL_RESET_POS := Vector3(2.50, 1.10, 0.0)
+# Exact BattleScene.unity P1_Lane1..4BattleCamera / P2_Lane1..4BattleCamera (* 0.05, Z reflected)
+const P1_DUEL_CAM_POS: Array[Vector3] = [
+	Vector3(-0.004, 0.070, -0.425),
+	Vector3(0.0, 0.045, 0.100),
+	Vector3(-0.049, 0.044, 0.7055),
+	Vector3(-0.050, 0.039, 1.209),
+]
+const P1_DUEL_CAM_LOOK: Array[Vector3] = [
+	Vector3(-0.3385, 0.0, -0.825),
+	Vector3(-0.3975, -0.005, -0.3315),
+	Vector3(-0.350, 0.025, 0.300),
+	Vector3(-0.3135, 0.062, 0.850),
+]
+const P2_DUEL_CAM_POS: Array[Vector3] = [
+	Vector3(0.004, 0.070, -0.425),
+	Vector3(0.0, 0.045, 0.100),
+	Vector3(0.049, 0.044, 0.7055),
+	Vector3(0.050, 0.039, 1.209),
+]
+const P2_DUEL_CAM_LOOK: Array[Vector3] = [
+	Vector3(0.3385, 0.0, -0.825),
+	Vector3(0.3975, -0.005, -0.3315),
+	Vector3(0.350, 0.025, 0.300),
+	Vector3(0.3135, 0.062, 0.850),
+]
+
 var _split_overlay: Control = null
 var _split_svp_p1: SubViewport = null
 var _split_svp_p2: SubViewport = null
 var _battle_cam_p1: Camera3D = null
 var _battle_cam_p2: Camera3D = null
+var _duel_look_p1: Vector3 = Vector3.ZERO
+var _duel_look_p2: Vector3 = Vector3.ZERO
 var _duel_split_active: bool = false
 var _active_duel_lane_idx: int = -1
 var _orig_grid_red_mat: Material = null
@@ -1778,14 +1808,12 @@ func focus_floop_action(is_player: bool, lane_idx: int, is_building: bool = fals
 	return tween_camera(cam_pos, look_pos, duration, 58.0)
 
 
-func focus_duel_lane(lane_idx: int, _player_attacking: bool, duration: float = 0.40) -> Tween:
+func focus_duel_lane(lane_idx: int, _player_attacking: bool, duration: float = 1.0) -> Tween:
 	_active_duel_lane_idx = clampi(lane_idx, 0, 3)
-	var z := LANE_Z_CENTERS[_active_duel_lane_idx]
-	# Matched to BattleScene.unity P1_Lane*BattleCamera / P2_Lane*BattleCamera relative to center & creatures
-	var p1_pos := Vector3(-0.02, 0.14, z + 0.58)
-	var p1_look := Vector3(PLAYER_LANE_X + CREATURE_OFFSET_X, 0.05, z)
-	var p2_pos := Vector3(0.02, 0.14, z + 0.58)
-	var p2_look := Vector3(OPPONENT_LANE_X - CREATURE_OFFSET_X, 0.05, z)
+	var p1_pos := P1_DUEL_CAM_POS[_active_duel_lane_idx]
+	var p1_look := P1_DUEL_CAM_LOOK[_active_duel_lane_idx]
+	var p2_pos := P2_DUEL_CAM_POS[_active_duel_lane_idx]
+	var p2_look := P2_DUEL_CAM_LOOK[_active_duel_lane_idx]
 
 	var was_active := _duel_split_active
 	_duel_split_active = true
@@ -1808,33 +1836,55 @@ func focus_duel_lane(lane_idx: int, _player_attacking: bool, duration: float = 0
 		_split_svp_p2.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
 	if _battle_cam_p1 and _battle_cam_p2:
-		_battle_cam_p1.fov = 52.0
-		_battle_cam_p2.fov = 52.0
-		if not was_active or duration <= 0.05:
+		if duration <= 0.05:
+			_battle_cam_p1.fov = 72.0
+			_battle_cam_p2.fov = 72.0
 			_battle_cam_p1.global_position = p1_pos
 			_battle_cam_p1.look_at(p1_look, Vector3.UP)
 			_battle_cam_p2.global_position = p2_pos
 			_battle_cam_p2.look_at(p2_look, Vector3.UP)
-		else:
-			var s1_pos := _battle_cam_p1.global_position
-			var s2_pos := _battle_cam_p2.global_position
-			var s1_quat := _battle_cam_p1.global_transform.basis.get_rotation_quaternion()
-			var s2_quat := _battle_cam_p2.global_transform.basis.get_rotation_quaternion()
-			var t1 := Transform3D().looking_at(p1_look - p1_pos, Vector3.UP).basis.get_rotation_quaternion()
-			var t2 := Transform3D().looking_at(p2_look - p2_pos, Vector3.UP).basis.get_rotation_quaternion()
-			if _cam_tween and _cam_tween.is_running():
-				_cam_tween.kill()
-			_cam_tween = create_tween()
-			_cam_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-			_cam_tween.tween_method(func(t: float) -> void:
-				if _battle_cam_p1:
-					_battle_cam_p1.global_position = s1_pos.lerp(p1_pos, t)
-					_battle_cam_p1.global_transform.basis = Basis(s1_quat.slerp(t1, t))
-				if _battle_cam_p2:
-					_battle_cam_p2.global_position = s2_pos.lerp(p2_pos, t)
-					_battle_cam_p2.global_transform.basis = Basis(s2_quat.slerp(t2, t))
-			, 0.0, 1.0, maxf(0.05, duration))
-			return _cam_tween
+			_duel_look_p1 = p1_look
+			_duel_look_p2 = p2_look
+			return null
+
+		if not was_active:
+			# Matches CWBattleSequenceController + CWBattleSequenceCam: split cams begin pulled back
+			# at P1_BattleCamera_ResetPos / P2_BattleCamera_ResetPos and zoom into the lane over 1.0s.
+			_duel_look_p1 = Vector3.ZERO
+			_duel_look_p2 = Vector3.ZERO
+			_battle_cam_p1.fov = 60.0
+			_battle_cam_p2.fov = 60.0
+			_battle_cam_p1.global_position = P1_DUEL_RESET_POS
+			_battle_cam_p1.look_at(_duel_look_p1, Vector3.UP)
+			_battle_cam_p2.global_position = P2_DUEL_RESET_POS
+			_battle_cam_p2.look_at(_duel_look_p2, Vector3.UP)
+
+		var s1_pos := _battle_cam_p1.global_position
+		var s2_pos := _battle_cam_p2.global_position
+		var s1_look := _duel_look_p1
+		var s2_look := _duel_look_p2
+		var s_fov := _battle_cam_p1.fov
+		if _cam_tween and _cam_tween.is_running():
+			_cam_tween.kill()
+		_cam_tween = create_tween()
+		_cam_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		_cam_tween.tween_method(func(t: float) -> void:
+			if _battle_cam_p1:
+				var cur_p1 := s1_pos.lerp(p1_pos, t)
+				var cur_l1 := s1_look.lerp(p1_look, t)
+				_duel_look_p1 = cur_l1
+				_battle_cam_p1.fov = lerpf(s_fov, 72.0, t)
+				_battle_cam_p1.global_position = cur_p1
+				_battle_cam_p1.look_at(cur_l1, Vector3.UP)
+			if _battle_cam_p2:
+				var cur_p2 := s2_pos.lerp(p2_pos, t)
+				var cur_l2 := s2_look.lerp(p2_look, t)
+				_duel_look_p2 = cur_l2
+				_battle_cam_p2.fov = lerpf(s_fov, 72.0, t)
+				_battle_cam_p2.global_position = cur_p2
+				_battle_cam_p2.look_at(cur_l2, Vector3.UP)
+		, 0.0, 1.0, maxf(0.05, duration))
+		return _cam_tween
 	return null
 
 
