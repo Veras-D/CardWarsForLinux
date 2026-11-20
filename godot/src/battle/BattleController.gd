@@ -782,7 +782,8 @@ func _run_summon_presentation(is_player: bool, lane_idx: int, card_data: Diction
 		arena_3d.focus_summon_camera(is_player, lane_idx, is_building, 0.50)
 		var mesh_info: Dictionary = Database.get_entity_mesh_info(card_data) if Database else {}
 		var intro_len := float(mesh_info.get("intro_length", 2.0 if is_building else 1.5))
-		var wait_dur := clampf(intro_len + 0.35, 1.55, 2.35)
+		var rez_delay := 0.75 if is_building else 1.0
+		var wait_dur := clampf(rez_delay + intro_len + 0.15, 2.50, 3.25)
 		await get_tree().create_timer(wait_dur).timeout
 		if not is_inside_tree():
 			_is_summon_cinematic_active = false

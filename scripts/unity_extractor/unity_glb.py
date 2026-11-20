@@ -644,6 +644,16 @@ def export_unity_subtree_to_glb(
             if target_node is None:
                 continue
             # Sample Hermite densely at 30fps if sparse (< 10 keys and non-constant) so curves match Unity tangents closely
+            if kind == "rot" and len(keys) >= 2:
+                aligned = [keys[0]]
+                for tm_k, v_k, ins_k, outs_k in keys[1:]:
+                    prev_v = aligned[-1][1]
+                    dot = sum(prev_v[d] * v_k[d] for d in range(4))
+                    if dot < 0.0:
+                        aligned.append((tm_k, [-x for x in v_k], [-x for x in ins_k], [-x for x in outs_k]))
+                    else:
+                        aligned.append((tm_k, v_k, ins_k, outs_k))
+                keys = aligned
             if len(keys) >= 2 and not is_constant_curve(keys) and (keys[-1][0] - keys[0][0]) > 0.05 and len(keys) < int((keys[-1][0] - keys[0][0]) * 25.0):
                 t0, t1 = keys[0][0], keys[-1][0]
                 steps = max(2, int(math.ceil((t1 - t0) * 30.0)))
@@ -661,6 +671,10 @@ def export_unity_subtree_to_glb(
                     dt = kb[0] - ka[0]
                     u = (ts - ka[0]) / dt if dt > 1e-6 else 0.0
                     vals = [_hermite(ka[1][d], ka[3][d] * dt, kb[1][d], kb[2][d] * dt, u) for d in range(dim)]
+                    if kind == "rot":
+                        nrm = math.sqrt(sum(c * c for c in vals))
+                        if nrm > 1e-8:
+                            vals = [c / nrm for c in vals]
                     sampled_keys.append((ts, vals))
                 keys_out = sampled_keys
             else:

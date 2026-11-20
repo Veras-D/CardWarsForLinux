@@ -16,14 +16,104 @@ Usage examples:
 """
 
 import argparse
+import math
 import re
+
+
+def _unpack_ints(num_items: int, hex_data: str, bit_size: int) -> list[int]:
+    m_data = bytes.fromhex(hex_data.strip()) if hex_data and hex_data.strip() else b""
+    res: list[int] = []
+    index_pos = 0
+    bit_pos = 0
+    mask = (1 << bit_size) - 1
+    for _ in range(num_items):
+        if bit_size == 0:
+            res.append(0)
+            continue
+        bits = 0
+        val = 0
+        while bits < bit_size:
+            val |= (m_data[index_pos] >> bit_pos) << bits
+            num = min(bit_size - bits, 8 - bit_pos)
+            bit_pos += num
+            bits += num
+            if bit_pos == 8:
+                index_pos += 1
+                bit_pos = 0
+        res.append(val & mask)
+    return res
+
+
+def _unpack_quats(num_items: int, hex_data: str) -> list[list[float]]:
+    m_data = bytes.fromhex(hex_data.strip()) if hex_data and hex_data.strip() else b""
+    res: list[list[float]] = []
+    index_pos = 0
+    bit_pos = 0
+    for _ in range(num_items):
+        flags = 0
+        bits = 0
+        while bits < 3:
+            flags |= (m_data[index_pos] >> bit_pos) << bits
+            num = min(3 - bits, 8 - bit_pos)
+            bit_pos += num
+            bits += num
+            if bit_pos == 8:
+                index_pos += 1
+                bit_pos = 0
+        flags &= 7
+        q = [0.0, 0.0, 0.0, 0.0]
+        sum_sq = 0.0
+        dropped = flags & 3
+        for j in range(4):
+            if dropped != j:
+                bit_size = 9 if ((dropped + 1) % 4 == j) else 10
+                x = 0
+                bits = 0
+                while bits < bit_size:
+                    x |= (m_data[index_pos] >> bit_pos) << bits
+                    num = min(bit_size - bits, 8 - bit_pos)
+                    bit_pos += num
+                    bits += num
+                    if bit_pos == 8:
+                        index_pos += 1
+                        bit_pos = 0
+                x &= (1 << bit_size) - 1
+                val = x / (0.5 * ((1 << bit_size) - 1)) - 1.0
+                q[j] = val
+                sum_sq += val * val
+        last = math.sqrt(max(0.0, 1.0 - sum_sq))
+        if (flags & 4) != 0:
+            last = -last
+        q[dropped] = last
+        norm = math.sqrt(sum(c * c for c in q))
+        if norm > 1e-8:
+            q = [c / norm for c in q]
+        res.append(q)
+    return res
+
+
+def _unpack_floats(num_items: int, rng: float, start: float, hex_data: str, bit_size: int) -> list[float]:
+    if bit_size == 0:
+        return [start] * num_items
+    ints = _unpack_ints(num_items, hex_data, bit_size)
+    scale = rng / float((1 << bit_size) - 1)
+    return [start + x * scale for x in ints]
+
+
+def _extract_section_body(text: str, header: str, section_order: list[str]) -> str:
+    if header not in text:
+        return ""
+    s = text.index(header)
+    nxt_candidates = [text.index(h, s + len(header)) for h in section_order if h != header and h in text[s + len(header) :]]
+    nxt = min(nxt_candidates) if nxt_candidates else len(text)
+    return text[s:nxt]
 
 
 def parse_clip(path: str) -> dict[tuple[str, str], list[tuple[float, list[float], list[float], list[float]]]]:
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         t = f.read()
 
-    secs = {}
+    secs: dict[tuple[str, str], list[tuple[float, list[float], list[float], list[float]]]] = {}
     section_Order = [
         "  m_RotationCurves:",
         "  m_CompressedRotationCurves:",
@@ -36,12 +126,9 @@ def parse_clip(path: str) -> dict[tuple[str, str], list[tuple[float, list[float]
     ]
 
     for short_name, header in (("rot", "  m_RotationCurves:"), ("pos", "  m_PositionCurves:"), ("scale", "  m_ScaleCurves:")):
-        if header not in t:
+        body = _extract_section_body(t, header, section_Order)
+        if not body:
             continue
-        s = t.index(header)
-        nxt_candidates = [t.index(h, s + len(header)) for h in section_Order if h != header and h in t[s + len(header) :]]
-        nxt = min(nxt_candidates) if nxt_candidates else len(t)
-        body = t[s:nxt]
         blocks = body.split("  - curve:")[1:]
         for b in blocks:
             pm = re.search(r"path:[ \t]*(.*)", b)
@@ -56,6 +143,37 @@ def parse_clip(path: str) -> dict[tuple[str, str], list[tuple[float, list[float]
 
                 keys.append((tm, vec("value"), vec("inSlope"), vec("outSlope")))
             secs[(short_name, path_str)] = keys
+
+    cbody = _extract_section_body(t, "  m_CompressedRotationCurves:", section_Order)
+    if cbody:
+        for b in cbody.split("  - m_Path:")[1:]:
+            nl = b.find("\n")
+            path_str = (b[:nl] if nl >= 0 else b).strip()
+            if len(path_str) >= 2 and path_str[0] == "'" and path_str[-1] == "'":
+                path_str = path_str[1:-1]
+            nt = int(re.search(r"m_Times:.*?m_NumItems:\s*(\d+)", b, re.S).group(1))
+            dt = re.search(r"m_Times:.*?m_Data:\s*([0-9a-fA-F]*)", b, re.S).group(1)
+            bt = int(re.search(r"m_Times:.*?m_BitSize:\s*(\d+)", b, re.S).group(1))
+            nv = int(re.search(r"m_Values:.*?m_NumItems:\s*(\d+)", b, re.S).group(1))
+            dv = re.search(r"m_Values:.*?m_Data:\s*([0-9a-fA-F]*)", b, re.S).group(1)
+            ns = int(re.search(r"m_Slopes:.*?m_NumItems:\s*(\d+)", b, re.S).group(1))
+            rg = float(re.search(r"m_Slopes:.*?m_Range:\s*([-0-9.eE+]+)", b, re.S).group(1))
+            st = float(re.search(r"m_Slopes:.*?m_Start:\s*([-0-9.eE+]+)", b, re.S).group(1))
+            ds = re.search(r"m_Slopes:.*?m_Data:\s*([0-9a-fA-F]*)", b, re.S).group(1)
+            bs = int(re.search(r"m_Slopes:.*?m_BitSize:\s*(\d+)", b, re.S).group(1))
+
+            deltas = _unpack_ints(nt, dt, bt)
+            quats = _unpack_quats(nv, dv)
+            slopes = _unpack_floats(ns, rg, st, ds, bs)
+            keys = []
+            sum_t = 0
+            for i in range(min(len(deltas), len(quats))):
+                sum_t += deltas[i]
+                sl = slopes[4 * i : 4 * i + 4] if 4 * i + 4 <= len(slopes) else [0.0, 0.0, 0.0, 0.0]
+                keys.append((sum_t * 0.01, quats[i], sl, sl))
+            if keys and ("rot", path_str) not in secs:
+                secs[("rot", path_str)] = keys
+
     return secs
 
 

@@ -95,6 +95,10 @@ const P1_LANDSCAPE_Z: Array[float] = [-0.8045, -0.2975, 0.2914, 0.8140]
 const P2_LANDSCAPE_Z: Array[float] = [-0.8162, -0.2936, 0.2953, 0.8023]
 const PLAYER_LANE_X := -0.5769
 const OPPONENT_LANE_X := 0.5769
+# Offsets relative to lane center matching BattleScene.unity world X: Creature ±0.305, Floop ±0.550, Building ±0.895
+const CREATURE_OFFSET_X := 0.2719
+const FLOOP_PAD_OFFSET_X := 0.0269
+const BUILDING_OFFSET_X := 0.3181
 const BOARD_SURFACE_Y := -0.122
 # Matches BattleScene.unity local scale (0.994, 0.78, 1.0) in Maya -90X space * WORLD_SCALE (0.05)
 const LANDSCAPE_MESH_SCALE := Vector3(0.0497, 0.05, 0.039)
@@ -155,7 +159,10 @@ const FLOOP_CAMERA_OFFSET := Vector3(-0.65, 1.00, 0.0)  # CWFloopActionManager f
 const SUMMON_UNDERGROUND_Y := -0.50                     # SummonScript -10f * 0.05
 
 const FX_SCAN_HEX_SOLID_TEX: String = "res://assets/textures/battle/FX_Scan_Hex_Solid.png"
-const FX_REZIN_PARTICLE_TEX: String = "res://assets/textures/fx/FX_RezInParticle2_PNG.png"
+const FX_SCAN_HEX_OUTLINE_TEX: String = "res://assets/textures/fx/FX_Scan_Hex_Outline.png"
+const FX_SCAN_TEX: String = "res://assets/textures/fx/FX_Scan.png"
+const FX_FLARE_TEX: String = "res://assets/textures/fx/FX_Flare3_TGA.png"
+const FX_SPARKLES_TEX: String = "res://assets/textures/fx/FX_BurstBubble_NoGlow_PNG.png"
 const FX_EXCLAMATION_TEX: String = "res://assets/textures/fx/FX_Battle_ExclamationMark_PNG.png"
 const SFX_REZIN_PATH: String = "res://assets/audio/sfx/FX_RezInParticle.wav"
 const SFX_DEREZ_PATH: String = "res://assets/audio/sfx/SFX_Derez.wav"
@@ -348,22 +355,22 @@ func _create_lane_node(node_name: String, pos: Vector3, is_player: bool) -> Node
 
 	var creature_anchor := Node3D.new()
 	creature_anchor.name = "CreatureAnchor"
-	creature_anchor.position = Vector3(0.14 if is_player else -0.14, 0.028, 0.0)
+	creature_anchor.position = Vector3(CREATURE_OFFSET_X if is_player else -CREATURE_OFFSET_X, 0.028, 0.0)
 	root.add_child(creature_anchor)
 
 	var building_anchor := Node3D.new()
 	building_anchor.name = "BuildingAnchor"
-	building_anchor.position = Vector3(-0.37 if is_player else 0.37, 0.025, 0.0)
+	building_anchor.position = Vector3(-BUILDING_OFFSET_X if is_player else BUILDING_OFFSET_X, 0.025, 0.0)
 	root.add_child(building_anchor)
 
 	var drop_anchor := Node3D.new()
 	drop_anchor.name = "DropAnchor"
-	drop_anchor.position = Vector3(0.14 if is_player else -0.14, 0.026, 0.0)
+	drop_anchor.position = Vector3(CREATURE_OFFSET_X if is_player else -CREATURE_OFFSET_X, 0.026, 0.0)
 	root.add_child(drop_anchor)
 
 	var floop_pad := _create_floop_pad(is_player)
 	floop_pad.name = "FloopPad"
-	floop_pad.position = Vector3(-0.16 if is_player else 0.16, 0.024, 0.0)
+	floop_pad.position = Vector3(FLOOP_PAD_OFFSET_X if is_player else -FLOOP_PAD_OFFSET_X, 0.024, 0.0)
 	floop_pad.visible = false
 	root.add_child(floop_pad)
 
@@ -619,8 +626,7 @@ func _play_ap_clip(ap: AnimationPlayer, clip_name: String, loop: bool = false, s
 		anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
 	ap.speed_scale = speed
 	ap.play(resolved)
-	if start_time >= 0.0:
-		ap.seek(start_time, true)
+	ap.seek(start_time if start_time >= 0.0 else 0.0, true)
 	return true
 
 
@@ -651,57 +657,116 @@ func _get_entity_body(is_player: bool, lane_idx: int, is_building: bool) -> Node
 	return holder.get_node_or_null("BuildingBody" if is_building else "EntityBody") as Node3D
 
 
+func _make_fx_add_mat(tex: Texture2D, tint: Color, billboard_mode: BaseMaterial3D.BillboardMode = BaseMaterial3D.BILLBOARD_DISABLED, uv_scale: Vector2 = Vector2.ONE, uv_offset: Vector2 = Vector2.ZERO) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.billboard_mode = billboard_mode
+	mat.billboard_keep_scale = true
+	mat.albedo_texture = tex
+	mat.albedo_color = tint
+	mat.uv1_scale = Vector3(uv_scale.x, uv_scale.y, 1.0)
+	mat.uv1_offset = Vector3(uv_offset.x, uv_offset.y, 0.0)
+	return mat
+
+
+func _spawn_floor_fx_quad(fx_root: Node3D, tex_path: String, size_m: float, local_pos: Vector3, delay: float, life: float, start_scale: float, end_scale: float, peak_alpha: float) -> void:
+	if not ResourceLoader.exists(tex_path):
+		return
+	var tex := load(tex_path) as Texture2D
+	if tex == null:
+		return
+	var mi := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(size_m, size_m)
+	mi.mesh = pm
+	var mat := _make_fx_add_mat(tex, Color(1.0, 0.98, 0.85, 0.0))
+	mi.material_override = mat
+	mi.position = local_pos
+	mi.scale = Vector3(start_scale, 1.0, start_scale)
+	fx_root.add_child(mi)
+
+	var tw := create_tween()
+	if delay > 0.0:
+		tw.tween_interval(delay)
+	tw.tween_property(mat, "albedo_color:a", peak_alpha, life * 0.25).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(mi, "scale", Vector3(end_scale, 1.0, end_scale), life * 0.75).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(mat, "albedo_color:a", 0.0, life * 0.55).set_trans(Tween.TRANS_SINE)
+
+
 func _spawn_summon_vfx(parent_anchor: Node3D, is_building: bool) -> void:
 	if parent_anchor == null:
 		return
 	var fx_root := Node3D.new()
 	fx_root.name = "SummonFX"
 	parent_anchor.add_child(fx_root)
+	var s := 0.88 if is_building else 1.0
 
-	# Hex glow pad matching FX_RezIn_Creature / FX_RezInParticle_Building
-	if ResourceLoader.exists(FX_SCAN_HEX_SOLID_TEX):
-		var hex_mi := MeshInstance3D.new()
-		var plane := PlaneMesh.new()
-		plane.size = Vector2(0.46, 0.46) if is_building else Vector2(0.54, 0.54)
-		hex_mi.mesh = plane
-		var hmat := StandardMaterial3D.new()
-		hmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		hmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		hmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-		hmat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
-		hmat.albedo_texture = load(FX_SCAN_HEX_SOLID_TEX)
-		hmat.albedo_color = Color(0.35, 0.92, 1.0, 0.95)
-		hex_mi.material_override = hmat
-		hex_mi.position = Vector3(0.0, 0.008, 0.0)
-		fx_root.add_child(hex_mi)
-		var tw_h := create_tween()
-		tw_h.tween_property(hex_mi, "scale", Vector3(1.25, 1.0, 1.25), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tw_h.parallel().tween_property(hmat, "albedo_color:a", 0.0, 0.85).set_delay(0.25)
+	# Mirrors Assets/Resources/particles/FX_RezIn_Creature.prefab & FX_RezInParticle_Building.prefab:
+	# 1. FX_Scan base glow disk (size 6 * 0.05 = 0.30m, delay 0, life 1.5s)
+	_spawn_floor_fx_quad(fx_root, FX_SCAN_TEX, 0.34 * s, Vector3(0.0, 0.008, 0.0), 0.0, 1.50, 0.35, 1.15, 0.85)
+	# 2. FX_ScanHexOutline ring (size 6 * 0.05 = 0.30m, delay 0.45s, life 0.85s)
+	_spawn_floor_fx_quad(fx_root, FX_SCAN_HEX_OUTLINE_TEX, 0.36 * s, Vector3(0.0, 0.011, 0.0), 0.45, 0.85, 0.40, 1.08, 0.95)
+	# 3. FX_ScanHexSolid1/2/3 staggered inner hexes (size 2 * 0.05 = 0.10m)
+	_spawn_floor_fx_quad(fx_root, FX_SCAN_HEX_SOLID_TEX, 0.12 * s, Vector3(1.297 * 0.05 * s, 0.013, 0.0), 0.58, 0.58, 0.30, 1.05, 0.90)
+	_spawn_floor_fx_quad(fx_root, FX_SCAN_HEX_SOLID_TEX, 0.12 * s, Vector3(-0.613 * 0.05 * s, 0.013, 1.171 * 0.05 * s), 0.70, 0.58, 0.30, 1.05, 0.90)
+	_spawn_floor_fx_quad(fx_root, FX_SCAN_HEX_SOLID_TEX, 0.12 * s, Vector3(-0.613 * 0.05 * s, 0.013, -1.057 * 0.05 * s), 0.84, 0.58, 0.30, 1.05, 0.90)
 
-	# Rising RezIn particles using original FX_RezInParticle2_PNG.png
-	if ResourceLoader.exists(FX_REZIN_PARTICLE_TEX):
-		var ptex := load(FX_REZIN_PARTICLE_TEX) as Texture2D
-		var p_px := 0.10 / maxf(1.0, float(ptex.get_height())) if ptex else 0.0012
-		for i in range(6):
-			var sp := Sprite3D.new()
-			sp.texture = ptex
-			sp.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-			sp.pixel_size = p_px
-			sp.modulate = Color(0.45, 0.95, 1.0, 0.9)
-			var ang := (TAU / 6.0) * float(i)
-			var rad := 0.14 if is_building else 0.17
-			sp.position = Vector3(cos(ang) * rad, 0.02, sin(ang) * rad)
-			fx_root.add_child(sp)
-			var tw_p := create_tween()
-			tw_p.tween_interval(0.04 * float(i))
-			tw_p.tween_property(sp, "position:y", 0.42, 0.65).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-			tw_p.parallel().tween_property(sp, "modulate:a", 0.0, 0.55).set_delay(0.15)
+	# 4. RayBeam: tall vertical light streaks shooting upward (FX_Flare3_TGA, 5/sec)
+	if ResourceLoader.exists(FX_FLARE_TEX):
+		var ftex := load(FX_FLARE_TEX) as Texture2D
+		var beam_count := 8 if is_building else 10
+		for i in range(beam_count):
+			var bm := MeshInstance3D.new()
+			var qm := QuadMesh.new()
+			qm.size = Vector2(0.026 * s, 0.56 * s)
+			bm.mesh = qm
+			var bmat := _make_fx_add_mat(ftex, Color(1.0, 0.99, 0.88, 0.0), BaseMaterial3D.BILLBOARD_FIXED_Y)
+			bm.material_override = bmat
+			var ang := float(i) * 2.39996
+			var rad := randf_range(0.03, 0.15 * s)
+			var start_y := 0.12
+			bm.position = Vector3(cos(ang) * rad, start_y, sin(ang) * rad)
+			fx_root.add_child(bm)
+			var tw_b := create_tween()
+			var d := 0.14 * float(i)
+			tw_b.tween_interval(d)
+			tw_b.tween_property(bmat, "albedo_color:a", 0.92, 0.16)
+			tw_b.parallel().tween_property(bm, "position:y", start_y + 0.42, 0.95).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tw_b.tween_property(bmat, "albedo_color:a", 0.0, 0.45)
+
+	# 5. Sparkles2: additive 8-point starbursts & sparkles (FX_BurstBubble_NoGlow_PNG 2x1 sheet)
+	if ResourceLoader.exists(FX_SPARKLES_TEX):
+		var stex := load(FX_SPARKLES_TEX) as Texture2D
+		var star_count := 6 if is_building else 8
+		for i in range(star_count):
+			var sm := MeshInstance3D.new()
+			var sqm := QuadMesh.new()
+			var sz := randf_range(0.055, 0.095) * s
+			sqm.size = Vector2(sz, sz)
+			sm.mesh = sqm
+			var frame_idx := 0 if (i % 3 != 2) else 1
+			var smat := _make_fx_add_mat(stex, Color(1.0, 0.98, 0.88, 0.0), BaseMaterial3D.BILLBOARD_ENABLED, Vector2(0.5, 1.0), Vector2(0.5 * float(frame_idx), 0.0))
+			sm.material_override = smat
+			var ang2 := float(i) * 2.1 + 0.4
+			var rad2 := randf_range(0.03, 0.15 * s)
+			var sy := randf_range(0.08, 0.24)
+			sm.position = Vector3(cos(ang2) * rad2, sy, sin(ang2) * rad2)
+			fx_root.add_child(sm)
+			var tw_s := create_tween()
+			tw_s.tween_interval(0.16 * float(i))
+			tw_s.tween_property(smat, "albedo_color:a", 0.92, 0.18)
+			tw_s.parallel().tween_property(sm, "position:y", sy + 0.34, 0.90).set_trans(Tween.TRANS_SINE)
+			tw_s.tween_property(smat, "albedo_color:a", 0.0, 0.45)
 
 	if ResourceLoader.exists(SFX_REZIN_PATH):
 		Audio.play_sfx_with_variation(load(SFX_REZIN_PATH), -4.0, 0.04)
 
 	var fx_id := fx_root.get_instance_id()
-	var clean_timer := get_tree().create_timer(1.4)
+	var clean_timer := get_tree().create_timer(2.6)
 	clean_timer.timeout.connect(func():
 		var fx := instance_from_id(fx_id) as Node
 		if is_instance_valid(fx):
@@ -786,20 +851,20 @@ func spawn_lane_creature(is_player: bool, lane_idx: int, card_data: Dictionary, 
 	set_lane_flooped(is_player, lane_idx, false, true)
 
 	if animate:
-		# Matches SummonScript.SummonAction: start underground -10f, brief delay, SpawnFX/SFX -> Intro -> Idle
+		# Matches CreatureManagerScript.Summon + SummonScript.SummonAction:
+		# 1. FX_RezIn_Creature spawns immediately on the hex while creature sits at -10f (-0.50m) underground.
+		# 2. After 1.0s (WaitForSeconds(1f)), PlaySpawnAudio() triggers, creature pops to board surface (+10f) and plays Intro -> Idle.
 		body.position.y = SUMMON_UNDERGROUND_Y
+		_spawn_summon_vfx(holder, false)
 		var body_id := body.get_instance_id()
-		var holder_id := holder.get_instance_id()
 		var ap_id := ap.get_instance_id() if ap else 0
-		var t_fx := get_tree().create_timer(0.32)
+		var t_fx := get_tree().create_timer(1.0)
 		t_fx.timeout.connect(func():
 			var b := instance_from_id(body_id) as Node3D
-			var h := instance_from_id(holder_id) as Node3D
-			if not is_inside_tree() or b == null or h == null:
+			if not is_inside_tree() or b == null:
 				return
-			b.position.y = 0.0
-			_spawn_summon_vfx(h, false)
 			_play_delayed_spawn_audio(spawn_audio, spawn_delay)
+			b.position.y = 0.0
 			var ap_node := instance_from_id(ap_id) as AnimationPlayer if ap_id != 0 else null
 			if ap_node:
 				if not _play_ap_clip(ap_node, intro_clip, false):
@@ -864,20 +929,18 @@ func spawn_lane_building(is_player: bool, lane_idx: int, card_data: Dictionary, 
 		_play_ap_clip(ap, ambient_clip, true)
 
 	if animate:
-		# Matches SummonScript.SummonAction for buildings: start at -10f underground -> VFX -> iTween.MoveTo 2.0s rise
+		# Matches SummonScript.SummonAction for buildings: start at -10f -> immediate FX -> iTween.MoveTo 2.0s rise
 		body.position.y = SUMMON_UNDERGROUND_Y
+		_spawn_summon_vfx(holder, true)
+		_play_delayed_spawn_audio(spawn_audio, spawn_delay)
 		var body_id := body.get_instance_id()
-		var holder_id := holder.get_instance_id()
-		var t_fx := get_tree().create_timer(0.32)
+		var t_fx := get_tree().create_timer(0.75)
 		t_fx.timeout.connect(func():
 			var b := instance_from_id(body_id) as Node3D
-			var h := instance_from_id(holder_id) as Node3D
-			if not is_inside_tree() or b == null or h == null:
+			if not is_inside_tree() or b == null:
 				return
-			_spawn_summon_vfx(h, true)
-			_play_delayed_spawn_audio(spawn_audio, spawn_delay)
 			var tw := create_tween()
-			tw.tween_property(b, "position:y", 0.0, 1.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tw.tween_property(b, "position:y", 0.0, 2.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		)
 	else:
 		body.position.y = 0.0
@@ -949,7 +1012,7 @@ func animate_creature_lunge(is_player: bool, lane_idx: int) -> void:
 	if holder == null:
 		return
 	var dir := 0.22 if is_player else -0.22
-	var base_x := 0.14 if is_player else -0.14
+	var base_x := CREATURE_OFFSET_X if is_player else -CREATURE_OFFSET_X
 	var tw := create_tween()
 	tw.tween_property(holder, "position:x", base_x + dir, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(holder, "position:x", base_x, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -976,7 +1039,7 @@ func animate_creature_hit(is_player: bool, lane_idx: int, is_crit: bool = false)
 	var holder := anchor.get_node_or_null("CreatureAnchor") as Node3D
 	if holder == null:
 		return
-	var base_x := 0.14 if is_player else -0.14
+	var base_x := CREATURE_OFFSET_X if is_player else -CREATURE_OFFSET_X
 	var tw := create_tween()
 	tw.tween_property(holder, "position:x", base_x + (-0.08 if is_player else 0.08), 0.08)
 	tw.tween_property(holder, "position:x", base_x, 0.12)
@@ -1676,16 +1739,17 @@ func focus_summon_camera(is_player: bool, lane_idx: int, is_building: bool = fal
 	var sub := anchor.get_node_or_null("BuildingAnchor" if is_building else "CreatureAnchor") as Node3D
 	var target_pos := sub.global_position if sub else anchor.global_position
 
-	# CWiTweenVantageCam: Lane{1..4}{Creature,Building}VantagePoint scaled by bounds height
+	# CWiTweenVantageCam: Lane{1..4}{Creature,Building}VantagePoint + bounds-scaled camera pullback
 	var vantage := BUILDING_VANTAGE_POINTS[li] if is_building else CREATURE_VANTAGE_POINTS[li]
 	var key := "%s_%d" % ["p" if is_player else "o", li]
 	var h := float(_creature_heights.get(key, 0.25))
+	var look_pos := target_pos + Vector3(0.0, 0.10 if is_building else (h * 0.38), 0.0)
 	if not is_building:
-		vantage.y += h * 0.5 + 0.025
-		var dir_out := Vector3(vantage.x - target_pos.x, 0.0, vantage.z - target_pos.z).normalized()
-		vantage += dir_out * (h * 0.4 + 0.08)
-	var look_pos := target_pos + Vector3(0.0, 0.10 if is_building else (h * 0.45), 0.0)
-	return tween_camera(vantage, look_pos, duration, 60.0)
+		var vec := vantage - look_pos
+		var f := h * 0.5 / tan(deg_to_rad(30.0))
+		vantage += vec * (absf(f) + 0.08)
+		vantage.y = maxf(vantage.y + 0.20, target_pos.y + 0.34)
+	return tween_camera(vantage, look_pos, duration, 58.0)
 
 
 func focus_lane_zoom(is_player: bool, lane_idx: int, duration: float = 0.30, is_building: bool = false) -> Tween:
@@ -1718,10 +1782,10 @@ func focus_duel_lane(lane_idx: int, _player_attacking: bool, duration: float = 0
 	_active_duel_lane_idx = clampi(lane_idx, 0, 3)
 	var z := LANE_Z_CENTERS[_active_duel_lane_idx]
 	# Matched to BattleScene.unity P1_Lane*BattleCamera / P2_Lane*BattleCamera relative to center & creatures
-	var p1_pos := Vector3(-0.04, 0.14, z + 0.62)
-	var p1_look := Vector3(-0.48, 0.06, z)
-	var p2_pos := Vector3(0.04, 0.14, z + 0.62)
-	var p2_look := Vector3(0.48, 0.06, z)
+	var p1_pos := Vector3(-0.02, 0.14, z + 0.58)
+	var p1_look := Vector3(PLAYER_LANE_X + CREATURE_OFFSET_X, 0.05, z)
+	var p2_pos := Vector3(0.02, 0.14, z + 0.58)
+	var p2_look := Vector3(OPPONENT_LANE_X - CREATURE_OFFSET_X, 0.05, z)
 
 	var was_active := _duel_split_active
 	_duel_split_active = true

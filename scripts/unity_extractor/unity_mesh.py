@@ -94,6 +94,7 @@ def parse_unity_mesh(asset_path: str) -> dict:
     ntris = len(ib) // 6
     tris = [struct.unpack_from("<3H", ib, i * 6) for i in range(ntris)]
 
+    cm_txt = ""
     if vc == 0 and "  m_CompressedMesh:" in txt:
         cm_start = txt.index("  m_CompressedMesh:")
         cm_end = txt.find("  m_LocalAABB:", cm_start)
@@ -171,7 +172,7 @@ def parse_unity_mesh(asset_path: str) -> dict:
                 m[int(r)][int(c)] = float(val)
             bps.append(m)
 
-    # Parse m_Skin if present
+    # Parse m_Skin if present, or fall back to m_CompressedMesh packed skin weights
     weights = []
     bone_indices = []
     if "  m_Skin:" in txt and "  m_VertexData:" in txt:
@@ -180,6 +181,49 @@ def parse_unity_mesh(asset_path: str) -> dict:
         bi_all = [int(x) for x in re.findall(r"boneIndex\[\d\]: (\d+)", sk_sub)]
         weights = [w_all[i : i + 4] for i in range(0, len(w_all), 4)]
         bone_indices = [bi_all[i : i + 4] for i in range(0, len(bi_all), 4)]
+
+    if (not weights or len(weights) != vc) and cm_txt:
+        w_blk = _extract_cm_field(cm_txt, "m_Weights", "m_NormalSigns")
+        b_blk = _extract_cm_field(cm_txt, "m_BoneIndices", "m_Triangles")
+        m_wn = re.search(r"m_NumItems:\s*(\d+)", w_blk)
+        m_wd = re.search(r"m_Data:\s*([0-9a-fA-F]*)", w_blk)
+        m_wb = re.search(r"m_BitSize:\s*(\d+)", w_blk)
+        m_bn = re.search(r"m_NumItems:\s*(\d+)", b_blk)
+        m_bd = re.search(r"m_Data:\s*([0-9a-fA-F]*)", b_blk)
+        m_bb = re.search(r"m_BitSize:\s*(\d+)", b_blk)
+        if m_wn and m_wb and int(m_wn.group(1)) > 0 and int(m_wb.group(1)) > 0 and m_bn and m_bb:
+            wn = int(m_wn.group(1))
+            wb = int(m_wb.group(1))
+            w_ints = _unpack_packed_ints(wn, m_wd.group(1) if m_wd else "", wb)
+            b_ints = _unpack_packed_ints(int(m_bn.group(1)), m_bd.group(1) if m_bd else "", int(m_bb.group(1)))
+            max_q = float((1 << wb) - 1)
+            wj = 0
+            bj = 0
+            weights = []
+            bone_indices = []
+            while wj < wn and len(weights) < vc:
+                w4 = [0.0, 0.0, 0.0, 0.0]
+                b4 = [0, 0, 0, 0]
+                s = 0
+                k = 0
+                while k < 3 and wj < wn:
+                    wv = w_ints[wj]
+                    bv = b_ints[bj] if bj < len(b_ints) else 0
+                    w4[k] = wv / max_q
+                    b4[k] = bv
+                    s += wv
+                    wj += 1
+                    bj += 1
+                    k += 1
+                    if s >= 31:
+                        break
+                if s < 31:
+                    # Unity omits the 4th quantized weight when k==3 & sum<31, reconstructing 31-sum
+                    w4[3] = (31 - s) / max_q
+                    b4[3] = b_ints[bj] if bj < len(b_ints) else 0
+                    bj += 1
+                weights.append(w4)
+                bone_indices.append(b4)
 
     return {
         "path": asset_path,
