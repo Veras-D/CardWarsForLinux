@@ -1,0 +1,1996 @@
+{
+  "Ash": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "BMO": {
+    "Opening": [
+      "BMO_Opening_1.wav",
+      "BMO_Opening_2.wav",
+      "beemo_mode_bmocartridge_01.wav"
+    ],
+    "Win": [
+      "BMO_Win_1.wav",
+      "BMO_Win_3.wav",
+      "bmo_gameplay_06a.wav",
+      "beemo_mode_loadgame_02.wav"
+    ],
+    "Lose": [
+      "BMO_Lose_1.wav",
+      "BMO_Lose_2.wav",
+      "beemo_mode_deathspawn_02.wav"
+    ],
+    "DestroyCreature": [
+      "beemo_mode_bossdefeat_01.wav"
+    ],
+    "PlayCreature": [
+      "BMO_Play_Creature_3.wav",
+      "beemo_mode_gumwad_04_ALT01.wav",
+      "beemo_mode_monsterfloor_02.wav"
+    ],
+    "PlayBuilding": [
+      "BMO_Play_Building_1.wav",
+      "BMO_Play_Building_3.wav",
+      "beemo_mode_monsterfloor_01.wav"
+    ],
+    "PlaySpell": [
+      "BMO_Play_Spell_1.wav",
+      "BMO_Play_Spell_2.wav",
+      "BMO_Play_Spell_3.wav",
+      "beemo_mode_dizzyrevive_01.wav",
+      "beemo_mode_floorcomplete_03.wav"
+    ],
+    "CreatureDestroyed": [
+      "BMO_Creature_Destroyed_1.wav",
+      "BMO_Creature_Destroyed_2.wav",
+      "BMO_Creature_Destroyed_3.wav"
+    ],
+    "BuildingDestroyed": [
+      "BMO_Building_Destroyed_2.wav",
+      "BMO_Creature_Destroyed_3_0.wav",
+      "beemo_mode_crab_02.wav"
+    ],
+    "Floop": [
+      "BMO_Floop_Ability_1.wav",
+      "BMO_Floop_Ability_2.wav",
+      "BMO_Floop_Ability_3.wav",
+      "beemo_mode_performspecial_01.wav",
+      "bmo laugh.wav"
+    ],
+    "HeroDamaged": [
+      "BMO_Hero_Damage_1.wav"
+    ],
+    "LeaderAbility": [
+      "bmo laugh.wav"
+    ]
+  },
+  "BMOSweater": {
+    "Opening": [
+      "BMO_Opening_1.wav",
+      "BMO_Opening_2.wav",
+      "beemo_mode_bmocartridge_01.wav"
+    ],
+    "Win": [
+      "BMO_Win_1.wav",
+      "BMO_Win_3.wav",
+      "bmo_gameplay_06a.wav",
+      "beemo_mode_loadgame_02.wav"
+    ],
+    "Lose": [
+      "BMO_Lose_1.wav",
+      "BMO_Lose_2.wav",
+      "beemo_mode_deathspawn_02.wav"
+    ],
+    "DestroyCreature": [
+      "beemo_mode_bossdefeat_01.wav"
+    ],
+    "PlayCreature": [
+      "BMO_Play_Creature_3.wav",
+      "beemo_mode_gumwad_04_ALT01.wav",
+      "beemo_mode_monsterfloor_02.wav"
+    ],
+    "PlayBuilding": [
+      "BMO_Play_Building_1.wav",
+      "BMO_Play_Building_3.wav",
+      "beemo_mode_monsterfloor_01.wav"
+    ],
+    "PlaySpell": [
+      "BMO_Play_Spell_1.wav",
+      "BMO_Play_Spell_2.wav",
+      "BMO_Play_Spell_3.wav",
+      "beemo_mode_dizzyrevive_01.wav",
+      "beemo_mode_floorcomplete_03.wav"
+    ],
+    "CreatureDestroyed": [
+      "BMO_Creature_Destroyed_1.wav",
+      "BMO_Creature_Destroyed_2.wav",
+      "BMO_Creature_Destroyed_3.wav"
+    ],
+    "BuildingDestroyed": [
+      "BMO_Building_Destroyed_2.wav",
+      "BMO_Creature_Destroyed_3_0.wav",
+      "beemo_mode_crab_02.wav"
+    ],
+    "Floop": [
+      "BMO_Floop_Ability_1.wav",
+      "BMO_Floop_Ability_2.wav",
+      "BMO_Floop_Ability_3.wav",
+      "beemo_mode_performspecial_01.wav",
+      "bmo laugh.wav"
+    ],
+    "HeroDamaged": [
+      "BMO_Hero_Damage_1.wav"
+    ],
+    "LeaderAbility": [
+      "bmo laugh.wav"
+    ]
+  },
+  "BananaGuard": {
+    "Opening": [
+      "Banana Guard_Character Select_13.wav",
+      "Banana Guard_FIGHT START_7_ALT01.wav",
+      "Banana Guard_GAME STARTS_2.wav"
+    ],
+    "Win": [
+      "Banana Guard_Drinking Satisfied_29.wav",
+      "Banana Guard_Drinking Satisfied_29_ALT01.wav",
+      "Banana Guard_Drinking Satisfied_29_ALT02.wav"
+    ],
+    "Lose": [
+      "Banana Guard_Drinking Disgusted_28.wav",
+      "Banana Guard_Drinking Disgusted_28_ALT01.wav",
+      "Banana Guard_Drinking Disgusted_28_ALT02.wav"
+    ],
+    "DestroyCreature": [
+      "Banana Guard_Surprise-Exclaimation_30.wav",
+      "Banana Guard_Surprise-Exclaimation_30_ALT02.wav",
+      "Banana Guard_Surprise-Exclaimation_31_ALT02.wav"
+    ],
+    "PlayCreature": [
+      "Banana Guard_FIGHT START_8.wav",
+      "Banana Guard_LANE SET UP_5.wav",
+      "Banana Guard_LANE SET UP_6_ALT01.wav"
+    ],
+    "PlayBuilding": [
+      "Banana Guard_LANE SET UP_4.wav",
+      "Banana Guard_LANE SET UP_5_0.wav",
+      "Banana Guard_LANE SET UP_6.wav"
+    ],
+    "PlaySpell": [
+      "Banana Guard_FIGHT START_9.wav",
+      "Banana Guard_GAME STARTS_3.wav",
+      "Banana Guard_Laugh Evil_21_ALT01.wav"
+    ],
+    "CreatureDestroyed": [
+      "Banana Guard_Crying Mumbling_16.wav",
+      "Banana Guard_Crying Mumbling_16_ALT01.wav",
+      "Banana Guard_Frustrated_24_ALT02.wav",
+      "Banana Guard_Huh Grunt_18.wav",
+      "Banana Guard_Huh Grunt_18_ALT02.wav"
+    ],
+    "BuildingDestroyed": [
+      "Banana Guard_Crying Mumbling_16_ALT02.wav",
+      "Banana Guard_Frustrated_24.wav",
+      "Banana Guard_What Grunt_17_ALT03.wav"
+    ],
+    "Floop": [
+      "Banana Guard_Grunt Offensive-Hoist_25.wav",
+      "Banana Guard_Grunt Offensive-Hoist_25_ALT02.wav",
+      "Banana Guard_Laugh Short_19_ALT01.wav"
+    ],
+    "HeroDamaged": [
+      "Banana Guard_Grunt Defensive Short_26_ALT01.wav",
+      "Banana Guard_Grunt Defensive Short_26_ALT02.wav",
+      "Banana Guard_Grunt Defensive Short_26_ALT03.wav",
+      "Banana Guard_Grunt Defensive Short_26_ALT04.wav",
+      "Banana Guard_Grunt Defensive Short_26_ALT05.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "BerryBones": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "Blumps": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "BoneChill": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "Cake": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "CinamonBunn": {
+    "Opening": [
+      "Cinnamon Bun_GAME STARTS_1.wav",
+      "Cinnamon Bun_GAME STARTS_3.wav"
+    ],
+    "Win": [
+      "Cinnamon Bun_Winner_10.wav",
+      "Cinnamon Bun_Winner_11.wav",
+      "Cinnamon Bun_Winner_12.wav"
+    ],
+    "Lose": [
+      "Banana Guard_Drinking Disgusted_28.wav",
+      "Banana Guard_Drinking Disgusted_28_ALT01.wav",
+      "Banana Guard_Drinking Disgusted_28_ALT02.wav"
+    ],
+    "DestroyCreature": [
+      "Cinnamon Bun_Grunt Offensive-Hoist_25_ALT03.wav",
+      "cb_summon_01_ALT01.wav"
+    ],
+    "PlayCreature": [
+      "Cinnamon Bun_Thinking_14.wav",
+      "Cinnamon Bun_Thinking_14_ALT02.wav"
+    ],
+    "PlayBuilding": [
+      "Cinnamon Bun_LANE SET UP_5.wav"
+    ],
+    "PlaySpell": [
+      "Cinnamon Bun_FIGHT START_7.wav",
+      "Banana Guard_FIGHT START_8.wav",
+      "Banana Guard_FIGHT START_9.wav"
+    ],
+    "CreatureDestroyed": [
+      "Banana Guard_Crying Mumbling_16.wav",
+      "Banana Guard_Crying Mumbling_16_ALT01.wav",
+      "Banana Guard_Crying Mumbling_16_ALT02.wav"
+    ],
+    "BuildingDestroyed": [
+      "Cinnamon Bun_Frustrated_24.wav",
+      "cb_rowdy.wav"
+    ],
+    "Floop": [
+      "Cinnamon Bun_Surprise-Exclaimation_30.wav",
+      "Cinnamon Bun_Surprise-Exclaimation_31.wav"
+    ],
+    "HeroDamaged": [
+      "cb_gethitmajor_01_ALT03.wav",
+      "cb_gethitmajor_01_ALT04.wav",
+      "cb_gethitmajor_01_ALT05.wav",
+      "cb_gethitmajor_01_ALT06.wav"
+    ],
+    "LeaderAbility": [
+      "cb_innate_01.wav"
+    ]
+  },
+  "DonutGoon": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "DrDonut": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "EarlOfLemongrab": {
+    "Opening": [
+      "Lemongrab_Opening_3.wav",
+      "lg_hub_01a_ALT03.wav"
+    ],
+    "Win": [
+      "Lemongrab_Win_1.wav",
+      "Lemongrab_Win_2.wav"
+    ],
+    "Lose": [
+      "Lemongrab_Lose_1.wav",
+      "Lemongrab_Lose_2.wav",
+      "cinematic_boss9_lemongrab_01.wav"
+    ],
+    "DestroyCreature": [
+      "Lemongrab_Destroy_Creature_1.wav",
+      "Lemongrab_Destroy_Creature_2.wav",
+      "Lemongrab_Destroy_Creature_3.wav"
+    ],
+    "PlayCreature": [
+      "Lemongrab_Play_Creature_3.wav",
+      "lemongrab_chargeattack_01_ALT03.wav"
+    ],
+    "PlayBuilding": [
+      "Lemongrab_Play_Building_1.wav",
+      "Lemongrab_Play_Building_3.wav",
+      "lemongrab_yes_01.wav"
+    ],
+    "PlaySpell": [
+      "Lemongrab_Play_Spell_2.wav",
+      "Lemongrab_Play_Spell_3.wav",
+      "lemongrab_shout_03.wav"
+    ],
+    "CreatureDestroyed": [
+      "Lemongrab_Creature_Destroyed_1.wav",
+      "Lemongrab_Creature_Destroyed_3.wav",
+      "lg_hub_05a_ALT02.wav"
+    ],
+    "BuildingDestroyed": [
+      "Lemongrab_Building_Destroyed_3.wav"
+    ],
+    "Floop": [
+      "Lemongrab_Floop_Ability_1.wav",
+      "Lemongrab_Floop_Ability_2.wav",
+      "lemongrab_yes_02.wav"
+    ],
+    "HeroDamaged": [
+      "Lemongrab_Hero_Damage_2.wav",
+      "Lemongrab_Hero_Damage_3.wav",
+      "Lemongrab_Hero_Damage_4.wav"
+    ],
+    "LeaderAbility": [
+      "Lemongrab_Destroy_Creature_3.wav"
+    ]
+  },
+  "ElFisto": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "ElFistoA": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "ElFistoB": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "Finn": {
+    "Opening": [
+      "Finn_Opening_3.wav"
+    ],
+    "Win": [],
+    "Lose": [
+      "Finn_Lose_2.wav",
+      "Finn_Lose_3.wav",
+      "cutscene_04_finn_04.wav"
+    ],
+    "DestroyCreature": [
+      "Finn_Destroy_Creature_1.wav",
+      "Finn_Destroy_Creature_2.wav",
+      "Finn_Destroy_Creature_3.wav",
+      "finn_trophy.wav"
+    ],
+    "PlayCreature": [
+      "Finn_Play_Creature_1.wav",
+      "Finn_Play_Creature_3.wav",
+      "finn_perfectblock_02.wav"
+    ],
+    "PlayBuilding": [
+      "Finn_Play_Building_1.wav",
+      "Finn_Play_Building_2.wav",
+      "Finn_Play_Building_3.wav",
+      "cutscene_05_finn_05_0.wav"
+    ],
+    "PlaySpell": [
+      "Finn_Play_Spell_1.wav",
+      "Finn_Play_Spell_2.wav",
+      "Finn_Play_Spell_3.wav",
+      "finn_itempickup_04.wav"
+    ],
+    "CreatureDestroyed": [
+      "Finn_Creature_Destroyed_1.wav",
+      "Finn_Creature_Destroyed_2.wav",
+      "cinematic_ending_finn_04.wav"
+    ],
+    "BuildingDestroyed": [
+      "Finn_Building_Destroyed_2.wav",
+      "Finn_Building_Destroyed_3.wav",
+      "cinematic_ending_finn_05.wav",
+      "finn_trapchest_01.wav"
+    ],
+    "Floop": [
+      "Finn_Floop_Ability_1.wav",
+      "Finn_Floop_Ability_2.wav",
+      "Finn_Floop_Ability_3.wav",
+      "cinematic_intro_finn_06.wav",
+      "cutscene_05_finn_05.wav"
+    ],
+    "HeroDamaged": [
+      "Finn_Hero_Damage_1.wav",
+      "Finn_Hero_Damage_2.wav",
+      "Finn_Hero_Damage_3.wav"
+    ],
+    "LeaderAbility": [
+      "Finn_Destroy_Creature_3.wav"
+    ]
+  },
+  "FinnDoctor": {
+    "Opening": [
+      "Finn_Opening_3.wav"
+    ],
+    "Win": [],
+    "Lose": [
+      "Finn_Lose_2.wav",
+      "Finn_Lose_3.wav",
+      "cutscene_04_finn_04.wav"
+    ],
+    "DestroyCreature": [
+      "Finn_Destroy_Creature_1.wav",
+      "Finn_Destroy_Creature_2.wav",
+      "Finn_Destroy_Creature_3.wav",
+      "finn_trophy.wav"
+    ],
+    "PlayCreature": [
+      "Finn_Play_Creature_1.wav",
+      "Finn_Play_Creature_3.wav",
+      "finn_perfectblock_02.wav"
+    ],
+    "PlayBuilding": [
+      "Finn_Play_Building_1.wav",
+      "Finn_Play_Building_2.wav",
+      "Finn_Play_Building_3.wav",
+      "cutscene_05_finn_05_0.wav"
+    ],
+    "PlaySpell": [
+      "Finn_Play_Spell_1.wav",
+      "Finn_Play_Spell_2.wav",
+      "Finn_Play_Spell_3.wav",
+      "finn_itempickup_04.wav"
+    ],
+    "CreatureDestroyed": [
+      "Finn_Creature_Destroyed_1.wav",
+      "Finn_Creature_Destroyed_2.wav",
+      "cinematic_ending_finn_04.wav"
+    ],
+    "BuildingDestroyed": [
+      "Finn_Building_Destroyed_2.wav",
+      "Finn_Building_Destroyed_3.wav",
+      "cinematic_ending_finn_05.wav",
+      "finn_trapchest_01.wav"
+    ],
+    "Floop": [
+      "Finn_Floop_Ability_1.wav",
+      "Finn_Floop_Ability_2.wav",
+      "Finn_Floop_Ability_3.wav",
+      "cinematic_intro_finn_06.wav",
+      "cutscene_05_finn_05.wav"
+    ],
+    "HeroDamaged": [
+      "Finn_Hero_Damage_1.wav",
+      "Finn_Hero_Damage_2.wav",
+      "Finn_Hero_Damage_3.wav"
+    ],
+    "LeaderAbility": [
+      "Finn_Destroy_Creature_3.wav"
+    ]
+  },
+  "FinnPajama": {
+    "Opening": [
+      "Finn_Opening_3.wav"
+    ],
+    "Win": [],
+    "Lose": [
+      "Finn_Lose_2.wav",
+      "Finn_Lose_3.wav",
+      "cutscene_04_finn_04.wav"
+    ],
+    "DestroyCreature": [
+      "Finn_Destroy_Creature_1.wav",
+      "Finn_Destroy_Creature_2.wav",
+      "Finn_Destroy_Creature_3.wav",
+      "finn_trophy.wav"
+    ],
+    "PlayCreature": [
+      "Finn_Play_Creature_1.wav",
+      "Finn_Play_Creature_3.wav",
+      "finn_perfectblock_02.wav"
+    ],
+    "PlayBuilding": [
+      "Finn_Play_Building_1.wav",
+      "Finn_Play_Building_2.wav",
+      "Finn_Play_Building_3.wav",
+      "cutscene_05_finn_05_0.wav"
+    ],
+    "PlaySpell": [
+      "Finn_Play_Spell_1.wav",
+      "Finn_Play_Spell_2.wav",
+      "Finn_Play_Spell_3.wav",
+      "finn_itempickup_04.wav"
+    ],
+    "CreatureDestroyed": [
+      "Finn_Creature_Destroyed_1.wav",
+      "Finn_Creature_Destroyed_2.wav",
+      "cinematic_ending_finn_04.wav"
+    ],
+    "BuildingDestroyed": [
+      "Finn_Building_Destroyed_2.wav",
+      "Finn_Building_Destroyed_3.wav",
+      "cinematic_ending_finn_05.wav",
+      "finn_trapchest_01.wav"
+    ],
+    "Floop": [
+      "Finn_Floop_Ability_1.wav",
+      "Finn_Floop_Ability_2.wav",
+      "Finn_Floop_Ability_3.wav",
+      "cinematic_intro_finn_06.wav",
+      "cutscene_05_finn_05.wav"
+    ],
+    "HeroDamaged": [
+      "Finn_Hero_Damage_1.wav",
+      "Finn_Hero_Damage_2.wav",
+      "Finn_Hero_Damage_3.wav"
+    ],
+    "LeaderAbility": [
+      "Finn_Destroy_Creature_3.wav"
+    ]
+  },
+  "FinnSweater": {
+    "Opening": [
+      "Finn_Opening_3.wav"
+    ],
+    "Win": [],
+    "Lose": [
+      "Finn_Lose_2.wav",
+      "Finn_Lose_3.wav",
+      "cutscene_04_finn_04.wav"
+    ],
+    "DestroyCreature": [
+      "Finn_Destroy_Creature_1.wav",
+      "Finn_Destroy_Creature_2.wav",
+      "Finn_Destroy_Creature_3.wav",
+      "finn_trophy.wav"
+    ],
+    "PlayCreature": [
+      "Finn_Play_Creature_1.wav",
+      "Finn_Play_Creature_3.wav",
+      "finn_perfectblock_02.wav"
+    ],
+    "PlayBuilding": [
+      "Finn_Play_Building_1.wav",
+      "Finn_Play_Building_2.wav",
+      "Finn_Play_Building_3.wav",
+      "cutscene_05_finn_05_0.wav"
+    ],
+    "PlaySpell": [
+      "Finn_Play_Spell_1.wav",
+      "Finn_Play_Spell_2.wav",
+      "Finn_Play_Spell_3.wav",
+      "finn_itempickup_04.wav"
+    ],
+    "CreatureDestroyed": [
+      "Finn_Creature_Destroyed_1.wav",
+      "Finn_Creature_Destroyed_2.wav",
+      "cinematic_ending_finn_04.wav"
+    ],
+    "BuildingDestroyed": [
+      "Finn_Building_Destroyed_2.wav",
+      "Finn_Building_Destroyed_3.wav",
+      "cinematic_ending_finn_05.wav",
+      "finn_trapchest_01.wav"
+    ],
+    "Floop": [
+      "Finn_Floop_Ability_1.wav",
+      "Finn_Floop_Ability_2.wav",
+      "Finn_Floop_Ability_3.wav",
+      "cinematic_intro_finn_06.wav",
+      "cutscene_05_finn_05.wav"
+    ],
+    "HeroDamaged": [
+      "Finn_Hero_Damage_1.wav",
+      "Finn_Hero_Damage_2.wav",
+      "Finn_Hero_Damage_3.wav"
+    ],
+    "LeaderAbility": [
+      "Finn_Destroy_Creature_3.wav"
+    ]
+  },
+  "Fiona": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "FlamePrincess": {
+    "Opening": [
+      "FP_Opening_3.wav",
+      "FP_Opening_4.wav"
+    ],
+    "Win": [
+      "FP_Win_2.wav",
+      "FP_Win_4.wav"
+    ],
+    "Lose": [
+      "FP_Lose_1.wav",
+      "FP_Lose_2.wav"
+    ],
+    "DestroyCreature": [
+      "FP_Destroy_Creature_1.wav",
+      "FP_Destroy_Creature_5.wav"
+    ],
+    "PlayCreature": [
+      "FP_Play_Creature_1.wav",
+      "FP_Play_Creature_2.wav",
+      "FP_Play_Creature_3.wav"
+    ],
+    "PlayBuilding": [
+      "FP_Play_Building_1.wav",
+      "FP_Play_Building_2.wav",
+      "FP_Play_Building_3.wav",
+      "FP_Play_Building_5.wav"
+    ],
+    "PlaySpell": [
+      "FP_Play_Spell_1.wav",
+      "FP_Play_Spell_2.wav"
+    ],
+    "CreatureDestroyed": [
+      "FP_Creature_Destroyed_1.wav",
+      "FP_Creature_Destroyed_2.wav",
+      "FP_Creature_Destroyed_3.wav",
+      "FP_Creature_Destroyed_4.wav",
+      "FP_Creature_Destroyed_5.wav"
+    ],
+    "BuildingDestroyed": [
+      "FP_Building_Destroyed_3.wav",
+      "FP_Building_Destroyed_4.wav",
+      "FP_Building_Destroyed_5.wav"
+    ],
+    "Floop": [
+      "FP_Floop_Ability_4.wav",
+      "FP_Floop_Ability_5.wav"
+    ],
+    "HeroDamaged": [
+      "FP_Hero_Damage_1.wav",
+      "FP_Hero_Damage_2.wav",
+      "FP_Hero_Damage_3.wav",
+      "FP_Hero_Damage_4.wav",
+      "FP_Hero_Damage_5.wav"
+    ],
+    "LeaderAbility": [
+      "FP_Floop_Ability_4.wav"
+    ]
+  },
+  "GhostJake": {
+    "Opening": [
+      "Jake_Opening_1.wav",
+      "Jake_Opening_2.wav",
+      "Jake_Opening_4.wav",
+      "Jake_Opening_5.wav"
+    ],
+    "Win": [
+      "Jake_Win_4.wav"
+    ],
+    "Lose": [
+      "Jake_Lose_2.wav",
+      "Jake_Lose_3.wav"
+    ],
+    "DestroyCreature": [
+      "Jake_Destroy_Creature_3.wav"
+    ],
+    "PlayCreature": [
+      "cinematic_ending_jake_03.wav",
+      "Jake_Opening_1_0.wav",
+      "Jake_Play_Creature_1.wav",
+      "Jake_Play_Creature_2.wav"
+    ],
+    "PlayBuilding": [
+      "cinematic_boss1_jake_02_ALT01.wav",
+      "jake_attack3_15.wav",
+      "Jake_Thinking_14_ALT04.wav"
+    ],
+    "PlaySpell": [
+      "Jake_Play_Spell_1.wav",
+      "Jake_Play_Spell_3.wav"
+    ],
+    "CreatureDestroyed": [
+      "Jake_Creature_Destroyed_1.wav",
+      "jake_curse_02.wav"
+    ],
+    "BuildingDestroyed": [
+      "Jake_Building_Destroyed_3.wav"
+    ],
+    "Floop": [
+      "Jake_Floop_Ability_1.wav",
+      "jake_block_03.wav",
+      "jake_chargeattack_04.wav",
+      "jake_perfect_block_02.wav"
+    ],
+    "HeroDamaged": [
+      "Jake_Hero_Damage_1.wav",
+      "Jake_Hero_Damage_2.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "Gunter": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "HunsonAbadeer": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "IceKing": {
+    "Opening": [
+      "Ice King_GAME STARTS_2.wav"
+    ],
+    "Win": [
+      "Ice King_Winner_10.wav",
+      "Ice King_Winner_11.wav",
+      "Ice King_Winner_12.wav",
+      "iceking_rowdy.wav"
+    ],
+    "Lose": [
+      "Ice King_Drinking Disgusted_28_ALT04.wav",
+      "Ice King_Drinking Disgusted_28_ALT07.wav",
+      "iceking_death_03.wav"
+    ],
+    "DestroyCreature": [
+      "Ice King_Crying Mumbling_16_ALt02.wav",
+      "Ice King_Laugh Short_19_ALT03.wav",
+      "iceking_cackle_ALT01.wav",
+      "iceking_chargeattack_03_ALT02.wav"
+    ],
+    "PlayCreature": [
+      "Ice King_FIGHT START_9.wav",
+      "Ice King_LANE SET UP_4.wav"
+    ],
+    "PlayBuilding": [
+      "Ice King_Happy Mumbling-Whistle_15.wav",
+      "Ice King_LANE SET UP_6.wav",
+      "iceking_summon_02.wav"
+    ],
+    "PlaySpell": [
+      "Ice King_FIGHT START_8.wav",
+      "Ice King_Laugh Evil_21.wav",
+      "Ice King_Laugh Evil_21_ALT01.wav",
+      "iceking_attack2_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "Ice King_Crying Mumbling_16_ALT01.wav",
+      "Ice King_Grunt Defensive Long_27_ALT01.wav",
+      "Ice King_Grunt Defensive Long_27_ALT02.wav"
+    ],
+    "BuildingDestroyed": [
+      "cutscene_04_iceking_01.wav",
+      "Ice King_Crying Mumbling_16.wav",
+      "Ice King_Grunt Defensive Long_27_ALT03.wav"
+    ],
+    "Floop": [
+      "Ice King_Laugh Short_19.wav",
+      "Ice King_Surprise-Exclaimation_30_ALT02.wav",
+      "Ice King_Surprise-Exclaimation_31_ALT01.wav"
+    ],
+    "HeroDamaged": [
+      "iceking_gethitminor_01_ALT01.wav",
+      "iceking_gethitminor_02_ALT01.wav",
+      "iceking_gethitminor_03.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "IceKingSweater": {
+    "Opening": [
+      "Ice King_GAME STARTS_2.wav"
+    ],
+    "Win": [
+      "Ice King_Winner_10.wav",
+      "Ice King_Winner_11.wav",
+      "Ice King_Winner_12.wav",
+      "iceking_rowdy.wav"
+    ],
+    "Lose": [
+      "Ice King_Drinking Disgusted_28_ALT04.wav",
+      "Ice King_Drinking Disgusted_28_ALT07.wav",
+      "iceking_death_03.wav"
+    ],
+    "DestroyCreature": [
+      "Ice King_Crying Mumbling_16_ALt02.wav",
+      "Ice King_Laugh Short_19_ALT03.wav",
+      "iceking_cackle_ALT01.wav",
+      "iceking_chargeattack_03_ALT02.wav"
+    ],
+    "PlayCreature": [
+      "Ice King_FIGHT START_9.wav",
+      "Ice King_LANE SET UP_4.wav"
+    ],
+    "PlayBuilding": [
+      "Ice King_Happy Mumbling-Whistle_15.wav",
+      "Ice King_LANE SET UP_6.wav",
+      "iceking_summon_02.wav"
+    ],
+    "PlaySpell": [
+      "Ice King_FIGHT START_8.wav",
+      "Ice King_Laugh Evil_21.wav",
+      "Ice King_Laugh Evil_21_ALT01.wav",
+      "iceking_attack2_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "Ice King_Crying Mumbling_16_ALT01.wav",
+      "Ice King_Grunt Defensive Long_27_ALT01.wav",
+      "Ice King_Grunt Defensive Long_27_ALT02.wav"
+    ],
+    "BuildingDestroyed": [
+      "cutscene_04_iceking_01.wav",
+      "Ice King_Crying Mumbling_16.wav",
+      "Ice King_Grunt Defensive Long_27_ALT03.wav"
+    ],
+    "Floop": [
+      "Ice King_Laugh Short_19.wav",
+      "Ice King_Surprise-Exclaimation_30_ALT02.wav",
+      "Ice King_Surprise-Exclaimation_31_ALT01.wav"
+    ],
+    "HeroDamaged": [
+      "iceking_gethitminor_01_ALT01.wav",
+      "iceking_gethitminor_02_ALT01.wav",
+      "iceking_gethitminor_03.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "IceKingValentine": {
+    "Opening": [
+      "Ice King_GAME STARTS_2.wav"
+    ],
+    "Win": [
+      "Ice King_Winner_10.wav",
+      "Ice King_Winner_11.wav",
+      "Ice King_Winner_12.wav",
+      "iceking_rowdy.wav"
+    ],
+    "Lose": [
+      "Ice King_Drinking Disgusted_28_ALT04.wav",
+      "Ice King_Drinking Disgusted_28_ALT07.wav",
+      "iceking_death_03.wav"
+    ],
+    "DestroyCreature": [
+      "Ice King_Crying Mumbling_16_ALt02.wav",
+      "Ice King_Laugh Short_19_ALT03.wav",
+      "iceking_cackle_ALT01.wav",
+      "iceking_chargeattack_03_ALT02.wav"
+    ],
+    "PlayCreature": [
+      "Ice King_FIGHT START_9.wav",
+      "Ice King_LANE SET UP_4.wav"
+    ],
+    "PlayBuilding": [
+      "Ice King_Happy Mumbling-Whistle_15.wav",
+      "Ice King_LANE SET UP_6.wav",
+      "iceking_summon_02.wav"
+    ],
+    "PlaySpell": [
+      "Ice King_FIGHT START_8.wav",
+      "Ice King_Laugh Evil_21.wav",
+      "Ice King_Laugh Evil_21_ALT01.wav",
+      "iceking_attack2_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "Ice King_Crying Mumbling_16_ALT01.wav",
+      "Ice King_Grunt Defensive Long_27_ALT01.wav",
+      "Ice King_Grunt Defensive Long_27_ALT02.wav"
+    ],
+    "BuildingDestroyed": [
+      "cutscene_04_iceking_01.wav",
+      "Ice King_Crying Mumbling_16.wav",
+      "Ice King_Grunt Defensive Long_27_ALT03.wav"
+    ],
+    "Floop": [
+      "Ice King_Laugh Short_19.wav",
+      "Ice King_Surprise-Exclaimation_30_ALT02.wav",
+      "Ice King_Surprise-Exclaimation_31_ALT01.wav"
+    ],
+    "HeroDamaged": [
+      "iceking_gethitminor_01_ALT01.wav",
+      "iceking_gethitminor_02_ALT01.wav",
+      "iceking_gethitminor_03.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "IceQueen": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "Jake": {
+    "Opening": [
+      "Jake_Opening_1.wav",
+      "Jake_Opening_2.wav",
+      "Jake_Opening_4.wav",
+      "Jake_Opening_5.wav"
+    ],
+    "Win": [
+      "Jake_Win_4.wav"
+    ],
+    "Lose": [
+      "Jake_Lose_2.wav",
+      "Jake_Lose_3.wav"
+    ],
+    "DestroyCreature": [
+      "Jake_Destroy_Creature_3.wav"
+    ],
+    "PlayCreature": [
+      "cinematic_ending_jake_03.wav",
+      "Jake_Opening_1_0.wav",
+      "Jake_Play_Creature_1.wav",
+      "Jake_Play_Creature_2.wav"
+    ],
+    "PlayBuilding": [
+      "cinematic_boss1_jake_02_ALT01.wav",
+      "jake_attack3_15.wav",
+      "Jake_Thinking_14_ALT04.wav"
+    ],
+    "PlaySpell": [
+      "Jake_Play_Spell_1.wav",
+      "Jake_Play_Spell_3.wav"
+    ],
+    "CreatureDestroyed": [
+      "Jake_Creature_Destroyed_1.wav",
+      "jake_curse_02.wav"
+    ],
+    "BuildingDestroyed": [
+      "Jake_Building_Destroyed_3.wav"
+    ],
+    "Floop": [
+      "Jake_Floop_Ability_1.wav",
+      "jake_block_03.wav",
+      "jake_chargeattack_04.wav",
+      "jake_perfect_block_02.wav"
+    ],
+    "HeroDamaged": [
+      "Jake_Hero_Damage_1.wav",
+      "Jake_Hero_Damage_2.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "JakeSweater": {
+    "Opening": [
+      "Jake_Opening_1.wav",
+      "Jake_Opening_2.wav",
+      "Jake_Opening_4.wav",
+      "Jake_Opening_5.wav"
+    ],
+    "Win": [
+      "Jake_Win_4.wav"
+    ],
+    "Lose": [
+      "Jake_Lose_2.wav",
+      "Jake_Lose_3.wav"
+    ],
+    "DestroyCreature": [
+      "Jake_Destroy_Creature_3.wav"
+    ],
+    "PlayCreature": [
+      "cinematic_ending_jake_03.wav",
+      "Jake_Opening_1_0.wav",
+      "Jake_Play_Creature_1.wav",
+      "Jake_Play_Creature_2.wav"
+    ],
+    "PlayBuilding": [
+      "cinematic_boss1_jake_02_ALT01.wav",
+      "jake_attack3_15.wav",
+      "Jake_Thinking_14_ALT04.wav"
+    ],
+    "PlaySpell": [
+      "Jake_Play_Spell_1.wav",
+      "Jake_Play_Spell_3.wav"
+    ],
+    "CreatureDestroyed": [
+      "Jake_Creature_Destroyed_1.wav",
+      "jake_curse_02.wav"
+    ],
+    "BuildingDestroyed": [
+      "Jake_Building_Destroyed_3.wav"
+    ],
+    "Floop": [
+      "Jake_Floop_Ability_1.wav",
+      "jake_block_03.wav",
+      "jake_chargeattack_04.wav",
+      "jake_perfect_block_02.wav"
+    ],
+    "HeroDamaged": [
+      "Jake_Hero_Damage_1.wav",
+      "Jake_Hero_Damage_2.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "LadyRainicorn": {
+    "Opening": [
+      "Lady Rainicorn_GAME STARTS_1.wav",
+      "Lady Rainicorn_GAME STARTS_2.wav",
+      "Lady Rainicorn_GAME STARTS_3.wav"
+    ],
+    "Win": [
+      "Lady Rainicorn_Drinking Satisfied_29.wav",
+      "Lady Rainicorn_Winner_11.wav"
+    ],
+    "Lose": [
+      "Lady Rainicorn_Drinking Disgusted_28.wav"
+    ],
+    "DestroyCreature": [
+      "Lady Rainicorn_Grunt Offensive-Hoist_25.wav",
+      "lr_hub_03.wav"
+    ],
+    "PlayCreature": [
+      "Lady Rainicorn_FIGHT START_9.wav"
+    ],
+    "PlayBuilding": [
+      "Lady Rainicorn_LANE SET UP_4.wav",
+      "Lady Rainicorn_LANE SET UP_6.wav"
+    ],
+    "PlaySpell": [
+      "Lady Rainicorn_Grunt Offensive-Hoist_25_ALT02.wav",
+      "rainicorn_summon.wav"
+    ],
+    "CreatureDestroyed": [
+      "Lady Rainicorn_Huh Grunt_18.wav"
+    ],
+    "BuildingDestroyed": [
+      "Lady Rainicorn_Grunt Defensive Long_27.wav",
+      "Lady Rainicorn_What Grunt_17.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "Lady Rainicorn_Crying Mumbling_16.wav",
+      "Lady Rainicorn_Frustrated_24.wav",
+      "Lady Rainicorn_Grunt Defensive Short_26.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "LordMonochromicorn": {
+    "Opening": [
+      "Finn_Opening_3.wav"
+    ],
+    "Win": [],
+    "Lose": [
+      "Finn_Lose_2.wav",
+      "Finn_Lose_3.wav",
+      "cutscene_04_finn_04.wav"
+    ],
+    "DestroyCreature": [
+      "Finn_Destroy_Creature_1.wav",
+      "Finn_Destroy_Creature_2.wav",
+      "Finn_Destroy_Creature_3.wav",
+      "finn_trophy.wav"
+    ],
+    "PlayCreature": [
+      "Finn_Play_Creature_1.wav",
+      "Finn_Play_Creature_3.wav",
+      "finn_perfectblock_02.wav"
+    ],
+    "PlayBuilding": [
+      "Finn_Play_Building_1.wav",
+      "Finn_Play_Building_2.wav",
+      "Finn_Play_Building_3.wav",
+      "cutscene_05_finn_05_0.wav"
+    ],
+    "PlaySpell": [
+      "Finn_Play_Spell_1.wav",
+      "Finn_Play_Spell_2.wav",
+      "Finn_Play_Spell_3.wav",
+      "finn_itempickup_04.wav"
+    ],
+    "CreatureDestroyed": [
+      "Finn_Creature_Destroyed_1.wav",
+      "Finn_Creature_Destroyed_2.wav",
+      "cinematic_ending_finn_04.wav"
+    ],
+    "BuildingDestroyed": [
+      "Finn_Building_Destroyed_2.wav",
+      "Finn_Building_Destroyed_3.wav",
+      "cinematic_ending_finn_05.wav",
+      "finn_trapchest_01.wav"
+    ],
+    "Floop": [
+      "Finn_Floop_Ability_1.wav",
+      "Finn_Floop_Ability_2.wav",
+      "Finn_Floop_Ability_3.wav",
+      "cinematic_intro_finn_06.wav",
+      "cutscene_05_finn_05.wav"
+    ],
+    "HeroDamaged": [
+      "Finn_Hero_Damage_1.wav",
+      "Finn_Hero_Damage_2.wav",
+      "Finn_Hero_Damage_3.wav"
+    ],
+    "LeaderAbility": [
+      "Finn_Destroy_Creature_3.wav"
+    ]
+  },
+  "LumpyMimic": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "LumpySpacePrince": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "LumpySpacePrincess": {
+    "Opening": [
+      "LSP_Opening_3.wav",
+      "lsp_upgrade.wav"
+    ],
+    "Win": [],
+    "Lose": [
+      "LSP_Lose_1.wav",
+      "LSP_Lose_3.wav"
+    ],
+    "DestroyCreature": [
+      "LSP_Destroy_Creature_1.wav",
+      "LSP_Destroy_Creature_2.wav",
+      "LSP_Destroy_Creature_3.wav",
+      "cinematic_boss8_lsp_01.wav"
+    ],
+    "PlayCreature": [],
+    "PlayBuilding": [
+      "LSP_Play_Building_1.wav"
+    ],
+    "PlaySpell": [
+      "LSP_Play_Spell_2.wav",
+      "lsp_summon_04.wav"
+    ],
+    "CreatureDestroyed": [
+      "LSP_Creature_Destroyed_1.wav",
+      "LSP_Creature_Destroyed_3.wav"
+    ],
+    "BuildingDestroyed": [
+      "cutscene_03_lsp_03a.wav"
+    ],
+    "Floop": [
+      "LSP_Floop_Ability_2.wav",
+      "lsp_hub_03b.wav"
+    ],
+    "HeroDamaged": [
+      "LSP_Hero_Damage_2.wav",
+      "LSP_Hero_Damage_3.wav",
+      "LSP_Hero_Damage_4.wav",
+      "LSP_Hero_Damage_5.wav"
+    ],
+    "LeaderAbility": [
+      "lsp_upgrade.wav"
+    ]
+  },
+  "LumpySpacePrincessSweater": {
+    "Opening": [
+      "LSP_Opening_3.wav",
+      "lsp_upgrade.wav"
+    ],
+    "Win": [],
+    "Lose": [
+      "LSP_Lose_1.wav",
+      "LSP_Lose_3.wav"
+    ],
+    "DestroyCreature": [
+      "LSP_Destroy_Creature_1.wav",
+      "LSP_Destroy_Creature_2.wav",
+      "LSP_Destroy_Creature_3.wav",
+      "cinematic_boss8_lsp_01.wav"
+    ],
+    "PlayCreature": [],
+    "PlayBuilding": [
+      "LSP_Play_Building_1.wav"
+    ],
+    "PlaySpell": [
+      "LSP_Play_Spell_2.wav",
+      "lsp_summon_04.wav"
+    ],
+    "CreatureDestroyed": [
+      "LSP_Creature_Destroyed_1.wav",
+      "LSP_Creature_Destroyed_3.wav"
+    ],
+    "BuildingDestroyed": [
+      "cutscene_03_lsp_03a.wav"
+    ],
+    "Floop": [
+      "LSP_Floop_Ability_2.wav",
+      "lsp_hub_03b.wav"
+    ],
+    "HeroDamaged": [
+      "LSP_Hero_Damage_2.wav",
+      "LSP_Hero_Damage_3.wav",
+      "LSP_Hero_Damage_4.wav",
+      "LSP_Hero_Damage_5.wav"
+    ],
+    "LeaderAbility": [
+      "lsp_upgrade.wav"
+    ]
+  },
+  "MagicMan": {
+    "Opening": [
+      "Magic Man_GAME STARTS_3.wav",
+      "Magic Man_FIGHT START_9.wav"
+    ],
+    "Win": [
+      "Magic Man_Winner_10.wav",
+      "Magic Man_Winner_11.wav"
+    ],
+    "Lose": [],
+    "DestroyCreature": [
+      "magicman_taunt_01.wav"
+    ],
+    "PlayCreature": [
+      "Magic Man_LANE SET UP_6.wav"
+    ],
+    "PlayBuilding": [
+      "Magic Man_LANE SET UP_4.wav"
+    ],
+    "PlaySpell": [
+      "magicman_toss_curse_02.wav"
+    ],
+    "CreatureDestroyed": [
+      "Magic Man_Bored_22.wav"
+    ],
+    "BuildingDestroyed": [
+      "magicman_gethit_weakness.wav"
+    ],
+    "Floop": [
+      "Magic Man_Grunt Offensive-Hoist_25_ALT01.wav",
+      "magicman_kick.wav",
+      "magicman_laugh_02.wav"
+    ],
+    "HeroDamaged": [
+      "Magic Man_Grunt Defensive Short_26_ALT01.wav",
+      "Magic Man_Grunt Defensive Short_26_ALT02.wav",
+      "magicman_death_ALT01.wav",
+      "magicman_death.wav",
+      "magicman_gethit.wav"
+    ],
+    "LeaderAbility": [
+      "magicman_appear_02.wav"
+    ]
+  },
+  "Marceline": {
+    "Opening": [
+      "Marceline_Opening_3.wav"
+    ],
+    "Win": [
+      "Marceline_Win_1.wav"
+    ],
+    "Lose": [
+      "Marceline_Lose_2.wav",
+      "Marceline_Lose_3.wav"
+    ],
+    "DestroyCreature": [
+      "cinematic_boss1_marceline_01.wav",
+      "marceline_pickup_treasure_01.wav"
+    ],
+    "PlayCreature": [
+      "Marceline_Play_Creature_2.wav",
+      "Marceline_Play_Creature_3.wav"
+    ],
+    "PlayBuilding": [
+      "Marceline_Play_Building_2.wav",
+      "marceline_pickup_key_02.wav"
+    ],
+    "PlaySpell": [],
+    "CreatureDestroyed": [
+      "Marceline_Creature_Destroyed_1.wav"
+    ],
+    "BuildingDestroyed": [
+      "Marceline_Building_Destroyed_1.wav",
+      "Marceline_Building_Destroyed_2.wav",
+      "Marceline_Building_Destroyed_3.wav",
+      "marceline_trapchest_02.wav"
+    ],
+    "Floop": [
+      "Marceline_Floop_Ability_1.wav",
+      "Marceline_Floop_Ability_2.wav",
+      "marceline_rowdy.wav"
+    ],
+    "HeroDamaged": [
+      "Marceline_Hero_Damage_2.wav",
+      "Marceline_Hero_Damage_3.wav",
+      "Marceline_Hero_Damage_5.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "MarshallLee": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "PeppermintButler": {
+    "Opening": [
+      "Peppermint Butler_GAME STARTS_2.wav"
+    ],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [
+      "cutscene_04_pb_04.wav"
+    ],
+    "PlayCreature": [
+      "Peppermint Butler_FIGHT START_9.wav"
+    ],
+    "PlayBuilding": [
+      "Peppermint Butler_Happy Mumbling-Whistle_15.wav",
+      "Peppermint Butler_LANE SET UP_5.wav"
+    ],
+    "PlaySpell": [
+      "pb_meleeswing_02.wav",
+      "Peppermint Butler_Laugh Evil_21.wav",
+      "Peppermint Butler_Laugh Long_20.wav"
+    ],
+    "CreatureDestroyed": [
+      "Peppermint Butler_Crying Mumbling_16_ALT02.wav"
+    ],
+    "BuildingDestroyed": [],
+    "Floop": [
+      "pb_chargeattack_01_ALT01.wav"
+    ],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "PrinceGumball": {
+    "Opening": [
+      "Finn_Opening_3.wav"
+    ],
+    "Win": [],
+    "Lose": [
+      "Finn_Lose_2.wav",
+      "Finn_Lose_3.wav",
+      "cutscene_04_finn_04.wav"
+    ],
+    "DestroyCreature": [
+      "Finn_Destroy_Creature_1.wav",
+      "Finn_Destroy_Creature_2.wav",
+      "Finn_Destroy_Creature_3.wav",
+      "finn_trophy.wav"
+    ],
+    "PlayCreature": [
+      "Finn_Play_Creature_1.wav",
+      "Finn_Play_Creature_3.wav",
+      "finn_perfectblock_02.wav"
+    ],
+    "PlayBuilding": [
+      "Finn_Play_Building_1.wav",
+      "Finn_Play_Building_2.wav",
+      "Finn_Play_Building_3.wav",
+      "cutscene_05_finn_05_0.wav"
+    ],
+    "PlaySpell": [
+      "Finn_Play_Spell_1.wav",
+      "Finn_Play_Spell_2.wav",
+      "Finn_Play_Spell_3.wav",
+      "finn_itempickup_04.wav"
+    ],
+    "CreatureDestroyed": [
+      "Finn_Creature_Destroyed_1.wav",
+      "Finn_Creature_Destroyed_2.wav",
+      "cinematic_ending_finn_04.wav"
+    ],
+    "BuildingDestroyed": [
+      "Finn_Building_Destroyed_2.wav",
+      "Finn_Building_Destroyed_3.wav",
+      "cinematic_ending_finn_05.wav",
+      "finn_trapchest_01.wav"
+    ],
+    "Floop": [
+      "Finn_Floop_Ability_1.wav",
+      "Finn_Floop_Ability_2.wav",
+      "Finn_Floop_Ability_3.wav",
+      "cinematic_intro_finn_06.wav",
+      "cutscene_05_finn_05.wav"
+    ],
+    "HeroDamaged": [
+      "Finn_Hero_Damage_1.wav",
+      "Finn_Hero_Damage_2.wav",
+      "Finn_Hero_Damage_3.wav"
+    ],
+    "LeaderAbility": [
+      "Finn_Destroy_Creature_3.wav"
+    ]
+  },
+  "PrincessBubblegum": {
+    "Opening": [],
+    "Win": [
+      "PBG_Win_1.wav",
+      "PBG_Win_2.wav"
+    ],
+    "Lose": [
+      "PBG_Lose_2.wav",
+      "PBG_Lose_3.wav"
+    ],
+    "DestroyCreature": [
+      "PBG_Destroy_Creature_1.wav",
+      "PBG_Destroy_Creature_3.wav",
+      "bg_hub_23.wav"
+    ],
+    "PlayCreature": [
+      "PBG_Play_Creature_2.wav"
+    ],
+    "PlayBuilding": [
+      "PBG_Play_Building_2.wav"
+    ],
+    "PlaySpell": [],
+    "CreatureDestroyed": [
+      "PBG_Creature_Destroyed_1.wav",
+      "PBG_Creature_Destroyed_3.wav"
+    ],
+    "BuildingDestroyed": [
+      "PBG_Building_Destroyed_3.wav",
+      "bg_hub_24.wav"
+    ],
+    "Floop": [
+      "PBG_Floop_Ability_1.wav"
+    ],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "PrincessBubblegumSweater": {
+    "Opening": [],
+    "Win": [
+      "PBG_Win_1.wav",
+      "PBG_Win_2.wav"
+    ],
+    "Lose": [
+      "PBG_Lose_2.wav",
+      "PBG_Lose_3.wav"
+    ],
+    "DestroyCreature": [
+      "PBG_Destroy_Creature_1.wav",
+      "PBG_Destroy_Creature_3.wav",
+      "bg_hub_23.wav"
+    ],
+    "PlayCreature": [
+      "PBG_Play_Creature_2.wav"
+    ],
+    "PlayBuilding": [
+      "PBG_Play_Building_2.wav"
+    ],
+    "PlaySpell": [],
+    "CreatureDestroyed": [
+      "PBG_Creature_Destroyed_1.wav",
+      "PBG_Creature_Destroyed_3.wav"
+    ],
+    "BuildingDestroyed": [
+      "PBG_Building_Destroyed_3.wav",
+      "bg_hub_24.wav"
+    ],
+    "Floop": [
+      "PBG_Floop_Ability_1.wav"
+    ],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "PrincessCookie": {
+    "Opening": [
+      "Banana Guard_Character Select_13.wav",
+      "Banana Guard_FIGHT START_7_ALT01.wav",
+      "Banana Guard_GAME STARTS_2.wav"
+    ],
+    "Win": [
+      "Banana Guard_Drinking Satisfied_29.wav",
+      "Banana Guard_Drinking Satisfied_29_ALT01.wav",
+      "Banana Guard_Drinking Satisfied_29_ALT02.wav"
+    ],
+    "Lose": [
+      "Banana Guard_Drinking Disgusted_28.wav",
+      "Banana Guard_Drinking Disgusted_28_ALT01.wav",
+      "Banana Guard_Drinking Disgusted_28_ALT02.wav"
+    ],
+    "DestroyCreature": [
+      "Banana Guard_Surprise-Exclaimation_30.wav",
+      "Banana Guard_Surprise-Exclaimation_30_ALT02.wav",
+      "Banana Guard_Surprise-Exclaimation_31_ALT02.wav"
+    ],
+    "PlayCreature": [
+      "Banana Guard_FIGHT START_8.wav",
+      "Banana Guard_LANE SET UP_5.wav",
+      "Banana Guard_LANE SET UP_6_ALT01.wav"
+    ],
+    "PlayBuilding": [
+      "Banana Guard_LANE SET UP_4.wav",
+      "Banana Guard_LANE SET UP_5_0.wav",
+      "Banana Guard_LANE SET UP_6.wav"
+    ],
+    "PlaySpell": [
+      "Banana Guard_FIGHT START_9.wav",
+      "Banana Guard_GAME STARTS_3.wav",
+      "Banana Guard_Laugh Evil_21_ALT01.wav"
+    ],
+    "CreatureDestroyed": [
+      "Banana Guard_Crying Mumbling_16.wav",
+      "Banana Guard_Crying Mumbling_16_ALT01.wav",
+      "Banana Guard_Frustrated_24_ALT02.wav",
+      "Banana Guard_Huh Grunt_18.wav",
+      "Banana Guard_Huh Grunt_18_ALT02.wav"
+    ],
+    "BuildingDestroyed": [
+      "Banana Guard_Crying Mumbling_16_ALT02.wav",
+      "Banana Guard_Frustrated_24.wav",
+      "Banana Guard_What Grunt_17_ALT03.wav"
+    ],
+    "Floop": [
+      "Banana Guard_Grunt Offensive-Hoist_25.wav",
+      "Banana Guard_Grunt Offensive-Hoist_25_ALT02.wav",
+      "Banana Guard_Laugh Short_19_ALT01.wav"
+    ],
+    "HeroDamaged": [
+      "Banana Guard_Grunt Defensive Short_26_ALT01.wav",
+      "Banana Guard_Grunt Defensive Short_26_ALT02.wav",
+      "Banana Guard_Grunt Defensive Short_26_ALT03.wav",
+      "Banana Guard_Grunt Defensive Short_26_ALT04.wav",
+      "Banana Guard_Grunt Defensive Short_26_ALT05.wav"
+    ],
+    "LeaderAbility": []
+  },
+  "RicardioHeartGuy": {
+    "Opening": [],
+    "Win": [],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [],
+    "PlayBuilding": [],
+    "PlaySpell": [],
+    "CreatureDestroyed": [],
+    "BuildingDestroyed": [],
+    "Floop": [],
+    "HeroDamaged": [],
+    "LeaderAbility": []
+  },
+  "Slumpy": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "SnowBerry": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "SnowFist": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "SnowNut": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "Sprinkles": {
+    "Opening": [],
+    "Win": [
+      "GenericEnemyLow_Win_01.wav"
+    ],
+    "Lose": [
+      "GenericEnemyLow_Lose_01.wav"
+    ],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "GenericEnemyLow_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "GenericEnemyLow_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "GenericEnemyLow_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "GenericEnemyLow_Play_01.wav"
+    ]
+  },
+  "TreasureCat": {
+    "Opening": [],
+    "Win": [
+      "Tcat_Win_01.wav"
+    ],
+    "Lose": [],
+    "DestroyCreature": [],
+    "PlayCreature": [
+      "Tcat_Play_01.wav"
+    ],
+    "PlayBuilding": [
+      "Tcat_Play_01.wav"
+    ],
+    "PlaySpell": [
+      "Tcat_Play_01.wav"
+    ],
+    "CreatureDestroyed": [
+      "Tcat_Destroyed_01.wav"
+    ],
+    "BuildingDestroyed": [
+      "Tcat_Destroyed_01.wav"
+    ],
+    "Floop": [],
+    "HeroDamaged": [
+      "Tcat_HeroDamage_01.wav"
+    ],
+    "LeaderAbility": [
+      "Tcat_Play_01.wav"
+    ]
+  }
+}

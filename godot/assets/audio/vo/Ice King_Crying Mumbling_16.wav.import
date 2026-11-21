@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dq8l8b4p21djd"
+path="res://.godot/imported/Ice King_Crying Mumbling_16.wav-728c34fc0dbc0e291cdd4d06ea784002.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Ice King_Crying Mumbling_16.wav"
+dest_files=["res://.godot/imported/Ice King_Crying Mumbling_16.wav-728c34fc0dbc0e291cdd4d06ea784002.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

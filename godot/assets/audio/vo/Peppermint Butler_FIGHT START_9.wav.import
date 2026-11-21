@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://clxafb8u5e2km"
+path="res://.godot/imported/Peppermint Butler_FIGHT START_9.wav-0cbe93755a48e8635cf1f9752e7b2e9a.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Peppermint Butler_FIGHT START_9.wav"
+dest_files=["res://.godot/imported/Peppermint Butler_FIGHT START_9.wav-0cbe93755a48e8635cf1f9752e7b2e9a.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -8,9 +8,11 @@ export_battle_stage1.py — Extract authentic Stage 1 Battle assets directly fro
   5. godot/src/battle/BattleIntroAnims.gd (Hermite splines from BattleIntro_CUT1..4.anim, scale 0.05)
 """
 
+import glob
 import json
 import os
 import re
+import shutil
 import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -221,12 +223,65 @@ def export_intro_camera_anims() -> None:
     print(f"[OK] BattleIntroAnims.gd -> {out_gd} (durations: {durations})")
 
 
+def export_character_prefab_vo(guid_index: dict[str, str]) -> None:
+    audio_src = os.path.join(REPO_ROOT, "Assets", "AudioClip")
+    vo_dst = os.path.join(REPO_ROOT, "godot", "assets", "audio", "vo")
+    os.makedirs(vo_dst, exist_ok=True)
+    fields = [
+        ("Opening", "OpeningClips"),
+        ("Win", "WinClips"),
+        ("Lose", "LoseClips"),
+        ("DestroyCreature", "DestroyCreatureClips"),
+        ("PlayCreature", "PlayCreatureClips"),
+        ("PlayBuilding", "PlayBuildingClips"),
+        ("PlaySpell", "PlaySpellClips"),
+        ("CreatureDestroyed", "CreatureDestroyedClips"),
+        ("BuildingDestroyed", "BuildingDestroyedClips"),
+        ("Floop", "FloopClips"),
+        ("HeroDamaged", "HeroDamagedClips"),
+        ("LeaderAbility", "LeaderAbilityClips"),
+    ]
+    prefab_vo: dict[str, dict[str, list[str]]] = {}
+    copied = 0
+    for pf in sorted(glob.glob(os.path.join(REPO_ROOT, "Assets", "Resources", "characters", "*.prefab"))):
+        pname = os.path.splitext(os.path.basename(pf))[0]
+        if pname.startswith("low_"):
+            continue
+        with open(pf, "r", encoding="utf-8", errors="replace") as f:
+            txt = f.read()
+        if "CreatureDestroyedClips:" not in txt:
+            continue
+        entry: dict[str, list[str]] = {}
+        for evt_key, field in fields:
+            m = re.search(rf"{field}:(.*?)(?=\n  [A-Z]\w+Clips:|\n---)", txt, re.S)
+            clips: list[str] = []
+            if m:
+                for g in re.findall(r"guid:\s*([0-9a-f]{32})", m.group(1)):
+                    cpath = guid_index.get(g, "")
+                    cname = os.path.basename(cpath) if cpath else ""
+                    if cname:
+                        if cname not in clips:
+                            clips.append(cname)
+                        src_f = os.path.join(audio_src, cname)
+                        dst_f = os.path.join(vo_dst, cname)
+                        if os.path.exists(src_f) and not os.path.exists(dst_f):
+                            shutil.copy2(src_f, dst_f)
+                            copied += 1
+            entry[evt_key] = clips
+        prefab_vo[pname] = entry
+    out_json = os.path.join(REPO_ROOT, "godot", "data", "character_prefab_vo.json")
+    with open(out_json, "w", encoding="utf-8") as f:
+        json.dump(prefab_vo, f, indent=2)
+    print(f"[OK] character_prefab_vo.json ({len(prefab_vo)} prefabs, copied {copied} new VO clips)")
+
+
 def main() -> None:
     banners_only = "--banners-only" in sys.argv[1:]
     print("Building Assets GUID index...")
     guid_index = build_guid_index(os.path.join(REPO_ROOT, "Assets"))
     print(f"Indexed {len(guid_index)} GUIDs.")
     export_battle_banner(guid_index)
+    export_character_prefab_vo(guid_index)
     if banners_only:
         return
     export_intro_camera_anims()

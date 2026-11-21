@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cnakla6bi1dpn"
+path="res://.godot/imported/Ice King_Grunt Defensive Long_27_ALT01.wav-06a21e28cb32971126cc75366a23c869.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Ice King_Grunt Defensive Long_27_ALT01.wav"
+dest_files=["res://.godot/imported/Ice King_Grunt Defensive Long_27_ALT01.wav-06a21e28cb32971126cc75366a23c869.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

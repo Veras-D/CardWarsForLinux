@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://daokq25bgpjsl"
+path="res://.godot/imported/Lady Rainicorn_Frustrated_24.wav-c3f73f2ecf9e26b66900da7462017dac.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Lady Rainicorn_Frustrated_24.wav"
+dest_files=["res://.godot/imported/Lady Rainicorn_Frustrated_24.wav-c3f73f2ecf9e26b66900da7462017dac.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

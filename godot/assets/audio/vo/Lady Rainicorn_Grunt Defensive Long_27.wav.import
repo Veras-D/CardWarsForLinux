@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://b4agc4ekr075q"
+path="res://.godot/imported/Lady Rainicorn_Grunt Defensive Long_27.wav-8742c27d3f66240280d49c21ee6bf831.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Lady Rainicorn_Grunt Defensive Long_27.wav"
+dest_files=["res://.godot/imported/Lady Rainicorn_Grunt Defensive Long_27.wav-8742c27d3f66240280d49c21ee6bf831.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

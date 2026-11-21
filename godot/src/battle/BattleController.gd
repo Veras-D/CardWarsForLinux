@@ -113,6 +113,7 @@ var _mp_label_base_x: Dictionary = {}
 var _pending_confirm_mode: String = ""
 var _pending_confirm_lane: LaneSlot = null
 var _pending_confirm_leader: String = ""
+var _in_battle_phase_hud: bool = false
 var _match_ended: bool = false
 
 # Live Match Telemetry for 3-Star Objectives (Task 7.2)
@@ -1078,6 +1079,13 @@ func _on_turn_button_pressed() -> void:
 func execute_battle_phase() -> void:
 	is_player_turn = false
 	turn_btn.disabled = true
+	_pending_confirm_mode = ""
+	_pending_confirm_lane = null
+	_pending_confirm_leader = ""
+	if battle_modals and battle_modals.is_inspection_open():
+		battle_modals.dismiss_inspection(false)
+		if arena_3d and not _is_summon_cinematic_active:
+			arena_3d.focus_setup_board(0.25)
 
 	# Original Card Wars rule: Turn 1 (first player's opening turn) skips combat phase
 	if _game_turn_count <= 1:
@@ -1194,9 +1202,6 @@ func execute_battle_phase() -> void:
 						log_message("Opponent's %s was destroyed!" % target_creature_name)
 						if opponent_face_rig:
 							opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
-						if vo_manager:
-							vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.DESTROY_CREATURE, true)
-							vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, false)
 				else:
 					if arena_3d:
 						arena_3d.play_lane_direct_hit_vfx(false, i)
@@ -1406,6 +1411,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func execute_opponent_turn() -> void:
+	_pending_confirm_mode = ""
+	_pending_confirm_lane = null
+	_pending_confirm_leader = ""
+	if battle_modals and battle_modals.is_inspection_open():
+		battle_modals.dismiss_inspection(false)
+		if arena_3d and not _is_summon_cinematic_active:
+			arena_3d.focus_setup_board(0.25)
 	if phase_manager != null:
 		if phase_manager.get_current_phase() != BattlePhaseManager.Phase.START_TURN:
 			phase_manager.transition_to(BattlePhaseManager.Phase.START_TURN)
@@ -1630,9 +1642,6 @@ func execute_opponent_turn() -> void:
 						log_message("Your %s was destroyed!" % target_name)
 						if player_face_rig:
 							player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
-						if vo_manager:
-							vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.DESTROY_CREATURE, false)
-							vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, true)
 					await get_tree().create_timer(0.20).timeout
 			else:
 				# Undefended Player lane: Unity CWBattleSequenceController sets undefendedFlag=true, forceMiss=true -> StopRing (0.5s) -> TweenDamage_P2Missed
@@ -1819,6 +1828,12 @@ func _on_creature_destroyed(lane: LaneSlot, dead_data: Dictionary) -> void:
 		match_enemy_creatures_defeated += 1
 		if ResourceLoader.exists("res://assets/audio/sfx/CreatureDeath.wav"):
 			Audio.play_sfx(load("res://assets/audio/sfx/CreatureDeath.wav"), -4.0)
+		if opponent_face_rig:
+			opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+		# Matches Unity CreatureBattleScript.DeathActions(): victim CreatureDestroyed first, then attacker DestroyCreature
+		if vo_manager and GameManager:
+			vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, false)
+			vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.DESTROY_CREATURE, true)
 		var q_max_drops := 99
 		if GameManager and GameManager.active_quest_id != "" and Database:
 			q_max_drops = int(Database.get_quest(GameManager.active_quest_id).get("max_loot_drops", 99))
@@ -1846,6 +1861,12 @@ func _on_creature_destroyed(lane: LaneSlot, dead_data: Dictionary) -> void:
 		match_player_creatures_lost += 1
 		if ResourceLoader.exists("res://assets/audio/sfx/CreatureDeath.wav"):
 			Audio.play_sfx(load("res://assets/audio/sfx/CreatureDeath.wav"), -4.0)
+		if player_face_rig:
+			player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+		# Matches Unity CreatureBattleScript.DeathActions(): victim CreatureDestroyed first, then attacker DestroyCreature
+		if vo_manager and GameManager:
+			vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, true)
+			vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.DESTROY_CREATURE, false)
 		if arena_3d:
 			arena_3d.spawn_lane_drop_prop(true, lane.lane_index, "TOMBSTONE")
 		lane.spawn_tombstone({
@@ -1862,6 +1883,9 @@ func _on_creature_destroyed(lane: LaneSlot, dead_data: Dictionary) -> void:
 func _on_building_destroyed(lane: LaneSlot, _dead_data: Dictionary) -> void:
 	if arena_3d:
 		arena_3d.despawn_lane_entity_animated(lane.is_player, lane.lane_index, true)
+	if vo_manager and GameManager:
+		var owner_hero := GameManager.player_hero_name if lane.is_player else GameManager.opponent_hero_name
+		vo_manager.play_event(owner_hero, VOManager.VOEvent.BUILDING_DESTROYED, lane.is_player)
 
 
 func _on_loot_collected(lane: LaneSlot, loot_type: String, drop_data: Dictionary) -> void:
@@ -2527,7 +2551,9 @@ func _on_board_surface_gui_input(event: InputEvent) -> void:
 		return
 	if arena_3d == null or not board_click_surface.visible:
 		return
-	if battle_modals and battle_modals.is_any_modal_open():
+	if battle_modals and (battle_modals.is_any_modal_open() or battle_modals.is_inspection_open()):
+		return
+	if not is_action_allowed() or _in_battle_phase_hud or (wheel_modal and wheel_modal.visible):
 		return
 
 	var pick := arena_3d.pick_board_at_screen_pos(mb.position, board_click_surface.size)
@@ -2551,7 +2577,7 @@ func _on_board_surface_gui_input(event: InputEvent) -> void:
 
 
 func _inspect_or_floop_lane(lane: LaneSlot, zone: String) -> void:
-	if lane == null:
+	if lane == null or not is_action_allowed() or _in_battle_phase_hud:
 		return
 	if lane.is_player and zone == "floop" and lane.has_creature and not lane.is_flooped and is_action_allowed():
 		_prompt_floop_confirmation(lane)
@@ -2583,11 +2609,13 @@ func _inspect_or_floop_lane(lane: LaneSlot, zone: String) -> void:
 
 
 func _restore_hud_after_inspect() -> void:
+	if _in_battle_phase_hud:
+		return
 	if footer_bar:
 		footer_bar.visible = true
 	if battle_log_box:
 		battle_log_box.visible = false
-	if arena_3d:
+	if arena_3d and not _is_summon_cinematic_active:
 		arena_3d.focus_setup_board(0.35)
 
 
@@ -2618,6 +2646,14 @@ func _on_info_dismissed() -> void:
 
 
 func _set_battle_phase_hud(active_combat: bool) -> void:
+	_in_battle_phase_hud = active_combat
+	if active_combat:
+		_pending_confirm_mode = ""
+		_pending_confirm_lane = null
+		_pending_confirm_leader = ""
+		_deselect_card()
+		if battle_modals and battle_modals.is_inspection_open():
+			battle_modals.dismiss_inspection(false)
 	if footer_bar:
 		footer_bar.visible = not active_combat
 	if turn_btn:
@@ -2628,6 +2664,8 @@ func _set_battle_phase_hud(active_combat: bool) -> void:
 		pause_quick_btn.visible = not active_combat
 	if battle_log_box:
 		battle_log_box.visible = false
+	if board_click_surface:
+		board_click_surface.mouse_filter = Control.MOUSE_FILTER_IGNORE if active_combat else Control.MOUSE_FILTER_PASS
 
 
 func _spawn_battle_fx_prefab(kind: String, target_is_player: bool, crit_mult: int = 2) -> void:

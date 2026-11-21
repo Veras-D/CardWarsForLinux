@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bk0pu1q52er4m"
+path="res://.godot/imported/Peppermint Butler_Laugh Evil_21.wav-0ca4faaef1c5808551e121d9595a8c29.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Peppermint Butler_Laugh Evil_21.wav"
+dest_files=["res://.godot/imported/Peppermint Butler_Laugh Evil_21.wav-0ca4faaef1c5808551e121d9595a8c29.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

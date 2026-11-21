@@ -311,6 +311,10 @@ func play_battle_banner(is_attack: bool) -> void:
 	var clip_name: StringName = CLIP_ATTACK if is_attack else CLIP_DEFEND
 	var seq := _play_overlay_banner(active_banner, active_anim, clip_name, "res://assets/audio/sfx/SFX_Banner_Battle.wav", 1.0)
 	_waiting_banner_seq = seq
+	get_tree().create_timer(1.25).timeout.connect(func():
+		if _waiting_banner_seq == seq:
+			_stop_turn_banners()
+	)
 	await battle_banner_finished
 
 
@@ -431,7 +435,7 @@ func open_unused_magic_warning() -> void:
 
 
 func show_card_info(card_data: Dictionary, current_atk: int = -1, current_def: int = -1, max_def: int = -1, is_flooped: bool = false) -> void:
-	close_all_modals()
+	dismiss_inspection(false)
 	if card_data.is_empty():
 		return
 	var c_type := str(card_data.get("type", "CREATURE"))
@@ -477,7 +481,7 @@ func show_card_info(card_data: Dictionary, current_atk: int = -1, current_def: i
 
 
 func show_ability_confirmation(title_text: String, desc_text: String, tex_path: String, cost: int, question_text: String, subtitle_text: String = "Floop Ability") -> void:
-	close_all_modals()
+	dismiss_inspection(false)
 	_ab_title.text = title_text
 	_ab_desc.text = desc_text if desc_text != "" else "Activate ability."
 	_ab_subtitle.text = subtitle_text

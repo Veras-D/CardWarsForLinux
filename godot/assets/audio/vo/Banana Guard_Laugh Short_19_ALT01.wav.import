@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://ckpe634tpoufv"
+path="res://.godot/imported/Banana Guard_Laugh Short_19_ALT01.wav-a8d5f5b91494e09a4db4c2d351f9b8da.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Banana Guard_Laugh Short_19_ALT01.wav"
+dest_files=["res://.godot/imported/Banana Guard_Laugh Short_19_ALT01.wav-a8d5f5b91494e09a4db4c2d351f9b8da.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

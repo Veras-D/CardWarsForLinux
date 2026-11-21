@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://kf4me6x8gj35"
+path="res://.godot/imported/Banana Guard_Grunt Defensive Short_26_ALT05.wav-9c1158eb287d44847184e734f18dcf08.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Banana Guard_Grunt Defensive Short_26_ALT05.wav"
+dest_files=["res://.godot/imported/Banana Guard_Grunt Defensive Short_26_ALT05.wav-9c1158eb287d44847184e734f18dcf08.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

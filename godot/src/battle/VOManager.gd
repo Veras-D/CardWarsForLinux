@@ -48,7 +48,11 @@ const EXPLICIT_OPENING_CLIPS: Dictionary = {
 # key = event_string, value = { "chance": float, "player": bool, "opponent": bool }
 var _event_rules: Dictionary = {}
 
-# Catalog of available clips:
+# Exact Unity VOController clip lists per character prefab (from Assets/Resources/characters/*.prefab):
+# key = prefab_name, value = { EventID: Array[String] }
+var _prefab_vo_table: Dictionary = {}
+
+# Catalog of available clips (fallback for custom tests):
 # key = "Character_EventID", value = Array[String] (file paths)
 var _clip_catalog: Dictionary = {}
 
@@ -61,7 +65,61 @@ var _internal_player: AudioStreamPlayer = null
 
 func _init() -> void:
 	_load_event_rules()
+	_load_prefab_vo_table()
 	_build_clip_catalog()
+
+
+func _load_prefab_vo_table() -> void:
+	_prefab_vo_table.clear()
+	var path := "res://data/character_prefab_vo.json"
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if not f:
+		return
+	var json := JSON.new()
+	if json.parse(f.get_as_text()) == OK and typeof(json.data) == TYPE_DICTIONARY:
+		_prefab_vo_table = json.data
+
+
+func resolve_character_prefab(char_name: String) -> String:
+	var clean := char_name.strip_edges()
+	if _prefab_vo_table.has(clean):
+		return clean
+	var db := get_node_or_null("/root/Database")
+	if db and db.has_method("get_character"):
+		var cinfo: Dictionary = db.get_character(clean)
+		var pf := str(cinfo.get("prefab", "")).strip_edges()
+		if pf != "" and _prefab_vo_table.has(pf):
+			return pf
+	match clean:
+		"JakeGhost":
+			return "GhostJake"
+		"GunterFC":
+			return "Gunter"
+		"Fionna":
+			return "Fiona"
+		"Princess Bubblegum", "PB", "Bubblegum", "PBG":
+			return "PrincessBubblegum"
+		"Flame Princess", "FP":
+			return "FlamePrincess"
+		"Earl of Lemongrab", "Lemongrab":
+			return "EarlOfLemongrab"
+		"LSP":
+			return "LumpySpacePrincess"
+		"Ice King":
+			return "IceKing"
+		"Lady Rainicorn":
+			return "LadyRainicorn"
+		"Magic Man":
+			return "MagicMan"
+		"Cinnamon Bun", "CinnamonBun":
+			return "CinamonBunn"
+		"Banana Guard":
+			return "BananaGuard"
+		"Peppermint Butler":
+			return "PeppermintButler"
+	return clean
 
 
 func _ready() -> void:
@@ -204,9 +262,31 @@ func _build_clip_catalog() -> void:
 
 
 func get_candidate_clips(hero_name: String, event: VOEvent) -> Array[String]:
-	var clean_hero = hero_name.strip_edges()
-	var norm_hero = normalize_hero_name(clean_hero)
-	var evt_str = get_event_id_string(event)
+	var clean_hero := hero_name.strip_edges()
+	var norm_hero := normalize_hero_name(clean_hero)
+	var evt_str := get_event_id_string(event)
+
+	# 1. Exact Unity VOController clip list from Assets/Resources/characters/<Prefab>.prefab
+	var pf_name := resolve_character_prefab(clean_hero)
+	if _prefab_vo_table.has(pf_name):
+		var pf_entry: Dictionary = _prefab_vo_table[pf_name]
+		if pf_entry.has(evt_str):
+			var raw_list: Array = pf_entry[evt_str]
+			var pf_res: Array[String] = []
+			for fn in raw_list:
+				var fp := "res://assets/audio/vo/" + str(fn)
+				if ResourceLoader.exists(fp) or FileAccess.file_exists(fp):
+					pf_res.append(fp)
+			if not pf_res.is_empty():
+				return pf_res
+			# In Unity Finn.prefab / LumpySpacePrincess.prefab / PeppermintButler.prefab have empty WinClips;
+			# fall back to DestroyCreatureClips only for VOEvent.WIN so end_match(true) still plays a victory line.
+			if event == VOEvent.WIN and pf_entry.has("DestroyCreature"):
+				for fn in pf_entry["DestroyCreature"]:
+					var fp := "res://assets/audio/vo/" + str(fn)
+					if ResourceLoader.exists(fp) or FileAccess.file_exists(fp):
+						pf_res.append(fp)
+			return pf_res
 
 	if event == VOEvent.OPENING:
 		var clip_files: Array = []
@@ -222,42 +302,12 @@ func get_candidate_clips(hero_name: String, event: VOEvent) -> Array[String]:
 					explicit_res.append(fp)
 			if not explicit_res.is_empty():
 				return explicit_res
-		# Characters with empty OpeningClips in Unity stay silent instead of borrowing Finn's voice
 		return []
 
-	var key = norm_hero + "_" + evt_str
-
+	var key := norm_hero + "_" + evt_str
 	if _clip_catalog.has(key) and not _clip_catalog[key].is_empty():
 		var res: Array[String] = []
 		for p in _clip_catalog[key]:
-			res.append(str(p))
-		return res
-
-	# Hero-specific aliases / fallbacks
-	if event == VOEvent.WIN:
-		# Fallback to DestroyCreature or Power
-		var fallback_key = norm_hero + "_DestroyCreature"
-		if _clip_catalog.has(fallback_key) and not _clip_catalog[fallback_key].is_empty():
-			var res: Array[String] = []
-			for p in _clip_catalog[fallback_key]:
-				res.append(str(p))
-			return res
-	elif event == VOEvent.LEADER_ABILITY:
-		var p_path = "res://assets/audio/vo/%s_Power.wav" % norm_hero
-		if FileAccess.file_exists(p_path):
-			return [p_path]
-		var f_key = norm_hero + "_Floop"
-		if _clip_catalog.has(f_key) and not _clip_catalog[f_key].is_empty():
-			var res: Array[String] = []
-			for p in _clip_catalog[f_key]:
-				res.append(str(p))
-			return res
-
-	# Check global Finn fallback
-	var finn_key = "Finn_" + evt_str
-	if _clip_catalog.has(finn_key) and not _clip_catalog[finn_key].is_empty():
-		var res: Array[String] = []
-		for p in _clip_catalog[finn_key]:
 			res.append(str(p))
 		return res
 
@@ -269,6 +319,11 @@ func play_event(char_name: String, event: VOEvent, is_player: bool = true, force
 		vo_skipped.emit(char_name, event, "vo_disabled")
 		return false
 
+	# Unity VOManager.PlayEvent: if (IsPlaying) return; (unless forced, e.g. end-of-match Win/Lose)
+	if not force and is_voice_playing():
+		vo_skipped.emit(char_name, event, "already_playing")
+		return false
+
 	var evt_str = get_event_id_string(event)
 	var rule = _event_rules.get(evt_str, { "chance": 1.0, "player": true, "opponent": true })
 
@@ -278,15 +333,15 @@ func play_event(char_name: String, event: VOEvent, is_player: bool = true, force
 		vo_skipped.emit(char_name, event, "role_not_allowed")
 		return false
 
+	var candidates = get_candidate_clips(char_name, event)
+	if candidates.is_empty():
+		vo_skipped.emit(char_name, event, "no_clips_found")
+		return false
+
 	# Check random activation chance
 	var chance = float(rule.get("chance", 1.0))
 	if not force and randf() > chance:
 		vo_skipped.emit(char_name, event, "chance_rolled_false")
-		return false
-
-	var candidates = get_candidate_clips(char_name, event)
-	if candidates.is_empty():
-		vo_skipped.emit(char_name, event, "no_clips_found")
 		return false
 
 	# Pick clip, avoiding duplicate back-to-back if more than 1 option exists

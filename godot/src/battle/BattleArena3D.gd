@@ -1087,7 +1087,7 @@ func despawn_lane_entity_animated(is_player: bool, lane_idx: int, is_building: b
 		return
 	# Rename immediately so any follow-up summon in the same frame won't collide
 	body.name = "DyingEntity"
-	if ResourceLoader.exists(SFX_DEREZ_PATH):
+	if is_building and ResourceLoader.exists(SFX_DEREZ_PATH):
 		Audio.play_sfx_with_variation(load(SFX_DEREZ_PATH), -3.0, 0.04)
 	var ap := body.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	var clip_name := "Derez" if is_building else "Death"

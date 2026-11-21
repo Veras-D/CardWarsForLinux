@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://m2cel2rqaabt"
+path="res://.godot/imported/Lady Rainicorn_Grunt Offensive-Hoist_25_ALT02.wav-be950f4632e63f40ebb4b02dcc12459b.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Lady Rainicorn_Grunt Offensive-Hoist_25_ALT02.wav"
+dest_files=["res://.godot/imported/Lady Rainicorn_Grunt Offensive-Hoist_25_ALT02.wav-be950f4632e63f40ebb4b02dcc12459b.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

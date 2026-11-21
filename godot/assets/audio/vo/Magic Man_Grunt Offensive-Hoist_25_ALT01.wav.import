@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://8dum17olc1i"
+path="res://.godot/imported/Magic Man_Grunt Offensive-Hoist_25_ALT01.wav-c317b1bd7661db3ffe02dafe00a380ea.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Magic Man_Grunt Offensive-Hoist_25_ALT01.wav"
+dest_files=["res://.godot/imported/Magic Man_Grunt Offensive-Hoist_25_ALT01.wav-c317b1bd7661db3ffe02dafe00a380ea.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

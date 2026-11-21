@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://ch8jy2kfysme5"
+path="res://.godot/imported/Lady Rainicorn_Huh Grunt_18.wav-bec0d81c8ef4d36db3d0324c1ecc4ef3.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Lady Rainicorn_Huh Grunt_18.wav"
+dest_files=["res://.godot/imported/Lady Rainicorn_Huh Grunt_18.wav-bec0d81c8ef4d36db3d0324c1ecc4ef3.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

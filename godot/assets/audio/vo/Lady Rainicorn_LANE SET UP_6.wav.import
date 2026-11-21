@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dshihal7olgx5"
+path="res://.godot/imported/Lady Rainicorn_LANE SET UP_6.wav-9b9cac69cd15b229abcceab1f5f1877f.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Lady Rainicorn_LANE SET UP_6.wav"
+dest_files=["res://.godot/imported/Lady Rainicorn_LANE SET UP_6.wav-9b9cac69cd15b229abcceab1f5f1877f.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

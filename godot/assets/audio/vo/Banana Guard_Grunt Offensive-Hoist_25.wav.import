@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bfkby5xhwt2ts"
+path="res://.godot/imported/Banana Guard_Grunt Offensive-Hoist_25.wav-adbe68dfbd040f915c5a60b170dd6dd3.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Banana Guard_Grunt Offensive-Hoist_25.wav"
+dest_files=["res://.godot/imported/Banana Guard_Grunt Offensive-Hoist_25.wav-adbe68dfbd040f915c5a60b170dd6dd3.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

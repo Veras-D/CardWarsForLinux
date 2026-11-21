@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bwcoe8xysn0ns"
+path="res://.godot/imported/Magic Man_LANE SET UP_4.wav-3170cab255962065436575f9c2981cc6.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Magic Man_LANE SET UP_4.wav"
+dest_files=["res://.godot/imported/Magic Man_LANE SET UP_4.wav-3170cab255962065436575f9c2981cc6.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

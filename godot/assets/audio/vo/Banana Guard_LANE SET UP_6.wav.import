@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dkmqdo053rbt"
+path="res://.godot/imported/Banana Guard_LANE SET UP_6.wav-39c626a8536b13fa0f3050d05461ee59.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Banana Guard_LANE SET UP_6.wav"
+dest_files=["res://.godot/imported/Banana Guard_LANE SET UP_6.wav-39c626a8536b13fa0f3050d05461ee59.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

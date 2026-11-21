@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://pkwb3pwjf2u4"
+path="res://.godot/imported/Banana Guard_Crying Mumbling_16_ALT01.wav-fcbedc2aca8ad1064c2b1f741c953abf.sample"
+
+[deps]
+
+source_file="res://assets/audio/vo/Banana Guard_Crying Mumbling_16_ALT01.wav"
+dest_files=["res://.godot/imported/Banana Guard_Crying Mumbling_16_ALT01.wav-fcbedc2aca8ad1064c2b1f741c953abf.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
