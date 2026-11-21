@@ -1898,12 +1898,134 @@ func focus_ko_camera(player_lost: bool, duration: float = 0.25) -> Tween:
 	return tween_camera(Vector3(-0.85, 0.60, 0.0), Vector3(0.25, 0.22, 0.0), duration, 60.0)
 
 
+const LAND_DAMAGE_OVERLAY_TEX_PATHS := [
+	"res://assets/textures/fx/FX_Land_HighlightA_PNG.png",
+	"res://assets/textures/fx/FX_Land_HighlightB_PNG.png",
+	"res://assets/textures/fx/FX_Land_HighlightC_PNG.png",
+	"res://assets/textures/fx/FX_Land_HighlightD_PNG.png",
+]
+const LAND_DAMAGE_OVERLAY_Z_OFFSETS := [-0.097, 0.0, -0.015, 0.0]
+const LAND_DAMAGE_STARBURST_TEX_PATH := "res://assets/textures/fx/FX_StarBurst4_PNG.png"
+const LAND_DAMAGE_SFX_PATH := "res://assets/audio/sfx/SFX_HighlightLand.wav"
+
+static func _eval_land_damage_starburst_curve(t: float) -> float:
+	## Evaluates Unity FX_Battle_Land_DamageA..D SizeModule Hermite spline (0.2545454 -> 1.0, in/outSlope 1.769944 -> 0).
+	var u := clampf(t, 0.0, 1.0)
+	var u2 := u * u
+	var u3 := u2 * u
+	return (2.0 * u3 - 3.0 * u2 + 1.0) * 0.2545454 + (u3 - 2.0 * u2 + u) * 1.769944 + (-2.0 * u3 + 3.0 * u2) * 1.0
+
+
+func shake_duel_camera(target_is_player: bool, duration: float = 0.50) -> void:
+	## Reproduces Unity 2_P1_DealDamage / 2_P2_DealDamage CWiTweenCamTrigger("CameraShake"):
+	## iTween.ShakePosition on Battle BattleCamera P1/P2 & LookAtTarget (amount=(1,1,1)*0.05, time=0.5s).
+	var cam := _battle_cam_p1 if target_is_player else _battle_cam_p2
+	if not _duel_split_active or cam == null or _active_duel_lane_idx < 0 or _active_duel_lane_idx >= 4:
+		return
+	var base_pos := P1_DUEL_CAM_POS[_active_duel_lane_idx] if target_is_player else P2_DUEL_CAM_POS[_active_duel_lane_idx]
+	var base_look := P1_DUEL_CAM_LOOK[_active_duel_lane_idx] if target_is_player else P2_DUEL_CAM_LOOK[_active_duel_lane_idx]
+	var tw := create_tween()
+	tw.tween_method(func(t: float) -> void:
+		if not _duel_split_active or not is_instance_valid(cam):
+			return
+		var amp := (1.0 - t) * 0.045
+		var p_off := Vector3(randf_range(-amp, amp), randf_range(-amp, amp), randf_range(-amp, amp))
+		var l_off := Vector3(randf_range(-amp, amp), randf_range(-amp, amp), randf_range(-amp, amp)) * 0.65
+		cam.global_position = base_pos + p_off
+		cam.look_at(base_look + l_off, Vector3.UP)
+	, 0.0, 1.0, duration)
+	tw.tween_callback(func() -> void:
+		if _duel_split_active and is_instance_valid(cam):
+			cam.global_position = base_pos
+			cam.look_at(base_look, Vector3.UP)
+	)
+
+
 func play_lane_direct_hit_vfx(target_is_player: bool, lane_idx: int) -> void:
-	set_lane_highlight(target_is_player, lane_idx, true, Color(0.96, 0.06, 0.06, 0.72))
-	var t := get_tree().create_timer(0.65)
-	t.timeout.connect(func():
-		if is_inside_tree():
-			set_lane_highlight(target_is_player, lane_idx, false)
+	## Authentically reproduces Unity FX_Battle_Land_DamageA..D.prefab spawned by LandscapeManagerScript.SpawnLandDamageFX.
+	if lane_idx < 0 or lane_idx >= 4:
+		return
+	var anchor := get_lane_anchor(target_is_player, lane_idx)
+	if anchor == null or not is_instance_valid(anchor):
+		return
+
+	if ResourceLoader.exists(LAND_DAMAGE_SFX_PATH):
+		Audio.play_sfx(load(LAND_DAMAGE_SFX_PATH))
+
+	var variant_idx := lane_idx if target_is_player else (3 - lane_idx)
+	var fx_root := Node3D.new()
+	fx_root.name = "FX_Battle_Land_Damage"
+	fx_root.rotation_degrees = Vector3(0.0, 0.0 if target_is_player else 180.0, 0.0)
+	anchor.add_child(fx_root)
+
+	# 1. FX_Overlay: Horizontal quad with FX_Land_HighlightA..D_PNG.png tinted deep blood-red Color(0.5803922, 0.0, 0.0, 1.0)
+	# Positioned at y = 0.0175 so it covers the landscape slab (top at y ~ 0.016) while 3D DetailMesh props/rocks/reeds poke through.
+	var overlay_tex_path: String = LAND_DAMAGE_OVERLAY_TEX_PATHS[clampi(variant_idx, 0, 3)]
+	var overlay_mi := MeshInstance3D.new()
+	overlay_mi.name = "FX_Overlay"
+	var overlay_mesh := PlaneMesh.new()
+	overlay_mesh.size = Vector2(1.28, 1.225)
+	overlay_mi.mesh = overlay_mesh
+	overlay_mi.position = Vector3(0.0, 0.0175, float(LAND_DAMAGE_OVERLAY_Z_OFFSETS[clampi(variant_idx, 0, 3)]))
+	overlay_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var overlay_mat := StandardMaterial3D.new()
+	overlay_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	overlay_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	overlay_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	overlay_mat.albedo_color = Color(0.5803922, 0.0, 0.0, 1.0)
+	if ResourceLoader.exists(overlay_tex_path):
+		overlay_mat.albedo_texture = load(overlay_tex_path)
+	overlay_mi.material_override = overlay_mat
+	fx_root.add_child(overlay_mi)
+
+	var o_tw := overlay_mi.create_tween()
+	o_tw.tween_property(overlay_mat, "albedo_color:a", 0.0, 1.0).set_trans(Tween.TRANS_LINEAR)
+
+	# 2. FX_StarBurst1 & FX_StarBurst2:
+	# Unity FX_StarBurst1: startSize=13 (0.65m), SizeModule scalar=1.5 -> max size 19.5 (0.975m), curve 0.2545454 -> 1.0 over 0.13s, startRotation=90 deg, alpha 1.0 -> 0.0
+	# Unity FX_StarBurst2: startSize=13 (0.65m), SizeModule scalar=3.0 -> max size 39.0 (1.95m), curve 0.2545454 -> 1.0 over 0.20s, startRotation=90 deg, alpha 0.251 -> 0.0
+	# Material FX_StarBurst4.mat uses Mobile/Particles/Alpha Blended (2.0 * _TintColor(0.5735) = 1.147x brightness)
+	var sb_tex: Texture2D = load(LAND_DAMAGE_STARBURST_TEX_PATH) if ResourceLoader.exists(LAND_DAMAGE_STARBURST_TEX_PATH) else null
+	var sb1_y := 0.075 if variant_idx == 2 else 0.030
+	for sb_cfg in [
+		{"name": "FX_StarBurst1", "dur": 0.13, "a0": 1.0, "max_size": 0.975, "y": sb1_y},
+		{"name": "FX_StarBurst2", "dur": 0.20, "a0": 0.2509804, "max_size": 1.950, "y": 0.025},
+	]:
+		var sb_mi := MeshInstance3D.new()
+		sb_mi.name = str(sb_cfg["name"])
+		var sb_mesh := PlaneMesh.new()
+		var max_sz: float = float(sb_cfg["max_size"])
+		sb_mesh.size = Vector2(max_sz, max_sz)
+		sb_mi.mesh = sb_mesh
+		sb_mi.position = Vector3(0.45, float(sb_cfg["y"]), 0.0)
+		sb_mi.rotation_degrees = Vector3(0.0, 90.0, 0.0)
+		sb_mi.scale = Vector3(0.2545454, 1.0, 0.2545454)
+		sb_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var sb_mat := StandardMaterial3D.new()
+		sb_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		sb_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		sb_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		var a0: float = float(sb_cfg["a0"])
+		sb_mat.albedo_color = Color(1.147, 1.147, 1.147, a0)
+		if sb_tex != null:
+			sb_mat.albedo_texture = sb_tex
+		sb_mi.material_override = sb_mat
+		fx_root.add_child(sb_mi)
+
+		var dur: float = float(sb_cfg["dur"])
+		var sb_tw := sb_mi.create_tween()
+		sb_tw.tween_method(func(t: float) -> void:
+			if not is_instance_valid(sb_mi):
+				return
+			var s := _eval_land_damage_starburst_curve(t)
+			sb_mi.scale = Vector3(s, 1.0, s)
+			sb_mat.albedo_color.a = a0 * (1.0 - t)
+		, 0.0, 1.0, dur)
+
+	var cleanup_timer := get_tree().create_timer(1.05)
+	cleanup_timer.timeout.connect(func():
+		if is_instance_valid(fx_root):
+			fx_root.queue_free()
 	)
 
 

@@ -383,6 +383,12 @@ def main() -> None:
         "FX_Scan.png",
         "FX_Flare3_TGA.png",
         "FX_Battle_ExclamationMark_PNG.png",
+        "FX_Land_HighlightA_PNG.png",
+        "FX_Land_HighlightB_PNG.png",
+        "FX_Land_HighlightC_PNG.png",
+        "FX_Land_HighlightD_PNG.png",
+        "FX_StarBurst4_PNG.png",
+        "FX_Skull2_PNG.png",
     ):
         src_fx = os.path.join(REPO_ROOT, "Assets", "Texture2D", fx_tex)
         dst_fx = os.path.join(OUT_FX_TEX, fx_tex)

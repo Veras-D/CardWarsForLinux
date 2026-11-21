@@ -209,6 +209,73 @@ func start_defend_clash(
 	_launch_wheel(sectors, float(p["speed_deg_sec"]), force_quick)
 
 
+func start_undefended_clash(
+	_attacker_name: String,
+	_defender_name: String,
+	incoming_damage: int
+) -> void:
+	## Reproduces Unity CWBattleSequenceController undefendedFlag=true + forceMiss=true + CWBattleRingMissed:
+	## Shows dimmed wheel with "UNDEFENDED!" callout, plays Ring_Miss.wav, waits 0.5s, then resolves.
+	visible = true
+	_resolved = true
+	_is_defend_mode = true
+	_current_base_damage = incoming_damage
+	_defender_atk = 0
+	modulate = Color.WHITE
+	_stop_prompt_pulse()
+
+	needle_tex.texture = TEX_NEEDLE_DEF
+	needle_tex.offset_left = -22.0
+	needle_tex.offset_top = -122.0
+	needle_tex.offset_right = 22.0
+	needle_tex.offset_bottom = 12.0
+	if prompt_lbl:
+		prompt_lbl.text = ""
+	if star_burst_fx:
+		star_burst_fx.visible = false
+
+	var sectors: Array = [
+		{"id": "miss", "name": "UNDEFENDED!", "ratio": 1.0, "color": Color(0.20, 0.12, 0.12, 0.85), "multiplier": 1.0, "is_success": false},
+	]
+	var cfg := WheelConfig.create_custom(sectors, 0.0)
+	spinner.setup(cfg)
+	needle_pivot.rotation_degrees = 0.0
+
+	if ResourceLoader.exists("res://assets/audio/sfx/Ring_Miss.wav"):
+		Audio.play_sfx(load("res://assets/audio/sfx/Ring_Miss.wav"))
+
+	if result_callout:
+		result_callout.text = "UNDEFENDED!"
+		if result_callout.label_settings:
+			result_callout.label_settings.font_color = Color(1.0, 0.24, 0.20, 1.0)
+			result_callout.label_settings.outline_color = Color(0.22, 0.02, 0.02, 1.0)
+		result_callout.visible = true
+		result_callout.scale = Vector2(0.5, 0.5)
+		create_tween().tween_property(result_callout, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	var clash_res := {
+		"id": "miss",
+		"name": "UNDEFENDED!",
+		"mode": "defend",
+		"multiplier": 1.0,
+		"base_damage": incoming_damage,
+		"final_damage": incoming_damage,
+		"counter_damage": 0,
+		"is_blocked": false,
+		"is_counter": false,
+		"angle_deg": 0.0,
+	}
+	await get_tree().create_timer(0.35).timeout
+	var fade_tw := create_tween()
+	fade_tw.tween_property(self, "modulate:a", 0.0, 0.15)
+	await fade_tw.finished
+	visible = false
+	modulate.a = 1.0
+	if result_callout:
+		result_callout.visible = false
+	clash_resolved.emit(clash_res)
+
+
 func _launch_wheel(sectors: Array, speed_deg_sec: float, force_quick: bool) -> void:
 	ring_anchor.scale = Vector2(0.45, 0.45)
 	ring_anchor.pivot_offset = ring_anchor.size * 0.5

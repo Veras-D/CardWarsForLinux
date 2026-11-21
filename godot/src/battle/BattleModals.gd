@@ -23,6 +23,7 @@ const CLIP_YOUR_TURN: StringName = &"Take 001_18"
 const CLIP_OPP_TURN: StringName = &"Take 001_19"
 const CLIP_ATTACK: StringName = &"Battle_Attack"
 const CLIP_DEFEND: StringName = &"Battle_Defend"
+const CLIP_DAMAGE_BURST: StringName = &"Take 001_16"
 const TEX_STAR_FULL: Texture2D = preload("res://assets/textures/battle/FX_QuestStar_PNG.png")
 const TEX_ATK_ICON: Texture2D = preload("res://assets/textures/battle/hud/Combat_Icon_ATK.png")
 const TEX_DEF_ICON: Texture2D = preload("res://assets/textures/battle/hud/Combat_Icon_DEF.png")
@@ -57,6 +58,8 @@ const TEX_BOOK: Texture2D = preload("res://assets/textures/battle/hud/Book.png")
 @onready var opp_turn_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_OpponentsTurn
 @onready var attack_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_Attack
 @onready var defend_banner: Node3D = $TurnBannerViewportContainer/SubViewport/Battle_Defend
+@onready var fx_damage_p1: Node3D = get_node_or_null("TurnBannerViewportContainer/SubViewport/FxDamageBattle_P1")
+@onready var fx_damage_p2: Node3D = get_node_or_null("TurnBannerViewportContainer/SubViewport/FxDamageBattle_P2")
 
 @onready var quest_modal: Control = $CurrentQuestModal
 @onready var quest_rows_box: VBoxContainer = $CurrentQuestModal/Frame/VBox/ConditionsScroll/Rows
@@ -80,6 +83,8 @@ var _your_turn_anim: AnimationPlayer = null
 var _opp_turn_anim: AnimationPlayer = null
 var _attack_anim: AnimationPlayer = null
 var _defend_anim: AnimationPlayer = null
+var _fx_damage_p1_anim: AnimationPlayer = null
+var _fx_damage_p2_anim: AnimationPlayer = null
 var _turn_seq_id: int = 0
 var _waiting_banner_seq: int = -1
 
@@ -121,6 +126,8 @@ func _ready() -> void:
 	_opp_turn_anim = _setup_turn_banner_anim(opp_turn_banner, CLIP_OPP_TURN)
 	_attack_anim = _setup_turn_banner_anim(attack_banner, CLIP_ATTACK, true)
 	_defend_anim = _setup_turn_banner_anim(defend_banner, CLIP_DEFEND, true)
+	_fx_damage_p1_anim = _setup_damage_burst_anim(fx_damage_p1)
+	_fx_damage_p2_anim = _setup_damage_burst_anim(fx_damage_p2)
 	_stop_turn_banners()
 	quest_modal.visible = false
 	discard_modal.visible = false
@@ -198,6 +205,55 @@ func _setup_turn_banner_anim(banner_root: Node3D, clip_name: StringName, use_alp
 	return anim_player
 
 
+func _setup_damage_burst_anim(burst_root: Node3D) -> AnimationPlayer:
+	if not burst_root:
+		return null
+	for child in burst_root.find_children("*", "MeshInstance3D", true, false):
+		var mi := child as MeshInstance3D
+		var base_mat := mi.get_active_material(0) as StandardMaterial3D
+		if base_mat:
+			var mat := base_mat.duplicate() as StandardMaterial3D
+			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+			mat.alpha_scissor_threshold = 0.25
+			mi.material_override = mat
+	var anim_player := burst_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if not anim_player:
+		return null
+	var anim_res := anim_player.get_animation(CLIP_DAMAGE_BURST)
+	if anim_res:
+		anim_res.loop_mode = Animation.LOOP_NONE
+	anim_player.animation_finished.connect(func(_anim_name: StringName):
+		burst_root.visible = false
+		_refresh_banner_viewport_visibility()
+	)
+	return anim_player
+
+
+func _refresh_banner_viewport_visibility() -> void:
+	if not turn_banner_viewport:
+		return
+	var any_vis := false
+	for bn in [your_turn_banner, opp_turn_banner, attack_banner, defend_banner, fx_damage_p1, fx_damage_p2]:
+		if bn and bn.visible:
+			any_vis = true
+			break
+	turn_banner_viewport.visible = any_vis
+
+
+func play_damage_burst_3d(target_is_player: bool) -> void:
+	## Plays the 3D FxDamageBattle (Take 001_16: Star, Ring, Red Flash, Poof 1..4) on TargetP1 (-3.5) or TargetP2 (+3.5).
+	var node: Node3D = fx_damage_p1 if target_is_player else fx_damage_p2
+	var ap: AnimationPlayer = _fx_damage_p1_anim if target_is_player else _fx_damage_p2_anim
+	if node == null or ap == null or not ap.has_animation(CLIP_DAMAGE_BURST):
+		return
+	if turn_banner_viewport:
+		turn_banner_viewport.visible = true
+	node.visible = true
+	ap.stop()
+	ap.play(CLIP_DAMAGE_BURST)
+	ap.seek(0.0, true)
+
+
 func _stop_turn_banners() -> void:
 	_turn_seq_id += 1
 	for ap in [_your_turn_anim, _opp_turn_anim, _attack_anim, _defend_anim]:
@@ -206,8 +262,7 @@ func _stop_turn_banners() -> void:
 	for bn in [your_turn_banner, opp_turn_banner, attack_banner, defend_banner]:
 		if bn:
 			bn.visible = false
-	if turn_banner_viewport:
-		turn_banner_viewport.visible = false
+	_refresh_banner_viewport_visibility()
 	if _waiting_banner_seq != -1:
 		_waiting_banner_seq = -1
 		battle_banner_finished.emit()

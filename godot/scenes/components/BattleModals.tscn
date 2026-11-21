@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ui/store/uiButtonGreen.png" id="12_btn_green"]
 [ext_resource type="PackedScene" path="res://assets/models/battle/banners/Battle_Attack.glb" id="13_attack_glb"]
 [ext_resource type="PackedScene" path="res://assets/models/battle/banners/Battle_Defend.glb" id="14_defend_glb"]
+[ext_resource type="PackedScene" path="res://assets/models/battle/banners/FxDamageBattle.glb" id="15_fxdamage_glb"]
 
 [sub_resource type="Environment" id="Env_TurnBannerUI"]
 ambient_light_source = 2
@@ -97,6 +98,14 @@ visible = false
 visible = false
 
 [node name="Battle_Defend" parent="TurnBannerViewportContainer/SubViewport" instance=ExtResource("14_defend_glb")]
+visible = false
+
+[node name="FxDamageBattle_P1" parent="TurnBannerViewportContainer/SubViewport" instance=ExtResource("15_fxdamage_glb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, 0)
+visible = false
+
+[node name="FxDamageBattle_P2" parent="TurnBannerViewportContainer/SubViewport" instance=ExtResource("15_fxdamage_glb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0)
 visible = false
 
 [node name="CurrentQuestModal" type="Control" parent="."]

@@ -31,9 +31,14 @@ const TEX_FX_FLARE: Texture2D = preload("res://assets/textures/battle/fx/Flare1_
 const TEX_FX_GLOW: Texture2D = preload("res://assets/textures/battle/fx/FX_Glow_ball3_grey_TGA.png")
 const TEX_FX_SKULL: Texture2D = preload("res://assets/textures/battle/fx/FX_Skull2_PNG.png")
 const TEX_FX_STARBURST: Texture2D = preload("res://assets/textures/battle/fx/FX_StarBurst4_PNG.png")
+const TEX_BATTLE_FLASH: Texture2D = preload("res://assets/textures/battle/hud/Battle_Flash.png")
+const TEX_BATTLE_SHIELD: Texture2D = preload("res://assets/textures/battle/hud/Battle_Shield.png")
 const TEX_BOTTLE_FULL: Texture2D = preload("res://assets/textures/battle/hud/Bottle_Full.png")
 const SHADER_MAGIC_ORB_LIQUID: Shader = preload("res://assets/shaders/magic_orb_liquid.gdshader")
 const SFX_DAMAGE_BURST_PATH := "res://assets/audio/sfx/SFX_DamageBurst.wav"
+const SFX_BATTLE_DAMAGE_HIT_PATH := "res://assets/audio/sfx/FX_BattleRing_Damage_Hit.wav"
+const SFX_BATTLE_DAMAGE_CRIT_PATH := "res://assets/audio/sfx/FX_BattleRing_Damage_Crit.wav"
+const SFX_BATTLE_DAMAGE_BLOCK_PATH := "res://assets/audio/sfx/FX_BattleRing_Damage_Block.wav"
 
 @onready var opponent_hp_damage_bar: ProgressBar = $Header/OpponentInfo/HBox/StatsCol/HpDamageBar
 @onready var opponent_hp_bar: ProgressBar = $Header/OpponentInfo/HBox/StatsCol/HpBar
@@ -1138,20 +1143,47 @@ func execute_battle_phase() -> void:
 				phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
 				phase_manager.resolve_combat_lane(i, clash_res)
 
-			if clash_res.id == "crit":
-				log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [attacker_name, final_damage])
-				_spawn_combat_callout("CRIT x2!", Color(0.22, 1.0, 0.32))
-			elif clash_res.id == "miss":
+			if clash_res.id == "miss":
 				log_message("❌ MISSED! %s's attack missed completely!" % attacker_name)
-				_spawn_combat_callout("MISS!", Color(0.98, 0.32, 0.28))
-			else:
-				log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
-				_spawn_combat_callout("ATTACK x1", Color(1.0, 0.90, 0.18))
-
-			if final_damage > 0:
 				if arena_3d:
 					arena_3d.animate_creature_lunge(true, i)
-				await get_tree().create_timer(0.14).timeout
+				await get_tree().create_timer(0.20).timeout
+				if o_lane.has_creature:
+					# Unity TweenDamage_P1Missed: 1_P1_Crash -> 2_UI_BlockOnP2 -> 3_P2_Crash -> 4_P2_DealDamage -> 5_P1_CheckForDefeat
+					_spawn_battle_fx_prefab("block", false)
+					await get_tree().create_timer(0.20).timeout
+					if arena_3d:
+						arena_3d.animate_creature_lunge(false, i)
+					await get_tree().create_timer(0.20).timeout
+					var opp_counter_atk: int = maxi(0, o_lane.current_atk)
+					_spawn_battle_fx_prefab("crit", true, 2)
+					if arena_3d:
+						arena_3d.shake_duel_camera(true, 0.50)
+					if opp_counter_atk > 0:
+						if arena_3d:
+							arena_3d.animate_creature_hit(true, i)
+						_spawn_floating_damage(true, i, opp_counter_atk)
+						var p_dead := p_lane.apply_damage(opp_counter_atk)
+						if p_dead and player_face_rig:
+							player_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+					await get_tree().create_timer(0.20).timeout
+				else:
+					# Unity TweenDamage_P1Missed_noCreature: 1_P1_Crash -> 2_UI_MissOnP2
+					_spawn_battle_fx_prefab("miss", false)
+					await get_tree().create_timer(0.20).timeout
+			elif final_damage > 0:
+				# Unity TweenDamage_P1Hit / TweenDamage_P1Crit:
+				# Step 1 (t=0.0s): 1_P1_Crash -> wait 0.2s -> Step 2 (t=0.2s): 2_P1_DealDamage (CameraShake P2 + FX_BattleFXHit/Crit on TargetP2 + DealDamage) -> wait 0.2s -> Step 3: 3_P2_CheckForDefeat
+				if clash_res.id == "crit":
+					log_message("⚡ CRITICAL HIT! %s dealt 2x damage (%d DMG)!" % [attacker_name, final_damage])
+				else:
+					log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
+				if arena_3d:
+					arena_3d.animate_creature_lunge(true, i)
+				await get_tree().create_timer(0.20).timeout
+				_spawn_battle_fx_prefab("crit" if clash_res.id == "crit" else "hit", false, 2)
+				if arena_3d:
+					arena_3d.shake_duel_camera(false, 0.50)
 				if o_lane.has_creature:
 					var target_creature_name = o_lane.creature_data.get("name", "Creature")
 					if arena_3d:
@@ -1168,13 +1200,13 @@ func execute_battle_phase() -> void:
 				else:
 					if arena_3d:
 						arena_3d.play_lane_direct_hit_vfx(false, i)
-					_spawn_floating_damage(false, i, final_damage)
 					opponent_hp = max(0, opponent_hp - final_damage)
 					if opponent_face_rig:
 						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
 					if vo_manager:
 						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.HERO_DAMAGED, false)
-			await get_tree().create_timer(0.32).timeout
+				await get_tree().create_timer(0.20).timeout
+			await get_tree().create_timer(0.50).timeout
 
 			_update_ui()
 			if opponent_hp <= 0:
@@ -1517,7 +1549,8 @@ func execute_opponent_turn() -> void:
 		if not is_inside_tree():
 			return
 
-		for i in range(4):
+		for j in range(4):
+			var i: int = 3 - j
 			var o_lane = opponent_lanes[i]
 			if not o_lane.has_creature:
 				continue
@@ -1552,11 +1585,19 @@ func execute_opponent_turn() -> void:
 					phase_manager.resolve_combat_lane(i, clash_res)
 
 				if bool(clash_res.get("is_counter", false)):
-					_spawn_combat_callout("COUNTER!", Color(0.18, 0.98, 0.35))
+					# Unity TweenDamage_P2Crit: 1_P2_Crash -> 2_BlockOnP1 -> 3_P1_Crash -> 4_P1_DealDamage -> 5_P2_CheckForDefeat (each step 0.2s)
 					log_message("⚡ COUNTER! %s blocked and struck back for %d DMG!" % [target_name, counter_damage])
 					if arena_3d:
+						arena_3d.animate_creature_lunge(false, i)
+					await get_tree().create_timer(0.20).timeout
+					_spawn_battle_fx_prefab("block", true)
+					await get_tree().create_timer(0.20).timeout
+					if arena_3d:
 						arena_3d.animate_creature_lunge(true, i)
-					await get_tree().create_timer(0.14).timeout
+					await get_tree().create_timer(0.20).timeout
+					_spawn_battle_fx_prefab("crit", false, 2)
+					if arena_3d:
+						arena_3d.shake_duel_camera(false, 0.50)
 					if counter_damage > 0:
 						if arena_3d:
 							arena_3d.animate_creature_hit(false, i)
@@ -1564,16 +1605,24 @@ func execute_opponent_turn() -> void:
 						var o_dead = o_lane.apply_damage(counter_damage)
 						if o_dead and opponent_face_rig:
 							opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.TAKE_DAMAGE)
+					await get_tree().create_timer(0.20).timeout
 				elif bool(clash_res.get("is_blocked", false)):
-					_spawn_combat_callout("BLOCK!", Color(0.32, 0.88, 1.0))
+					# Unity TweenDamage_P2Hit: 1_P2_Crash -> 2_BlockOnP1
 					log_message("🛡️ BLOCKED! %s blocked %s's attack!" % [target_name, attacker_name])
+					if arena_3d:
+						arena_3d.animate_creature_lunge(false, i)
+					await get_tree().create_timer(0.20).timeout
+					_spawn_battle_fx_prefab("block", true)
+					await get_tree().create_timer(0.20).timeout
 				else:
-					_spawn_combat_callout("ATTACK x1", Color(1.0, 0.88, 0.22))
+					# Unity TweenDamage_P2Missed: 1_P2_Crash -> 2_P2_DealDamage (CameraShake P1 + FX_BattleFXHit on TargetP1 + DealDamage) -> 3_P1_CheckForDefeat
 					log_message("⚔️ HIT! %s dealt %d damage to %s!" % [attacker_name, final_damage, target_name])
 					if arena_3d:
 						arena_3d.animate_creature_lunge(false, i)
-					await get_tree().create_timer(0.14).timeout
+					await get_tree().create_timer(0.20).timeout
+					_spawn_battle_fx_prefab("hit", true)
 					if arena_3d:
+						arena_3d.shake_duel_camera(true, 0.50)
 						arena_3d.animate_creature_hit(true, i)
 					_spawn_floating_damage(true, i, final_damage)
 					var destroyed = p_lane.apply_damage(final_damage)
@@ -1584,18 +1633,22 @@ func execute_opponent_turn() -> void:
 						if vo_manager:
 							vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.DESTROY_CREATURE, false)
 							vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.CREATURE_DESTROYED, true)
+					await get_tree().create_timer(0.20).timeout
 			else:
-				# Undefended Player lane -> direct Hero damage + Jake warning banner (Screenshot 10)
+				# Undefended Player lane: Unity CWBattleSequenceController sets undefendedFlag=true, forceMiss=true -> StopRing (0.5s) -> TweenDamage_P2Missed
+				# 1_P2_Crash (t=0.0s) -> wait 0.2s -> 2_P2_DealDamage (CameraShake P1 + FX_BattleFXHit on TargetP1 + DealDamage -> SpawnLandDamageFX + C_P1Damaged) -> wait 0.2s
+				wheel_modal.start_undefended_clash(attacker_name, target_name, atk)
+				await wheel_modal.clash_resolved
 				if phase_manager != null:
 					phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
 				_show_undefended_warning()
 				if arena_3d:
 					arena_3d.animate_creature_lunge(false, i)
+				await get_tree().create_timer(0.20).timeout
+				_spawn_battle_fx_prefab("hit", true)
+				if arena_3d:
+					arena_3d.shake_duel_camera(true, 0.50)
 					arena_3d.play_lane_direct_hit_vfx(true, i)
-				if ResourceLoader.exists("res://assets/audio/sfx/Ring_Hit.wav"):
-					Audio.play_sfx_with_variation(load("res://assets/audio/sfx/Ring_Hit.wav"))
-				await get_tree().create_timer(0.15).timeout
-				_spawn_floating_damage(true, i, atk)
 				player_hp = max(0, player_hp - atk)
 				match_player_hp_lost += atk
 				if player_face_rig:
@@ -1603,9 +1656,9 @@ func execute_opponent_turn() -> void:
 				if vo_manager:
 					vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.HERO_DAMAGED, true)
 				log_message("💥 %s attacked undefended Hero for %d damage!" % [attacker_name, atk])
-				await get_tree().create_timer(0.60).timeout
+				await get_tree().create_timer(0.20).timeout
 
-			await get_tree().create_timer(0.32).timeout
+			await get_tree().create_timer(0.50).timeout
 			_update_ui()
 			if player_hp <= 0:
 				_set_battle_phase_hud(false)
@@ -2575,6 +2628,147 @@ func _set_battle_phase_hud(active_combat: bool) -> void:
 		pause_quick_btn.visible = not active_combat
 	if battle_log_box:
 		battle_log_box.visible = false
+
+
+func _spawn_battle_fx_prefab(kind: String, target_is_player: bool, crit_mult: int = 2) -> void:
+	## Authentically reproduces Unity FX_BattleFXHit, FX_BattleFXCrit, FX_BattleFXBlock, and FX_BattleFXMiss
+	## spawned on TargetP1 (x = -350 / 1280 -> left half) or TargetP2 (x = +350 / 1280 -> right half).
+	var host := Control.new()
+	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var anchor_x := 0.2265625 if target_is_player else 0.7734375
+	host.anchor_left = anchor_x
+	host.anchor_right = anchor_x
+	host.anchor_top = 0.5
+	host.anchor_bottom = 0.5
+	host.z_index = 60
+	add_child(host)
+
+	match kind:
+		"hit", "crit":
+			var is_crit := (kind == "crit")
+			var sfx_path := SFX_BATTLE_DAMAGE_CRIT_PATH if is_crit else SFX_BATTLE_DAMAGE_HIT_PATH
+			if ResourceLoader.exists(sfx_path):
+				Audio.play_sfx(load(sfx_path))
+			if battle_modals:
+				battle_modals.play_damage_burst_3d(target_is_player)
+			if is_crit:
+				# FX_BattleRingCrit: Battle_Flash (600->900 over 0.1s, alpha 0.776 -> 0.0 over 0.8s)
+				var flash := TextureRect.new()
+				flash.texture = TEX_BATTLE_FLASH
+				flash.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				flash.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				flash.size = Vector2(540.0, 540.0)
+				flash.position = -flash.size * 0.5
+				flash.pivot_offset = flash.size * 0.5
+				flash.scale = Vector2(0.667, 0.667)
+				flash.modulate = Color(1.0, 1.0, 1.0, 0.7764706)
+				flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				host.add_child(flash)
+				var f_tw := flash.create_tween()
+				f_tw.set_parallel(true)
+				f_tw.tween_property(flash, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				f_tw.tween_property(flash, "modulate:a", 0.0, 0.80).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+			var text_str := ("CRITICAL x %d" % crit_mult) if is_crit else "ATTACK x 1"
+			# 1. AttackLevel_Label (base yellow r=0.862,g=1,b=0 with orange outline r=1,g=0.412,b=0, alpha 0.6 -> 0 over 1.0s)
+			var base_lbl := Label.new()
+			base_lbl.text = text_str
+			base_lbl.size = Vector2(680.0, 140.0)
+			base_lbl.position = -base_lbl.size * 0.5
+			base_lbl.pivot_offset = base_lbl.size * 0.5
+			base_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			base_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			base_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			base_lbl.add_theme_font_override("font", FONT_BATTLE_HUD)
+			base_lbl.add_theme_font_size_override("font_size", 68)
+			base_lbl.add_theme_color_override("font_color", Color(0.862069, 1.0, 0.0, 1.0))
+			base_lbl.add_theme_color_override("font_outline_color", Color(1.0, 0.4117647, 0.0, 1.0))
+			base_lbl.add_theme_constant_override("outline_size", 10)
+			base_lbl.modulate.a = 0.92
+			host.add_child(base_lbl)
+			var b_tw := base_lbl.create_tween()
+			b_tw.tween_property(base_lbl, "modulate:a", 0.0, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+			# 2. AttackLevel_Label_Scale (white with yellow outline r=0.945,g=1,b=0, scale 0.625 -> 1.25 (or 1.875 for crit) and alpha 0.6 -> 0 over 0.5s)
+			var scale_lbl := Label.new()
+			scale_lbl.text = text_str
+			scale_lbl.size = Vector2(680.0, 140.0)
+			scale_lbl.position = -scale_lbl.size * 0.5
+			scale_lbl.pivot_offset = scale_lbl.size * 0.5
+			scale_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			scale_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			scale_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			scale_lbl.add_theme_font_override("font", FONT_BATTLE_HUD)
+			scale_lbl.add_theme_font_size_override("font_size", 68)
+			scale_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
+			scale_lbl.add_theme_color_override("font_outline_color", Color(0.9448276, 1.0, 0.0, 1.0))
+			scale_lbl.add_theme_constant_override("outline_size", 10)
+			scale_lbl.scale = Vector2(0.625, 0.625)
+			scale_lbl.modulate.a = 0.65
+			host.add_child(scale_lbl)
+			var end_s := 1.875 if is_crit else 1.25
+			var s_tw := scale_lbl.create_tween()
+			s_tw.set_parallel(true)
+			s_tw.tween_property(scale_lbl, "scale", Vector2(end_s, end_s), 0.50).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			s_tw.tween_property(scale_lbl, "modulate:a", 0.0, 0.50).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+		"block":
+			if ResourceLoader.exists(SFX_BATTLE_DAMAGE_BLOCK_PATH):
+				Audio.play_sfx(load(SFX_BATTLE_DAMAGE_BLOCK_PATH))
+			# FX_BattleFXBlock: Battle_Shield + FX_BattleFXBlockDup (scale 1.0 -> 2.0 over 0.5s) + "BLOCKED!" label above
+			for dup_idx in range(2):
+				var sh := TextureRect.new()
+				sh.texture = TEX_BATTLE_SHIELD
+				sh.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				sh.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				sh.size = Vector2(210.0, 210.0)
+				sh.position = -sh.size * 0.5
+				sh.pivot_offset = sh.size * 0.5
+				sh.modulate = Color(1.0, 1.0, 1.0, 0.55 if dup_idx == 0 else 0.4431373)
+				sh.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				host.add_child(sh)
+				var sh_tw := sh.create_tween()
+				sh_tw.set_parallel(true)
+				if dup_idx == 1:
+					sh_tw.tween_property(sh, "scale", Vector2(2.0, 2.0), 0.50).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				sh_tw.tween_property(sh, "modulate:a", 0.0, 0.50).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			var blk_lbl := Label.new()
+			blk_lbl.text = "BLOCKED!"
+			blk_lbl.size = Vector2(480.0, 100.0)
+			blk_lbl.position = Vector2(-240.0, -210.0)
+			blk_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			blk_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			blk_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			blk_lbl.add_theme_font_override("font", FONT_BATTLE_HUD)
+			blk_lbl.add_theme_font_size_override("font_size", 52)
+			blk_lbl.add_theme_color_override("font_color", Color(0.0, 0.9172416, 1.0, 1.0))
+			blk_lbl.add_theme_color_override("font_outline_color", Color(0.9448276, 1.0, 0.0, 1.0))
+			blk_lbl.add_theme_constant_override("outline_size", 8)
+			host.add_child(blk_lbl)
+			var bl_tw := blk_lbl.create_tween()
+			bl_tw.tween_property(blk_lbl, "modulate:a", 0.0, 0.50).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+		"miss":
+			var miss_lbl := Label.new()
+			miss_lbl.text = "MISS!"
+			miss_lbl.size = Vector2(480.0, 120.0)
+			miss_lbl.position = -miss_lbl.size * 0.5
+			miss_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			miss_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			miss_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			miss_lbl.add_theme_font_override("font", FONT_BATTLE_HUD)
+			miss_lbl.add_theme_font_size_override("font_size", 68)
+			miss_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
+			miss_lbl.add_theme_color_override("font_outline_color", Color(0.9448276, 1.0, 0.0, 1.0))
+			miss_lbl.add_theme_constant_override("outline_size", 10)
+			host.add_child(miss_lbl)
+			var m_tw := miss_lbl.create_tween()
+			m_tw.tween_property(miss_lbl, "modulate:a", 0.0, 0.50).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+	get_tree().create_timer(1.15).timeout.connect(func():
+		if is_instance_valid(host):
+			host.queue_free()
+	)
 
 
 func _spawn_combat_callout(text: String, col: Color = Color(1.0, 0.90, 0.22)) -> void:

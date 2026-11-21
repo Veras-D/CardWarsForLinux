@@ -45,6 +45,20 @@ def export_battle_banner(guid_index: dict[str, str]) -> None:
         )
         print(f"[{'OK' if ok else 'FAIL'}] {filename} -> {out_path}")
 
+    fx_hit_prefab = os.path.join(REPO_ROOT, "Assets", "PrefabInstance", "FX_BattleFXHit.prefab")
+    fx_hit_anim = os.path.join(REPO_ROOT, "Assets", "AnimationClip", "Take 001_16.anim")
+    fx_hit_out = os.path.join(REPO_ROOT, "godot", "assets", "models", "battle", "banners", "FxDamageBattle.glb")
+    ok_fx = export_unity_subtree_to_glb(
+        yaml_path=fx_hit_prefab,
+        out_glb_path=fx_hit_out,
+        guid_index=guid_index,
+        root_go_id="1100104357777771",
+        scale_factor=0.01,
+        extra_clips=[("Take 001_16", fx_hit_anim)],
+        double_sided_mats=True,
+    )
+    print(f"[{'OK' if ok_fx else 'FAIL'}] FxDamageBattle.glb -> {fx_hit_out}")
+
 
 def export_props(guid_index: dict[str, str]) -> None:
     for pname in ("HoldCards", "PlayingCard"):
