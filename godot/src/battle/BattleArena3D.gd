@@ -140,6 +140,8 @@ var _mat_cache: Dictionary = {}
 var _tex_cache: Dictionary = {}
 var _creature_heights: Dictionary = {} # key: "p_0" / "o_0" -> float height
 var _entity_meta: Dictionary = {} # key: "p_0_c" / "p_0_b" / "o_0_c" / "o_0_b" -> Dictionary
+var _floop_idle_fx_nodes: Array[Dictionary] = []
+var _floop_idle_fx_time: float = 0.0
 
 # Unity BattleScene.unity CWiTweenVantageCam vantage points (* 0.05, S_Z reflected)
 const CREATURE_VANTAGE_POINTS: Array[Vector3] = [
@@ -155,7 +157,7 @@ const BUILDING_VANTAGE_POINTS: Array[Vector3] = [
 	Vector3(0.0, 0.45, 1.55),
 ]
 const DETAIL_CAMERA_OFFSET := Vector3(-0.75, 0.75, 0.0) # CWCommandCardSet detailCameraOffsetX/Y = 15 * 0.05
-const FLOOP_CAMERA_OFFSET := Vector3(-0.65, 1.00, 0.0)  # CWFloopActionManager floopCameraOffsetX=13, Y=20 * 0.05
+const FLOOP_CAMERA_OFFSET := Vector3(-0.66, 0.56, 0.0)  # Frames creature, swirl & FLOOP pad closely like Unity ToFloopAction
 const SUMMON_UNDERGROUND_Y := -0.50                     # SummonScript -10f * 0.05
 
 const FX_SCAN_HEX_SOLID_TEX: String = "res://assets/textures/battle/FX_Scan_Hex_Solid.png"
@@ -164,6 +166,14 @@ const FX_SCAN_TEX: String = "res://assets/textures/fx/FX_Scan.png"
 const FX_FLARE_TEX: String = "res://assets/textures/fx/FX_Flare3_TGA.png"
 const FX_SPARKLES_TEX: String = "res://assets/textures/fx/FX_BurstBubble_NoGlow_PNG.png"
 const FX_EXCLAMATION_TEX: String = "res://assets/textures/fx/FX_Battle_ExclamationMark_PNG.png"
+const FX_FLOOP_OUTLINE_TEX: String = "res://assets/textures/battle/FX_FloopOutline_PNG.png"
+const FX_FLOOP_SPEEDLINE_TEX: String = "res://assets/textures/battle/FX_FloopAnimation_Trail_Speedline_TGA.png"
+const FX_FLOOP_PLUS_TEX: String = "res://assets/textures/battle/FX_PlusIcon_PNG.png"
+const FX_FLOOP_SWORD_TEX: String = "res://assets/textures/battle/FX_AttackIcon_PNG.png"
+const FX_FLOOP_SHIELD_TEX: String = "res://assets/textures/battle/FX_DefenseIconShield_PNG.png"
+const FX_FLOOP_HEART_TEX: String = "res://assets/textures/battle/QuestInfo_Heart.png"
+const FX_FLOOP_SWORD_BROKEN_TEX: String = "res://assets/textures/battle/FX_SwordBrokenIcon_TGA.png"
+const FX_FLOOP_SHIELD_BROKEN_TEX: String = "res://assets/textures/battle/FX_ShieldBrokenIcon_TGA.png"
 const SFX_REZIN_PATH: String = "res://assets/audio/sfx/FX_RezInParticle.wav"
 const SFX_DEREZ_PATH: String = "res://assets/audio/sfx/SFX_Derez.wav"
 
@@ -341,6 +351,29 @@ func _process(delta: float) -> void:
 		var col := frame % 4
 		var row := int(floor(float(frame) / 4.0))
 		_hex_scan_mat.uv1_offset = Vector3(float(col) * 0.25, float(row) * 0.25, 0.0)
+	if not _floop_idle_fx_nodes.is_empty():
+		_floop_idle_fx_time = fmod(_floop_idle_fx_time + delta, 1.0)
+		var t_fx := _floop_idle_fx_time
+		var s_mult := lerpf(0.86, 1.18, t_fx)
+		var out_mult := lerpf(0.96, 1.24, t_fx)
+		var a_mult := 0.28
+		if t_fx < 0.256:
+			a_mult = lerpf(0.28, 0.85, t_fx / 0.256)
+		else:
+			a_mult = lerpf(0.85, 0.28, (t_fx - 0.256) / 0.744)
+		for entry in _floop_idle_fx_nodes:
+			var fx_face := entry.get("fx_face") as MeshInstance3D
+			var fx_mat := entry.get("fx_mat") as StandardMaterial3D
+			var out_face := entry.get("out_face") as MeshInstance3D
+			var out_mat := entry.get("out_mat") as StandardMaterial3D
+			var is_p: bool = bool(entry.get("is_player", true))
+			if fx_face and fx_face.visible and fx_mat:
+				fx_face.scale = Vector3(0.058 * s_mult, 0.058 * s_mult, 0.050 * s_mult)
+				fx_face.rotation_degrees = Vector3(90.0, 90.0 if is_p else -90.0, 0.0)
+				fx_mat.albedo_color = Color(0.35, 1.0, 0.15, a_mult * 0.45)
+			if out_face and out_face.visible and out_mat:
+				out_face.scale = Vector3(out_mult, out_mult, 1.0)
+				out_mat.albedo_color = Color(0.745, 1.0, 0.537, a_mult)
 	_step_face_tracks(delta, true)
 	_step_face_tracks(delta, false)
 
@@ -361,6 +394,7 @@ func _build_lane_anchors() -> void:
 	_opponent_lane_highlights.clear()
 	_creature_heights.clear()
 	_entity_meta.clear()
+	_floop_idle_fx_nodes.clear()
 
 	for i in range(4):
 		var p_slot := _create_lane_node("PlayerLane_%d" % i, Vector3(PLAYER_LANE_X, BOARD_SURFACE_Y, P1_LANDSCAPE_Z[i]), true)
@@ -443,11 +477,66 @@ func _create_floop_pad(is_player: bool) -> Node3D:
 				var face := MeshInstance3D.new()
 				face.name = "Face"
 				face.mesh = src_mesh
-				# FloopPad mesh bounds are [-3.55..3.55] x [-1.43..1.43] x [-1.14..0.0]; center at origin on board
-				face.scale = Vector3(0.052, -0.052, 0.018)
-				face.rotation_degrees = Vector3(-90.0, 90.0 if is_player else -90.0, 0.0)
-				face.position = Vector3(0.0, 0.022, 0.0)
+				# FloopPad.glb has raised white-"FLOOP" top face at local z=-1.136, tan rim at z=-0.360, base at z=+0.005.
+				# Rot (90, 90, 0) with positive scale maps local -Z -> +Y (sticking UP out of board), local +X -> -Z (left), local +Y -> +X (up).
+				face.scale = Vector3(0.058, 0.058, 0.050)
+				face.rotation_degrees = Vector3(90.0, 90.0 if is_player else -90.0, 0.0)
+				face.position = Vector3(0.0, 0.006, 0.0)
+				var base_mat := StandardMaterial3D.new()
+				base_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				base_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+				if ResourceLoader.exists("res://assets/textures/battle/Floop.png"):
+					base_mat.albedo_texture = load("res://assets/textures/battle/Floop.png")
+				base_mat.albedo_color = Color.WHITE
+				face.material_override = base_mat
 				pad.add_child(face)
+
+				# Authentic FX_Battle_FloopButton_Idle Layer 1: ButtonFX (Floop.png additive lime glow over raised face)
+				var fx_face := MeshInstance3D.new()
+				fx_face.name = "IdleFX"
+				fx_face.mesh = src_mesh
+				fx_face.scale = Vector3(0.058, 0.058, 0.050)
+				fx_face.rotation_degrees = Vector3(90.0, 90.0 if is_player else -90.0, 0.0)
+				fx_face.position = Vector3(0.0, 0.008, 0.0)
+				fx_face.visible = false
+				var fx_mat := StandardMaterial3D.new()
+				fx_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				fx_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				fx_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+				fx_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+				if ResourceLoader.exists("res://assets/textures/battle/Floop.png"):
+					fx_mat.albedo_texture = load("res://assets/textures/battle/Floop.png")
+				fx_mat.albedo_color = Color(0.35, 1.0, 0.15, 0.0)
+				fx_face.material_override = fx_mat
+				pad.add_child(fx_face)
+
+				# Authentic FX_Battle_FloopButton_Idle Layer 2: Outline (FX_FloopOutline_PNG expanding neon ring around tan rim)
+				var out_face := MeshInstance3D.new()
+				out_face.name = "IdleOutlineFX"
+				var out_quad := QuadMesh.new()
+				out_quad.size = Vector2(0.46, 0.22)
+				out_face.mesh = out_quad
+				out_face.rotation_degrees = Vector3(-90.0, 90.0 if is_player else -90.0, 0.0)
+				out_face.position = Vector3(0.0, 0.028, 0.0)
+				out_face.visible = false
+				var out_mat := StandardMaterial3D.new()
+				out_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				out_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				out_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+				out_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+				if ResourceLoader.exists(FX_FLOOP_OUTLINE_TEX):
+					out_mat.albedo_texture = load(FX_FLOOP_OUTLINE_TEX)
+				out_mat.albedo_color = Color(0.745, 1.0, 0.537, 0.0)
+				out_face.material_override = out_mat
+				pad.add_child(out_face)
+
+				_floop_idle_fx_nodes.append({
+					"fx_face": fx_face,
+					"fx_mat": fx_mat,
+					"out_face": out_face,
+					"out_mat": out_mat,
+					"is_player": is_player,
+				})
 	return pad
 
 
@@ -623,7 +712,7 @@ func _compute_hierarchy_aabb(node: Node3D) -> AABB:
 	var root_inv := node.global_transform.affine_inverse() if node.is_inside_tree() else Transform3D.IDENTITY
 	var stack: Array[Node] = [node]
 	while not stack.is_empty():
-		var cur := stack.pop_back() as Node
+		var cur: Node = stack.pop_back() as Node
 		for ch in cur.get_children():
 			stack.append(ch)
 		if cur is MeshInstance3D:
@@ -977,6 +1066,15 @@ func spawn_lane_building(is_player: bool, lane_idx: int, card_data: Dictionary, 
 
 
 func set_lane_flooped(is_player: bool, lane_idx: int, is_flooped: bool, has_creature: bool = true) -> void:
+	set_lane_floop_button_state(is_player, lane_idx, has_creature, not is_flooped and is_player, false)
+
+
+func set_lane_floop_button_state(is_player: bool, lane_idx: int, has_creature: bool, can_floop: bool, is_floop_blocked: bool = false) -> void:
+	## Matches Unity CWCreatureStatsFloorDisplay.UpdateFloopButtonState(enable) + SetVisualStateOnFloopButton(enable):
+	## - Button is visible whenever the lane has a creature.
+	## - When enable==true (can_floop): renderer.material.color = Color.white, localScale.z = 1.0 (raised 0.018), FloopButtonIdleFx active.
+	## - When enable==false: renderer.material.color = Color.grey, localScale.z = 0.3 (depressed 0.0054), FloopButtonIdleFx hidden.
+	## - Floop_Red.png is used only when FloopBlocked is true (CardScript.cs:110).
 	var anchor := get_lane_anchor(is_player, lane_idx)
 	if anchor == null:
 		return
@@ -986,13 +1084,103 @@ func set_lane_flooped(is_player: bool, lane_idx: int, is_flooped: bool, has_crea
 		if has_creature:
 			var face := pad.get_node_or_null("Face") as MeshInstance3D
 			if face:
-				face.material_override = _get_cached_mat("res://assets/textures/battle/Floop_Red.png", true) if is_flooped else null
+				var tex_path := "res://assets/textures/battle/Floop_Red.png" if is_floop_blocked else "res://assets/textures/battle/Floop.png"
+				var mat := face.material_override as StandardMaterial3D
+				if mat == null:
+					mat = StandardMaterial3D.new()
+					mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+					mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+					face.material_override = mat
+				else:
+					mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+				if not _tex_cache.has(tex_path) and ResourceLoader.exists(tex_path):
+					_tex_cache[tex_path] = load(tex_path)
+				mat.albedo_texture = _tex_cache.get(tex_path, null)
+				# Unity Unlit/Alpha With Fade lacks _Color so Color.grey is a no-op; inactive pads stay full Color.WHITE
+				# and communicate disabled state strictly via 0.3x Z scale + hiding IdleFX/IdleOutlineFX.
+				mat.albedo_color = Color.WHITE
+				var z_scale := 0.050 if can_floop else (0.050 * 0.3)
+				face.scale = Vector3(0.058, 0.058, z_scale)
+				face.position = Vector3(0.0, 0.006 if can_floop else 0.008, 0.0)
+			var idle_fx := pad.get_node_or_null("IdleFX") as MeshInstance3D
+			if idle_fx:
+				idle_fx.visible = can_floop
+			var idle_outline := pad.get_node_or_null("IdleOutlineFX") as MeshInstance3D
+			if idle_outline:
+				idle_outline.visible = can_floop
+	# NOTE: Creatures in original Unity NEVER rotate 90 degrees when flooped!
 	var holder := anchor.get_node_or_null("CreatureAnchor") as Node3D
 	if holder:
 		var body := holder.get_node_or_null("EntityBody") as Node3D
 		if body:
-			var target_rot_y := (-90.0 if is_player else 90.0) + (90.0 if is_flooped else 0.0)
-			body.rotation_degrees = Vector3(0, target_rot_y, 0)
+			body.rotation_degrees = Vector3(0, -90.0 if is_player else 90.0, 0)
+
+
+func play_floop_button_action_fx(is_player: bool, lane_idx: int) -> void:
+	## Spawns Unity FX_Battle_FloopButton_Action (additive expanding green Floop mesh burst) on the lane's FloopPad.
+	var anchor := get_lane_anchor(is_player, lane_idx)
+	if anchor == null:
+		return
+	var pad := anchor.get_node_or_null("FloopPad") as Node3D
+	if pad == null:
+		return
+	var face := pad.get_node_or_null("Face") as MeshInstance3D
+	if face == null or face.mesh == null:
+		return
+	var burst := MeshInstance3D.new()
+	burst.mesh = face.mesh
+	burst.rotation_degrees = Vector3(90.0, 90.0 if is_player else -90.0, 0.0)
+	burst.position = Vector3(0.0, 0.008, 0.0)
+	burst.scale = Vector3(0.058 * 0.72, 0.058 * 0.72, 0.050)
+	var bmat := StandardMaterial3D.new()
+	bmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	bmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	bmat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	if ResourceLoader.exists("res://assets/textures/battle/Floop.png"):
+		bmat.albedo_texture = load("res://assets/textures/battle/Floop.png")
+	bmat.albedo_color = Color(0.69, 1.0, 0.435, 0.75)
+	burst.material_override = bmat
+	pad.add_child(burst)
+	var burst_id := burst.get_instance_id()
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(burst, "scale", Vector3(0.058 * 1.55, 0.058 * 1.55, 0.065), 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(bmat, "albedo_color:a", 0.0, 0.45)
+	tw.set_parallel(false)
+	tw.tween_callback(func():
+		var n := instance_from_id(burst_id) as Node
+		if is_instance_valid(n):
+			n.queue_free()
+	)
+	if ResourceLoader.exists(FX_FLOOP_OUTLINE_TEX):
+		var oburst := MeshInstance3D.new()
+		var oquad := QuadMesh.new()
+		oquad.size = Vector2(0.46, 0.22)
+		oburst.mesh = oquad
+		oburst.rotation_degrees = Vector3(-90.0, 90.0 if is_player else -90.0, 0.0)
+		oburst.position = Vector3(0.0, 0.032, 0.0)
+		oburst.scale = Vector3(0.85, 0.85, 1.0)
+		var omat := StandardMaterial3D.new()
+		omat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		omat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		omat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		omat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		omat.albedo_texture = load(FX_FLOOP_OUTLINE_TEX)
+		omat.albedo_color = Color(0.75, 1.0, 0.55, 0.85)
+		oburst.material_override = omat
+		pad.add_child(oburst)
+		var ob_id := oburst.get_instance_id()
+		var otw := create_tween()
+		otw.set_parallel(true)
+		otw.tween_property(oburst, "scale", Vector3(1.55, 1.55, 1.0), 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		otw.tween_property(omat, "albedo_color:a", 0.0, 0.45)
+		otw.set_parallel(false)
+		otw.tween_callback(func():
+			var n := instance_from_id(ob_id) as Node
+			if is_instance_valid(n):
+				n.queue_free()
+		)
 
 
 func play_entity_floop(is_player: bool, lane_idx: int, is_building: bool = false) -> void:
@@ -1005,6 +1193,8 @@ func play_entity_floop(is_player: bool, lane_idx: int, is_building: bool = false
 	if ap:
 		if _play_ap_clip(ap, "Floop", false) and idle_clip != "":
 			_queue_ap_clip(ap, idle_clip, true)
+	if not is_building:
+		play_floop_swirl_vfx(is_player, lane_idx)
 	if is_building and ResourceLoader.exists(FX_EXCLAMATION_TEX):
 		var etex := load(FX_EXCLAMATION_TEX) as Texture2D
 		var sp := Sprite3D.new()
@@ -1023,6 +1213,156 @@ func play_entity_floop(is_player: bool, lane_idx: int, is_building: bool = false
 			if is_instance_valid(sp_n):
 				sp_n.queue_free()
 		)
+
+
+func play_floop_swirl_vfx(is_player: bool, lane_idx: int, color_tint: Color = Color(1.0, 1.0, 1.0, 0.80)) -> void:
+	## Authentically reproduces Unity FX_Battle_FloopAnimation (additive crisp white CircleSpeedLine swirl around creature).
+	var anchor := get_lane_anchor(is_player, lane_idx)
+	if anchor == null or not ResourceLoader.exists(FX_FLOOP_SPEEDLINE_TEX):
+		return
+	var holder := anchor.get_node_or_null("CreatureAnchor") as Node3D
+	if holder == null:
+		return
+	var tex := load(FX_FLOOP_SPEEDLINE_TEX) as Texture2D
+	var q_mesh := QuadMesh.new()
+	q_mesh.size = Vector2(0.46, 0.46)
+	for i in range(6):
+		var ring := MeshInstance3D.new()
+		ring.mesh = q_mesh
+		ring.rotation_degrees = Vector3(-90.0 + randf_range(-8.0, 8.0), float(i * 60), randf_range(-6.0, 6.0))
+		ring.position = Vector3(0.0, 0.055 + float(i % 4) * 0.028, 0.0)
+		ring.scale = Vector3(0.80 + float(i) * 0.05, 0.80 + float(i) * 0.05, 1.0)
+		var rmat := StandardMaterial3D.new()
+		rmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		rmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		rmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		rmat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		rmat.no_depth_test = true
+		rmat.render_priority = 4
+		rmat.albedo_texture = tex
+		rmat.albedo_color = Color(color_tint.r, color_tint.g, color_tint.b, 0.0)
+		ring.material_override = rmat
+		holder.add_child(ring)
+		var ring_id := ring.get_instance_id()
+		var delay_s := float(i) * 0.06
+		var tw_move := create_tween()
+		tw_move.set_parallel(true)
+		tw_move.tween_property(ring, "rotation_degrees:y", ring.rotation_degrees.y + 540.0, 0.82).set_delay(delay_s)
+		tw_move.tween_property(ring, "position:y", ring.position.y - 0.02, 0.82).set_delay(delay_s)
+		# Separate sequential alpha tween so fade-in and fade-out never overwrite each other
+		var tw_alpha := create_tween()
+		tw_alpha.tween_interval(delay_s)
+		tw_alpha.tween_property(rmat, "albedo_color:a", color_tint.a, 0.12)
+		tw_alpha.tween_interval(0.32)
+		tw_alpha.tween_property(rmat, "albedo_color:a", 0.0, 0.34)
+		tw_alpha.tween_callback(func():
+			var n := instance_from_id(ring_id) as Node
+			if is_instance_valid(n):
+				n.queue_free()
+		)
+
+
+func _spawn_rising_stat_sprite(holder: Node3D, tex: Texture2D, start_pos: Vector3, world_height: float, delay_s: float, lift_m: float = 0.28, tint: Color = Color.WHITE) -> void:
+	if holder == null or tex == null:
+		return
+	var sp := Sprite3D.new()
+	sp.texture = tex
+	sp.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sp.no_depth_test = true
+	sp.render_priority = 6
+	sp.pixel_size = world_height / maxf(1.0, float(tex.get_height()))
+	sp.position = start_pos
+	sp.modulate = Color(tint.r, tint.g, tint.b, 0.0)
+	holder.add_child(sp)
+	var sp_id := sp.get_instance_id()
+	var tw_move := create_tween()
+	tw_move.tween_interval(delay_s)
+	tw_move.tween_property(sp, "position:y", start_pos.y + lift_m, 0.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var tw_alpha := create_tween()
+	tw_alpha.tween_interval(delay_s)
+	tw_alpha.tween_property(sp, "modulate:a", 1.0, 0.12)
+	tw_alpha.tween_interval(0.38)
+	tw_alpha.tween_property(sp, "modulate:a", 0.0, 0.32)
+	tw_alpha.tween_callback(func():
+		var n := instance_from_id(sp_id) as Node
+		if is_instance_valid(n):
+			n.queue_free()
+	)
+
+
+func play_floop_stat_vfx(is_player: bool, lane_idx: int, fx_name: String) -> void:
+	## Authentically reproduces Unity FX_Battle_AttackUp, FX_Battle_DefenseUp, FX_Battle_HealthUp,
+	## FX_Battle_AttackDown, FX_Battle_DefenseDown (rising icons + plus/broken icons + CircleSpeedLine + SFX).
+	var anchor := get_lane_anchor(is_player, lane_idx)
+	if anchor == null:
+		return
+	var holder := anchor.get_node_or_null("CreatureAnchor") as Node3D
+	if holder == null:
+		return
+
+	var icon_tex_path := FX_FLOOP_SWORD_TEX
+	var plus_tex_path := FX_FLOOP_PLUS_TEX
+	var sfx_path := "res://assets/audio/sfx/FX_Battle_AttackUp.wav"
+	var swirl_tint := Color(1.0, 0.72, 0.36, 0.85)
+	var show_plus := true
+
+	match fx_name:
+		"FX_Battle_AttackUp":
+			icon_tex_path = FX_FLOOP_SWORD_TEX
+			plus_tex_path = FX_FLOOP_PLUS_TEX
+			sfx_path = "res://assets/audio/sfx/FX_Battle_AttackUp.wav"
+			swirl_tint = Color(1.0, 0.72, 0.36, 0.85)
+			show_plus = true
+		"FX_Battle_DefenseUp":
+			icon_tex_path = FX_FLOOP_SHIELD_TEX
+			plus_tex_path = FX_FLOOP_PLUS_TEX
+			sfx_path = "res://assets/audio/sfx/FX_Battle_DefenseUp.wav"
+			swirl_tint = Color(0.45, 0.82, 1.0, 0.85)
+			show_plus = true
+		"FX_Battle_HealthUp":
+			icon_tex_path = FX_FLOOP_HEART_TEX
+			plus_tex_path = FX_FLOOP_PLUS_TEX
+			sfx_path = "res://assets/audio/sfx/FX_Battle_HealthUp.wav"
+			swirl_tint = Color(1.0, 0.48, 0.62, 0.85)
+			show_plus = true
+		"FX_Battle_AttackDown":
+			icon_tex_path = FX_FLOOP_SWORD_BROKEN_TEX
+			sfx_path = "res://assets/audio/sfx/FX_Battle_AttackDown.wav"
+			swirl_tint = Color(0.95, 0.30, 0.30, 0.80)
+			show_plus = false
+		"FX_Battle_DefenseDown", "FX_Battle_PointDown":
+			icon_tex_path = FX_FLOOP_SHIELD_BROKEN_TEX
+			sfx_path = "res://assets/audio/sfx/FX_Battle_DefenseDown.wav"
+			swirl_tint = Color(0.40, 0.68, 0.95, 0.80)
+			show_plus = false
+
+	if Audio and ResourceLoader.exists(sfx_path):
+		Audio.play_sfx(load(sfx_path), -3.0)
+
+	play_floop_swirl_vfx(is_player, lane_idx, Color(swirl_tint.r, swirl_tint.g, swirl_tint.b, 0.45))
+
+	var icon_tex := load(icon_tex_path) as Texture2D if ResourceLoader.exists(icon_tex_path) else null
+	var plus_tex := load(plus_tex_path) as Texture2D if (show_plus and ResourceLoader.exists(plus_tex_path)) else null
+
+	# Unity FX_Battle_AttackUp ShapeModule: Sphere radius 2.5*0.05=0.125m around creature, startSize 1.5..2.5 (0.10..0.14m)
+	var icon_offsets: Array[Vector3] = [
+		Vector3(-0.08, 0.14, -0.14),
+		Vector3(0.10, 0.16, 0.12),
+		Vector3(-0.04, 0.18, 0.15),
+		Vector3(0.06, 0.12, -0.13),
+	]
+	var plus_offsets: Array[Vector3] = [
+		Vector3(-0.12, 0.12, -0.10),
+		Vector3(0.04, 0.15, 0.15),
+		Vector3(0.09, 0.17, -0.11),
+		Vector3(-0.06, 0.13, 0.11),
+	]
+	for idx in range(icon_offsets.size()):
+		var delay_s := float(idx) * 0.10
+		if icon_tex:
+			_spawn_rising_stat_sprite(holder, icon_tex, icon_offsets[idx], 0.14, delay_s, 0.26)
+		if plus_tex:
+			_spawn_rising_stat_sprite(holder, plus_tex, plus_offsets[idx], 0.11, delay_s + 0.04, 0.25, Color(0.95, 0.88, 1.0, 1.0))
 
 
 func animate_creature_lunge(is_player: bool, lane_idx: int) -> void:
@@ -1189,6 +1529,49 @@ func _project_world_to_screen(world_pos: Vector3, is_player: bool, lane_idx: int
 	return Vector2(p.x * (container_size.x / sv_size.x), p.y * (container_size.y / sv_size.y))
 
 
+func _transform_local_aabb(local_aabb: AABB, xf: Transform3D) -> AABB:
+	var min_w := Vector3(INF, INF, INF)
+	var max_w := Vector3(-INF, -INF, -INF)
+	for ix in [0.0, 1.0]:
+		for iy in [0.0, 1.0]:
+			for iz in [0.0, 1.0]:
+				var corner := xf * (local_aabb.position + local_aabb.size * Vector3(ix, iy, iz))
+				min_w = min_w.min(corner)
+				max_w = max_w.max(corner)
+	return AABB(min_w, max_w - min_w)
+
+
+func _compute_hierarchy_world_aabb(root_node: Node3D) -> AABB:
+	var has_bounds := false
+	var combined := AABB()
+	var stack: Array[Node] = [root_node]
+	while not stack.is_empty():
+		var cur: Node = stack.pop_back()
+		if cur is MeshInstance3D:
+			var mi := cur as MeshInstance3D
+			if mi.visible and mi.mesh != null and not mi.name.begins_with("Shadow"):
+				var w_box := _transform_local_aabb(mi.mesh.get_aabb(), mi.global_transform)
+				if not has_bounds:
+					combined = w_box
+					has_bounds = true
+				else:
+					combined = combined.merge(w_box)
+		for child in cur.get_children():
+			stack.append(child)
+	return combined
+
+
+func _build_entity_pick_aabb(holder: Node3D, body: Node3D, min_half_xz: float, min_height: float, pad_xz: float = 0.020) -> AABB:
+	var c := holder.global_position
+	var min_p := Vector3(c.x - min_half_xz, c.y - 0.01, c.z - min_half_xz)
+	var max_p := Vector3(c.x + min_half_xz, c.y + min_height, c.z + min_half_xz)
+	var mesh_box := _compute_hierarchy_world_aabb(body)
+	if mesh_box.size != Vector3.ZERO:
+		min_p = min_p.min(mesh_box.position - Vector3(pad_xz, 0.005, pad_xz))
+		max_p = max_p.max(mesh_box.end + Vector3(pad_xz, 0.020, pad_xz))
+	return AABB(min_p, max_p - min_p)
+
+
 func pick_board_at_screen_pos(screen_pos: Vector2, container_size: Vector2) -> Dictionary:
 	if camera == null or container_size.x <= 1.0 or container_size.y <= 1.0:
 		return {"valid": false}
@@ -1200,18 +1583,83 @@ func pick_board_at_screen_pos(screen_pos: Vector2, container_size: Vector2) -> D
 	if absf(rd.y) < 0.001:
 		return {"valid": false}
 
-	var hit := Vector3.ZERO
-	var found := false
-	var y_planes: Array[float] = [BOARD_SURFACE_Y + 0.06, BOARD_SURFACE_Y]
-	for y_plane in y_planes:
-		var t: float = (y_plane - ro.y) / rd.y
-		if t > 0.05:
-			var p: Vector3 = ro + rd * t
-			if p.x >= -1.16 and p.x <= 1.16 and p.z >= -1.04 and p.z <= 1.14:
-				hit = p
-				found = true
-				break
-	if not found:
+	# Distance-sorted 3D ray picking across:
+	# 1. Active Player FloopPads only (tight to visible 3D Face, matching Unity collider.enabled = can_floop)
+	# 2. All Creatures (3D body bounds so head/torso/feet always hit the exact creature, never the lane behind)
+	# 3. All Buildings (3D body bounds)
+	var best_dist := INF
+	var best_pick := {}
+
+	for is_p in [true, false]:
+		var anchors := _player_lane_anchors if is_p else _opponent_lane_anchors
+		for i in range(mini(anchors.size(), 4)):
+			var anchor := anchors[i]
+			if is_p:
+				var pad := anchor.get_node_or_null("FloopPad") as Node3D
+				var idle_fx := pad.get_node_or_null("IdleFX") as Node3D if pad else null
+				var face := pad.get_node_or_null("Face") as MeshInstance3D if pad else null
+				if pad and pad.visible and idle_fx and idle_fx.visible and face and face.mesh:
+					var w_box := _transform_local_aabb(face.mesh.get_aabb(), face.global_transform)
+					var pad_margin := Vector3(0.010, 0.002, 0.010)
+					var floop_aabb := AABB(w_box.position - pad_margin, w_box.size + pad_margin * 2.0)
+					var f_hit = floop_aabb.intersects_ray(ro, rd)
+					if f_hit is Vector3:
+						var fd := ro.distance_squared_to(f_hit)
+						if fd < best_dist:
+							best_dist = fd
+							best_pick = {
+								"valid": true,
+								"is_player": true,
+								"lane_idx": i,
+								"zone": "floop",
+								"world_pos": f_hit,
+							}
+
+			var c_holder := anchor.get_node_or_null("CreatureAnchor") as Node3D
+			var c_body := c_holder.get_node_or_null("EntityBody") as Node3D if c_holder else null
+			if c_holder and c_body:
+				var key := "%s_%d" % ["p" if is_p else "o", i]
+				var stored_h := maxf(0.24, float(_creature_heights.get(key, 0.22)) + 0.04)
+				var c_aabb := _build_entity_pick_aabb(c_holder, c_body, 0.13, stored_h, 0.025)
+				var c_hit = c_aabb.intersects_ray(ro, rd)
+				if c_hit is Vector3:
+					var cd := ro.distance_squared_to(c_hit)
+					if cd < best_dist:
+						best_dist = cd
+						best_pick = {
+							"valid": true,
+							"is_player": is_p,
+							"lane_idx": i,
+							"zone": "creature",
+							"world_pos": c_hit,
+						}
+
+			var b_holder := anchor.get_node_or_null("BuildingAnchor") as Node3D
+			var b_body := b_holder.get_node_or_null("BuildingBody") as Node3D if b_holder else null
+			if b_holder and b_body:
+				var b_aabb := _build_entity_pick_aabb(b_holder, b_body, 0.14, 0.24, 0.020)
+				var b_hit = b_aabb.intersects_ray(ro, rd)
+				if b_hit is Vector3:
+					var bd := ro.distance_squared_to(b_hit)
+					if bd < best_dist:
+						best_dist = bd
+						best_pick = {
+							"valid": true,
+							"is_player": is_p,
+							"lane_idx": i,
+							"zone": "building",
+							"world_pos": b_hit,
+						}
+
+	if not best_pick.is_empty():
+		return best_pick
+
+	# Empty board / floor lane fallback (e.g., placing cards from hand)
+	var t: float = (BOARD_SURFACE_Y - ro.y) / rd.y
+	if t <= 0.05:
+		return {"valid": false}
+	var hit: Vector3 = ro + rd * t
+	if hit.x < -1.16 or hit.x > 1.16 or hit.z < -1.04 or hit.z > 1.14:
 		return {"valid": false}
 
 	var is_player := hit.x < 0.0
@@ -1225,20 +1673,10 @@ func pick_board_at_screen_pos(screen_pos: Vector2, container_size: Vector2) -> D
 
 	var local_x := hit.x - (PLAYER_LANE_X if is_player else OPPONENT_LANE_X)
 	var zone := "lane"
-	if is_player:
-		if local_x >= -0.28 and local_x <= -0.04 and absf(hit.z - LANE_Z_CENTERS[best_lane]) < 0.20:
-			zone = "floop"
-		elif local_x < -0.28:
-			zone = "building"
-		elif local_x > -0.04:
-			zone = "creature"
-	else:
-		if local_x <= 0.28 and local_x >= 0.04 and absf(hit.z - LANE_Z_CENTERS[best_lane]) < 0.20:
-			zone = "floop"
-		elif local_x > 0.28:
-			zone = "building"
-		elif local_x < 0.04:
-			zone = "creature"
+	if is_player and local_x < -0.14:
+		zone = "building"
+	elif not is_player and local_x > 0.14:
+		zone = "building"
 
 	return {
 		"valid": true,
@@ -1795,17 +2233,53 @@ func focus_lane_zoom(is_player: bool, lane_idx: int, duration: float = 0.30, is_
 	return tween_camera(cam_pos, look_pos, duration, 56.0)
 
 
-func focus_floop_action(is_player: bool, lane_idx: int, is_building: bool = false, duration: float = 0.20) -> Tween:
+func focus_floop_panel(is_player: bool, lane_idx: int, duration: float = 0.30) -> Tween:
+	## Matches Unity CWFloopPanelSet.OnClick() + ToFloopPanel (0.3s), framing the creature in the lower-middle,
+	## player FLOOP buttons along the bottom edge flanking No/Yes, and opponent row cleanly visible above.
+	_disable_split_duel()
+	var anchor := get_lane_anchor(is_player, lane_idx)
+	if anchor == null:
+		return focus_setup_board(duration)
+	var sub := anchor.get_node_or_null("CreatureAnchor") as Node3D
+	var p := sub.global_position if sub else anchor.global_position
+	var target_z := p.z * 0.45
+	var cam_pos := Vector3(p.x - 0.68, p.y + 0.98, target_z)
+	var look_pos := Vector3(p.x + 0.08, p.y + 0.26, target_z)
+	return tween_camera(cam_pos, look_pos, duration, 60.0)
+
+
+func focus_floop_action(is_player: bool, lane_idx: int, is_building: bool = false, duration: float = 0.20, target_offset: bool = false) -> Tween:
 	_disable_split_duel()
 	var anchor := get_lane_anchor(is_player, lane_idx)
 	if anchor == null:
 		return focus_setup_board(duration)
 	var sub := anchor.get_node_or_null("BuildingAnchor" if is_building else "CreatureAnchor") as Node3D
 	var p := sub.global_position if sub else anchor.global_position
-	# CWFloopActionManager FloopCameraTrigger: offsetX = -0.65, offsetY = 1.00, targetOffsetY = 0.415 (0.28 for small units)
-	var cam_pos := p + FLOOP_CAMERA_OFFSET
-	var look_pos := p + Vector3(0.0, 0.28, 0.0)
-	return tween_camera(cam_pos, look_pos, duration, 58.0)
+	# CWFloopActionManager FloopCameraTrigger + ToFloopAction:
+	# swirl phase frames creature & FLOOP pad closely; stat buff phase tilts up gently with headroom under top banner.
+	var cam_pos := p + (Vector3(-0.74, 0.70, 0.0) if target_offset else FLOOP_CAMERA_OFFSET)
+	var look_pos := p + (Vector3(-0.04, 0.16, 0.0) if target_offset else Vector3(-0.10, 0.10, 0.0))
+	if _cam_tween and _cam_tween.is_running():
+		_cam_tween.kill()
+	var start_pos := _cam_pos
+	var start_look := _cam_look
+	var start_fov := camera.fov if camera else 60.0
+	var pos_dur := maxf(0.01, duration)
+	var look_dur := maxf(pos_dur, 0.50 if duration >= 0.15 else duration)
+	_cam_tween = create_tween()
+	_cam_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_cam_tween.tween_method(func(elapsed: float) -> void:
+		var tp := clampf(elapsed / pos_dur, 0.0, 1.0)
+		var tl := clampf(elapsed / look_dur, 0.0, 1.0)
+		_cam_pos = start_pos.lerp(cam_pos, tp)
+		_cam_look = start_look.lerp(look_pos, tl)
+		if camera:
+			camera.fov = lerpf(start_fov, 60.0, tp)
+			camera.global_position = _cam_pos
+			camera.look_at(_cam_look, Vector3.UP)
+	, 0.0, look_dur, look_dur)
+	_cam_tween.tween_callback(func(): camera_transition_finished.emit())
+	return _cam_tween
 
 
 func focus_duel_lane(lane_idx: int, _player_attacking: bool, duration: float = 1.0) -> Tween:

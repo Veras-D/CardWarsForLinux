@@ -32,6 +32,7 @@ const TEX_BTN_GREEN: Texture2D = preload("res://assets/textures/battle/hud/uiBut
 const TEX_BTN_RED: Texture2D = preload("res://assets/textures/battle/hud/uiButtonRed.png")
 const TEX_FLOOP_BG: Texture2D = preload("res://assets/textures/battle/hud/FloopPanel_BG.png")
 const TEX_FLOOP_INFO: Texture2D = preload("res://assets/textures/battle/hud/FloopInfo.png")
+const TEX_QUEST_FRAME: Texture2D = preload("res://assets/textures/battle/hud/QuestInfo_BG.png")
 const TEX_FLOOP_COST: Texture2D = preload("res://assets/textures/battle/hud/FloopCostBadge.png")
 const TEX_FRAME_INDENT: Texture2D = preload("res://assets/textures/battle/hud/Frame_Indent.png")
 const TEX_SUMMON_CORN: Texture2D = preload("res://assets/textures/battle/hud/SummonPanelCorn.png")
@@ -104,7 +105,10 @@ var _ci_faction_icon: TextureRect = null
 var _ci_type_icon: TextureRect = null
 var _ab_bg_tint: NinePatchRect = null
 
-var _ability_banner: NinePatchRect = null
+var _ability_banner: Control = null
+var _ab_bg_fill: StyleBoxFlat = null
+var _ab_header_strip: ColorRect = null
+var _ab_footer_strip: ColorRect = null
 var _ab_title: Label = null
 var _ab_portrait: TextureRect = null
 var _ab_desc: Label = null
@@ -112,7 +116,7 @@ var _ab_subtitle: Label = null
 var _ab_book_badge: TextureRect = null
 var _ab_book_lbl: Label = null
 
-var _ability_confirm_bar: NinePatchRect = null
+var _ability_confirm_bar: Control = null
 var _ac_question: Label = null
 var _ac_yes_btn: Button = null
 var _ac_no_btn: Button = null
@@ -150,11 +154,15 @@ func _ready() -> void:
 
 
 func is_any_modal_open() -> bool:
-	return quest_modal.visible or discard_modal.visible or leave_modal.visible or magic_warn_modal.visible or (_ability_confirm_bar != null and _ability_confirm_bar.visible)
+	return quest_modal.visible or discard_modal.visible or leave_modal.visible or magic_warn_modal.visible or (_ability_confirm_bar != null and _ability_confirm_bar.visible) or (_ability_banner != null and _ability_banner.visible)
+
+
+func is_fullscreen_modal_open() -> bool:
+	return quest_modal.visible or discard_modal.visible or leave_modal.visible or magic_warn_modal.visible
 
 
 func is_inspection_open() -> bool:
-	return (_card_info_bar != null and _card_info_bar.visible) or (_ability_confirm_bar != null and _ability_confirm_bar.visible)
+	return (_card_info_bar != null and _card_info_bar.visible) or (_ability_confirm_bar != null and _ability_confirm_bar.visible) or (_ability_banner != null and _ability_banner.visible)
 
 
 func close_all_modals() -> void:
@@ -179,6 +187,14 @@ func dismiss_inspection(emit_signal: bool = true) -> void:
 		_ability_confirm_bar.visible = false
 	if emit_signal:
 		info_dismissed.emit()
+
+
+func hide_ability_confirm_bar_only() -> void:
+	## Matches Unity Q_2_YesNo reverse tween on "Yes" click while keeping Q_3_FloopDescription (_ability_banner) visible during PlayFloopAction.
+	if _info_backdrop:
+		_info_backdrop.visible = false
+	if _ability_confirm_bar:
+		_ability_confirm_bar.visible = false
 
 
 func _setup_turn_banner_anim(banner_root: Node3D, clip_name: StringName, use_alpha_scissor: bool = false) -> AnimationPlayer:
@@ -486,8 +502,12 @@ func show_ability_confirmation(title_text: String, desc_text: String, tex_path: 
 	_ab_desc.text = desc_text if desc_text != "" else "Activate ability."
 	_ab_subtitle.text = subtitle_text
 	var is_hero := subtitle_text.find("Hero") >= 0 or subtitle_text.find("Leader") >= 0
-	if _ability_banner:
-		_ability_banner.self_modulate = Color(0.95, 0.80, 0.44, 1.0) if is_hero else Color(0.55, 0.96, 0.58, 1.0)
+	if _ab_bg_fill:
+		_ab_bg_fill.bg_color = Color(0.86, 0.68, 0.28, 0.88) if is_hero else Color(0.235, 0.784, 0.392, 0.863)
+	if _ab_header_strip:
+		_ab_header_strip.color = Color(1.0, 0.90, 0.58, 0.60) if is_hero else Color(0.667, 1.0, 0.667, 0.588)
+	if _ab_footer_strip:
+		_ab_footer_strip.color = Color(1.0, 0.90, 0.58, 0.60) if is_hero else Color(0.667, 1.0, 0.667, 0.588)
 	if _ab_book_badge:
 		_ab_book_badge.visible = is_hero
 		if _ab_book_lbl:
@@ -672,73 +692,103 @@ func _build_inspection_and_confirm_ui() -> void:
 	_ci_def_row.add_child(_ci_def_lbl)
 	ci_bot.add_child(_ci_def_row)
 
-	# 2. Top-center green Floop / Ability Info Banner (FloopInfo 9-slice)
-	_ability_banner = NinePatchRect.new()
+	# 2. Top-center green Floop / Ability Info Banner (Unity Q_3_FloopDescription: crisp 0.5x QuestInfo_BG frame over mint strips)
+	_ability_banner = Control.new()
 	_ability_banner.name = "AbilityInfoBanner"
-	_ability_banner.texture = TEX_FLOOP_INFO
-	_ability_banner.self_modulate = Color(0.55, 0.96, 0.58, 1.0)
-	_ability_banner.patch_margin_left = 40
-	_ability_banner.patch_margin_top = 28
-	_ability_banner.patch_margin_right = 40
-	_ability_banner.patch_margin_bottom = 28
 	_ability_banner.anchor_left = 0.5
 	_ability_banner.anchor_right = 0.5
-	_ability_banner.offset_left = -250
-	_ability_banner.offset_right = 250
-	_ability_banner.offset_top = 12
-	_ability_banner.offset_bottom = 186
+	_ability_banner.offset_left = -216
+	_ability_banner.offset_right = 216
+	_ability_banner.offset_top = 4
+	_ability_banner.offset_bottom = 181
 	_ability_banner.mouse_filter = Control.MOUSE_FILTER_STOP
 	_ability_banner.visible = false
 	add_child(_ability_banner)
 
-	var ab_v := VBoxContainer.new()
-	ab_v.set_anchors_preset(Control.PRESET_FULL_RECT)
-	ab_v.offset_left = 24
-	ab_v.offset_right = -24
-	ab_v.offset_top = 14
-	ab_v.offset_bottom = -14
-	ab_v.add_theme_constant_override("separation", 4)
-	_ability_banner.add_child(ab_v)
+	var ab_bg_clip := Panel.new()
+	ab_bg_clip.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ab_bg_clip.offset_left = 7
+	ab_bg_clip.offset_right = -7
+	ab_bg_clip.offset_top = 7
+	ab_bg_clip.offset_bottom = -7
+	ab_bg_clip.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
+	ab_bg_clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ab_bg_fill = StyleBoxFlat.new()
+	_ab_bg_fill.bg_color = Color(0.235, 0.784, 0.392, 0.863)
+	_ab_bg_fill.set_corner_radius_all(6)
+	ab_bg_clip.add_theme_stylebox_override("panel", _ab_bg_fill)
+	_ability_banner.add_child(ab_bg_clip)
 
-	_ab_title = _make_outlined_label("Cornball", 22, Color(0.98, 0.86, 0.16))
+	_ab_header_strip = ColorRect.new()
+	_ab_header_strip.anchor_left = 0.0
+	_ab_header_strip.anchor_right = 1.0
+	_ab_header_strip.anchor_top = 0.0
+	_ab_header_strip.anchor_bottom = 0.0
+	_ab_header_strip.offset_bottom = 36
+	_ab_header_strip.color = Color(0.667, 1.0, 0.667, 0.588)
+	_ab_header_strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ab_bg_clip.add_child(_ab_header_strip)
+
+	_ab_footer_strip = ColorRect.new()
+	_ab_footer_strip.anchor_left = 0.0
+	_ab_footer_strip.anchor_right = 1.0
+	_ab_footer_strip.anchor_top = 1.0
+	_ab_footer_strip.anchor_bottom = 1.0
+	_ab_footer_strip.offset_top = -34
+	_ab_footer_strip.color = Color(0.667, 1.0, 0.667, 0.588)
+	_ab_footer_strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ab_bg_clip.add_child(_ab_footer_strip)
+
+	# Full corner rivet margins (60x54) scaled to 0.33x give Unity's crisp ~10px thin straight silver rails & small corner rivets
+	var ab_frame := _make_scaled_ninepatch(TEX_QUEST_FRAME, Vector2(432, 177), 0.33, 60, 54)
+	_ability_banner.add_child(ab_frame)
+
+	_ab_title = _make_outlined_label("Cornball", 24, Color(1.0, 1.0, 0.04), 3)
+	_ab_title.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	_ab_title.add_theme_constant_override("shadow_offset_x", 1)
+	_ab_title.add_theme_constant_override("shadow_offset_y", 2)
+	_ab_title.position = Vector2(18, 11)
+	_ab_title.size = Vector2(396, 30)
 	_ab_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ab_v.add_child(_ab_title)
+	_ab_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_ability_banner.add_child(_ab_title)
 
-	var ab_mid := HBoxContainer.new()
-	ab_mid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	ab_mid.add_theme_constant_override("separation", 12)
-	ab_v.add_child(ab_mid)
-
-	var ab_port_frame := PanelContainer.new()
-	ab_port_frame.custom_minimum_size = Vector2(84, 74)
-	var ab_pf_sb := StyleBoxTexture.new()
-	ab_pf_sb.texture = TEX_FRAME_INDENT
-	ab_pf_sb.texture_margin_left = 4.0
-	ab_pf_sb.texture_margin_top = 4.0
-	ab_pf_sb.texture_margin_right = 4.0
-	ab_pf_sb.texture_margin_bottom = 4.0
-	ab_port_frame.add_theme_stylebox_override("panel", ab_pf_sb)
-	ab_mid.add_child(ab_port_frame)
+	var ab_port_frame := ColorRect.new()
+	ab_port_frame.position = Vector2(20, 48)
+	ab_port_frame.size = Vector2(78, 78)
+	ab_port_frame.color = Color.BLACK
+	_ability_banner.add_child(ab_port_frame)
 
 	_ab_portrait = TextureRect.new()
+	_ab_portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ab_portrait.offset_left = 2
+	_ab_portrait.offset_top = 2
+	_ab_portrait.offset_right = -2
+	_ab_portrait.offset_bottom = -2
 	_ab_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_ab_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	ab_port_frame.add_child(_ab_portrait)
 
-	_ab_desc = _make_outlined_label("+1 Attack.", 16, Color.WHITE)
-	_ab_desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_ab_desc = _make_outlined_label("+1 Attack.", 20, Color.WHITE, 2)
+	_ab_desc.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.90))
+	_ab_desc.add_theme_constant_override("shadow_offset_x", 1)
+	_ab_desc.add_theme_constant_override("shadow_offset_y", 2)
+	_ab_desc.position = Vector2(108, 44)
+	_ab_desc.size = Vector2(304, 86)
 	_ab_desc.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_ab_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_ab_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_ab_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ab_mid.add_child(_ab_desc)
+	_ab_desc.add_theme_constant_override("line_spacing", -2)
+	_ability_banner.add_child(_ab_desc)
 
 	_ab_book_badge = TextureRect.new()
-	_ab_book_badge.custom_minimum_size = Vector2(58, 68)
+	_ab_book_badge.position = Vector2(354, 52)
+	_ab_book_badge.size = Vector2(56, 66)
 	_ab_book_badge.texture = TEX_BOOK
 	_ab_book_badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_ab_book_badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_ab_book_badge.visible = false
-	ab_mid.add_child(_ab_book_badge)
+	_ability_banner.add_child(_ab_book_badge)
 
 	_ab_book_lbl = _make_outlined_label("0", 24, Color.WHITE)
 	_ab_book_lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -746,81 +796,123 @@ func _build_inspection_and_confirm_ui() -> void:
 	_ab_book_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_ab_book_badge.add_child(_ab_book_lbl)
 
-	_ab_subtitle = _make_outlined_label("Floop Ability", 18, Color(0.98, 0.86, 0.16))
+	_ab_subtitle = _make_outlined_label("Floop Ability", 22, Color(1.0, 1.0, 0.04), 3)
+	_ab_subtitle.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	_ab_subtitle.add_theme_constant_override("shadow_offset_x", 1)
+	_ab_subtitle.add_theme_constant_override("shadow_offset_y", 2)
+	_ab_subtitle.position = Vector2(18, 137)
+	_ab_subtitle.size = Vector2(396, 28)
 	_ab_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ab_v.add_child(_ab_subtitle)
+	_ab_subtitle.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_ability_banner.add_child(_ab_subtitle)
 
-	# 3. Bottom-center Confirm Bar ("No | Floop the ...? | Yes (cost)")
-	_ability_confirm_bar = NinePatchRect.new()
+	# 3. Bottom-center Confirm Bar (Unity Q_2_YesNo):
+	#    Center dark-slate bar + thin silver QuestInfo_BG frame, with full-height No / Yes buttons overlapping the left & right ends!
+	_ability_confirm_bar = Control.new()
 	_ability_confirm_bar.name = "AbilityConfirmBar"
-	_ability_confirm_bar.texture = TEX_POPUP_BLUE
-	_ability_confirm_bar.patch_margin_left = 54
-	_ability_confirm_bar.patch_margin_top = 36
-	_ability_confirm_bar.patch_margin_right = 62
-	_ability_confirm_bar.patch_margin_bottom = 36
 	_ability_confirm_bar.anchor_left = 0.5
 	_ability_confirm_bar.anchor_right = 0.5
 	_ability_confirm_bar.anchor_top = 1.0
 	_ability_confirm_bar.anchor_bottom = 1.0
-	_ability_confirm_bar.offset_left = -265
-	_ability_confirm_bar.offset_right = 265
-	_ability_confirm_bar.offset_top = -124
-	_ability_confirm_bar.offset_bottom = -16
+	_ability_confirm_bar.offset_left = -318
+	_ability_confirm_bar.offset_right = 318
+	_ability_confirm_bar.offset_top = -130
+	_ability_confirm_bar.offset_bottom = -4
 	_ability_confirm_bar.mouse_filter = Control.MOUSE_FILTER_STOP
 	_ability_confirm_bar.visible = false
 	add_child(_ability_confirm_bar)
 
-	var ac_h := HBoxContainer.new()
-	ac_h.set_anchors_preset(Control.PRESET_FULL_RECT)
-	ac_h.offset_left = 20
-	ac_h.offset_right = -20
-	ac_h.offset_top = 16
-	ac_h.offset_bottom = -16
-	ac_h.add_theme_constant_override("separation", 12)
-	_ability_confirm_bar.add_child(ac_h)
+	var ac_center_bar := Control.new()
+	ac_center_bar.position = Vector2(36, 12)
+	ac_center_bar.size = Vector2(564, 104)
+	ac_center_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ability_confirm_bar.add_child(ac_center_bar)
 
-	_ac_no_btn = _make_textured_btn("No", TEX_BTN_RED)
+	var ac_bg := Panel.new()
+	ac_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ac_bg.offset_left = 7
+	ac_bg.offset_right = -7
+	ac_bg.offset_top = 7
+	ac_bg.offset_bottom = -7
+	var ac_sb := StyleBoxFlat.new()
+	ac_sb.bg_color = Color(0.137, 0.224, 0.251, 0.93)
+	ac_sb.set_corner_radius_all(6)
+	ac_bg.add_theme_stylebox_override("panel", ac_sb)
+	ac_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ac_center_bar.add_child(ac_bg)
+
+	var ac_frame := _make_scaled_ninepatch(TEX_QUEST_FRAME, Vector2(564, 104), 0.40, 60, 54)
+	ac_center_bar.add_child(ac_frame)
+
+	_ac_question = _make_outlined_label("Floop the Cornball?", 28, Color.WHITE, 2)
+	_ac_question.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.90))
+	_ac_question.add_theme_constant_override("shadow_offset_x", 1)
+	_ac_question.add_theme_constant_override("shadow_offset_y", 2)
+	_ac_question.add_theme_constant_override("line_spacing", -3)
+	_ac_question.position = Vector2(202, 16)
+	_ac_question.size = Vector2(232, 102)
+	_ac_question.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_ac_question.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_ac_question.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_ability_confirm_bar.add_child(_ac_question)
+
+	_ac_no_btn = _make_textured_btn("No", TEX_BTN_RED, Vector2(184, 126), 31, 0.90)
+	_ac_no_btn.position = Vector2(0, 0)
+	_ac_no_btn.size = Vector2(184, 126)
 	_ac_no_btn.pressed.connect(func():
 		if Audio and ResourceLoader.exists("res://assets/audio/sfx/Cancel.wav"):
 			Audio.play_sfx(load("res://assets/audio/sfx/Cancel.wav"), -4.0)
 		dismiss_inspection(true)
 		ability_cancelled.emit()
 	)
-	ac_h.add_child(_ac_no_btn)
-
-	_ac_question = _make_outlined_label("Floop the Cornball?", 18, Color.WHITE)
-	_ac_question.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_ac_question.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_ac_question.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_ac_question.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ac_h.add_child(_ac_question)
+	_ability_confirm_bar.add_child(_ac_no_btn)
 
 	var yes_holder := Control.new()
-	yes_holder.custom_minimum_size = Vector2(140, 68)
-	ac_h.add_child(yes_holder)
+	yes_holder.position = Vector2(452, 0)
+	yes_holder.size = Vector2(184, 126)
+	_ability_confirm_bar.add_child(yes_holder)
 
-	_ac_yes_btn = _make_textured_btn("Yes", TEX_BTN_GREEN)
+	_ac_yes_btn = _make_textured_btn("Yes", TEX_BTN_GREEN, Vector2(184, 126), 31, 0.90)
 	_ac_yes_btn.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ac_yes_btn.pressed.connect(func():
-		dismiss_inspection(true)
+		hide_ability_confirm_bar_only()
 		ability_confirmed.emit()
 	)
 	yes_holder.add_child(_ac_yes_btn)
 
 	_ac_cost_orb = TextureRect.new()
 	_ac_cost_orb.texture = TEX_FLOOP_COST
-	_ac_cost_orb.custom_minimum_size = Vector2(44, 48)
-	_ac_cost_orb.size = Vector2(44, 48)
+	_ac_cost_orb.custom_minimum_size = Vector2(64, 66)
+	_ac_cost_orb.size = Vector2(64, 66)
 	_ac_cost_orb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_ac_cost_orb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_ac_cost_orb.position = Vector2(110, -18)
+	_ac_cost_orb.position = Vector2(124, -24)
+	_ac_cost_orb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	yes_holder.add_child(_ac_cost_orb)
 
-	_ac_cost_lbl = _make_outlined_label("2", 20, Color.WHITE)
-	_ac_cost_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ac_cost_lbl = _make_outlined_label("2", 34, Color(0.98, 0.80, 1.0), 2)
+	_ac_cost_lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.90))
+	_ac_cost_lbl.add_theme_constant_override("shadow_offset_x", 1)
+	_ac_cost_lbl.add_theme_constant_override("shadow_offset_y", 2)
+	_ac_cost_lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_ac_cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_ac_cost_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_ac_cost_orb.add_child(_ac_cost_lbl)
+
+
+func _make_scaled_ninepatch(tex: Texture2D, target_size: Vector2, tex_scale: float, margin_px: int, margin_v: int = -1, margin_bot: int = -1) -> NinePatchRect:
+	var mv := margin_v if margin_v >= 0 else margin_px
+	var mb := margin_bot if margin_bot >= 0 else mv
+	var np := NinePatchRect.new()
+	np.texture = tex
+	np.patch_margin_left = margin_px
+	np.patch_margin_top = mv
+	np.patch_margin_right = margin_px
+	np.patch_margin_bottom = mb
+	np.size = target_size / tex_scale
+	np.scale = Vector2(tex_scale, tex_scale)
+	np.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return np
 
 
 func _make_card_stat_label(txt: String, size_px: int, col: Color) -> Label:
@@ -832,33 +924,46 @@ func _make_card_stat_label(txt: String, size_px: int, col: Color) -> Label:
 	return l
 
 
-func _make_outlined_label(txt: String, size_px: int, col: Color) -> Label:
+func _make_outlined_label(txt: String, size_px: int, col: Color, outline_px: int = 4) -> Label:
 	var l := Label.new()
 	l.text = txt
 	l.add_theme_font_override("font", FONT_MAIN)
 	l.add_theme_font_size_override("font_size", size_px)
 	l.add_theme_color_override("font_color", col)
 	l.add_theme_color_override("font_outline_color", Color.BLACK)
-	l.add_theme_constant_override("outline_size", 4)
+	l.add_theme_constant_override("outline_size", outline_px)
 	return l
 
 
-func _make_textured_btn(txt: String, tex: Texture2D) -> Button:
+func _make_textured_btn(txt: String, tex: Texture2D, min_size: Vector2 = Vector2(140, 68), font_px: int = 24, border_scale: float = 1.0) -> Button:
 	var b := Button.new()
 	b.text = txt
-	b.custom_minimum_size = Vector2(140, 68)
+	b.custom_minimum_size = min_size
 	b.add_theme_font_override("font", FONT_MAIN)
-	b.add_theme_font_size_override("font_size", 24)
+	b.add_theme_font_size_override("font_size", font_px)
 	b.add_theme_color_override("font_color", Color.WHITE)
-	b.add_theme_color_override("font_outline_color", Color.BLACK)
-	b.add_theme_constant_override("outline_size", 5)
-	var sb := StyleBoxTexture.new()
-	sb.texture = tex
-	sb.texture_margin_left = 20
-	sb.texture_margin_top = 20
-	sb.texture_margin_right = 20
-	sb.texture_margin_bottom = 20
-	b.add_theme_stylebox_override("normal", sb)
-	b.add_theme_stylebox_override("hover", sb)
-	b.add_theme_stylebox_override("pressed", sb)
+	b.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.90))
+	b.add_theme_constant_override("outline_size", 2)
+	b.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	b.add_theme_constant_override("shadow_offset_x", 1)
+	b.add_theme_constant_override("shadow_offset_y", 2)
+	if border_scale < 0.99:
+		var empty_sb := StyleBoxEmpty.new()
+		b.add_theme_stylebox_override("normal", empty_sb)
+		b.add_theme_stylebox_override("hover", empty_sb)
+		b.add_theme_stylebox_override("pressed", empty_sb)
+		b.add_theme_stylebox_override("focus", empty_sb)
+		var np := _make_scaled_ninepatch(tex, min_size, border_scale, 38, 56, 38)
+		np.show_behind_parent = true
+		b.add_child(np)
+	else:
+		var sb := StyleBoxTexture.new()
+		sb.texture = tex
+		sb.texture_margin_left = 18
+		sb.texture_margin_top = 18
+		sb.texture_margin_right = 18
+		sb.texture_margin_bottom = 18
+		b.add_theme_stylebox_override("normal", sb)
+		b.add_theme_stylebox_override("hover", sb)
+		b.add_theme_stylebox_override("pressed", sb)
 	return b

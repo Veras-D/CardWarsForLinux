@@ -785,6 +785,7 @@ func _run_summon_presentation(is_player: bool, lane_idx: int, card_data: Diction
 	if first_time:
 		_already_summoned_cards[cid] = true
 		_is_summon_cinematic_active = true
+		_sync_floop_buttons_visual_state()
 		arena_3d.focus_summon_camera(is_player, lane_idx, is_building, 0.50)
 		var mesh_info: Dictionary = Database.get_entity_mesh_info(card_data) if Database else {}
 		var intro_len := float(mesh_info.get("intro_length", 2.0 if is_building else 1.5))
@@ -799,6 +800,7 @@ func _run_summon_presentation(is_player: bool, lane_idx: int, card_data: Diction
 		if arena_3d:
 			arena_3d.focus_setup_board(0.45)
 		_is_summon_cinematic_active = false
+		_sync_floop_buttons_visual_state()
 	elif trigger_building_fx:
 		var t_b := get_tree().create_timer(0.40)
 		t_b.timeout.connect(func():
@@ -864,7 +866,7 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 func _on_floop_requested(lane: LaneSlot) -> void:
 	if not is_action_allowed() or not lane.has_creature or lane.is_flooped:
 		return
-	_execute_floop_confirmed(lane)
+	_prompt_floop_confirmation(lane)
 
 
 func _prompt_floop_confirmation(lane: LaneSlot) -> void:
@@ -874,7 +876,7 @@ func _prompt_floop_confirmation(lane: LaneSlot) -> void:
 	var data = lane.creature_data
 	var floop_cost := int(data.get("floop_cost", 0))
 
-	if player_mp < floop_cost:
+	if floop_cost <= 0 or player_mp < floop_cost:
 		log_message("Not enough MP to Floop! (Need %d MP)" % floop_cost)
 		return
 
@@ -886,13 +888,19 @@ func _prompt_floop_confirmation(lane: LaneSlot) -> void:
 		if battle_log_box:
 			battle_log_box.visible = false
 		if arena_3d:
-			arena_3d.focus_lane_zoom(lane.is_player, lane.lane_index, 0.35)
+			# Matches Unity FLOOPButton OnClick: PushFloop() + FX_Battle_FloopButton_Action + ToFloopPanel (0.3s)
+			arena_3d.set_lane_floop_button_state(lane.is_player, lane.lane_index, true, false, false)
+			arena_3d.play_floop_button_action_fx(lane.is_player, lane.lane_index)
+			arena_3d.focus_floop_panel(lane.is_player, lane.lane_index, 0.30)
+		var short_name := str(data.get("short_hand", "")).strip_edges()
+		if short_name == "":
+			short_name = str(data.get("name", "Creature"))
 		battle_modals.show_ability_confirmation(
 			str(data.get("name", "Creature")),
 			str(data.get("desc", "")),
 			str(data.get("texture_path", "")),
 			floop_cost,
-			"Floop the\n%s?" % str(data.get("name", "Creature")),
+			"Floop the %s?" % short_name,
 			"Floop Ability"
 		)
 	else:
@@ -907,33 +915,88 @@ func _execute_floop_confirmed(lane: LaneSlot) -> void:
 		log_message("Not enough MP to Floop! (Need %d MP)" % floop_cost)
 		return
 
+	## Matches Unity CWFloopActionManager.PlayFloopAction() + DoWaitThenTrigger(1f, anim, "Floop"):
+	## 1. Q_2_YesNo (bottom confirm bar) closes, while Q_3_FloopDescription (top banner) STAYS VISIBLE!
+	## 2. FloopCameraTrigger(target, false) zooms to creature (0.2s).
+	## 3. Creature plays "Floop" anim + FX_Battle_FloopAnimation swirl + SFX.
+	## 4. After 1.0s wait, GameInstance.FloopCard executes: MP is deducted, ability effect + stat VFX fire,
+	##    and after 1.0s FloopCameraDelay the top banner closes, camera returns to ToP1Setup, and footer returns.
+	_is_summon_cinematic_active = true
+	if footer_bar:
+		footer_bar.visible = false
+	if arena_3d:
+		arena_3d.set_lane_floop_button_state(lane.is_player, lane.lane_index, true, false, false)
+		arena_3d.focus_floop_action(lane.is_player, lane.lane_index, false, 0.20, false)
+		arena_3d.play_entity_floop(lane.is_player, lane.lane_index, false)
+		if lane.has_building:
+			arena_3d.play_entity_floop(lane.is_player, lane.lane_index, true)
+	if ResourceLoader.exists("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"):
+		Audio.play_sfx_with_variation(load("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"), -3.0)
+
+	await get_tree().create_timer(1.0).timeout
+	if not is_inside_tree():
+		_is_summon_cinematic_active = false
+		return
+
 	player_mp -= floop_cost
 	match_floops_used += 1
 	match_total_mp_spent += floop_cost
 	lane.set_flooped(true)
-	if arena_3d:
-		arena_3d.set_lane_flooped(lane.is_player, lane.lane_index, true, true)
-		arena_3d.focus_floop_action(lane.is_player, lane.lane_index, false, 0.22)
-		arena_3d.play_entity_floop(lane.is_player, lane.lane_index, false)
-		if lane.has_building:
-			arena_3d.play_entity_floop(lane.is_player, lane.lane_index, true)
 	if GameManager and GameManager.is_network_match and GameManager.network_protocol:
 		GameManager.network_protocol.send_floop(lane.lane_index)
 	log_message("Flooped %s!" % data.get("name", "Creature"))
 
 	if vo_manager:
 		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.FLOOP, true)
-	if ResourceLoader.exists("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"):
-		Audio.play_sfx_with_variation(load("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"), -3.0)
 
+	_spawn_floop_ability_vfx_for_lane(lane, data)
 	_execute_floop_ability(lane)
 	_update_ui()
+
+	await get_tree().create_timer(1.0).timeout
+	if not is_inside_tree():
+		_is_summon_cinematic_active = false
+		return
+	_is_summon_cinematic_active = false
+	if battle_modals:
+		battle_modals.dismiss_inspection(false)
+	_restore_hud_after_inspect()
+	_sync_floop_buttons_visual_state()
+
+
+func _spawn_floop_ability_vfx_for_lane(source_lane: LaneSlot, card_data: Dictionary) -> void:
+	if arena_3d == null or source_lane == null:
+		return
+	var script_name := str(card_data.get("script_name", ""))
+	var is_p := source_lane.is_player
+	var idx := source_lane.lane_index
 	if arena_3d:
-		var t_ret := get_tree().create_timer(0.85)
-		t_ret.timeout.connect(func():
-			if is_inside_tree() and arena_3d and _pending_confirm_mode == "":
-				arena_3d.focus_setup_board(0.45)
-		)
+		arena_3d.focus_floop_action(is_p, idx, false, 0.20, true)
+	if script_name.find("ATKDEFBonus") >= 0:
+		arena_3d.play_floop_stat_vfx(is_p, idx, "FX_Battle_AttackUp")
+		arena_3d.play_floop_stat_vfx(is_p, idx, "FX_Battle_DefenseUp")
+	elif script_name.find("ATKBonus") >= 0 or script_name.find("BonusATK") >= 0:
+		arena_3d.play_floop_stat_vfx(is_p, idx, "FX_Battle_AttackUp")
+	elif script_name.find("DEFBonus") >= 0 or script_name.find("BonusDEF") >= 0:
+		arena_3d.play_floop_stat_vfx(is_p, idx, "FX_Battle_DefenseUp")
+	elif script_name.find("Heal") >= 0:
+		arena_3d.play_floop_stat_vfx(is_p, idx, "FX_Battle_HealthUp")
+	elif script_name.find("LowerATK") >= 0 or script_name.find("ATKPenalty") >= 0:
+		var opp_lanes := opponent_lanes if is_p else player_lanes
+		if idx < opp_lanes.size() and opp_lanes[idx].has_creature:
+			arena_3d.focus_floop_action(not is_p, idx, false, 0.20, true)
+			arena_3d.play_floop_stat_vfx(not is_p, idx, "FX_Battle_AttackDown")
+		else:
+			arena_3d.play_floop_stat_vfx(is_p, idx, "FX_Battle_AttackDown")
+	elif script_name.find("LowerDEF") >= 0 or script_name.find("DEFPenalty") >= 0 or script_name.find("ReduceDEF") >= 0:
+		var opp_lanes2 := opponent_lanes if is_p else player_lanes
+		if idx < opp_lanes2.size() and opp_lanes2[idx].has_creature:
+			arena_3d.focus_floop_action(not is_p, idx, false, 0.20, true)
+			arena_3d.play_floop_stat_vfx(not is_p, idx, "FX_Battle_DefenseDown")
+		else:
+			arena_3d.play_floop_stat_vfx(is_p, idx, "FX_Battle_DefenseDown")
+	else:
+		arena_3d.play_floop_stat_vfx(is_p, idx, "FX_Battle_AttackUp")
 
 func _execute_floop_ability(source_lane: LaneSlot) -> void:
 	if ability_system:
@@ -1983,6 +2046,32 @@ func _update_ui() -> void:
 	if arena_3d:
 		arena_3d.update_holding_cards_count(true, hand_container.get_child_count() if hand_container else 0)
 		arena_3d.update_holding_cards_count(false, opponent_hand.size())
+		_sync_floop_buttons_visual_state()
+
+
+func _can_lane_floop_now(lane: LaneSlot) -> bool:
+	if lane == null or not lane.has_creature or lane.is_flooped:
+		return false
+	if not is_player_turn or _in_battle_phase_hud or _is_summon_cinematic_active or _match_ended:
+		return false
+	if _pending_confirm_mode == "floop" and _pending_confirm_lane == lane:
+		return false
+	var floop_cost := int(lane.creature_data.get("floop_cost", 0))
+	if floop_cost <= 0 or player_mp < floop_cost:
+		return false
+	return true
+
+
+func _sync_floop_buttons_visual_state() -> void:
+	if arena_3d == null:
+		return
+	for i in range(player_lanes.size()):
+		var p_lane := player_lanes[i]
+		var can_f := _can_lane_floop_now(p_lane)
+		arena_3d.set_lane_floop_button_state(true, i, p_lane.has_creature, can_f, false)
+	for i in range(opponent_lanes.size()):
+		var o_lane := opponent_lanes[i]
+		arena_3d.set_lane_floop_button_state(false, i, o_lane.has_creature, false, false)
 
 
 func _setup_mp_orb_liquid(bar: TextureProgressBar, phase: float) -> void:
@@ -2501,7 +2590,7 @@ func _update_creature_stat_badges() -> void:
 	var c_size := creature_stats_layer.size
 	if c_size.x <= 1.0:
 		c_size = Vector2(1280, 720)
-	var hide_for_modal := battle_modals != null and battle_modals.is_any_modal_open()
+	var hide_for_modal := battle_modals != null and battle_modals.is_fullscreen_modal_open()
 	for b in _stat_badges:
 		var is_p: bool = b["is_player"]
 		var idx: int = b["lane_idx"]
@@ -2579,7 +2668,15 @@ func _on_board_surface_gui_input(event: InputEvent) -> void:
 func _inspect_or_floop_lane(lane: LaneSlot, zone: String) -> void:
 	if lane == null or not is_action_allowed() or _in_battle_phase_hud:
 		return
-	if lane.is_player and zone == "floop" and lane.has_creature and not lane.is_flooped and is_action_allowed():
+	# Matches Unity CWCommandCardSet.OnClick() (lines 52-61) + FLOOPButton OnClick:
+	# - Clicking the FLOOP button when can_floop is true opens the Floop Prompt.
+	# - Clicking the FLOOP button when can_floop is false does nothing (collider disabled in Unity).
+	# - Clicking a player creature directly when can_floop is true ALSO triggers floopButton.SendMessage("OnClick")!
+	if zone == "floop":
+		if lane.is_player and _can_lane_floop_now(lane):
+			_prompt_floop_confirmation(lane)
+		return
+	if lane.is_player and zone != "building" and lane.has_creature and _can_lane_floop_now(lane):
 		_prompt_floop_confirmation(lane)
 		return
 	if zone == "building" and lane.has_building:
@@ -2626,10 +2723,12 @@ func _on_ability_confirmed() -> void:
 	_pending_confirm_mode = ""
 	_pending_confirm_lane = null
 	_pending_confirm_leader = ""
-	_restore_hud_after_inspect()
 	if mode == "floop" and lane != null:
 		_execute_floop_confirmed(lane)
 	elif mode == "leader" and l_id != "":
+		if battle_modals:
+			battle_modals.dismiss_inspection(false)
+		_restore_hud_after_inspect()
 		_confirm_leader_power(l_id)
 
 
@@ -2638,6 +2737,7 @@ func _on_ability_cancelled() -> void:
 	_pending_confirm_lane = null
 	_pending_confirm_leader = ""
 	_restore_hud_after_inspect()
+	_sync_floop_buttons_visual_state()
 
 
 func _on_info_dismissed() -> void:
@@ -2666,6 +2766,7 @@ func _set_battle_phase_hud(active_combat: bool) -> void:
 		battle_log_box.visible = false
 	if board_click_surface:
 		board_click_surface.mouse_filter = Control.MOUSE_FILTER_IGNORE if active_combat else Control.MOUSE_FILTER_PASS
+	_sync_floop_buttons_visual_state()
 
 
 func _spawn_battle_fx_prefab(kind: String, target_is_player: bool, crit_mult: int = 2) -> void:

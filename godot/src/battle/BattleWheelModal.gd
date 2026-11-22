@@ -19,6 +19,7 @@ signal clash_resolved(result: Dictionary)
 @onready var ring_outline: TextureRect = $RingAnchor/RingOutline
 @onready var needle_pivot: Control = $RingAnchor/NeedlePivot
 @onready var needle_tex: TextureRect = $RingAnchor/NeedlePivot/NeedleTex
+@onready var undefended_fx: TextureRect = $RingAnchor/UndefendedFX
 @onready var result_callout: Label = $ResultCallout
 @onready var prompt_lbl: Label = $Prompt
 
@@ -108,6 +109,8 @@ func start_attack_clash(
 	prompt_lbl.text = "Tap to Attack!" if is_player else "%s vs %s" % [attacker_name, target_name]
 	if star_burst_fx:
 		star_burst_fx.visible = false
+	if undefended_fx:
+		undefended_fx.visible = false
 	if result_callout:
 		result_callout.visible = false
 
@@ -174,6 +177,8 @@ func start_defend_clash(
 	prompt_lbl.text = "Tap to Defend!"
 	if star_burst_fx:
 		star_burst_fx.visible = false
+	if undefended_fx:
+		undefended_fx.visible = false
 	if result_callout:
 		result_callout.visible = false
 
@@ -215,7 +220,12 @@ func start_undefended_clash(
 	incoming_damage: int
 ) -> void:
 	## Reproduces Unity CWBattleSequenceController undefendedFlag=true + forceMiss=true + CWBattleRingMissed:
-	## Shows dimmed wheel with "UNDEFENDED!" callout, plays Ring_Miss.wav, waits 0.5s, then resolves.
+	## 1. Drops the ring (Ring_Drop.wav + BattleRingSquash pop-in) with "Tap to Defend!"
+	## 2. After SetUpRing delay, triggers CWBattleRingMissed.OnClick():
+	##    - Dims the wheel (critAreaSprite*0.3, hitAreaSprite*0.3, baseSprite=black*0.5)
+	##    - Enables Ring_UndefendedFX (Undefended.png skull & crossbones + arched "Undefended!" sprite)
+	##    - Plays Ring_Miss.wav and hides the text callout label (component.labelString = string.Empty)
+	## 3. Waits 0.3s + 0.2s Tween_Away, then resolves into TweenDamage_P2Missed.
 	visible = true
 	_resolved = true
 	_is_defend_mode = true
@@ -233,25 +243,54 @@ func start_undefended_clash(
 		prompt_lbl.text = ""
 	if star_burst_fx:
 		star_burst_fx.visible = false
+	if result_callout:
+		result_callout.visible = false
+	if undefended_fx:
+		undefended_fx.visible = false
 
+	var p := _get_leader_and_quest_params()
+	var leader: Dictionary = p["leader"]
+	var quest: Dictionary = p["quest"]
+	var block_ratio := clampf(
+		float(leader.get("ring_p2_hit_range", 0.15)) + float(quest.get("p2_hit_mod", 0.0)),
+		0.05, 0.65
+	)
+	var counter_ratio := clampf(
+		float(leader.get("ring_p2_crit_range", 0.05)) + float(quest.get("p2_crit_mod", 0.0)),
+		0.03, 0.35
+	)
+	var miss_total := maxf(0.05, 1.0 - (block_ratio + counter_ratio))
+	var miss_half := miss_total * 0.5
+	# Unity CWBattleRingMissed dims critAreaSprite * 0.3, hitAreaSprite * 0.3, baseSprite = black * 0.5
+	var dimmed_counter_col := Color(0.08 * 0.3, 0.96 * 0.3, 0.22 * 0.3, 1.0)
+	var dimmed_block_col := Color(0.14 * 0.3, 0.56 * 0.3, 0.22 * 0.3, 1.0)
+	var dimmed_miss_col := Color(0.0, 0.0, 0.0, 0.5)
 	var sectors: Array = [
-		{"id": "miss", "name": "UNDEFENDED!", "ratio": 1.0, "color": Color(0.20, 0.12, 0.12, 0.85), "multiplier": 1.0, "is_success": false},
+		{"id": "miss", "name": "UNDEFENDED!", "ratio": miss_half, "color": dimmed_miss_col, "multiplier": 1.0, "is_success": false},
+		{"id": "hit", "name": "BLOCK!", "ratio": block_ratio, "color": dimmed_block_col, "multiplier": 0.0, "is_success": true},
+		{"id": "crit", "name": "COUNTER!", "ratio": counter_ratio, "color": dimmed_counter_col, "multiplier": 0.0, "is_success": true},
+		{"id": "miss", "name": "UNDEFENDED!", "ratio": miss_half, "color": dimmed_miss_col, "multiplier": 1.0, "is_success": false},
 	]
 	var cfg := WheelConfig.create_custom(sectors, 0.0)
 	spinner.setup(cfg)
 	needle_pivot.rotation_degrees = 0.0
 
+	ring_anchor.scale = Vector2(0.45, 0.45)
+	ring_anchor.pivot_offset = ring_anchor.size * 0.5
+	var pop_tw := create_tween()
+	pop_tw.tween_property(ring_anchor, "scale", Vector2.ONE, 0.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	if ResourceLoader.exists("res://assets/audio/sfx/Ring_Drop.wav"):
+		Audio.play_sfx(load("res://assets/audio/sfx/Ring_Drop.wav"), -4.0)
+
+	# Show Ring_UndefendedFX (Undefended.png skull & crossbones + arched "Undefended!" sprite) over the ring
+	if undefended_fx:
+		undefended_fx.visible = true
+		undefended_fx.scale = Vector2(0.65, 0.65)
+		create_tween().tween_property(undefended_fx, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
 	if ResourceLoader.exists("res://assets/audio/sfx/Ring_Miss.wav"):
 		Audio.play_sfx(load("res://assets/audio/sfx/Ring_Miss.wav"))
-
-	if result_callout:
-		result_callout.text = "UNDEFENDED!"
-		if result_callout.label_settings:
-			result_callout.label_settings.font_color = Color(1.0, 0.24, 0.20, 1.0)
-			result_callout.label_settings.outline_color = Color(0.22, 0.02, 0.02, 1.0)
-		result_callout.visible = true
-		result_callout.scale = Vector2(0.5, 0.5)
-		create_tween().tween_property(result_callout, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 	var clash_res := {
 		"id": "miss",
@@ -265,12 +304,14 @@ func start_undefended_clash(
 		"is_counter": false,
 		"angle_deg": 0.0,
 	}
-	await get_tree().create_timer(0.35).timeout
+	await get_tree().create_timer(0.80).timeout
 	var fade_tw := create_tween()
-	fade_tw.tween_property(self, "modulate:a", 0.0, 0.15)
+	fade_tw.tween_property(self, "modulate:a", 0.0, 0.20)
 	await fade_tw.finished
 	visible = false
 	modulate.a = 1.0
+	if undefended_fx:
+		undefended_fx.visible = false
 	if result_callout:
 		result_callout.visible = false
 	clash_resolved.emit(clash_res)
@@ -385,6 +426,8 @@ func _on_spinner_completed(result: Dictionary) -> void:
 	_stop_prompt_pulse()
 	if star_burst_fx:
 		star_burst_fx.visible = false
+	if undefended_fx:
+		undefended_fx.visible = false
 	if result_callout:
 		result_callout.visible = false
 	clash_resolved.emit(clash_res)
