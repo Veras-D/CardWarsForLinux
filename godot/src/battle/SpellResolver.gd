@@ -374,6 +374,8 @@ func cast_spell(spell_data: Dictionary, target_lane: LaneSlot = null, is_player:
 			if target_lane and target_lane.has_creature:
 				var c_name = target_lane.creature_data.get("name", "Creature")
 				target_lane.clear_slot()
+				if "arena_3d" in battle_controller and battle_controller.arena_3d:
+					battle_controller.arena_3d.despawn_lane_entity_animated(target_lane.is_player, target_lane.lane_index, false)
 				var draw_count = val2 if val2 > 0 else 2
 				if is_player and battle_controller.has_method("draw_player_card"):
 					for _i in range(draw_count):
@@ -386,6 +388,8 @@ func cast_spell(spell_data: Dictionary, target_lane: LaneSlot = null, is_player:
 			if target_lane and target_lane.has_creature:
 				var c_name = target_lane.creature_data.get("name", "Creature")
 				target_lane.clear_slot()
+				if "arena_3d" in battle_controller and battle_controller.arena_3d:
+					battle_controller.arena_3d.despawn_lane_entity_animated(target_lane.is_player, target_lane.lane_index, false)
 				var mp_gain = val2 if val2 > 0 else 2
 				if is_player:
 					battle_controller.player_mp = min(10, battle_controller.player_mp + mp_gain)

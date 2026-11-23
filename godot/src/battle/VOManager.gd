@@ -62,6 +62,11 @@ var _last_played_clip: Dictionary = {}
 # Dedicated internal player if Audio autoload is not active
 var _internal_player: AudioStreamPlayer = null
 
+# Pending 1-slot follow-up per channel ("player" / "opponent") so rapid actions (e.g. Summon -> Floop)
+# play naturally back-to-back without cancelling the active clip or silently dropping the line.
+var _pending_vo: Dictionary = {}
+const MAX_QUEUE_AGE_MSEC: int = 2200
+
 
 func _init() -> void:
 	_load_event_rules()
@@ -84,9 +89,16 @@ func _load_prefab_vo_table() -> void:
 
 func resolve_character_prefab(char_name: String) -> String:
 	var clean := char_name.strip_edges()
+	var db := get_node_or_null("/root/Database")
+	if clean.begins_with("Leader_") and db and db.has_method("get_leader"):
+		var linfo: Dictionary = db.get_leader(clean)
+		var lchar := str(linfo.get("character_id", "")).strip_edges()
+		if lchar != "":
+			clean = lchar
+		else:
+			clean = clean.substr(7)
 	if _prefab_vo_table.has(clean):
 		return clean
-	var db := get_node_or_null("/root/Database")
 	if db and db.has_method("get_character"):
 		var cinfo: Dictionary = db.get_character(clean)
 		var pf := str(cinfo.get("prefab", "")).strip_edges()
@@ -95,7 +107,7 @@ func resolve_character_prefab(char_name: String) -> String:
 	match clean:
 		"JakeGhost":
 			return "GhostJake"
-		"GunterFC":
+		"GunterFC", "Gunter02":
 			return "Gunter"
 		"Fionna":
 			return "Fiona"
@@ -129,10 +141,20 @@ func _ready() -> void:
 		var bus_name = "Voice" if AudioServer.get_bus_index("Voice") != -1 else "Master"
 		_internal_player.bus = bus_name
 		add_child(_internal_player)
+	if not _internal_player.finished.is_connected(_on_channel_voice_finished.bind("default")):
+		_internal_player.finished.connect(_on_channel_voice_finished.bind("default"))
 
 
 func normalize_hero_name(char_name: String) -> String:
 	var clean = char_name.strip_edges()
+	if clean.begins_with("Leader_"):
+		var db := get_node_or_null("/root/Database")
+		if db and db.has_method("get_leader"):
+			var linfo: Dictionary = db.get_leader(clean)
+			var lchar := str(linfo.get("character_id", "")).strip_edges()
+			clean = lchar if lchar != "" else clean.substr(7)
+		else:
+			clean = clean.substr(7)
 	match clean:
 		"FinnDoctor", "FinnPajama", "FinnSweater":
 			return "Finn"
@@ -187,13 +209,13 @@ func _load_event_rules() -> void:
 		"Opening": { "chance": 1.0, "player": true, "opponent": false },
 		"Win": { "chance": 1.0, "player": true, "opponent": false },
 		"Lose": { "chance": 1.0, "player": true, "opponent": false },
-		"DestroyCreature": { "chance": 0.5, "player": true, "opponent": true },
-		"PlayCreature": { "chance": 0.5, "player": true, "opponent": true },
-		"PlayBuilding": { "chance": 0.5, "player": true, "opponent": true },
-		"PlaySpell": { "chance": 0.5, "player": true, "opponent": true },
-		"CreatureDestroyed": { "chance": 0.5, "player": true, "opponent": true },
-		"BuildingDestroyed": { "chance": 0.5, "player": true, "opponent": true },
-		"Floop": { "chance": 0.5, "player": true, "opponent": true },
+		"DestroyCreature": { "chance": 0.85, "player": true, "opponent": true },
+		"PlayCreature": { "chance": 0.85, "player": true, "opponent": true },
+		"PlayBuilding": { "chance": 0.85, "player": true, "opponent": true },
+		"PlaySpell": { "chance": 0.85, "player": true, "opponent": true },
+		"CreatureDestroyed": { "chance": 0.85, "player": true, "opponent": true },
+		"BuildingDestroyed": { "chance": 0.85, "player": true, "opponent": true },
+		"Floop": { "chance": 1.0, "player": true, "opponent": true },
 		"HeroDamaged": { "chance": 1.0, "player": true, "opponent": true },
 		"LeaderAbility": { "chance": 1.0, "player": true, "opponent": true }
 	}
@@ -319,11 +341,7 @@ func play_event(char_name: String, event: VOEvent, is_player: bool = true, force
 		vo_skipped.emit(char_name, event, "vo_disabled")
 		return false
 
-	# Unity VOManager.PlayEvent: if (IsPlaying) return; (unless forced, e.g. end-of-match Win/Lose)
-	if not force and is_voice_playing():
-		vo_skipped.emit(char_name, event, "already_playing")
-		return false
-
+	var channel := "player" if is_player else "opponent"
 	var evt_str = get_event_id_string(event)
 	var rule = _event_rules.get(evt_str, { "chance": 1.0, "player": true, "opponent": true })
 
@@ -352,18 +370,39 @@ func play_event(char_name: String, event: VOEvent, is_player: bool = true, force
 		var pool = candidates.filter(func(p): return p != last)
 		chosen = pool[randi() % pool.size()] if not pool.is_empty() else candidates[randi() % candidates.size()]
 
-	_last_played_clip[norm_hero + "_" + evt_str] = chosen
+	# If this character's own channel is still speaking, queue this line as a 1-slot follow-up
+	# instead of cancelling the active clip or dropping the new line.
+	if not force and is_voice_playing(channel):
+		_pending_vo[channel] = {
+			"char_name": char_name,
+			"norm_key": norm_hero + "_" + evt_str,
+			"event": event,
+			"chosen": chosen,
+			"queued_msec": Time.get_ticks_msec(),
+		}
+		vo_skipped.emit(char_name, event, "queued_already_playing")
+		return false
 
-	# Load AudioStream
+	_pending_vo.erase(channel)
+	return _play_chosen_clip(char_name, norm_hero + "_" + evt_str, event, chosen, channel)
+
+
+func _play_chosen_clip(char_name: String, norm_key: String, event: VOEvent, chosen: String, channel: String) -> bool:
 	var stream = ResourceLoader.load(chosen) as AudioStream
 	if stream == null:
 		vo_skipped.emit(char_name, event, "failed_to_load_stream")
 		return false
 
-	# Route playback
+	_last_played_clip[norm_key] = chosen
+
+	# Route playback to character's dedicated voice channel ("player" or "opponent")
 	var audio_autoload = get_node_or_null("/root/Audio")
 	if audio_autoload and audio_autoload.has_method("play_voice"):
-		audio_autoload.play_voice(stream)
+		var player = audio_autoload.play_voice(stream, 0.0, 1.0, channel)
+		if player is AudioStreamPlayer:
+			var cb := _on_channel_voice_finished.bind(channel)
+			if not player.finished.is_connected(cb):
+				player.finished.connect(cb)
 	else:
 		if _internal_player == null:
 			_internal_player = AudioStreamPlayer.new()
@@ -371,6 +410,8 @@ func play_event(char_name: String, event: VOEvent, is_player: bool = true, force
 			var bus_name = "Voice" if AudioServer.get_bus_index("Voice") != -1 else "Master"
 			_internal_player.bus = bus_name
 			add_child(_internal_player)
+		if not _internal_player.finished.is_connected(_on_channel_voice_finished.bind("default")):
+			_internal_player.finished.connect(_on_channel_voice_finished.bind("default"))
 		_internal_player.stop()
 		_internal_player.stream = stream
 		_internal_player.play()
@@ -379,16 +420,41 @@ func play_event(char_name: String, event: VOEvent, is_player: bool = true, force
 	return true
 
 
-func stop_voice() -> void:
+func _on_channel_voice_finished(channel: String) -> void:
+	if not is_inside_tree() or not vo_enabled:
+		return
+	var key := channel if _pending_vo.has(channel) else ""
+	if key == "":
+		return
+	var entry: Dictionary = _pending_vo[key]
+	_pending_vo.erase(key)
+	if Time.get_ticks_msec() - int(entry.get("queued_msec", 0)) > MAX_QUEUE_AGE_MSEC:
+		return
+	if is_voice_playing(key):
+		return
+	_play_chosen_clip(
+		str(entry.get("char_name", "")),
+		str(entry.get("norm_key", "")),
+		int(entry.get("event", VOEvent.FLOOP)) as VOEvent,
+		str(entry.get("chosen", "")),
+		key
+	)
+
+
+func stop_voice(channel: String = "") -> void:
+	if channel != "":
+		_pending_vo.erase(channel)
+	else:
+		_pending_vo.clear()
 	var audio_autoload = get_node_or_null("/root/Audio")
 	if audio_autoload and audio_autoload.has_method("stop_voice"):
-		audio_autoload.stop_voice()
+		audio_autoload.stop_voice(channel)
 	elif _internal_player and _internal_player.playing:
 		_internal_player.stop()
 
 
-func is_voice_playing() -> bool:
+func is_voice_playing(channel: String = "") -> bool:
 	var audio_autoload = get_node_or_null("/root/Audio")
 	if audio_autoload and audio_autoload.has_method("is_voice_playing"):
-		return audio_autoload.is_voice_playing()
+		return audio_autoload.is_voice_playing(channel)
 	return _internal_player != null and _internal_player.playing

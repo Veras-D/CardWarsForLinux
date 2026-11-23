@@ -1147,11 +1147,14 @@ func _sacrifice_creature(lane: LaneSlot) -> void:
 		return
 	var dead_data = lane.creature_data.duplicate(true)
 	lane.clear_slot()
+	# Matches Unity GameState.RemoveCardFromPlay: sacrificing removes the creature directly
+	# without playing CreatureDeath SFX, death VO, or spawning a tombstone.
+	if battle_controller and "arena_3d" in battle_controller and battle_controller.arena_3d:
+		battle_controller.arena_3d.despawn_lane_entity_animated(lane.is_player, lane.lane_index, false)
 	if lane.is_player and battle_controller and "player_discard_pile" in battle_controller:
 		battle_controller.player_discard_pile.append(dead_data.get("id", ""))
 	elif not lane.is_player and battle_controller and "opponent_discard_pile" in battle_controller:
 		battle_controller.opponent_discard_pile.append(dead_data.get("id", ""))
-	lane.creature_destroyed.emit(lane, dead_data)
 
 
 func _damage_opposing_hero(from_player: bool, amount: int) -> void:

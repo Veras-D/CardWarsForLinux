@@ -883,6 +883,8 @@ func _prompt_floop_confirmation(lane: LaneSlot) -> void:
 	if battle_modals:
 		_pending_confirm_mode = "floop"
 		_pending_confirm_lane = lane
+		if Audio and ResourceLoader.exists("res://assets/audio/sfx/UI_Select.wav"):
+			Audio.play_sfx(load("res://assets/audio/sfx/UI_Select.wav"), -4.0)
 		if footer_bar:
 			footer_bar.visible = false
 		if battle_log_box:
@@ -930,8 +932,7 @@ func _execute_floop_confirmed(lane: LaneSlot) -> void:
 		arena_3d.play_entity_floop(lane.is_player, lane.lane_index, false)
 		if lane.has_building:
 			arena_3d.play_entity_floop(lane.is_player, lane.lane_index, true)
-	if ResourceLoader.exists("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"):
-		Audio.play_sfx_with_variation(load("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"), -3.0)
+	_play_floop_start_sfx()
 
 	await get_tree().create_timer(1.0).timeout
 	if not is_inside_tree():
@@ -946,11 +947,7 @@ func _execute_floop_confirmed(lane: LaneSlot) -> void:
 		GameManager.network_protocol.send_floop(lane.lane_index)
 	log_message("Flooped %s!" % data.get("name", "Creature"))
 
-	if vo_manager:
-		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.FLOOP, true)
-
-	_spawn_floop_ability_vfx_for_lane(lane, data)
-	_execute_floop_ability(lane)
+	_trigger_floop_outcome(lane, data, true)
 	_update_ui()
 
 	await get_tree().create_timer(1.0).timeout
@@ -962,6 +959,22 @@ func _execute_floop_confirmed(lane: LaneSlot) -> void:
 		battle_modals.dismiss_inspection(false)
 	_restore_hud_after_inspect()
 	_sync_floop_buttons_visual_state()
+
+
+func _play_floop_start_sfx() -> void:
+	if Audio and ResourceLoader.exists("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"):
+		Audio.play_sfx(load("res://assets/audio/sfx/FX_Battle_FloopAnimation.wav"), -3.0)
+
+
+func _trigger_floop_outcome(lane: LaneSlot, card_data: Dictionary, is_player_owner: bool) -> void:
+	var face_rig := player_face_rig if is_player_owner else opponent_face_rig
+	if face_rig:
+		face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+	if vo_manager and GameManager:
+		var hero_name := GameManager.player_hero_name if is_player_owner else GameManager.opponent_hero_name
+		vo_manager.play_event(hero_name, VOManager.VOEvent.FLOOP, is_player_owner)
+	_spawn_floop_ability_vfx_for_lane(lane, card_data)
+	_execute_floop_ability(lane)
 
 
 func _spawn_floop_ability_vfx_for_lane(source_lane: LaneSlot, card_data: Dictionary) -> void:
@@ -1374,12 +1387,13 @@ func _on_network_action_executed(sender_id: int, action_type: String, payload: D
 				var o_lane = opponent_lanes[slot_idx]
 				if o_lane.has_creature and not o_lane.is_flooped:
 					o_lane.set_flooped(true)
+					_play_floop_start_sfx()
 					if arena_3d:
 						arena_3d.set_lane_flooped(false, slot_idx, true, true)
 						arena_3d.play_entity_floop(false, slot_idx, false)
 						if o_lane.has_building:
 							arena_3d.play_entity_floop(false, slot_idx, true)
-					_execute_floop_ability(o_lane)
+					_trigger_floop_outcome(o_lane, o_lane.creature_data, false)
 					log_message("%s flooped %s on Lane %d!" % [GameManager.remote_player_name, o_lane.creature_data.get("name", "Creature"), slot_idx + 1])
 					_update_ui()
 
@@ -1602,6 +1616,34 @@ func execute_opponent_turn() -> void:
 					played_any = true
 					await get_tree().create_timer(0.35).timeout
 					break
+
+	# AI floops eligible creatures (matches Unity CWOpponentActionSequencer.OpponentFloop)
+	for o_lane in opponent_lanes:
+		if not is_inside_tree():
+			return
+		if not o_lane.has_creature or o_lane.is_flooped:
+			continue
+		var o_data: Dictionary = o_lane.creature_data
+		var f_cost := int(o_data.get("floop_cost", 0))
+		if f_cost <= 0 or opponent_mp < f_cost:
+			continue
+		_play_floop_start_sfx()
+		if arena_3d:
+			arena_3d.focus_floop_action(false, o_lane.lane_index, false, 0.20, false)
+			arena_3d.play_entity_floop(false, o_lane.lane_index, false)
+			if o_lane.has_building:
+				arena_3d.play_entity_floop(false, o_lane.lane_index, true)
+		await get_tree().create_timer(0.85).timeout
+		if not is_inside_tree():
+			return
+		opponent_mp -= f_cost
+		o_lane.set_flooped(true)
+		_trigger_floop_outcome(o_lane, o_data, false)
+		log_message("%s flooped %s on Lane %d!" % [
+			GameManager.opponent_hero_name, o_data.get("name", "Creature"), o_lane.lane_index + 1
+		])
+		_update_ui()
+		await get_tree().create_timer(0.45).timeout
 
 	# Turn 1 No-Attack parity
 	if _game_turn_count <= 1:
@@ -2688,6 +2730,8 @@ func _inspect_or_floop_lane(lane: LaneSlot, zone: String) -> void:
 			battle_modals.show_card_info(lane.building_data)
 		return
 	if lane.has_creature:
+		if Audio and ResourceLoader.exists("res://assets/audio/sfx/PressCreatureHead.wav"):
+			Audio.play_sfx(load("res://assets/audio/sfx/PressCreatureHead.wav"), -4.0)
 		if footer_bar:
 			footer_bar.visible = false
 		var lane_max_def: int = maxi(lane.current_def, int(lane.creature_data.get("def", lane.current_def)))

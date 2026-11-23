@@ -875,6 +875,8 @@ func _build_inspection_and_confirm_ui() -> void:
 	_ac_yes_btn = _make_textured_btn("Yes", TEX_BTN_GREEN, Vector2(184, 126), 31, 0.90)
 	_ac_yes_btn.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ac_yes_btn.pressed.connect(func():
+		if Audio and ResourceLoader.exists("res://assets/audio/sfx/UI_Select.wav"):
+			Audio.play_sfx(load("res://assets/audio/sfx/UI_Select.wav"), -4.0)
 		hide_ability_confirm_bar_only()
 		ability_confirmed.emit()
 	)

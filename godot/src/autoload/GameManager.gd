@@ -928,7 +928,9 @@ func apply_custom_deck(deck_data: Dictionary) -> void:
 	active_deck_name = str(deck_data.get("name", "Custom Deck"))
 	var leader_id = str(deck_data.get("leader", player_hero_name))
 	if leader_id != "":
-		player_hero_name = leader_id
+		player_hero_name = get_leader_character_id(leader_id)
+		if player_hero_name == "Fionna":
+			player_hero_name = "Fiona"
 		_update_active_hero_hp()
 
 	var lands = deck_data.get("landscapes", [])
