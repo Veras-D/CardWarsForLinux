@@ -48,6 +48,8 @@ var _p1_table_card: Node3D = null
 var _p2_table_card: Node3D = null
 var _p1_table_card_ready: bool = false
 var _p2_table_card_ready: bool = false
+var _p1_play_card_seq: int = 0
+var _p2_play_card_seq: int = 0
 var _p1_anim_player: AnimationPlayer = null
 var _p2_anim_player: AnimationPlayer = null
 var _p1_char_info: Dictionary = {}
@@ -85,6 +87,12 @@ const CAM_KETCHUP_LOOK := Vector3(-0.00135, -1.104, 0.0)
 
 const CAM_SETUP_POS := Vector3(-1.876, 1.34, 0.0)
 const CAM_SETUP_LOOK := Vector3(-0.85, -0.019, 0.0)
+
+const CAM_OPPONENT_SETUP_POS := Vector3(-1.845, 1.26, 0.0)
+const CAM_OPPONENT_SETUP_LOOK := Vector3(0.8365, 0.608, 0.0)
+
+const CAM_P1_SPELL_POS := Vector3(-1.735, 1.135, 0.0)
+const CAM_P1_SPELL_LOOK := Vector3(-0.84, -0.019, 0.0)
 
 const CAM_LOOT_POS := Vector3(-1.05, 0.58, 0.0)
 const CAM_LOOT_LOOK := Vector3(0.25, -0.02, 0.0)
@@ -2015,6 +2023,64 @@ func play_hero_anim(is_player: bool, anim_slot: String, next_slot: String = "ani
 			ap.queue(next_name)
 
 
+func play_hero_card_action(is_player: bool, is_rare: bool = false, is_last_card: bool = false) -> float:
+	## Plays the hero's Unity PlayCard (or PlayRare / LastCard) arm+card placement animation
+	## with PlayingCard visible on Puppet_CardPlay, then returns smoothly to CardIdle.
+	var ap := _p1_anim_player if is_player else _p2_anim_player
+	var info := _p1_char_info if is_player else _p2_char_info
+	if ap == null or info.is_empty():
+		return 0.0
+
+	var candidates: Array[String] = []
+	if is_rare:
+		candidates.append("anim_play_rare")
+	if is_last_card:
+		candidates.append("anim_last_card")
+	candidates.append("anim_play_card")
+
+	var chosen_slot := "anim_play_card"
+	for slot in candidates:
+		var cname := str(info.get(slot, ""))
+		if cname != "" and ap.has_animation(cname):
+			chosen_slot = slot
+			break
+
+	var clip_name := str(info.get(chosen_slot, ""))
+	var clip_len := 1.5
+	if clip_name != "" and ap.has_animation(clip_name):
+		var res := ap.get_animation(clip_name)
+		if res and res.length > 0.1:
+			clip_len = res.length
+
+	var table_card := _p1_table_card if is_player else _p2_table_card
+	if table_card:
+		table_card.visible = false
+
+	var pc := player_playing_card if is_player else opponent_playing_card
+	if is_player:
+		_p1_play_card_seq += 1
+	else:
+		_p2_play_card_seq += 1
+	var seq := _p1_play_card_seq if is_player else _p2_play_card_seq
+	if pc:
+		pc.visible = true
+		var hide_after := clampf(clip_len * 0.85, 0.80, 1.85)
+		var t_hide := get_tree().create_timer(hide_after)
+		t_hide.timeout.connect(func():
+			if not is_inside_tree():
+				return
+			var cur_seq := _p1_play_card_seq if is_player else _p2_play_card_seq
+			if cur_seq != seq:
+				return
+			var cur_pc := player_playing_card if is_player else opponent_playing_card
+			if cur_pc and is_instance_valid(cur_pc):
+				cur_pc.visible = false
+		)
+
+	play_hero_anim(is_player, chosen_slot, "anim_card_idle", 0.12)
+	return clip_len
+
+
 func _start_face_track(is_player: bool, anim_name: String) -> void:
 	var path := "res://data/character_face_anim/%s.json" % anim_name
 	var tracks: Array[Dictionary] = []
@@ -2196,6 +2262,24 @@ func focus_setup_board(duration: float = 0.65) -> Tween:
 	if opponent_seat:
 		opponent_seat.visible = true
 	return tween_camera(CAM_SETUP_POS, CAM_SETUP_LOOK, duration, 60.0)
+
+
+func focus_opponent_setup(duration: float = 0.55) -> Tween:
+	_disable_split_duel()
+	if player_seat:
+		player_seat.visible = true
+	if opponent_seat:
+		opponent_seat.visible = true
+	return tween_camera(CAM_OPPONENT_SETUP_POS, CAM_OPPONENT_SETUP_LOOK, duration, 60.0)
+
+
+func focus_player_spell(duration: float = 0.40) -> Tween:
+	_disable_split_duel()
+	if player_seat:
+		player_seat.visible = true
+	if opponent_seat:
+		opponent_seat.visible = true
+	return tween_camera(CAM_P1_SPELL_POS, CAM_P1_SPELL_LOOK, duration, 60.0)
 
 
 func focus_summon_camera(is_player: bool, lane_idx: int, is_building: bool = false, duration: float = 0.50) -> Tween:

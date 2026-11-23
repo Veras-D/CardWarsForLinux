@@ -714,8 +714,11 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 		var b_fac = str(card_data.get("faction", "")).strip_edges()
 		if b_fac != "":
 			match_factions_played.append(b_fac)
+		var is_last_card := hand_container != null and hand_container.get_child_count() <= 1
+		var is_rare_card := int(card_data.get("rarity", 1)) >= 5
 		lane.place_building(card_data)
 		if arena_3d:
+			arena_3d.play_hero_card_action(true, is_rare_card, is_last_card)
 			arena_3d.spawn_lane_building(true, lane.lane_index, card_data, true)
 		if GameManager and GameManager.is_network_match and GameManager.network_protocol:
 			GameManager.network_protocol.send_play_card(str(card_data.get("id", "")), lane.lane_index, false)
@@ -756,8 +759,11 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 	var c_fac = str(card_data.get("faction", "")).strip_edges()
 	if c_fac != "":
 		match_factions_played.append(c_fac)
+	var is_last_card := hand_container != null and hand_container.get_child_count() <= 1
+	var is_rare_card := int(card_data.get("rarity", 1)) >= 5
 	lane.place_creature(card_data)
 	if arena_3d:
+		arena_3d.play_hero_card_action(true, is_rare_card, is_last_card)
 		arena_3d.spawn_lane_creature(true, lane.lane_index, card_data, true)
 	if GameManager and GameManager.is_network_match and GameManager.network_protocol:
 		GameManager.network_protocol.send_play_card(str(card_data.get("id", "")), lane.lane_index, false)
@@ -777,7 +783,7 @@ func _on_lane_clicked(lane: LaneSlot) -> void:
 	await _run_summon_presentation(true, lane.lane_index, card_data, false, lane.has_building)
 
 
-func _run_summon_presentation(is_player: bool, lane_idx: int, card_data: Dictionary, is_building: bool, trigger_building_fx: bool = false) -> void:
+func _run_summon_presentation(is_player: bool, lane_idx: int, card_data: Dictionary, is_building: bool, trigger_building_fx: bool = false, return_to_setup: bool = true) -> void:
 	if arena_3d == null or card_data.is_empty():
 		return
 	var cid := str(card_data.get("id", card_data.get("object_name", "")))
@@ -798,7 +804,10 @@ func _run_summon_presentation(is_player: bool, lane_idx: int, card_data: Diction
 		if trigger_building_fx and arena_3d:
 			arena_3d.play_entity_floop(is_player, lane_idx, true)
 		if arena_3d:
-			arena_3d.focus_setup_board(0.45)
+			if return_to_setup:
+				arena_3d.focus_setup_board(0.45)
+			else:
+				arena_3d.focus_opponent_setup(0.40)
 		_is_summon_cinematic_active = false
 		_sync_floop_buttons_visual_state()
 	elif trigger_building_fx:
@@ -852,6 +861,11 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 
 	if player_face_rig:
 		player_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+	if arena_3d:
+		var is_last_card := hand_container != null and hand_container.get_child_count() <= 1
+		var is_rare_card := int(card_data.get("rarity", 1)) >= 5
+		arena_3d.focus_player_spell(0.35)
+		arena_3d.play_hero_card_action(true, is_rare_card, is_last_card)
 	if vo_manager:
 		vo_manager.play_event(GameManager.player_hero_name, VOManager.VOEvent.PLAY_SPELL, true)
 
@@ -861,6 +875,12 @@ func _cast_selected_spell_on_lane(target_lane: LaneSlot = null) -> bool:
 	# Remove from hand and reset selection
 	_consume_selected_hand_card()
 	_update_ui()
+	if arena_3d:
+		var t_cam := get_tree().create_timer(0.85)
+		t_cam.timeout.connect(func():
+			if is_inside_tree() and arena_3d and not _is_summon_cinematic_active:
+				arena_3d.focus_setup_board(0.40)
+		)
 	return true
 
 func _on_floop_requested(lane: LaneSlot) -> void:
@@ -1367,6 +1387,9 @@ func _on_network_action_executed(sender_id: int, action_type: String, payload: D
 
 			if slot_idx >= 0 and slot_idx < opponent_lanes.size():
 				var o_lane = opponent_lanes[slot_idx]
+				var is_rare_card := int(c_data.get("rarity", 1)) >= 5
+				if arena_3d:
+					arena_3d.play_hero_card_action(false, is_rare_card, false)
 				if is_spell or c_data.get("type") == "SPELL":
 					if spell_resolver:
 						spell_resolver.execute_spell(c_data, o_lane, false)
@@ -1487,6 +1510,26 @@ func _unhandled_input(event: InputEvent) -> void:
 			gamepad_navigator.focus_zone(GamepadNavigator.FocusZone.HAND, 0)
 			get_viewport().set_input_as_handled()
 
+func _begin_opponent_card_play(hand_idx: int, cost: int, c_data: Dictionary, vo_event: int, did_focus_opp: bool) -> bool:
+	## Focuses opponent hero view if needed, updates held card fan, and plays PlayCard animation.
+	if not did_focus_opp and arena_3d:
+		arena_3d.focus_opponent_setup(0.45)
+		await get_tree().create_timer(0.42).timeout
+		if not is_inside_tree():
+			return false
+	opponent_hand.remove_at(hand_idx)
+	opponent_mp -= cost
+	if arena_3d:
+		arena_3d.update_holding_cards_count(false, opponent_hand.size())
+		arena_3d.play_hero_card_action(false, int(c_data.get("rarity", 1)) >= 5, opponent_hand.is_empty())
+	if opponent_face_rig:
+		opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
+	if vo_manager:
+		vo_manager.play_event(GameManager.opponent_hero_name, vo_event as VOManager.VOEvent, false)
+	await get_tree().create_timer(0.65).timeout
+	return is_inside_tree()
+
+
 func execute_opponent_turn() -> void:
 	_pending_confirm_mode = ""
 	_pending_confirm_lane = null
@@ -1533,6 +1576,7 @@ func execute_opponent_turn() -> void:
 		_execute_leader_power(false, opponent_leader_id)
 
 	# AI plays affordable cards from its real hand using opponent_mp budget
+	var did_focus_opp := false
 	var played_any := true
 	while played_any and opponent_mp > 0:
 		played_any = false
@@ -1549,23 +1593,20 @@ func execute_opponent_turn() -> void:
 						target_lane = o_lane
 						break
 				if target_lane != null:
-					opponent_hand.remove_at(i)
-					opponent_mp -= cost
+					if not await _begin_opponent_card_play(i, cost, c_data, VOManager.VOEvent.PLAY_CREATURE, did_focus_opp):
+						return
+					did_focus_opp = true
 					target_lane.place_creature(c_data)
 					if arena_3d:
 						arena_3d.spawn_lane_creature(false, target_lane.lane_index, c_data, true)
 					log_message("%s summoned %s on Lane %d!" % [
 						GameManager.opponent_hero_name, c_data.get("name", "Creature"), target_lane.lane_index + 1
 					])
-					if opponent_face_rig:
-						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
-					if vo_manager:
-						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.PLAY_CREATURE, false)
 					if ability_system:
 						ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_SUMMON, target_lane)
 					_update_ui()
 					played_any = true
-					await _run_summon_presentation(false, target_lane.lane_index, c_data, false, target_lane.has_building)
+					await _run_summon_presentation(false, target_lane.lane_index, c_data, false, target_lane.has_building, false)
 					await get_tree().create_timer(0.25).timeout
 					break
 			elif c_type == "BUILDING":
@@ -1575,21 +1616,18 @@ func execute_opponent_turn() -> void:
 						target_lane = o_lane
 						break
 				if target_lane != null:
-					opponent_hand.remove_at(i)
-					opponent_mp -= cost
+					if not await _begin_opponent_card_play(i, cost, c_data, VOManager.VOEvent.PLAY_BUILDING, did_focus_opp):
+						return
+					did_focus_opp = true
 					target_lane.place_building(c_data)
 					if arena_3d:
 						arena_3d.spawn_lane_building(false, target_lane.lane_index, c_data, true)
 					log_message("%s constructed %s on Lane %d!" % [
 						GameManager.opponent_hero_name, c_data.get("name", "Building"), target_lane.lane_index + 1
 					])
-					if opponent_face_rig:
-						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
-					if vo_manager:
-						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.PLAY_BUILDING, false)
 					_update_ui()
 					played_any = true
-					await _run_summon_presentation(false, target_lane.lane_index, c_data, true, target_lane.has_creature)
+					await _run_summon_presentation(false, target_lane.lane_index, c_data, true, target_lane.has_creature, false)
 					await get_tree().create_timer(0.25).timeout
 					break
 			elif c_type == "SPELL" and spell_resolver != null:
@@ -1601,17 +1639,14 @@ func execute_opponent_turn() -> void:
 						if targets.is_empty():
 							continue
 						target = targets[0]
-					opponent_hand.remove_at(i)
-					opponent_mp -= cost
+					if not await _begin_opponent_card_play(i, cost, c_data, VOManager.VOEvent.PLAY_SPELL, did_focus_opp):
+						return
+					did_focus_opp = true
 					var res = spell_resolver.cast_spell(c_data, target, false)
 					opponent_discard_pile.append(str(c_data.get("id", "")))
 					log_message("%s cast %s! %s" % [
 						GameManager.opponent_hero_name, c_data.get("name", "Spell"), res.get("message", "")
 					])
-					if opponent_face_rig:
-						opponent_face_rig.play_emote(CharacterFaceRig.EmoteState.PLAY_CARD)
-					if vo_manager:
-						vo_manager.play_event(GameManager.opponent_hero_name, VOManager.VOEvent.PLAY_SPELL, false)
 					_update_ui()
 					played_any = true
 					await get_tree().create_timer(0.35).timeout
@@ -1648,6 +1683,8 @@ func execute_opponent_turn() -> void:
 	# Turn 1 No-Attack parity
 	if _game_turn_count <= 1:
 		log_message("%s ended Turn 1!" % GameManager.opponent_hero_name)
+		if arena_3d:
+			arena_3d.focus_setup_board(0.45)
 		if ability_system:
 			ability_system.dispatch_trigger(AbilitySystem.Trigger.ON_TURN_END)
 		_end_turn_phase()
