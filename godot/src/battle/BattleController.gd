@@ -1755,7 +1755,6 @@ func execute_opponent_turn() -> void:
 				await wheel_modal.clash_resolved
 				if phase_manager != null:
 					phase_manager.transition_to(BattlePhaseManager.Phase.COMBAT_RESOLUTION)
-				_show_undefended_warning()
 				if arena_3d:
 					arena_3d.animate_creature_lunge(false, i)
 				await get_tree().create_timer(0.20).timeout
@@ -3009,44 +3008,6 @@ func _spawn_floating_damage(is_player_target: bool, lane_idx: int, dmg: int) -> 
 	tw.tween_property(lbl, "modulate:a", 0.0, 0.65).set_delay(0.20)
 	tw.set_parallel(false)
 	tw.tween_callback(lbl.queue_free)
-
-
-func _show_undefended_warning() -> void:
-	var panel := PanelContainer.new()
-	panel.anchor_left = 0.5
-	panel.anchor_right = 0.5
-	panel.offset_left = -290
-	panel.offset_right = 290
-	panel.offset_top = 18
-	panel.offset_bottom = 112
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var sb := StyleBoxTexture.new()
-	sb.texture = TEX_FLOOP_PANEL_BG
-	sb.texture_margin_left = 20.0
-	sb.texture_margin_top = 20.0
-	sb.texture_margin_right = 20.0
-	sb.texture_margin_bottom = 20.0
-	sb.content_margin_left = 20.0
-	sb.content_margin_right = 20.0
-	sb.content_margin_top = 12.0
-	sb.content_margin_bottom = 12.0
-	panel.add_theme_stylebox_override("panel", sb)
-	var lbl := Label.new()
-	lbl.text = "Whoah, man! You didn't have any creatures defending your lane so your Hero took some damage."
-	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_override("font", FONT_BATTLE_HUD)
-	lbl.add_theme_font_size_override("font_size", 18)
-	lbl.add_theme_color_override("font_color", Color.WHITE)
-	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-	lbl.add_theme_constant_override("outline_size", 4)
-	panel.add_child(lbl)
-	add_child(panel)
-	var tw := create_tween()
-	tw.tween_interval(1.1)
-	tw.tween_property(panel, "modulate:a", 0.0, 0.25)
-	tw.tween_callback(panel.queue_free)
 
 
 func _spawn_loot_fly_to_counter(is_player_lane: bool, lane_idx: int, is_chest: bool) -> void:
