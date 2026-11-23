@@ -322,10 +322,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -310.0
-offset_top = -155.0
-offset_right = 310.0
-offset_bottom = 155.0
+offset_left = -246.0
+offset_top = -202.0
+offset_right = 246.0
+offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("SB_FrameBlue")
@@ -334,31 +334,34 @@ theme_override_styles/panel = SubResource("SB_FrameBlue")
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 26.0
-offset_bottom = 72.0
+offset_left = 24.0
+offset_top = 34.0
+offset_right = -24.0
+offset_bottom = 78.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0.94, 0.35, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 28
 text = "Leave this Battle?"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Body" type="Label" parent="LeaveBattleModal/Frame"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 36.0
-offset_top = 82.0
-offset_right = -36.0
-offset_bottom = 185.0
+offset_left = 44.0
+offset_top = 80.0
+offset_right = -44.0
+offset_bottom = 202.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
+theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 26
 text = "All coins, chests and XP collected will be lost if you return to the main menu."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -370,15 +373,15 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -92.0
-offset_bottom = -24.0
+offset_top = -128.0
+offset_bottom = -34.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_constants/separation = 34
 alignment = 1
 
 [node name="QuitBtn" type="Button" parent="LeaveBattleModal/Frame/Buttons"]
-custom_minimum_size = Vector2(180, 56)
+custom_minimum_size = Vector2(176, 94)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
@@ -391,7 +394,7 @@ theme_override_styles/pressed = SubResource("SB_BtnGreen")
 text = "QUIT"
 
 [node name="StayBtn" type="Button" parent="LeaveBattleModal/Frame/Buttons"]
-custom_minimum_size = Vector2(195, 56)
+custom_minimum_size = Vector2(176, 94)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
@@ -401,7 +404,8 @@ theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("SB_BtnRed")
 theme_override_styles/hover = SubResource("SB_BtnRed")
 theme_override_styles/pressed = SubResource("SB_BtnRed")
-text = "DON'T QUIT"
+text = "DON'T
+QUIT"
 
 [node name="UnusedMagicModal" type="Control" parent="."]
 visible = false

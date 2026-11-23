@@ -33,6 +33,7 @@ const TEX_BTN_RED: Texture2D = preload("res://assets/textures/battle/hud/uiButto
 const TEX_FLOOP_BG: Texture2D = preload("res://assets/textures/battle/hud/FloopPanel_BG.png")
 const TEX_FLOOP_INFO: Texture2D = preload("res://assets/textures/battle/hud/FloopInfo.png")
 const TEX_QUEST_FRAME: Texture2D = preload("res://assets/textures/battle/hud/QuestInfo_BG.png")
+const TEX_QUEST_SMALL_FRAME: Texture2D = preload("res://assets/textures/battle/hud/QuestInfo_BG2_Small.png")
 const TEX_FLOOP_COST: Texture2D = preload("res://assets/textures/battle/hud/FloopCostBadge.png")
 const TEX_FRAME_INDENT: Texture2D = preload("res://assets/textures/battle/hud/Frame_Indent.png")
 const TEX_SUMMON_CORN: Texture2D = preload("res://assets/textures/battle/hud/SummonPanelCorn.png")
@@ -88,6 +89,8 @@ var _fx_damage_p1_anim: AnimationPlayer = null
 var _fx_damage_p2_anim: AnimationPlayer = null
 var _turn_seq_id: int = 0
 var _waiting_banner_seq: int = -1
+var _leave_tween: Tween = null
+var _leave_animating: bool = false
 
 signal battle_banner_finished
 
@@ -124,7 +127,17 @@ var _ac_cost_orb: TextureRect = null
 var _ac_cost_lbl: Label = null
 
 
+const SFX_UI_SELECT: String = "res://assets/audio/sfx/UI_Select.wav"
+const SFX_CANCEL: String = "res://assets/audio/sfx/Cancel.wav"
+
+
+func _play_ui_sfx(wav_path: String, volume_db: float = -4.0) -> void:
+	if Audio and ResourceLoader.exists(wav_path):
+		Audio.play_sfx(load(wav_path), volume_db)
+
+
 func _ready() -> void:
+	z_index = 80
 	dimmer.visible = false
 	_your_turn_anim = _setup_turn_banner_anim(your_turn_banner, CLIP_YOUR_TURN)
 	_opp_turn_anim = _setup_turn_banner_anim(opp_turn_banner, CLIP_OPP_TURN)
@@ -138,18 +151,37 @@ func _ready() -> void:
 	leave_modal.visible = false
 	magic_warn_modal.visible = false
 
-	quest_close_btn.pressed.connect(close_all_modals)
-	discard_close_btn.pressed.connect(close_all_modals)
-	leave_stay_btn.pressed.connect(close_all_modals)
+	quest_close_btn.pressed.connect(func():
+		_play_ui_sfx(SFX_CANCEL)
+		close_all_modals()
+	)
+	discard_close_btn.pressed.connect(func():
+		_play_ui_sfx(SFX_CANCEL)
+		close_all_modals()
+	)
+	leave_stay_btn.pressed.connect(func():
+		if _leave_animating:
+			return
+		_play_ui_sfx(SFX_CANCEL)
+		close_leave_battle()
+	)
 	leave_quit_btn.pressed.connect(func():
+		if _leave_animating:
+			return
+		_play_ui_sfx(SFX_UI_SELECT)
 		close_all_modals()
 		quit_battle_confirmed.emit()
 	)
-	magic_no_btn.pressed.connect(close_all_modals)
+	magic_no_btn.pressed.connect(func():
+		_play_ui_sfx(SFX_CANCEL)
+		close_all_modals()
+	)
 	magic_yes_btn.pressed.connect(func():
+		_play_ui_sfx(SFX_UI_SELECT)
 		close_all_modals()
 		force_battle_confirmed.emit()
 	)
+	_style_leave_battle_modal()
 	_build_inspection_and_confirm_ui()
 
 
@@ -165,7 +197,17 @@ func is_inspection_open() -> bool:
 	return (_card_info_bar != null and _card_info_bar.visible) or (_ability_confirm_bar != null and _ability_confirm_bar.visible) or (_ability_banner != null and _ability_banner.visible)
 
 
+func _stop_leave_tween() -> void:
+	if _leave_tween and _leave_tween.is_valid():
+		_leave_tween.kill()
+	_leave_tween = null
+	_leave_animating = false
+	dimmer.modulate.a = 1.0
+	leave_modal.position = Vector2.ZERO
+
+
 func close_all_modals() -> void:
+	_stop_leave_tween()
 	_stop_turn_banners()
 	dimmer.visible = false
 	quest_modal.visible = false
@@ -438,10 +480,112 @@ func open_discard_pile(card_ids: Array[String], title_text: String = "Player's D
 		cv.scale = Vector2(0.84, 0.84)
 
 
+func _apply_riveted_btn_skin(btn: Button, tex: Texture2D, btn_size: Vector2, border_scale: float = 0.72) -> void:
+	if btn == null or tex == null:
+		return
+	var empty_sb := StyleBoxEmpty.new()
+	btn.add_theme_stylebox_override("normal", empty_sb)
+	btn.add_theme_stylebox_override("hover", empty_sb)
+	btn.add_theme_stylebox_override("pressed", empty_sb)
+	btn.add_theme_stylebox_override("focus", empty_sb)
+	btn.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	btn.add_theme_constant_override("shadow_offset_x", 1)
+	btn.add_theme_constant_override("shadow_offset_y", 2)
+	btn.add_theme_constant_override("outline_size", 3)
+	var np := _make_scaled_ninepatch(tex, btn_size, border_scale, 38, 56, 38)
+	np.show_behind_parent = true
+	btn.add_child(np)
+
+
+func _style_leave_battle_modal() -> void:
+	## Matches Unity BattleScene P_5_ReturnToMainMenu: PopUpSprite_2 backing inside QuestInfo_BG2_Small riveted frame.
+	var frame := leave_modal.get_node_or_null("Frame") as Panel
+	if frame == null:
+		return
+	frame.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	var fsize := Vector2(492.0, 352.0)
+
+	var bg_clip := Control.new()
+	bg_clip.position = Vector2(12.0, 10.0)
+	bg_clip.size = fsize - Vector2(24.0, 20.0)
+	bg_clip.clip_contents = true
+	bg_clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bg_clip.show_behind_parent = true
+	frame.add_child(bg_clip)
+	frame.move_child(bg_clip, 0)
+
+	var inner_bg := _make_scaled_ninepatch(TEX_POPUP_BLUE, bg_clip.size + Vector2(30.0, 16.0), 0.72, 28, 28, 36)
+	inner_bg.patch_margin_right = 62
+	inner_bg.position = Vector2(-2.0, -2.0)
+	bg_clip.add_child(inner_bg)
+
+	var outer_frame := NinePatchRect.new()
+	outer_frame.texture = TEX_QUEST_SMALL_FRAME
+	outer_frame.patch_margin_left = 58
+	outer_frame.patch_margin_top = 52
+	outer_frame.patch_margin_right = 65
+	outer_frame.patch_margin_bottom = 58
+	outer_frame.size = fsize / 0.48
+	outer_frame.scale = Vector2(0.48, 0.48)
+	outer_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	outer_frame.show_behind_parent = true
+	frame.add_child(outer_frame)
+	frame.move_child(outer_frame, 1)
+
+	for lbl_name in ["Title", "Body"]:
+		var lbl := frame.get_node_or_null(lbl_name) as Label
+		if lbl:
+			lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+			lbl.add_theme_constant_override("shadow_offset_x", 1)
+			lbl.add_theme_constant_override("shadow_offset_y", 2)
+			if lbl_name == "Body":
+				lbl.add_theme_constant_override("line_spacing", -1)
+
+	_apply_riveted_btn_skin(leave_quit_btn, TEX_BTN_GREEN, Vector2(176, 94), 0.72)
+	_apply_riveted_btn_skin(leave_stay_btn, TEX_BTN_RED, Vector2(176, 94), 0.72)
+	if leave_stay_btn:
+		leave_stay_btn.add_theme_constant_override("line_spacing", -5)
+
+
+func _get_leave_offscreen_y() -> float:
+	var vp_h: float = maxf(get_viewport_rect().size.y, 720.0)
+	return -(vp_h * 0.5 + 180.0)
+
+
 func open_leave_battle() -> void:
 	close_all_modals()
+	_leave_animating = true
 	dimmer.visible = true
+	dimmer.modulate.a = 0.0
 	leave_modal.visible = true
+	leave_modal.position = Vector2(0.0, _get_leave_offscreen_y())
+
+	_leave_tween = create_tween()
+	_leave_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_leave_tween.set_parallel(true)
+	_leave_tween.tween_property(dimmer, "modulate:a", 1.0, 0.1).set_trans(Tween.TRANS_LINEAR)
+	_leave_tween.tween_property(leave_modal, "position:y", 0.0, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_leave_tween.chain().tween_callback(func():
+		_leave_animating = false
+		_leave_tween = null
+	)
+
+
+func close_leave_battle() -> void:
+	if not leave_modal.visible or _leave_animating:
+		return
+	if _leave_tween and _leave_tween.is_valid():
+		_leave_tween.kill()
+	_leave_animating = true
+
+	_leave_tween = create_tween()
+	_leave_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_leave_tween.set_parallel(true)
+	_leave_tween.tween_property(dimmer, "modulate:a", 0.0, 0.1).set_trans(Tween.TRANS_LINEAR)
+	_leave_tween.tween_property(leave_modal, "position:y", _get_leave_offscreen_y(), 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_leave_tween.chain().tween_callback(func():
+		close_all_modals()
+	)
 
 
 func open_unused_magic_warning() -> void:
@@ -860,8 +1004,7 @@ func _build_inspection_and_confirm_ui() -> void:
 	_ac_no_btn.position = Vector2(0, 0)
 	_ac_no_btn.size = Vector2(184, 126)
 	_ac_no_btn.pressed.connect(func():
-		if Audio and ResourceLoader.exists("res://assets/audio/sfx/Cancel.wav"):
-			Audio.play_sfx(load("res://assets/audio/sfx/Cancel.wav"), -4.0)
+		_play_ui_sfx(SFX_CANCEL)
 		dismiss_inspection(true)
 		ability_cancelled.emit()
 	)
@@ -875,8 +1018,7 @@ func _build_inspection_and_confirm_ui() -> void:
 	_ac_yes_btn = _make_textured_btn("Yes", TEX_BTN_GREEN, Vector2(184, 126), 31, 0.90)
 	_ac_yes_btn.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ac_yes_btn.pressed.connect(func():
-		if Audio and ResourceLoader.exists("res://assets/audio/sfx/UI_Select.wav"):
-			Audio.play_sfx(load("res://assets/audio/sfx/UI_Select.wav"), -4.0)
+		_play_ui_sfx(SFX_UI_SELECT)
 		hide_ability_confirm_bar_only()
 		ability_confirmed.emit()
 	)

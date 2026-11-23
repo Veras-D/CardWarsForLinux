@@ -2065,15 +2065,18 @@ func _advance_turn_counter(ending_player_idx: int) -> void:
 func _on_quest_quick_pressed() -> void:
 	if not battle_modals:
 		return
+	battle_modals._play_ui_sfx(BattleModals.SFX_UI_SELECT)
 	var qid := GameManager.active_quest_id if GameManager else ""
 	battle_modals.open_current_quest(qid, get_match_stats(true))
 
 func _on_pause_quick_pressed() -> void:
 	if battle_modals:
+		battle_modals._play_ui_sfx(BattleModals.SFX_UI_SELECT)
 		battle_modals.open_leave_battle()
 
 func _on_discard_pile_pressed() -> void:
 	if battle_modals:
+		battle_modals._play_ui_sfx(BattleModals.SFX_UI_SELECT)
 		battle_modals.open_discard_pile(player_discard_pile, "Player's Discard Pile")
 
 func log_message(text: String) -> void:
